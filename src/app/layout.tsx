@@ -1,16 +1,11 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Advent_Pro } from 'next/font/google'
 import './globals.css'
-import { Providers } from './providers'
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const adventPro = Advent_Pro({
   subsets: ['latin'],
-})
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
+  variable: '--font-advent-pro',
+  display: 'swap',
 })
 
 export const metadata: Metadata = {
@@ -24,9 +19,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col">
-        <Providers>{children}</Providers>
+    <html lang="ko" className={`${adventPro.variable} `}>
+      <body className="bg-white" suppressHydrationWarning>
+        <div className="mx-auto min-h-screen w-full max-w-125 bg-[#FAF7F2]">
+          <main className="w-full">{children}</main>
+        </div>
       </body>
     </html>
   )
