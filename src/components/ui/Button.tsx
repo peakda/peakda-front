@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils/cn'
 import { ButtonHTMLAttributes, forwardRef, ReactNode } from 'react'
 
 type ButtonVariant = 'filled' | 'outlined' | 'ghost'
@@ -14,10 +15,10 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const BASE =
-  'inline-flex items-center justify-center gap-1.5 font-medium rounded-full transition-colors duration-150 cursor-pointer disabled:cursor-not-allowed select-none'
+  'inline-flex items-center justify-center gap-1.5 font-medium rounded-2xl transition-colors duration-150 cursor-pointer disabled:cursor-not-allowed select-none'
 
 const SIZE: Record<ButtonSize, string> = {
-  lg: 'h-12 px-6 text-base w-full',
+  lg: 'h-12 px-6 text-[15px] font-medium w-full',
   md: 'h-9  px-4 text-sm',
   sm: 'h-7  px-3 text-xs',
 }
@@ -41,10 +42,6 @@ const VARIANT_COLOR: Record<ButtonVariant, Record<ButtonColor, string>> = {
   },
 }
 
-function cn(...classes: (string | undefined | false)[]) {
-  return classes.filter(Boolean).join(' ')
-}
-
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
@@ -66,7 +63,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       >
         {leftIcon && (
-          <span className="flex items-center text-[1em]" aria-hidden>
+          <span className="rounded- flex items-center text-[1em]" aria-hidden>
             {leftIcon}
           </span>
         )}
