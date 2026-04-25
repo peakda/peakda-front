@@ -2,10 +2,10 @@
 'use client'
 
 import Card from '@/components/ui/Card'
+import OnboardingMessage from '@/components/ui/OnboardingMessage'
 import { STEPS } from '@/constants'
 import { useCarousel } from '@/hooks/useEmblaCarousel'
 import { cn } from '@/lib/utils/cn'
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 
 export default function OnboardingPage() {
@@ -55,21 +55,7 @@ export default function OnboardingPage() {
 
               {/* 메인 영역 */}
               <div className="relative z-10 flex w-full flex-1 flex-col items-center justify-center gap-10 px-8 pt-20">
-                <Image
-                  src={step.image}
-                  alt={step.title}
-                  className="animate-[bounce_1s_ease-in-out_1]"
-                  width={100}
-                  height={100}
-                />
-                <div className="flex w-full flex-col gap-2 text-center">
-                  <h1 className="text-[24px] font-bold tracking-tight text-gray-900">
-                    {step.title}
-                  </h1>
-                  <p className="text-[16px] leading-relaxed whitespace-pre-line text-[#6B7280]">
-                    {step.description}
-                  </p>
-                </div>
+                <OnboardingMessage step={step} />
                 <div
                   className={cn(
                     'grid w-full',
