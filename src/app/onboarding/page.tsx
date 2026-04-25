@@ -7,6 +7,10 @@ import { STEPS } from '@/constants'
 import { useCarousel } from '@/hooks/useEmblaCarousel'
 import { cn } from '@/lib/utils/cn'
 import { useRouter } from 'next/navigation'
+import SkipButton from './_components/SkipButton'
+import Indecator from './_components/Indecator'
+import Button from '@/components/ui/Button'
+import Header from '@/components/ui/Header'
 
 export default function OnboardingPage() {
   const router = useRouter()
@@ -20,7 +24,7 @@ export default function OnboardingPage() {
   const handleNext = () => {
     if (isLast) {
       localStorage.setItem('is_onboarding_done', 'true')
-      router.replace('/')
+      router.replace('/login')
     } else {
       scrollNext()
     }
@@ -28,11 +32,18 @@ export default function OnboardingPage() {
 
   const handleSkip = () => {
     localStorage.setItem('is_onboarding_done', 'true')
-    router.replace('/')
+    router.replace('/login')
   }
 
   return (
     <main className="relative h-dvh w-full overflow-hidden">
+      {/* 상단 skip */}
+      <Header
+        right={<SkipButton handleSkip={handleSkip} isLast={isLast} />}
+        center={
+          <Indecator scrollSnaps={scrollSnaps} selectedIndex={selectedIndex} scrollTo={scrollTo} />
+        }
+      />
       {/* 슬라이드 */}
       <div ref={emblaRef} className="h-full overflow-hidden">
         <div className="flex h-full touch-pan-y">
@@ -41,18 +52,6 @@ export default function OnboardingPage() {
               key={index}
               className="relative flex h-full flex-[0_0_100%] flex-col items-center justify-between"
             >
-              {/* 상단 skip */}
-              <div className="relative z-10 flex h-9 w-full justify-end px-4 pt-2">
-                {!isLast && (
-                  <button
-                    onClick={handleSkip}
-                    className="text-sm font-medium text-gray-700 transition-colors hover:text-gray-600"
-                  >
-                    건너뛰기
-                  </button>
-                )}
-              </div>
-
               {/* 메인 영역 */}
               <div className="relative z-10 flex w-full flex-1 flex-col items-center justify-center gap-10 px-8 pt-20">
                 <OnboardingMessage step={step} />
@@ -83,37 +82,17 @@ export default function OnboardingPage() {
         </div>
       </div>
 
-      {/* 도트 인디케이터 */}
-      <div className="absolute top-4.5 right-0 left-0 z-20 px-6 pb-10">
-        <div role="tablist" aria-label="온보딩 단계" className="mb-6 flex justify-center gap-2">
-          {scrollSnaps.map((_, index) => (
-            <button
-              key={index}
-              role="tab"
-              aria-selected={index === selectedIndex}
-              aria-label={`${index + 1}단계`}
-              onClick={() => scrollTo(index)}
-              className={cn(
-                'h-2 rounded-full transition-all duration-300',
-                index === selectedIndex ? 'w-6 bg-gray-900' : 'w-2 bg-gray-300'
-              )}
-            />
-          ))}
-        </div>
-      </div>
-
       {/* CTA 버튼 */}
       <div className="absolute right-0 bottom-0 left-0 z-20 px-6 pb-10">
-        <button
+        <Button
+          variant="filled"
+          size="lg"
+          color="primary"
           onClick={handleNext}
-          className={cn(
-            'w-full rounded-2xl px-4 py-3 text-base font-semibold',
-            'transition-all duration-300 active:scale-95',
-            'bg-[#8DC468] text-white'
-          )}
+          className="bg-[#8DC468] text-white hover:bg-[#8DC468]"
         >
           {isLast ? '시작하기' : '다음'}
-        </button>
+        </Button>
       </div>
     </main>
   )
