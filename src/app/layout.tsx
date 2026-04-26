@@ -1,6 +1,9 @@
 import type { Metadata } from 'next'
-import { Advent_Pro } from 'next/font/google'
+import { Advent_Pro, Geist } from 'next/font/google'
 import './globals.css'
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const adventPro = Advent_Pro({
   subsets: ['latin'],
@@ -19,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="ko" className={`${adventPro.variable} `}>
+    <html lang="ko" className={cn(adventPro.variable, "font-sans", geist.variable)}>
       <body vaul-drawer-wrapper="" suppressHydrationWarning className="bg-[#F8F8F8]">
         <div className="mx-auto min-h-screen w-full max-w-125 bg-[#FAF7F2]">
           <main className="w-full">{children}</main>
