@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" className={`${adventPro.variable} `}>
-      <body className="bg-white" suppressHydrationWarning>
+      <body vaul-drawer-wrapper="" suppressHydrationWarning className="bg-[#F8F8F8]">
         <div className="mx-auto min-h-screen w-full max-w-125 bg-[#FAF7F2]">
           <main className="w-full">{children}</main>
         </div>
