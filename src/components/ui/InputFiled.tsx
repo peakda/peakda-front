@@ -12,6 +12,7 @@ interface InputGroupProps {
   value?: string
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
   maxLength?: number
+  message?: string
 }
 
 const InputFiled = ({
@@ -21,10 +22,11 @@ const InputFiled = ({
   buttonText,
   onButtonClick,
   maxLength = 10,
+  message,
   ...inputProps
 }: InputGroupProps) => {
   return (
-    <div className="flex w-full max-w-md flex-col gap-2">
+    <div className="flex w-full flex-col gap-2">
       {/* Label Area */}
       {(title || description) && (
         <div className="flex flex-col gap-1">
@@ -66,6 +68,7 @@ const InputFiled = ({
           </button>
         )}
       </div>
+      {message && <p className={cn('')}>{message}</p>}
     </div>
   )
 }

@@ -21,7 +21,7 @@ export default function ProfilePage() {
       <div className="flex flex-1 items-center justify-center">
         <Image src={'/images/Profile.png'} alt="프로필 이미지" width={100} height={100} />
       </div>
-      <div className="flex flex-1 flex-col gap-2 p-4">
+      <div className="flex w-full flex-1 flex-col gap-2 p-4">
         <InputFiled
           title="닉네임"
           showAsterisk
@@ -32,7 +32,7 @@ export default function ProfilePage() {
       </div>
       <div className="flex-2 p-4">
         <div className="flex items-center gap-1">
-          <h3 className="text-lg font-semibold text-gray-700">좋아하는 계절유형 선택</h3>
+          <h3 className="text-lg font-semibold text-gray-700">어떤 꽃·자연이 좋으세요?</h3>
           <p className="text-gray-500">(복수 선택)</p>
         </div>
       </div>
