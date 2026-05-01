@@ -10,6 +10,7 @@ import type { stepProps } from '@/types/types'
 import { useRouter } from 'next/navigation'
 import Indecator from './Indecator'
 import SkipButton from './SkipButton'
+import { Divide } from 'lucide-react'
 
 interface Props {
   steps: readonly stepProps[]
@@ -61,7 +62,7 @@ export default function OnboardingCarousel({ steps }: Props) {
           {steps.map((step, index) => (
             <div
               key={index}
-              className="relative flex h-full flex-[0_0_100%] flex-col items-center justify-between"
+              className="relative flex h-full flex-[0_0_100%] flex-col items-center justify-between px-4"
             >
               <div className="relative z-10 flex w-full flex-1 flex-col items-center justify-center gap-10 pt-20">
                 <OnboardingMessage step={step} />
@@ -98,7 +99,7 @@ export default function OnboardingCarousel({ steps }: Props) {
           onClick={handleNext}
           className="bg-brand-secondary hover:bg-brand-secondary text-white"
         >
-          {isLast ? '시작하기' : '다음'}
+          다음
         </Button>
       </div>
     </div>

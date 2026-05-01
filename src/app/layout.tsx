@@ -20,8 +20,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" className={adventPro.variable}>
-      <body vaul-drawer-wrapper="" className="bg-gray-200" suppressHydrationWarning>
-        <div className="relative mx-auto flex min-h-dvh w-full max-w-93.5 flex-col overflow-hidden bg-[#FAF7F2]">
+      <body vaul-drawer-wrapper="" className="bg-gray-100" suppressHydrationWarning>
+        <div className="relative mx-auto flex min-h-dvh w-full max-w-93.5 flex-col overflow-hidden bg-[#FFFFFF]">
           <main className="flex flex-1 flex-col">{children}</main>
         </div>
       </body>

@@ -20,8 +20,8 @@ export default function Card({
       className={cn(
         'rounded-xl bg-[#F8F9FB] transition-colors',
         isBig
-          ? 'flex w-full items-center gap-1 px-2 py-3.5'
-          : 'flex flex-col items-center gap-0.5 px-3 py-3.5 text-center',
+          ? 'flex h-[67px] w-full items-center gap-1 px-2 py-3.5'
+          : 'flex h-[84px] flex-col items-center gap-0.5 px-3 py-3.5 text-center',
         className
       )}
     >
@@ -29,14 +29,16 @@ export default function Card({
       <div
         className={cn(
           'relative flex shrink-0 items-center justify-center',
-          isBig ? 'h-16 w-16 rounded-lg' : 'h-8 w-8'
+          isBig ? 'h-8 w-8 rounded-lg' : 'h-6 w-6'
         )}
       >
         <img
           src={image}
           alt={title}
           aria-hidden
-          className={cn(isBig ? 'h-8 w-8 rounded-lg object-cover' : 'h-6 w-6 object-cover')}
+          className={cn(
+            isBig ? 'h-7 w-7 rounded-lg object-cover' : 'h-[22px] w-[22px] object-cover'
+          )}
         />
       </div>
 
@@ -45,7 +47,7 @@ export default function Card({
         <p
           className={cn(
             'text-foreground mb-0.5 truncate font-bold',
-            isBig ? 'text-[15px]' : 'text-[13px]'
+            isBig ? 'text-[13px]' : 'text-[11px]'
           )}
         >
           {title}
@@ -53,7 +55,7 @@ export default function Card({
         <p
           className={cn(
             'text-muted-foreground truncate font-normal text-gray-500',
-            isBig ? 'text-[13px]' : 'text-[11px]'
+            isBig ? 'text-[12px]' : 'text-[10px]'
           )}
         >
           {description}

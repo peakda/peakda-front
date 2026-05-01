@@ -17,7 +17,7 @@ export default function TermsPage() {
           center={<div className="text-[15px] font-medium text-[#000000]">서비스 이용 동의</div>}
         />
 
-        <div className="flex flex-1 flex-col gap-2 px-4">
+        <div className="flex flex-1 flex-col gap-2 p-4">
           <h2 className="text-color-var(--icon-quaternary) text-xl! font-semibold! tracking-tight">
             서비스 이용 동의
           </h2>

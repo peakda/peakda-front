@@ -27,14 +27,13 @@ export default async function Page({ params }: PageProps) {
 
   return (
     <div className="relative flex h-dvh w-full flex-col py-11">
-      <div className="flex h-12 px-4">
-        <Header
-          left={<LeftArrow />}
-          center={
-            <div className="text-[15px] font-medium text-[#000000]">{TERMS_MAP[slug].slug}</div>
-          }
-        />
-      </div>
+      <Header
+        left={<LeftArrow />}
+        center={
+          <div className="text-[15px] font-medium text-[#000000]">{TERMS_MAP[slug].slug}</div>
+        }
+      />
+
       <div className="px-4">
         <p className="leading-7 wrap-break-word whitespace-pre-wrap">{TERMS_MAP[slug].content}</p>
       </div>

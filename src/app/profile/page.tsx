@@ -13,7 +13,7 @@ export default function ProfilePage() {
           center={<div className="text-[15px] font-medium text-[#000000]">프로필 설정</div>}
         />
       </div>
-      <div className="mt-4 flex flex-1 flex-col gap-2 p-4">
+      <div className="flex flex-1 flex-col gap-2 p-4">
         <h2 className="text-xl font-semibold">프로필 설정</h2>
         <p className="text-base font-normal">PEAKDA에서 사용할 정보를 입력해 주세요.</p>
         <p className="text-base font-normal">나중에 MY탭에서 언제든지 변경 가능해요.</p>
@@ -32,7 +32,9 @@ export default function ProfilePage() {
       </div>
       <div className="flex-2 p-4">
         <div className="flex items-center gap-1">
-          <h3 className="text-lg font-semibold text-gray-700">어떤 꽃·자연이 좋으세요?</h3>
+          <h3 className="text-[16px] font-semibold tracking-tight text-gray-700">
+            어떤 꽃·자연이 좋으세요?
+          </h3>
           <p className="text-gray-500">(복수 선택)</p>
         </div>
       </div>

@@ -32,13 +32,13 @@ const InputFiled = ({
         <div className="flex flex-col gap-1">
           {title && (
             <div className="flex">
-              <h3 className="text-lg font-bold text-slate-900">{title}</h3>
+              <h3 className="text-base font-bold text-slate-900">{title}</h3>
               {showAsterisk && (
                 <Asterisk className="mt-0.5 h-3.5 w-3.5 text-rose-400" strokeWidth={2} />
               )}
             </div>
           )}
-          {description && <p className="text-sm text-slate-500">{description}</p>}
+          {description && <p className="text-sm tracking-tight text-slate-500">{description}</p>}
         </div>
       )}
 
@@ -47,8 +47,8 @@ const InputFiled = ({
         <div className="relative flex-1">
           <input
             className={cn(
-              'h-14 w-full rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 transition-all focus:ring-2 focus:ring-blue-100 focus:outline-none',
-              'placeholder:text-slate-300'
+              'border-var(--border-secondary) bg-var(--bg-secondary) h-12 w-full rounded-3xl border p-3 transition-all focus:ring-1 focus:ring-blue-100 focus:outline-none',
+              'placeholder:text-sm placeholder:text-slate-300'
             )}
             {...inputProps}
           />
@@ -62,7 +62,7 @@ const InputFiled = ({
         {buttonText && (
           <button
             onClick={onButtonClick}
-            className="h-14 cursor-pointer rounded-2xl bg-[#96CE71] px-6 font-bold whitespace-nowrap text-white transition-colors hover:bg-[#85ba63]"
+            className="h-12 cursor-pointer rounded-3xl bg-[#96CE71] px-4 py-2 text-[15px] font-medium whitespace-nowrap text-white transition-colors hover:bg-[#85ba63]"
           >
             {buttonText}
           </button>
