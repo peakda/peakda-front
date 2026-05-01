@@ -1,21 +1,39 @@
 @import 'tailwindcss';
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css');
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 
 @custom-variant dark (&:is(.dark *));
+
+@keyframes bounce-smooth {
+  0% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-20px);
+  }
+  60% {
+    transform: translateY(-8px);
+  }
+  80% {
+    transform: translateY(-3px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
 
 /* ============================================================
    PEAKDA Color Primitives → Tailwind utilities
    bg-gray-50, text-pink-300, border-green-300 등으로 사용
    ============================================================ */
 @theme {
-  --font-sans: "Pretendard Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Pretendard Variable', ui-sans-serif, system-ui, sans-serif;
   --font-advent: var(--font-advent-pro);
-
+  --animate-bounce-smooth: bounce-smooth 0.8s ease-out 1 forwards;
   /* gray */
-  --color-gray-0:   #ffffff;
-  --color-gray-50:  #f8f9fb;
+  --color-gray-0: #ffffff;
+  --color-gray-50: #f8f9fb;
   --color-gray-100: #f0f2f5;
   --color-gray-200: #e8eaee;
   --color-gray-300: #d0d4db;
@@ -28,7 +46,7 @@
   --color-gray-950: #1a1d24;
 
   /* pink */
-  --color-pink-50:  #fff0f2;
+  --color-pink-50: #fff0f2;
   --color-pink-100: #ffcfd6;
   --color-pink-200: #ffa8b4;
   --color-pink-300: #ff7f92;
@@ -40,7 +58,7 @@
   --color-pink-900: #45060f;
 
   /* green */
-  --color-green-50:  #f0f8e8;
+  --color-green-50: #f0f8e8;
   --color-green-100: #d5ecc0;
   --color-green-200: #a9d188;
   --color-green-300: #8dc468;
@@ -52,7 +70,7 @@
   --color-green-900: #0d1d03;
 
   /* yellow */
-  --color-yellow-50:  #fffce8;
+  --color-yellow-50: #fffce8;
   --color-yellow-100: #fff3b5;
   --color-yellow-200: #ffe87a;
   --color-yellow-300: #ffd63a;
@@ -66,24 +84,24 @@
   --color-error: #ef441e;
 
   /* brand semantic → Tailwind: bg-brand-primary, text-brand-secondary */
-  --color-brand-primary:   #ff7f92;
+  --color-brand-primary: #ff7f92;
   --color-brand-secondary: #8dc468;
-  --color-brand-warning:   #ef441e;
+  --color-brand-warning: #ef441e;
 
   /* flower → Tailwind: bg-flower-plum, text-flower-cherry 등 */
-  --color-flower-plum:         #ff7f92;
-  --color-flower-forsythia:    #ffd63a;
-  --color-flower-azalea:       #e82a78;
-  --color-flower-cherry:       #ffa8b4;
-  --color-flower-canola:       #ffe87a;
+  --color-flower-plum: #ff7f92;
+  --color-flower-forsythia: #ffd63a;
+  --color-flower-azalea: #e82a78;
+  --color-flower-cherry: #ffa8b4;
+  --color-flower-canola: #ffe87a;
   --color-flower-royal-azalea: #dc3f62;
-  --color-flower-hydrangea:    #97caff;
-  --color-flower-lotus:        #ffcfd6;
-  --color-flower-cosmos:       #f07088;
-  --color-flower-pink-muhly:   #d87ba0;
+  --color-flower-hydrangea: #97caff;
+  --color-flower-lotus: #ffcfd6;
+  --color-flower-cosmos: #f07088;
+  --color-flower-pink-muhly: #d87ba0;
   --color-flower-pampas-grass: #c2aa8a;
   --color-flower-autumn-maple: #f0603a;
-  --color-flower-camellia:     #c8202a;
+  --color-flower-camellia: #c8202a;
 }
 
 /* ============================================================
@@ -129,18 +147,18 @@
 
   /* PEAKDA Border Radius (Figma 토큰 1:1) */
   --radius-none: 0px;
-  --radius-sm:   2px;
-  --radius:      4px;
-  --radius-md:   6px;
-  --radius-lg:   8px;
-  --radius-xl:   10px;
-  --radius-2xl:  12px;
-  --radius-3xl:  16px;
-  --radius-4xl:  20px;
-  --radius-5xl:  24px;
-  --radius-6xl:  32px;
-  --radius-7xl:  40px;
-  --radius-8xl:  48px;
+  --radius-sm: 2px;
+  --radius: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-2xl: 12px;
+  --radius-3xl: 16px;
+  --radius-4xl: 20px;
+  --radius-5xl: 24px;
+  --radius-6xl: 32px;
+  --radius-7xl: 40px;
+  --radius-8xl: 48px;
   --radius-full: 9999px;
 }
 
@@ -182,65 +200,65 @@
   --sidebar-ring: #ff7f92;
 
   /* ── PEAKDA Semantic: Background ── */
-  --bg-primary:          #ffffff;
-  --bg-primary-0:        rgba(255, 255, 255, 0.00);
-  --bg-primary-10:       rgba(255, 255, 255, 0.10);
-  --bg-primary-80:       rgba(255, 255, 255, 0.60); /* 토큰명 80%, 실제 alpha 0.6 */
-  --bg-secondary:        #f8f9fb;
-  --bg-secondary-50:     rgba(250, 250, 247, 0.50);
-  --bg-secondary-80:     rgba(250, 250, 247, 0.80);
-  --bg-tertiary:         #e8eaee;
-  --bg-tertiary-70:      rgba(232, 234, 238, 0.70);
-  --bg-quaternary:       #d0d4db;
-  --bg-quaternary-2:     #a8b0bc;
-  --bg-quaternary-0:     rgba(30, 25, 22, 0.00);
-  --bg-quaternary-10:    rgba(30, 25, 22, 0.10);
-  --bg-quaternary-50:    rgba(30, 25, 22, 0.50);
-  --bg-quaternary-80:    rgba(30, 25, 22, 0.80);
+  --bg-primary: #ffffff;
+  --bg-primary-0: rgba(255, 255, 255, 0);
+  --bg-primary-10: rgba(255, 255, 255, 0.1);
+  --bg-primary-80: rgba(255, 255, 255, 0.6); /* 토큰명 80%, 실제 alpha 0.6 */
+  --bg-secondary: #f8f9fb;
+  --bg-secondary-50: rgba(250, 250, 247, 0.5);
+  --bg-secondary-80: rgba(250, 250, 247, 0.8);
+  --bg-tertiary: #e8eaee;
+  --bg-tertiary-70: rgba(232, 234, 238, 0.7);
+  --bg-quaternary: #d0d4db;
+  --bg-quaternary-2: #a8b0bc;
+  --bg-quaternary-0: rgba(30, 25, 22, 0);
+  --bg-quaternary-10: rgba(30, 25, 22, 0.1);
+  --bg-quaternary-50: rgba(30, 25, 22, 0.5);
+  --bg-quaternary-80: rgba(30, 25, 22, 0.8);
 
   /* ── PEAKDA Semantic: Text ── */
-  --text-primary:         #1a1d24;
-  --text-secondary:       #4e5666;
-  --text-tertiary:        #8c95a4;
-  --text-quaternary:      #a8b0bc;
+  --text-primary: #1a1d24;
+  --text-secondary: #4e5666;
+  --text-tertiary: #8c95a4;
+  --text-quaternary: #a8b0bc;
   --text-primary-inverse: #f8f9fb;
 
   /* ── PEAKDA Semantic: Icon ── */
-  --icon-primary:         #2c313a;
-  --icon-secondary:       #4e5666;
-  --icon-tertiary:        #8c95a4;
-  --icon-quaternary:      #a8b0bc;
+  --icon-primary: #2c313a;
+  --icon-secondary: #4e5666;
+  --icon-tertiary: #8c95a4;
+  --icon-quaternary: #a8b0bc;
   --icon-primary-inverse: #f8f9fb;
 
   /* ── PEAKDA Semantic: Border ── */
-  --border-primary:            #f0f2f5;
-  --border-secondary:          #d0d4db;
-  --border-tertiary:           #a8b0bc;
-  --border-primary-inverse:    #363d4a;
-  --border-primary-inverse-10: rgba(54, 48, 40, 0.10);
-  --border-primary-inverse-70: rgba(54, 48, 40, 0.70);
+  --border-primary: #f0f2f5;
+  --border-secondary: #d0d4db;
+  --border-tertiary: #a8b0bc;
+  --border-primary-inverse: #363d4a;
+  --border-primary-inverse-10: rgba(54, 48, 40, 0.1);
+  --border-primary-inverse-70: rgba(54, 48, 40, 0.7);
 
   /* ── PEAKDA Flower Colors (13종 사용) ── */
-  --flower-plum:         #ff7f92; /* 매화 */
-  --flower-forsythia:    #ffd63a; /* 개나리 */
-  --flower-azalea:       #e82a78; /* 진달래 */
-  --flower-cherry:       #ffa8b4; /* 벚꽃 */
-  --flower-canola:       #ffe87a; /* 유채 */
+  --flower-plum: #ff7f92; /* 매화 */
+  --flower-forsythia: #ffd63a; /* 개나리 */
+  --flower-azalea: #e82a78; /* 진달래 */
+  --flower-cherry: #ffa8b4; /* 벚꽃 */
+  --flower-canola: #ffe87a; /* 유채 */
   --flower-royal-azalea: #dc3f62; /* 철쭉 */
-  --flower-hydrangea:    #97caff; /* 수국 */
-  --flower-lotus:        #ffcfd6; /* 연꽃 */
-  --flower-cosmos:       #f07088; /* 코스모스 */
-  --flower-pink-muhly:   #d87ba0; /* 핑크뮬리 */
+  --flower-hydrangea: #97caff; /* 수국 */
+  --flower-lotus: #ffcfd6; /* 연꽃 */
+  --flower-cosmos: #f07088; /* 코스모스 */
+  --flower-pink-muhly: #d87ba0; /* 핑크뮬리 */
   --flower-pampas-grass: #c2aa8a; /* 억새 */
   --flower-autumn-maple: #f0603a; /* 단풍 */
-  --flower-camellia:     #c8202a; /* 동백 */
+  --flower-camellia: #c8202a; /* 동백 */
 
   /* ── Effects ── */
   --blur-default: 8px;
 
   /* ── Typography ── */
-  --font-family:      "Pretendard Variable", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-family-logo: "Advent Pro", "Advent Pro Expanded", sans-serif;
+  --font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-family-logo: 'Advent Pro', 'Advent Pro Expanded', sans-serif;
 }
 
 .dark {
@@ -294,29 +312,89 @@
    Text Style utilities (Figma Text Style 1:1)
    ============================================================ */
 @layer utilities {
-  .t-display-1       { font: 700 48px/1.2   var(--font-family); letter-spacing: -0.02em; }
-  .t-heading-1       { font: 700 32px/1.3   var(--font-family); letter-spacing: -0.02em; }
-  .t-heading-2       { font: 600 24px/1.35  var(--font-family); letter-spacing: 0; }
-  .t-heading-3       { font: 600 20px/1.4   var(--font-family); letter-spacing: -0.01em; }
-  .t-title-1         { font: 700 18px/1.6   var(--font-family); letter-spacing: 0; }
+  .t-display-1 {
+    font: 700 48px/1.2 var(--font-family);
+    letter-spacing: -0.02em;
+  }
+  .t-heading-1 {
+    font: 700 32px/1.3 var(--font-family);
+    letter-spacing: -0.02em;
+  }
+  .t-heading-2 {
+    font: 600 24px/1.35 var(--font-family);
+    letter-spacing: 0;
+  }
+  .t-heading-3 {
+    font: 600 20px/1.4 var(--font-family);
+    letter-spacing: -0.01em;
+  }
+  .t-title-1 {
+    font: 700 18px/1.6 var(--font-family);
+    letter-spacing: 0;
+  }
 
-  .t-body-1-regular  { font: 500 18px/1.55  var(--font-family); letter-spacing: -0.005em; }
-  .t-body-1-semibold { font: 600 18px/1.55  var(--font-family); letter-spacing: -0.005em; }
-  .t-body-2-regular  { font: 400 16px/1.5   var(--font-family); letter-spacing: 0; }
-  .t-body-2-semibold { font: 600 16px/1.5   var(--font-family); letter-spacing: -0.005em; }
-  .t-body-3-regular  { font: 400 14px/1.5   var(--font-family); letter-spacing: 0.005em; }
-  .t-body-3-medium   { font: 500 14px/1.5   var(--font-family); letter-spacing: 0; }
-  .t-body-3-bold     { font: 700 14px/1.5   var(--font-family); letter-spacing: 0; }
-  .t-body-4-regular  { font: 400 13px/1.4   var(--font-family); letter-spacing: 0.01em; }
-  .t-body-4-semibold { font: 600 13px/1.4   var(--font-family); letter-spacing: 0.01em; }
+  .t-body-1-regular {
+    font: 500 18px/1.55 var(--font-family);
+    letter-spacing: -0.005em;
+  }
+  .t-body-1-semibold {
+    font: 600 18px/1.55 var(--font-family);
+    letter-spacing: -0.005em;
+  }
+  .t-body-2-regular {
+    font: 400 16px/1.5 var(--font-family);
+    letter-spacing: 0;
+  }
+  .t-body-2-semibold {
+    font: 600 16px/1.5 var(--font-family);
+    letter-spacing: -0.005em;
+  }
+  .t-body-3-regular {
+    font: 400 14px/1.5 var(--font-family);
+    letter-spacing: 0.005em;
+  }
+  .t-body-3-medium {
+    font: 500 14px/1.5 var(--font-family);
+    letter-spacing: 0;
+  }
+  .t-body-3-bold {
+    font: 700 14px/1.5 var(--font-family);
+    letter-spacing: 0;
+  }
+  .t-body-4-regular {
+    font: 400 13px/1.4 var(--font-family);
+    letter-spacing: 0.01em;
+  }
+  .t-body-4-semibold {
+    font: 600 13px/1.4 var(--font-family);
+    letter-spacing: 0.01em;
+  }
 
-  .t-caption-1-regular  { font: 400 12px/1.4 var(--font-family); letter-spacing: 0.01em; }
-  .t-caption-1-medium   { font: 500 12px/1.4 var(--font-family); letter-spacing: 0.01em; }
-  .t-caption-2-medium   { font: 500 11px/1.4 var(--font-family); letter-spacing: 0.01em; }
-  .t-caption-2-semibold { font: 600 11px/1.4 var(--font-family); letter-spacing: 0.01em; }
+  .t-caption-1-regular {
+    font: 400 12px/1.4 var(--font-family);
+    letter-spacing: 0.01em;
+  }
+  .t-caption-1-medium {
+    font: 500 12px/1.4 var(--font-family);
+    letter-spacing: 0.01em;
+  }
+  .t-caption-2-medium {
+    font: 500 11px/1.4 var(--font-family);
+    letter-spacing: 0.01em;
+  }
+  .t-caption-2-semibold {
+    font: 600 11px/1.4 var(--font-family);
+    letter-spacing: 0.01em;
+  }
 
-  .t-button-1 { font: 500 15px/1.4 var(--font-family); letter-spacing: 0; }
-  .t-button-2 { font: 500 14px/1.4 var(--font-family); letter-spacing: 0; }
+  .t-button-1 {
+    font: 500 15px/1.4 var(--font-family);
+    letter-spacing: 0;
+  }
+  .t-button-2 {
+    font: 500 14px/1.4 var(--font-family);
+    letter-spacing: 0;
+  }
 
   .t-logo-peakda {
     font: 600 30px/1 var(--font-family-logo);

@@ -1,4 +1,4 @@
-'use clinet'
+'use client'
 import useEmblaCarousel from 'embla-carousel-react'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -9,7 +9,7 @@ interface UseCarouselOptions {
   dragFree?: boolean
 }
 
-export const useCarousel = (options: UseCarouselOptions = {}) => {
+export const useCarousel = (options: UseCarouselOptions = {}, initialCount = 0) => {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: options.loop ?? false,
     align: options.align ?? 'start',
@@ -18,7 +18,7 @@ export const useCarousel = (options: UseCarouselOptions = {}) => {
   })
 
   const [selectedIndex, setSelectedIndex] = useState(0)
-  const [scrollSnaps, setScrollSnaps] = useState<number[]>([])
+  const [scrollSnaps, setScrollSnaps] = useState<number[]>(Array.from({ length: initialCount }))
   const [canScrollPrev, setCanScrollPrev] = useState(false)
   const [canScrollNext, setCanScrollNext] = useState(false)
 

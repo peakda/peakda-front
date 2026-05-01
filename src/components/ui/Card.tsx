@@ -18,17 +18,17 @@ export default function Card({
       onClick={onClick}
       onKeyDown={(e) => e.key === 'Enter' && onClick?.()}
       className={cn(
-        'cursor-pointer rounded-xl bg-gray-100 transition-colors',
+        'rounded-xl bg-[#F8F9FB] transition-colors',
         isBig
           ? 'flex w-full items-center gap-1 px-2 py-3.5'
-          : 'flex flex-col items-center gap-2 px-3 py-3.5 text-center',
+          : 'flex flex-col items-center gap-0.5 px-3 py-3.5 text-center',
         className
       )}
     >
       {/* Image */}
       <div
         className={cn(
-          'bg-muted relative flex shrink-0 items-center justify-center',
+          'relative flex shrink-0 items-center justify-center',
           isBig ? 'h-16 w-16 rounded-lg' : 'h-8 w-8'
         )}
       >
@@ -36,7 +36,7 @@ export default function Card({
           src={image}
           alt={title}
           aria-hidden
-          className={cn(isBig ? 'h-10 w-10 rounded-lg object-cover' : 'h-8 w-8 object-cover')}
+          className={cn(isBig ? 'h-8 w-8 rounded-lg object-cover' : 'h-6 w-6 object-cover')}
         />
       </div>
 

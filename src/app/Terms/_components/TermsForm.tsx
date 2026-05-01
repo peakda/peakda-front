@@ -2,13 +2,20 @@
 
 import { Checkbox } from '@/components/ui/checkbox'
 import { ChevronRight } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 export function TermsForm() {
+  const router = useRouter()
   const [items, setItems] = useState([
-    { id: 'age', label: '[필수] 이용약관 동의', checked: false },
-    { id: 'service', label: '[필수] 개인정보 동의', checked: false },
-    { id: 'privacy', label: '[선택] 마케팅푸시 동의', checked: false },
+    { id: 'age', label: '[필수] 이용약관 동의', checked: false, slug: 'terms-of-service' },
+    { id: 'service', label: '[필수] 개인정보 동의', checked: false, slug: 'privacy-policy' },
+    {
+      id: 'privacy',
+      label: '[선택] 마케팅푸시 동의',
+      checked: false,
+      slug: 'marketing-push-consent',
+    },
   ])
 
   // 전체 동의 핸들러
@@ -30,7 +37,7 @@ export function TermsForm() {
           id="all"
           checked={allChecked}
           onCheckedChange={handleAllCheck}
-          className="rounded-sm"
+          className="rounded-md"
         />
         <label htmlFor="all" className="cursor-pointer font-bold">
           전체 동의
@@ -44,12 +51,15 @@ export function TermsForm() {
             id={item.id}
             checked={item.checked}
             onCheckedChange={(checked: boolean) => handleSingleCheck(item.id, checked)}
-            className="rounded-sm"
+            className="rounded-md"
           />
           <label htmlFor={item.id} className="cursor-pointer text-base">
             {item.label}
           </label>
-          <ChevronRight className="ml-auto cursor-pointer text-gray-500 hover:text-gray-700" />
+          <ChevronRight
+            onClick={() => router.push(`/Terms/${item.slug}`)}
+            className="ml-auto cursor-pointer text-gray-500 transition-colors duration-200 hover:text-gray-600"
+          />
         </div>
       ))}
     </div>

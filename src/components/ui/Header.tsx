@@ -10,7 +10,7 @@ interface HeaderProps {
 
 const Header = ({ left, center, right, className }: HeaderProps) => {
   return (
-    <header className={cn('absolute top-0 z-50 flex h-14 w-full items-center px-4', className)}>
+    <header className={cn('absolute top-0 z-50 flex h-[36px] w-full items-center px-4', className)}>
       {/* Left */}
       <div className="flex flex-1 items-center justify-start">{left}</div>
 
