@@ -13,6 +13,8 @@ interface InputGroupProps {
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
   maxLength?: number
   message?: string
+  error?: string
+  disabled?: boolean
 }
 
 const InputFiled = ({
@@ -21,12 +23,16 @@ const InputFiled = ({
   showAsterisk = false,
   buttonText,
   onButtonClick,
-  maxLength = 10,
+  maxLength = 9,
   message,
+  error,
+  disabled = false,
+  value,
+  onChange,
   ...inputProps
 }: InputGroupProps) => {
   return (
-    <div className="flex w-full flex-col gap-2">
+    <div className="flex w-full flex-col gap-1">
       {/* Label Area */}
       {(title || description) && (
         <div className="flex flex-col gap-1">
@@ -38,7 +44,9 @@ const InputFiled = ({
               )}
             </div>
           )}
-          {description && <p className="text-sm tracking-tight text-slate-500">{description}</p>}
+          {description && (
+            <p className="mb-0.5 text-sm tracking-tight text-[#4E5666]">{description}</p>
+          )}
         </div>
       )}
 
@@ -47,14 +55,19 @@ const InputFiled = ({
         <div className="relative flex-1">
           <input
             className={cn(
-              'border-var(--border-secondary) bg-var(--bg-secondary) h-12 w-full rounded-3xl border p-3 transition-all focus:ring-1 focus:ring-blue-100 focus:outline-none',
-              'placeholder:text-sm placeholder:text-slate-300'
+              'border-var(--border-primary) bg-var(--bg-secondary) h-12 w-full rounded-3xl border p-3 transition-all focus:ring-1 focus:ring-blue-100 focus:outline-none',
+              'placeholder:text-sm placeholder:text-slate-300',
+              error && 'border-rose-400 focus:ring-rose-100',
+              disabled && 'bg-slate-100 text-slate-400'
             )}
+            value={value}
+            onChange={onChange}
+            maxLength={maxLength}
             {...inputProps}
           />
           {maxLength && (
             <span className="absolute top-1/2 right-4 -translate-y-1/2 text-sm text-slate-300">
-              {inputProps.value?.toString().length || 0}/{maxLength}
+              {value?.toString().length || 0}/{maxLength + 1}
             </span>
           )}
         </div>
@@ -62,13 +75,15 @@ const InputFiled = ({
         {buttonText && (
           <button
             onClick={onButtonClick}
-            className="h-12 cursor-pointer rounded-3xl bg-[#96CE71] px-4 py-2 text-[15px] font-medium whitespace-nowrap text-white transition-colors hover:bg-[#85ba63]"
+            disabled={!value || value.length < 1}
+            className="h-12 cursor-pointer rounded-3xl bg-[#96CE71] px-4 py-2 text-[15px] font-medium whitespace-nowrap text-white transition-colors hover:bg-[#85ba63] disabled:cursor-not-allowed disabled:bg-[#d0d4db]"
           >
             {buttonText}
           </button>
         )}
       </div>
-      {message && <p className={cn('')}>{message}</p>}
+      {error && <p className="text-sm text-rose-500">{error}</p>}
+      {!error && message && <p className="text-sm text-[#4E5666]">{message}</p>}
     </div>
   )
 }
