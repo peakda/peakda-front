@@ -21,7 +21,7 @@ class KakaoSDKLoader {
 
       script.src =
         `//dapi.kakao.com/v2/maps/sdk.js` +
-        `?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_KEY}` +
+        `?appkey=${appKey}` +
         `&autoload=false` + // 수동 초기화 — 타이밍 제어
         `&libraries=clusterer` // 필요한 것만
 
