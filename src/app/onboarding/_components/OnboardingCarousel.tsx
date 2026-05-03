@@ -10,7 +10,6 @@ import type { stepProps } from '@/types/types'
 import { useRouter } from 'next/navigation'
 import Indecator from './Indecator'
 import SkipButton from './SkipButton'
-import { Divide } from 'lucide-react'
 
 interface Props {
   steps: readonly stepProps[]

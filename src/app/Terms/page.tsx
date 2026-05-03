@@ -3,7 +3,6 @@ import Header from '@/components/ui/Header'
 import { Drawer } from '@/components/ui/Drawer'
 import Button from '@/components/ui/Button'
 import { TermsForm } from './_components/TermsForm'
-import Image from 'next/image'
 import LeftArrow from '@/components/ui/LeftArrow'
 
 export default function TermsPage() {

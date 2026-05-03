@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils/cn'
 import { CardProps } from '@/types/types'
+import Image from 'next/image'
 
 export default function Card({
   variant,
@@ -32,13 +33,15 @@ export default function Card({
           isBig ? 'h-8 w-8 rounded-lg' : 'h-6 w-6'
         )}
       >
-        <img
+        <Image
           src={image}
           alt={title}
           aria-hidden
           className={cn(
             isBig ? 'h-7 w-7 rounded-lg object-cover' : 'h-[22px] w-[22px] object-cover'
           )}
+          width={22}
+          height={22}
         />
       </div>
 
