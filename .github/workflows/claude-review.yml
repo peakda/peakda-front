@@ -1,0 +1,27 @@
+name: Claude PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  claude-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          direct_prompt: |
+            이 PR의 코드를 리뷰해줘. 아래 기준으로 검토해:
+            1. TypeScript 타입 안정성 (any 사용 여부)
+            2. 컴포넌트 구조 및 재사용성
+            3. 성능 이슈 (불필요한 리렌더링, 무거운 연산)
+            4. 접근성 (aria 속성, 키보드 조작)
+            5. AGENTS.md 컨벤션 준수 여부
+            한국어로 리뷰해줘.
