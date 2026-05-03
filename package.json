@@ -41,6 +41,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.15",
     "eslint-config-prettier": "^10.1.8",
+    "kakao.maps.d.ts": "^0.1.40",
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "tailwindcss": "^4",

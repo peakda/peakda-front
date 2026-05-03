@@ -1,4 +1,5 @@
-import { cn } from '@/lib/utils'
+
+import { cn } from '@/lib/utils/cn'
 import React, { ReactNode } from 'react'
 
 type Variant = 'soft' | 'filled' | 'ghost'

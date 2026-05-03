@@ -1,6 +1,6 @@
 import React from 'react'
 import { Asterisk } from 'lucide-react'
-import { cn } from '@/lib/utils' // shadcn/ui의 유틸 함수 (없으면 직접 클래스 병합)
+import { cn } from '@/lib/utils/cn'
 
 interface InputGroupProps {
   title?: string
