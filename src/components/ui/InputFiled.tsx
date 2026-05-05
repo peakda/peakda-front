@@ -1,8 +1,8 @@
 import React from 'react'
 import { Asterisk } from 'lucide-react'
-import { cn } from '@/lib/utils/cn'
+import Input, { type BorderVariant } from './Input'
 
-interface InputGroupProps {
+interface InputFiledProps {
   title?: string
   description?: string
   showAsterisk?: boolean
@@ -15,6 +15,7 @@ interface InputGroupProps {
   message?: string
   error?: string
   disabled?: boolean
+  variant?: BorderVariant
 }
 
 const InputFiled = ({
@@ -23,17 +24,17 @@ const InputFiled = ({
   showAsterisk = false,
   buttonText,
   onButtonClick,
-  maxLength = 9,
+  maxLength,
   message,
   error,
   disabled = false,
   value,
   onChange,
-  ...inputProps
-}: InputGroupProps) => {
+  variant = 'secondary',
+  placeholder,
+}: InputFiledProps) => {
   return (
     <div className="flex w-full flex-col gap-1">
-      {/* Label Area */}
       {(title || description) && (
         <div className="flex flex-col gap-1">
           {title && (
@@ -50,24 +51,20 @@ const InputFiled = ({
         </div>
       )}
 
-      {/* Input & Button Area */}
       <div className="flex w-full gap-2">
         <div className="relative flex-1">
-          <input
-            className={cn(
-              'border-var(--border-primary) bg-var(--bg-secondary) h-12 w-full rounded-3xl border p-3 transition-all focus:ring-1 focus:ring-blue-100 focus:outline-none',
-              'placeholder:text-sm placeholder:text-slate-300',
-              error && 'border-rose-400 focus:ring-rose-100',
-              disabled && 'bg-slate-100 text-slate-400'
-            )}
+          <Input
+            variant={variant}
+            error={!!error}
             value={value}
             onChange={onChange}
             maxLength={maxLength}
-            {...inputProps}
+            disabled={disabled}
+            placeholder={placeholder}
           />
           {maxLength && (
             <span className="absolute top-1/2 right-4 -translate-y-1/2 text-sm text-slate-300">
-              {value?.toString().length || 0}/{maxLength + 1}
+              {value?.toString().length ?? 0}/{maxLength}
             </span>
           )}
         </div>
@@ -82,6 +79,7 @@ const InputFiled = ({
           </button>
         )}
       </div>
+
       {error && <p className="text-sm text-rose-500">{error}</p>}
       {!error && message && <p className="text-sm text-[#4E5666]">{message}</p>}
     </div>

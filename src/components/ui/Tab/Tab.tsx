@@ -1,7 +1,7 @@
 'use client'
 import { TabItem, TabsContext } from '@/context/TabContext'
 import { ReactNode, useCallback, useId, useRef, useState } from 'react'
-import { TabTrigger } from './Tab/TabTrigger'
+import { TabTrigger } from './TabTrigger'
 import { cn } from '@/lib/utils/cn'
 
 interface TabsProps {
