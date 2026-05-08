@@ -1,4 +1,4 @@
-import { MapContainer } from '@/components/Map/MapContainer'
+import { MapContainer } from "@/components/map/MapContainer";
 
 export default function MapPage() {
   return <MapContainer />

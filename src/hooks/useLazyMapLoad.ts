@@ -15,7 +15,7 @@ export const useLazyMapLoad = (containerRef: RefObject<HTMLDivElement | null>) =
           observer.disconnect()
         }
       },
-      { rootMargin: '200px', threshold: 0 },
+      { rootMargin: '200px', threshold: 0 }
     )
 
     if (containerRef.current) observer.observe(containerRef.current)
