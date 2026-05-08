@@ -146,6 +146,45 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
+  /* PEAKDA Semantic: Background */
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-primary-0: var(--bg-primary-0);
+  --color-bg-primary-10: var(--bg-primary-10);
+  --color-bg-primary-80: var(--bg-primary-80);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-secondary-50: var(--bg-secondary-50);
+  --color-bg-secondary-80: var(--bg-secondary-80);
+  --color-bg-tertiary: var(--bg-tertiary);
+  --color-bg-tertiary-70: var(--bg-tertiary-70);
+  --color-bg-quaternary: var(--bg-quaternary);
+  --color-bg-quaternary-2: var(--bg-quaternary-2);
+  --color-bg-quaternary-0: var(--bg-quaternary-0);
+  --color-bg-quaternary-10: var(--bg-quaternary-10);
+  --color-bg-quaternary-50: var(--bg-quaternary-50);
+  --color-bg-quaternary-80: var(--bg-quaternary-80);
+
+  /* PEAKDA Semantic: Text */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-quaternary: var(--text-quaternary);
+  --color-text-primary-inverse: var(--text-primary-inverse);
+
+  /* PEAKDA Semantic: Icon */
+  --color-icon-primary: var(--icon-primary);
+  --color-icon-secondary: var(--icon-secondary);
+  --color-icon-tertiary: var(--icon-tertiary);
+  --color-icon-quaternary: var(--icon-quaternary);
+  --color-icon-primary-inverse: var(--icon-primary-inverse);
+
+  /* PEAKDA Semantic: Border */
+  --color-border-primary: var(--border-primary);
+  --color-border-secondary: var(--border-secondary);
+  --color-border-tertiary: var(--border-tertiary);
+  --color-border-primary-inverse: var(--border-primary-inverse);
+  --color-border-primary-inverse-10: var(--border-primary-inverse-10);
+  --color-border-primary-inverse-70: var(--border-primary-inverse-70);
+
   /* PEAKDA Border Radius (Figma 토큰 1:1) */
   --radius-none: 0px;
   --radius-sm: 2px;
@@ -294,6 +333,7 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: #ff7f92;
+  --border-primary: #f0f2f5;
 }
 
 @layer base {

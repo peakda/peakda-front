@@ -30,7 +30,7 @@ const Textarea = ({
     <div className="relative w-full">
       <textarea
         className={cn(
-          'bg-var(--bg-secondary) border-secondary w-full resize-none rounded-2xl border p-3 pb-8 transition-all focus:ring-1 focus:ring-blue-100 focus:outline-none',
+          'bg-bg-secondary w-full resize-none rounded-2xl border p-3 pb-8 transition-all focus:ring-1 focus:ring-blue-100 focus:outline-none',
           'placeholder:text-sm placeholder:text-slate-300',
           borderVariantClass[variant],
           error && 'border-rose-400 focus:ring-rose-100',

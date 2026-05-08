@@ -19,7 +19,7 @@ const Input = ({ variant = 'warning', error, className, ...props }: InputProps) 
   return (
     <input
       className={cn(
-        'bg-var(--bg-secondary) border-secondary h-12 w-full rounded-3xl border p-3 transition-all focus:ring-1 focus:ring-blue-100 focus:outline-none',
+        'bg-bg-secondary h-12 w-full rounded-3xl border p-3 transition-all focus:ring-1 focus:ring-blue-100 focus:outline-none',
         'placeholder:text-sm placeholder:text-slate-300',
         borderVariantClass[variant],
         error && 'border-rose-400 focus:ring-rose-100',
