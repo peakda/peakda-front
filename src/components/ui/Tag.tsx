@@ -1,7 +1,14 @@
-export default function Tag({ TagText }: { TagText: string }) {
+interface TagProps {
+  text: string
+  className?: string
+}
+
+export default function Tag({ text, className = '' }: TagProps) {
   return (
-    <div className="absolute top-3 right-3 rounded-full bg-pink-400 px-1.5 py-1 text-xs font-bold text-white">
-      {TagText}
+    <div
+      className={`rounded-full bg-pink-400 px-1.5 py-0.5 text-[11px] font-semibold text-white ${className}`}
+    >
+      {text}
     </div>
   )
 }
