@@ -3,6 +3,7 @@ import HeartBtn from './HeartBtn'
 import { Badge } from './Badge'
 import Tag from './Tag'
 import { X } from 'lucide-react'
+import IconBtn from './IconBtn'
 
 interface PinTextProps {
   title: string
@@ -42,8 +43,14 @@ export default function PinText({
 
         {/* 찜(좋아요) 버튼 */}
         <div className="flex items-center gap-1">
-          <HeartBtn InitFavorite={isFavorite} />
-          {variant === 'list' && <X />}
+          <IconBtn size="md">
+            <HeartBtn InitFavorite={isFavorite} className="h-5 w-5" />
+          </IconBtn>
+          {variant === 'list' && (
+            <IconBtn size="md">
+              <X />
+            </IconBtn>
+          )}
         </div>
       </div>
 
