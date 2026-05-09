@@ -1,26 +1,17 @@
 import React from 'react'
 import Tag from './Tag'
 import PinText from './PinText'
-
-interface PinCardProps {
-  imageUrl?: string
-  TagText?: string
-  title: string
-  location: string
-  description: string
-  Badges: string[]
-  isFavorite: boolean
-}
+import { PinProps, SingleImageProps } from '@/types/types'
 
 export default function PinCard({
   imageUrl,
-  TagText,
+  tagText,
   title,
   location,
   description,
   Badges = [],
   isFavorite = false,
-}: PinCardProps) {
+}: SingleImageProps) {
   return (
     <div className="flex h-[318px] w-full min-w-[300px] flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm">
       {/* 상단 이미지 영역 */}
@@ -30,7 +21,7 @@ export default function PinCard({
         )}
 
         {/* 우측 상단 품절/상태 배지 */}
-        {TagText && <Tag text={TagText} className="absolute top-2 right-2" />}
+        {tagText && <Tag text={tagText} className="absolute top-2 right-2" />}
       </div>
 
       {/* 하단 콘텐츠 영역 */}
