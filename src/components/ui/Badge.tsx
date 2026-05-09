@@ -1,4 +1,3 @@
-
 import { cn } from '@/lib/utils/cn'
 import React, { ReactNode } from 'react'
 
@@ -22,8 +21,8 @@ const styles: Record<Variant, Record<Color, string>> = {
     green: 'bg-green-100 text-green-600',
   },
   filled: {
-    gray: 'bg-slate-500 text-white',  
-    pink: 'bg-pink-400 text-white',
+    gray: 'bg-slate-500 text-white',
+    pink: 'bg-[#ffa8b43b]  text-flower-plum',
     red: 'bg-red-400 text-white',
     green: 'bg-green-500 text-white',
   },

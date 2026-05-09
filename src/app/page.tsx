@@ -1,4 +1,5 @@
 import MainMessage from '@/components/ui/MainMessage'
+import PinCard from '@/components/ui/PinCard'
 
 export default function Home() {
   return (
