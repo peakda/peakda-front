@@ -1,12 +1,13 @@
-import { kakaoLoader } from './kakaoLoader'
-
+/**
+ * 카카오맵 초기 타일을 미리 prefetch합니다.
+ * 반드시 브라우저 환경(useEffect 등)에서 kakaoLoader.load() 완료 후 호출해야 합니다.
+ *
+ * 사용 예:
+ *   kakaoLoader.load(process.env.NEXT_PUBLIC_KAKAO_MAP_KEY!).then(() => {
+ *     prefetchInitialTiles({ lat: 37.5665, lng: 126.978 })
+ *   })
+ */
 export const prefetchInitialTiles = (center: { lat: number; lng: number }, level = 3) => {
-  // 카카오맵 타일 URL 패턴
-  // 실제 URL은 브라우저 네트워크 탭에서 확인
-  const tileSize = 256
-  const tilesPerRow = 4 // 화면 채울 타일 수
-
-  // 위경도 → 타일 좌표 변환
   const lat2tile = (lat: number, zoom: number) =>
     Math.floor(
       ((1 -
@@ -18,23 +19,17 @@ export const prefetchInitialTiles = (center: { lat: number; lng: number }, level
   const lng2tile = (lng: number, zoom: number) =>
     Math.floor(((lng + 180) / 360) * Math.pow(2, zoom))
 
-  const zoom = 14 - level // 카카오 레벨 → 줌 변환 (근사값)
+  const zoom = 14 - level
   const tx = lng2tile(center.lng, zoom)
   const ty = lat2tile(center.lat, zoom)
 
-  // 중심 타일 주변 3x3 미리 fetch
   for (let dx = -1; dx <= 1; dx++) {
     for (let dy = -1; dy <= 1; dy++) {
       const link = document.createElement('link')
       link.rel = 'prefetch'
       link.as = 'image'
-      // 실제 카카오 타일 URL로 교체 필요
-      link.href = `//map.daumcdn.net/map_2d_hd/` + `${zoom}/${tx + dx}/${ty + dy}.png`
+      link.href = `//map.daumcdn.net/map_2d_hd/${zoom}/${tx + dx}/${ty + dy}.png`
       document.head.appendChild(link)
     }
   }
 }
-
-kakaoLoader.load(appkey).then(() => {
-  prefetchInitialTiles({ lat: 37.5665, lng: 126.978 })
-})

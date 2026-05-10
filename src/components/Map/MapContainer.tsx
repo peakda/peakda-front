@@ -5,10 +5,16 @@ import { useEffect, useRef } from 'react'
 import MainMessage from '../ui/MainMessage'
 import Header from '../ui/Header'
 import Image from 'next/image'
+import { prefetchInitialTiles } from '@/lib/kakao/tilePrefetch'
+
+const DEFAULT_CENTER = {
+  lat: 36.5665,
+  lng: 127.978,
+}
 
 const initMap = (container: HTMLElement) => {
   return new kakao.maps.Map(container, {
-    center: new kakao.maps.LatLng(36.5665, 127.978),
+    center: new kakao.maps.LatLng(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng),
     level: 13,
     draggable: true,
     scrollwheel: true,
@@ -23,6 +29,11 @@ export const MapContainer = () => {
 
   useEffect(() => {
     if (!isReady || !containerRef.current) return
+
+    // 타일 미리 받아오기
+    prefetchInitialTiles(DEFAULT_CENTER, 13)
+
+    // 실제 맵 생성
     initMap(containerRef.current)
   }, [isReady])
 

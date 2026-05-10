@@ -1,7 +1,8 @@
 import React from 'react'
 import Tag from './Tag'
 import PinText from './PinText'
-import { PinProps, SingleImageProps } from '@/types/types'
+import { SingleImageProps } from '@/types/types'
+import Image from 'next/image'
 
 export default function PinCard({
   imageUrl,
@@ -17,7 +18,7 @@ export default function PinCard({
       {/* 상단 이미지 영역 */}
       <div className="relative h-48 bg-gray-200">
         {imageUrl && (
-          <img src={imageUrl} alt={title} className="aspect-video h-full w-full object-cover" />
+          <Image src={imageUrl} alt={title} className="aspect-video h-full w-full object-cover" />
         )}
 
         {/* 우측 상단 품절/상태 배지 */}
