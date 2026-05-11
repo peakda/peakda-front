@@ -9,6 +9,10 @@ export default function MainMessage() {
         width={128}
         height={120}
         className="mx-auto h-32 w-32"
+        priority
+        quality={80}
+        placeholder="blur"
+        blurDataURL="data:image/png;base64,..."
       />
       <h1 className="font-advent text-color-green-700 text-center text-[40px] font-semibold! tracking-tight">
         Peakda

@@ -15,15 +15,18 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: latest
+          version: 9
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm typecheck
 
       - name: Lint
         run: pnpm lint
@@ -32,3 +35,4 @@ jobs:
         run: pnpm build
         env:
           NEXT_PUBLIC_KAKAO_MAP_KEY: ${{ secrets.NEXT_PUBLIC_KAKAO_MAP_KEY }}
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}

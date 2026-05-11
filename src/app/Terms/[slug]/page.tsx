@@ -1,6 +1,5 @@
 import LeftArrow from '@/components/ui/LeftArrow'
 import Header from '@/components/ui/Header'
-import Image from 'next/image'
 
 interface PageProps {
   params: Promise<{ slug: string }>

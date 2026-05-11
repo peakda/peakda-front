@@ -1,70 +1,102 @@
-# 꽃피는 지금 — CLAUDE.md
+# CLAUDE.md — 꽃피는 지금 (Peakda)
 
-## 프로젝트 개요
+## 프로젝트 컨텍스트
 
-계절 여행 타이밍 안내 서비스. 벚꽃·단풍 등 20여 개 계절 명소의
-실시간 개화 상태를 지도로 보여주고, 찜 & 알림 기능을 제공한다.
+- **서비스명:** (Peakda)
+- **목적:** 계절 여행 타이밍 안내 — 벚꽃·단풍 등 20여 개 계절 명소의 실시간 개화 상태 제공
+- **패키지 매니저:** pnpm
+- **배포:** Vercel
 
-## 기술 스택
+---
 
-- Framework: Next.js 15 (App Router)
-- Language: TypeScript (strict)
-- Styling: Tailwind CSS v4
-- 서버 상태: TanStack Query v5
-- 클라이언트 상태: Zustand v5
-- 폼: React Hook Form + Zod
-- 지도: Kakao Maps SDK
-- 패키지 매니저: pnpm
+## 1. 코딩 전에 먼저 생각하기
 
-## 디렉토리 구조
+**가정하지 말고, 혼란을 숨기지 말고, 트레이드오프를 드러낼 것.**
 
-src/
-├── app/ # Next.js App Router 페이지
-│ ├── (map)/ # 메인 지도 페이지
-│ ├── spot/[id]/ # 명소 상세
-│ ├── record/ # 방문 기록
-│ ├── wishlist/ # 찜 목록
-│ └── api/ # Route Handler (API 프록시)
-├── components/
-│ ├── ui/ # 공용 컴포넌트 (Button, Badge 등)
-│ ├── map/ # 지도 관련 컴포넌트
-│ ├── spot/ # 명소 관련 컴포넌트
-│ ├── record/ # 기록 관련 컴포넌트
-│ └── layout/ # Header, Navigation
-├── lib/
-│ ├── api/ # TourAPI, 기상청 클라이언트
-│ └── utils/ # cn.ts 등 유틸
-├── hooks/ # 커스텀 훅
-├── stores/ # Zustand 스토어
-├── types/ # TypeScript 타입 정의
-└── constants/ # 상수 (꽃 유형, 상태 등)
+구현 전에:
 
-## 코드 컨벤션
+- 가정이 있다면 명시적으로 밝힌다. 불확실하면 먼저 질문한다.
+- 해석이 여러 가지라면 모두 제시한다. 혼자 선택하지 않는다.
+- 더 단순한 방법이 있다면 말한다. 필요하면 반박한다.
+- 뭔가 불명확하면 멈춘다. 뭐가 헷갈리는지 명시하고 질문한다.
 
-- 컴포넌트: PascalCase, named export
-- 훅: camelCase, use prefix
-- 타입: PascalCase, interface 우선
-- 상수: UPPER_SNAKE_CASE
-- 파일명: kebab-case
-- 절대경로 import (@/) 사용, 상대경로 금지
+**Peakda 적용 예시:**
 
-## 외부 API
+- TourAPI 응답 구조가 불명확하면 → 임의로 타입 만들지 말고 실제 응답 확인 후 진행
+- 카카오맵 마커 클릭 이벤트 처리 방식이 여러 가지라면 → 옵션 제시 후 결정 요청
+- 필터 상태를 URL 쿼리로 할지 Zustand로 할지 모호하면 → 먼저 질문
 
-- 한국관광공사 TourAPI: /api/tour Route Handler로 프록시
-- 기상청 예보 API: /api/weather Route Handler로 프록시
-- Kakao Maps SDK: NEXT_PUBLIC_KAKAO_MAP_KEY (클라이언트)
+---
 
-## 환경변수
+## 2. 단순함 우선
 
-TOUR_API_KEY # 서버 전용
-WEATHER_API_KEY # 서버 전용
-NEXT_PUBLIC_KAKAO_MAP_KEY # 클라이언트 노출 (도메인 제한)
+**요청한 것만. 추측성 코드 없음.**
 
-## 주요 규칙
+- 요청하지 않은 기능은 추가하지 않는다.
+- 단일 사용 코드에 불필요한 추상화를 만들지 않는다.
+- 요청하지 않은 "유연성"이나 "확장성"을 넣지 않는다.
+- 불가능한 시나리오에 대한 에러 핸들링을 추가하지 않는다.
+- 200줄로 짠 코드가 50줄로 가능하다면 다시 작성한다.
 
-- TourAPI 직접 클라이언트 호출 금지 (키 노출) → Route Handler 경유
-- any 타입 금지 (ESLint warn)
-- 미사용 변수 금지 (ESLint error), \_ prefix 예외
-- console.log 금지, console.error/warn만 허용
-- 서버 컴포넌트 기본, 클라이언트 컴포넌트는 'use client' 명시
-- 카카오맵은 dynamic import + ssr: false 필수
+**Peakda 적용 예시:**
+
+- SpotCard 컴포넌트 요청 → 지금 필요없는 애니메이션·스켈레톤 미리 추가 금지
+- useCarousel 훅 요청 → 자동재생·터치감도 옵션 등 요청 없는 기능 금지
+- TourAPI 클라이언트 작성 → 지금 쓰지 않는 엔드포인트 미리 구현 금지
+
+자문: "시니어 개발자가 보면 과하다고 할까?" → Yes라면 단순화한다.
+
+---
+
+## 3. 최소 변경 원칙
+
+**꼭 필요한 것만 건드린다. 내가 만든 문제만 정리한다.**
+
+기존 코드 수정 시:
+
+- 인접한 코드·주석·포맷을 "개선"하지 않는다.
+- 안 깨진 것은 리팩토링하지 않는다.
+- 기존 스타일을 그대로 따른다. 내 방식이 달라도.
+- 관련 없는 데드코드를 발견하면 → 삭제하지 말고 언급만 한다.
+
+내 변경으로 생긴 고아(orphan) 정리:
+
+- 내 변경으로 인해 사용되지 않게 된 import·변수·함수는 제거한다.
+- 기존에 있던 데드코드는 요청 없으면 건드리지 않는다.
+
+기준: **변경된 모든 줄이 요청 사항과 직접 연결되어야 한다.**
+
+**Peakda 적용 예시:**
+
+- FilterPanel 버그 수정 → MapPage 레이아웃 "개선" 금지
+- useWishlist 훅 수정 → 관련 없는 wishlistStore 리팩토링 금지
+- globals.css 토큰 추가 → 기존 base style 정리 금지
+
+---
+
+## 4. 목표 기반 실행
+
+**성공 기준을 정의하고, 검증될 때까지 반복한다.**
+
+작업을 검증 가능한 목표로 전환:
+
+- "필터 추가" → "꽃 종류·상태 필터 선택 시 지도 마커가 필터링되어야 함"
+- "버그 수정" → "마커 클릭 시 BottomSheet가 열리지 않는 문제 재현 후 수정"
+- "리팩토링" → "수정 전후 동일하게 동작해야 함"
+
+여러 단계 작업은 간략한 계획을 먼저 제시:
+
+## 프로젝트 규칙 요약
+
+| 항목            | 규칙                                                      |
+| --------------- | --------------------------------------------------------- |
+| Import          | `@/` 절대경로만, 상대경로(`../`) 금지                     |
+| 컴포넌트        | named export, PascalCase                                  |
+| 타입            | `any` 금지, `interface` 우선                              |
+| 스타일          | Tailwind 유틸리티만, 인라인 style 금지                    |
+| 조건부 클래스   | `cn()` 유틸 사용                                          |
+| 서버 상태       | TanStack Query                                            |
+| 클라이언트 상태 | Zustand                                                   |
+| 외부 API        | Route Handler 프록시 경유 필수 (키 노출 방지)             |
+| 카카오맵        | `dynamic import + ssr: false` 필수                        |
+| 로그            | `console.log` 금지, `console.error`·`console.warn`만 허용 |
