@@ -8,6 +8,7 @@ import { useCarousel } from '@/hooks/useEmblaCarousel'
 import { cn } from '@/lib/utils/cn'
 import type { stepProps } from '@/types/types'
 import { useRouter } from 'next/navigation'
+import { useEffect, useRef } from 'react'
 import Indecator from './Indecator'
 import SkipButton from './SkipButton'
 
@@ -26,6 +27,15 @@ export default function OnboardingCarousel({ steps }: Props) {
   )
 
   const isLast = selectedIndex === steps.length - 1
+  const imageRefs = useRef<(HTMLDivElement | null)[]>([])
+
+  useEffect(() => {
+    const el = imageRefs.current[selectedIndex]
+    if (!el) return
+    el.style.animation = 'none'
+    void el.offsetWidth
+    el.style.animation = ''
+  }, [selectedIndex])
 
   const handleNext = () => {
     if (isLast) {
@@ -64,7 +74,10 @@ export default function OnboardingCarousel({ steps }: Props) {
               className="relative flex h-full flex-[0_0_100%] flex-col items-center justify-between px-4"
             >
               <div className="relative z-10 flex w-full flex-1 flex-col items-center justify-center gap-10 pt-20">
-                <OnboardingMessage step={step} />
+                <OnboardingMessage
+                  step={step}
+                  imageRef={(el) => { imageRefs.current[index] = el }}
+                />
                 <div
                   className={cn(
                     'grid w-full',
