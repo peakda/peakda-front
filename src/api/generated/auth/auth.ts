@@ -5,6 +5,25 @@
  * 계절 여행 타이밍 안내 서비스 API 문서
  * OpenAPI spec version: v1
  */
+import {
+  useMutation,
+  useQuery
+} from '@tanstack/react-query';
+import type {
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
+  MutationFunction,
+  QueryClient,
+  QueryFunction,
+  QueryKey,
+  UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query';
+
 import type {
   ApiResponseNicknameCheckResponse,
   ApiResponseUnit,
@@ -14,6 +33,11 @@ import type {
 } from '../peakdaApi.schemas';
 
 import { customInstance } from '../../mutator/index';
+
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+
 
 export type completeSignupResponse200 = {
   data: ApiResponseUnit
@@ -51,7 +75,53 @@ export const completeSignup = async (signupCompleteRequest: SignupCompleteReques
 );}
 
 
-export type refreshResponse200 = {
+
+
+export const getCompleteSignupMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof completeSignup>>, TError,{data: SignupCompleteRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof completeSignup>>, TError,{data: SignupCompleteRequest}, TContext> => {
+
+const mutationKey = ['completeSignup'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof completeSignup>>, {data: SignupCompleteRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  completeSignup(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CompleteSignupMutationResult = NonNullable<Awaited<ReturnType<typeof completeSignup>>>
+    export type CompleteSignupMutationBody = SignupCompleteRequest
+    export type CompleteSignupMutationError = unknown
+
+    /**
+ * @summary 소셜 회원가입 완료
+ */
+export const useCompleteSignup = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof completeSignup>>, TError,{data: SignupCompleteRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof completeSignup>>,
+        TError,
+        {data: SignupCompleteRequest},
+        TContext
+      > => {
+      return useMutation(getCompleteSignupMutationOptions(options), queryClient);
+    }
+    export type refreshResponse200 = {
   data: ApiResponseUnit
   status: 200
 }
@@ -87,7 +157,53 @@ export const refresh = async ( options?: RequestInit): Promise<refreshResponse> 
 );}
 
 
-export type logoutResponse200 = {
+
+
+export const getRefreshMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refresh>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof refresh>>, TError,void, TContext> => {
+
+const mutationKey = ['refresh'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof refresh>>, void> = () => {
+
+
+          return  refresh(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RefreshMutationResult = NonNullable<Awaited<ReturnType<typeof refresh>>>
+
+    export type RefreshMutationError = unknown
+
+    /**
+ * @summary 토큰 재발급
+ */
+export const useRefresh = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refresh>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof refresh>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getRefreshMutationOptions(options), queryClient);
+    }
+    export type logoutResponse200 = {
   data: ApiResponseUnit
   status: 200
 }
@@ -123,7 +239,53 @@ export const logout = async ( options?: RequestInit): Promise<logoutResponse> =>
 );}
 
 
-export type checkNicknameResponse200 = {
+
+
+export const getLogoutMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError,void, TContext> => {
+
+const mutationKey = ['logout'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof logout>>, void> = () => {
+
+
+          return  logout(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LogoutMutationResult = NonNullable<Awaited<ReturnType<typeof logout>>>
+
+    export type LogoutMutationError = unknown
+
+    /**
+ * @summary 로그아웃
+ */
+export const useLogout = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof logout>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getLogoutMutationOptions(options), queryClient);
+    }
+    export type checkNicknameResponse200 = {
   data: ApiResponseNicknameCheckResponse
   status: 200
 }
@@ -166,6 +328,83 @@ export const checkNickname = async (params: CheckNicknameParams, options?: Reque
 );}
 
 
+
+
+
+export const getCheckNicknameQueryKey = (params?: CheckNicknameParams,) => {
+    return [
+    `/api/auth/signup/nickname/check`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getCheckNicknameQueryOptions = <TData = Awaited<ReturnType<typeof checkNickname>>, TError = unknown>(params: CheckNicknameParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof checkNickname>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getCheckNicknameQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof checkNickname>>> = ({ signal }) => checkNickname(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof checkNickname>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type CheckNicknameQueryResult = NonNullable<Awaited<ReturnType<typeof checkNickname>>>
+export type CheckNicknameQueryError = unknown
+
+
+export function useCheckNickname<TData = Awaited<ReturnType<typeof checkNickname>>, TError = unknown>(
+ params: CheckNicknameParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof checkNickname>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof checkNickname>>,
+          TError,
+          Awaited<ReturnType<typeof checkNickname>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCheckNickname<TData = Awaited<ReturnType<typeof checkNickname>>, TError = unknown>(
+ params: CheckNicknameParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof checkNickname>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof checkNickname>>,
+          TError,
+          Awaited<ReturnType<typeof checkNickname>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCheckNickname<TData = Awaited<ReturnType<typeof checkNickname>>, TError = unknown>(
+ params: CheckNicknameParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof checkNickname>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 회원가입 닉네임 중복 확인
+ */
+
+export function useCheckNickname<TData = Awaited<ReturnType<typeof checkNickname>>, TError = unknown>(
+ params: CheckNicknameParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof checkNickname>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getCheckNicknameQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
 export type getCurrentUserResponse200 = {
   data: ApiResponseUserInfoResponse
   status: 200
@@ -200,6 +439,83 @@ export const getCurrentUser = async ( options?: RequestInit): Promise<getCurrent
 
   }
 );}
+
+
+
+
+
+export const getGetCurrentUserQueryKey = () => {
+    return [
+    `/api/auth/me`
+    ] as const;
+    }
+
+
+export const getGetCurrentUserQueryOptions = <TData = Awaited<ReturnType<typeof getCurrentUser>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCurrentUserQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCurrentUser>>> = ({ signal }) => getCurrentUser({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetCurrentUserQueryResult = NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>
+export type GetCurrentUserQueryError = unknown
+
+
+export function useGetCurrentUser<TData = Awaited<ReturnType<typeof getCurrentUser>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCurrentUser>>,
+          TError,
+          Awaited<ReturnType<typeof getCurrentUser>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCurrentUser<TData = Awaited<ReturnType<typeof getCurrentUser>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCurrentUser>>,
+          TError,
+          Awaited<ReturnType<typeof getCurrentUser>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCurrentUser<TData = Awaited<ReturnType<typeof getCurrentUser>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 내 정보 조회
+ */
+
+export function useGetCurrentUser<TData = Awaited<ReturnType<typeof getCurrentUser>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetCurrentUserQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
 
 
 export type getOauth2AuthorizationKakaoResponse302 = {
@@ -241,5 +557,82 @@ export const getOauth2AuthorizationKakao = async ( options?: RequestInit): Promi
 
   }
 );}
+
+
+
+
+
+export const getGetOauth2AuthorizationKakaoQueryKey = () => {
+    return [
+    `/oauth2/authorization/kakao`
+    ] as const;
+    }
+
+
+export const getGetOauth2AuthorizationKakaoQueryOptions = <TData = Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>, TError = void>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetOauth2AuthorizationKakaoQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>> = ({ signal }) => getOauth2AuthorizationKakao({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetOauth2AuthorizationKakaoQueryResult = NonNullable<Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>>
+export type GetOauth2AuthorizationKakaoQueryError = void
+
+
+export function useGetOauth2AuthorizationKakao<TData = Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>, TError = void>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>,
+          TError,
+          Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetOauth2AuthorizationKakao<TData = Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>, TError = void>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>,
+          TError,
+          Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetOauth2AuthorizationKakao<TData = Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>, TError = void>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 카카오 로그인 시작 - 링크 클릭용
+ */
+
+export function useGetOauth2AuthorizationKakao<TData = Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>, TError = void>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetOauth2AuthorizationKakaoQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
 
 
