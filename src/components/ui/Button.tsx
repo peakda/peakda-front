@@ -26,9 +26,9 @@ const SIZE: Record<ButtonSize, string> = {
 const VARIANT_COLOR: Record<ButtonVariant, Record<ButtonColor, string>> = {
   filled: {
     primary:
-      'bg-green-500 text-white hover:bg-green-600 active:bg-green-700 disabled:bg-green-200 disabled:text-white',
+      'bg-green-500 text-white hover:bg-green-600 active:bg-green-700 disabled:bg-bg-quaternary disabled:text-text-primary-inverse',
     default:
-      'bg-gray-200 text-gray-500 hover:bg-gray-300 active:bg-gray-400 disabled:bg-gray-100 disabled:text-gray-300',
+      'bg-gray-200 text-gray-500 hover:bg-gray-300 active:bg-gray-400 disabled:bg-bg-quaternary disabled:text-text-primary-inverse',
   },
   outlined: {
     primary:
