@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import Header from '@/components/ui/Header'
 import InputFiled from '@/components/ui/InputFiled'
+import { useCheckNickname } from '@/hooks/useCheckNickname'
 import { ChevronLeft } from 'lucide-react'
 import Image from 'next/image'
 import { useState } from 'react'
@@ -26,6 +27,9 @@ const FLOWER_LIST = [
 
 export default function ProfilePage() {
   const [nickname, setNickname] = useState('')
+
+  const { isAvailable, isPending, check, isError, message } = useCheckNickname(nickname)
+  console.log(isAvailable)
   return (
     <div className="relative flex h-screen flex-col">
       <div className="h-14">
@@ -35,9 +39,13 @@ export default function ProfilePage() {
         />
       </div>
       <div className="flex flex-1 flex-col gap-1 px-4">
-        <h2 className="text-xl font-semibold">프로필 설정</h2>
-        <p className="text-base font-normal">PEAKDA에서 사용할 정보를 입력해 주세요.</p>
-        <p className="text-base font-normal">나중에 MY탭에서 언제든지 변경 가능해요.</p>
+        <h2 className="text-text-primary text-xl font-semibold">프로필 설정</h2>
+        <p className="text-text-secondary text-base font-normal">
+          PEAKDA에서 사용할 정보를 입력해 주세요.
+        </p>
+        <p className="text-text-secondary text-base font-normal">
+          나중에 MY탭에서 언제든지 변경 가능해요.
+        </p>
       </div>
       <div className="flex flex-1 items-center justify-center">
         <Image src={'/images/Profile.png'} alt="프로필 이미지" width={100} height={100} />
@@ -51,8 +59,11 @@ export default function ProfilePage() {
           onChange={(e) => setNickname(e.target.value)}
           placeholder="닉네임을 작성해주세요"
           buttonText="중복확인"
-          disabled={nickname.length > 9}
+          onButtonClick={() => check()}
+          disabled={nickname.length > 9 || isPending}
           message="닉네임을 작성해주세요"
+          error={message}
+          isAvailable={isAvailable}
         />
       </div>
       <div className="flex flex-2 flex-col gap-2 p-4">

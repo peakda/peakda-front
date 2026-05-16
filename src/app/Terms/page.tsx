@@ -23,10 +23,12 @@ export default function TermsPage() {
           <h2 className="text-color-var(--icon-quaternary) text-xl! font-semibold! tracking-tight">
             서비스 이용 동의
           </h2>
-          <p className="text-color-var(--icon-quaternary) text-[15px] font-normal">
+          <p className="text-text-secondary text-[15px] font-normal">
             PEAKDA를 시작하기 전에 아래 내용을 확인해주세요.
           </p>
-          <p className="text-[15px] font-normal">필수 항목에 동의해야 서비스를 이용할 수 있어요.</p>
+          <p className="text-text-secondary text-[15px] font-normal">
+            필수 항목에 동의해야 서비스를 이용할 수 있어요.
+          </p>
         </div>
         <div className="flex-1">
           <TermsForm onRequiredChange={setCanSubmit} />
@@ -37,7 +39,7 @@ export default function TermsPage() {
             size="lg"
             disabled={!canSubmit}
             onClick={() => router.push('/profile')}
-            className="bg-brand-secondary hover:bg-brand-secondary active:bg-brand-secondary w-full cursor-pointer text-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="bg-brand-secondary hover:bg-brand-secondary active:bg-brand-secondary w-full cursor-pointer text-white disabled:cursor-not-allowed"
           >
             시작하기
           </Button>

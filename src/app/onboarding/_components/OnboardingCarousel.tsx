@@ -28,8 +28,13 @@ export default function OnboardingCarousel({ steps }: Props) {
 
   const isLast = selectedIndex === steps.length - 1
   const imageRefs = useRef<(HTMLDivElement | null)[]>([])
+  const isFirstRender = useRef(true)
 
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
     const el = imageRefs.current[selectedIndex]
     if (!el) return
     el.style.animation = 'none'
@@ -63,10 +68,7 @@ export default function OnboardingCarousel({ steps }: Props) {
       />
 
       {/* 캐러셀 — 아래에서 페이드인 */}
-      <div
-        ref={emblaRef}
-        className="animate-in fade-in slide-in-from-bottom-2 flex-1 overflow-hidden delay-100 duration-500"
-      >
+      <div ref={emblaRef} className="slide-in-from-bottom-2 flex-1 overflow-hidden">
         <div className="flex h-full touch-pan-y">
           {steps.map((step, index) => (
             <div
@@ -76,7 +78,9 @@ export default function OnboardingCarousel({ steps }: Props) {
               <div className="relative z-10 flex w-full flex-1 flex-col items-center justify-center gap-10 pt-20">
                 <OnboardingMessage
                   step={step}
-                  imageRef={(el) => { imageRefs.current[index] = el }}
+                  imageRef={(el) => {
+                    imageRefs.current[index] = el
+                  }}
                 />
                 <div
                   className={cn(
@@ -109,7 +113,7 @@ export default function OnboardingCarousel({ steps }: Props) {
           size="lg"
           color="primary"
           onClick={handleNext}
-          className="bg-brand-secondary hover:bg-brand-secondary text-white"
+          className="text-white"
         >
           다음
         </Button>
