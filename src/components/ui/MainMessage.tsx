@@ -10,7 +10,7 @@ export default function MainMessage() {
         height={120}
         className="mx-auto h-32 w-32"
         priority
-        quality={80}
+        quality={70}
         placeholder="blur"
         blurDataURL="data:image/png;base64,..."
       />

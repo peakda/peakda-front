@@ -1,15 +1,14 @@
-import { stepProps } from '@/types/types'
+import { StepProps } from '@/types/types'
 import Image from 'next/image'
 
 interface Props {
-  step: stepProps
-  imageRef?: React.RefCallback<HTMLDivElement>
+  step: StepProps
 }
 
-export default function OnboardingMessage({ step, imageRef }: Props) {
+export default function OnboardingMessage({ step }: Props) {
   return (
     <>
-      <div ref={imageRef} className="animate-drop-in">
+      <div className="animate-drop-in">
         <Image src={step.image} alt={step.title} width={80} height={80} />
       </div>
       <div className="flex w-full flex-col gap-2 text-center">
