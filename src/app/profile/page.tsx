@@ -6,9 +6,10 @@ import Header from '@/components/ui/Header'
 import InputFiled from '@/components/ui/InputFiled'
 import { useCheckNickname } from '@/hooks/useCheckNickname'
 import { cn } from '@/lib/utils/cn'
+import { useUploadThing } from '@/lib/uploadthing'
 import { ChevronLeft } from 'lucide-react'
 import Image from 'next/image'
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 
 const FLOWER_LIST = [
   '동백꽃',
@@ -29,12 +30,30 @@ const FLOWER_LIST = [
 export default function ProfilePage() {
   const [nickname, setNickname] = useState('')
   const [selected, setSelected] = useState<string[]>([])
+  const [preview, setPreview] = useState<string | null>(null)
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   const { isAvailable, isPending, check, isError, message } = useCheckNickname(nickname)
+  const { startUpload, isUploading } = useUploadThing('profileImage', {
+    onClientUploadComplete: (res) => {
+      setProfileImageUrl(res[0].ufsUrl)
+    },
+  })
+
   const toggleBadge = useCallback((flower: string) => {
     setSelected((prev) =>
       prev.includes(flower) ? prev.filter((f) => f !== flower) : [...prev, flower]
     )
   }, [])
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setPreview(URL.createObjectURL(file))
+    startUpload([file])
+  }
+
   return (
     <div className="relative flex h-screen flex-col">
       <div className="h-14">
@@ -52,8 +71,44 @@ export default function ProfilePage() {
           나중에 MY탭에서 언제든지 변경 가능해요.
         </p>
       </div>
-      <div className="flex flex-1 items-center justify-center">
-        <Image src={'/images/Profile.png'} alt="프로필 이미지" width={100} height={100} />
+      <div className="relative flex flex-1 items-center justify-center">
+        <button
+          type="button"
+          onClick={() => {
+            if (fileInputRef.current) fileInputRef.current.value = ''
+            fileInputRef.current?.click()
+          }}
+          className="relative cursor-pointer"
+          disabled={isUploading}
+        >
+          <Image
+            src={preview ?? '/images/Profile.png'}
+            alt="프로필 이미지"
+            width={100}
+            height={100}
+            className="object-cover"
+          />
+          {isUploading && (
+            <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/30">
+              <span className="text-xs text-white">업로드 중...</span>
+            </div>
+          )}
+        </button>
+        {preview && (
+          <button
+            onClick={() => setPreview(null)}
+            className="bg-brand-secondary absolute right-10 bottom-0 cursor-pointer rounded-xl px-2 py-1 text-white"
+          >
+            초기화
+          </button>
+        )}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleFileChange}
+        />
       </div>
       <div className="flex w-full flex-1 flex-col gap-2 p-4">
         <InputFiled
@@ -103,6 +158,7 @@ export default function ProfilePage() {
           variant="filled"
           size="lg"
           className="w-full cursor-pointer bg-[#98C96D] text-white hover:bg-[#98C96D]"
+          disabled={isUploading}
         >
           시작하기
         </Button>
