@@ -10,6 +10,7 @@ import { useUploadThing } from '@/lib/uploadthing'
 import { ChevronLeft } from 'lucide-react'
 import Image from 'next/image'
 import { useCallback, useRef, useState } from 'react'
+import { useSignUpComplete } from '@/hooks/useSignUpComplete'
 
 const FLOWER_LIST = [
   '동백꽃',
@@ -40,6 +41,12 @@ export default function ProfilePage() {
       setProfileImageUrl(res[0].ufsUrl)
     },
   })
+  const {
+    isPending: signupPending,
+    check: submit,
+    isError: signupError,
+    message: signupMessage,
+  } = useSignUpComplete(nickname, profileImageUrl)
 
   const toggleBadge = useCallback((flower: string) => {
     setSelected((prev) =>
@@ -158,7 +165,8 @@ export default function ProfilePage() {
           variant="filled"
           size="lg"
           className="w-full cursor-pointer bg-[#98C96D] text-white hover:bg-[#98C96D]"
-          disabled={isUploading}
+          disabled={isUploading || signupPending}
+          onClick={() => submit()}
         >
           시작하기
         </Button>

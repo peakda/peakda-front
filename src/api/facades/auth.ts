@@ -31,7 +31,8 @@ export async function checkNicknameApi(nickname: string) {
 }
 
 export async function completeSignupApi(payload: SignupCompleteRequest) {
-  await completeSignup(payload)
+  const res = await completeSignup(payload)
+  return res
 }
 
 export async function refreshApi() {

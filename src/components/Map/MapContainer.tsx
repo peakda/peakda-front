@@ -46,6 +46,7 @@ export const MapContainer = () => {
     >
       {isReady && (
         <Header
+          className="mt-2"
           left={
             <div className="flex items-center justify-center gap-2">
               <Image
