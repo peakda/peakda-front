@@ -5,9 +5,10 @@ import Button from '@/components/ui/Button'
 import Header from '@/components/ui/Header'
 import InputFiled from '@/components/ui/InputFiled'
 import { useCheckNickname } from '@/hooks/useCheckNickname'
+import { cn } from '@/lib/utils/cn'
 import { ChevronLeft } from 'lucide-react'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
 const FLOWER_LIST = [
   '동백꽃',
@@ -27,9 +28,13 @@ const FLOWER_LIST = [
 
 export default function ProfilePage() {
   const [nickname, setNickname] = useState('')
-
+  const [selected, setSelected] = useState<string[]>([])
   const { isAvailable, isPending, check, isError, message } = useCheckNickname(nickname)
-  console.log(isAvailable)
+  const toggleBadge = useCallback((flower: string) => {
+    setSelected((prev) =>
+      prev.includes(flower) ? prev.filter((f) => f !== flower) : [...prev, flower]
+    )
+  }, [])
   return (
     <div className="relative flex h-screen flex-col">
       <div className="h-14">
@@ -64,6 +69,7 @@ export default function ProfilePage() {
           message="닉네임을 작성해주세요"
           error={message}
           isAvailable={isAvailable}
+          isError={isError}
         />
       </div>
       <div className="flex flex-2 flex-col gap-2 p-4">
@@ -74,15 +80,22 @@ export default function ProfilePage() {
           <p className="text-gray-500">(복수 선택)</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {FLOWER_LIST.map((flower) => (
-            <Badge
-              key={flower}
-              label={flower}
-              variant="ghost"
-              color="gray"
-              className="rounded-xl px-3.5 py-2"
-            />
-          ))}
+          {FLOWER_LIST.map((flower) => {
+            const isSelected = selected.includes(flower)
+            return (
+              <Badge
+                key={flower}
+                label={flower}
+                variant="ghost"
+                color="gray"
+                className={cn(
+                  'cursor-pointer rounded-xl px-3.5 py-2',
+                  isSelected && 'border-brand-secondary text-text-secondary bg-green-50'
+                )}
+                onClick={() => toggleBadge(flower)}
+              />
+            )
+          })}
         </div>
       </div>
       <div className="absolute right-0 bottom-2 left-0 z-10 p-4">

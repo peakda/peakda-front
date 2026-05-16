@@ -18,6 +18,7 @@ interface InputFiledProps {
   disabled?: boolean
   variant?: BorderVariant
   isAvailable?: boolean
+  isError?: boolean
 }
 
 const InputFiled = ({
@@ -35,6 +36,7 @@ const InputFiled = ({
   variant = 'none',
   placeholder,
   isAvailable,
+  isError,
 }: InputFiledProps) => {
   const isMesssage = value && value?.length > 0
 
@@ -60,11 +62,11 @@ const InputFiled = ({
         <div className="relative flex-1">
           <Input
             variant={variant}
-            error={!isAvailable}
+            error={isError}
             value={value}
             onChange={onChange}
             maxLength={maxLength}
-            disabled={disabled}
+            disabled={isAvailable}
             placeholder={placeholder}
           />
           {maxLength && (

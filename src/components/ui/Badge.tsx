@@ -11,6 +11,7 @@ interface Props {
   className?: string
   variant?: Variant
   color?: Color
+  onClick?: () => void
 }
 
 const styles: Record<Variant, Record<Color, string>> = {
@@ -27,7 +28,7 @@ const styles: Record<Variant, Record<Color, string>> = {
     green: 'bg-green-50 text-brand-secondary',
   },
   ghost: {
-    gray: 'text-[#D0D4DB] border border-var(--border-secondary)',
+    gray: 'text-text-quaternary border border-border-secondary hover:text-text-secondary ',
     pink: 'text-pink-500',
     white: 'text-secondary',
     green: 'text-green-600',
@@ -41,11 +42,13 @@ export function Badge({
   className,
   variant = 'soft',
   color = 'gray',
+  onClick,
 }: Props) {
   return (
     <div
+      onClick={onClick}
       className={cn(
-        'inline-flex items-center gap-1 rounded-full px-3 py-1',
+        'inline-flex items-center gap-1 rounded-full px-3 py-1 transition-colors duration-200',
         styles[variant][color],
         className
       )}
