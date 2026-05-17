@@ -9,6 +9,7 @@ import { prefetchInitialTiles } from '@/lib/kakao/tilePrefetch'
 import Nav from '../ui/Nav'
 import LocationBtn from '../ui/LocationBtn'
 import { SearchBar } from '../ui/SearchBar'
+import Category from '../ui/Category'
 
 const DEFAULT_CENTER = {
   lat: 36.5665,
@@ -90,6 +91,9 @@ export const MapContainer = () => {
           <MainMessage />
         </div>
       )}
+
+      <Category />
+
       <SearchBar
         value={search}
         onChange={(e) => setSearch(e.target.value)}
