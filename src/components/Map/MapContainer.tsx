@@ -6,6 +6,8 @@ import MainMessage from '../ui/MainMessage'
 import Header from '../ui/Header'
 import Image from 'next/image'
 import { prefetchInitialTiles } from '@/lib/kakao/tilePrefetch'
+import Nav from '../ui/Nav'
+import LocationBtn from '../ui/LocationBtn'
 
 const DEFAULT_CENTER = {
   lat: 36.5665,
@@ -47,7 +49,7 @@ export const MapContainer = () => {
     <div
       ref={containerRef}
       id="kakao-map"
-      className="py-11"
+      className="relative py-11"
       style={{ width: '100%', height: '100dvh', contain: 'strict' }}
     >
       {isReady && (
@@ -87,6 +89,8 @@ export const MapContainer = () => {
           <MainMessage />
         </div>
       )}
+      <LocationBtn />
+      <Nav activeTab="map" />
     </div>
   )
 }
