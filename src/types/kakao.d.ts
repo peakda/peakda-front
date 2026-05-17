@@ -34,6 +34,7 @@ declare namespace kakao.maps {
     draggable?: boolean
     scrollwheel?: boolean
     disableDoubleClickZoom?: boolean
+    maxLevel?: number
   }
 
   interface MarkerOptions {

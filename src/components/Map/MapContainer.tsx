@@ -13,14 +13,17 @@ const DEFAULT_CENTER = {
 }
 
 const initMap = (container: HTMLElement) => {
-  return new kakao.maps.Map(container, {
+  const map = new kakao.maps.Map(container, {
     center: new kakao.maps.LatLng(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng),
     level: 13,
+    maxLevel: 13,
     draggable: true,
     scrollwheel: true,
     disableDoubleClickZoom: false,
     mapTypeId: kakao.maps.MapTypeId.ROADMAP,
   })
+
+  return map
 }
 
 export const MapContainer = () => {
@@ -28,12 +31,15 @@ export const MapContainer = () => {
   const isReady = useLazyMapLoad(containerRef)
 
   useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/map-tile-sw.js').catch(console.error)
+    }
+  }, [])
+
+  useEffect(() => {
     if (!isReady || !containerRef.current) return
 
-    // 타일 미리 받아오기
     prefetchInitialTiles(DEFAULT_CENTER, 13)
-
-    // 실제 맵 생성
     initMap(containerRef.current)
   }, [isReady])
 
@@ -62,7 +68,7 @@ export const MapContainer = () => {
             </div>
           }
           right={
-            <div className="bg-bg-primary border-border-primary rounded-full p-1">
+            <div className="bg-bg-primary border-border-primary relative rounded-full p-1">
               <Image
                 src={'/icons/alram.svg'}
                 alt="알람"
@@ -70,6 +76,7 @@ export const MapContainer = () => {
                 height={20}
                 className="h-6 w-6"
               />
+              <div className="absolute top-1.5 right-1.5 h-1 w-1 rounded-full bg-pink-500"></div>
             </div>
           }
         />
