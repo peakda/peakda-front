@@ -1,13 +1,14 @@
 'use client'
 
 import { useLazyMapLoad } from '@/hooks/useLazyMapLoad'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import MainMessage from '../ui/MainMessage'
 import Header from '../ui/Header'
 import Image from 'next/image'
 import { prefetchInitialTiles } from '@/lib/kakao/tilePrefetch'
 import Nav from '../ui/Nav'
 import LocationBtn from '../ui/LocationBtn'
+import { SearchBar } from '../ui/SearchBar'
 
 const DEFAULT_CENTER = {
   lat: 36.5665,
@@ -31,7 +32,7 @@ const initMap = (container: HTMLElement) => {
 export const MapContainer = () => {
   const containerRef = useRef<HTMLDivElement>(null)
   const isReady = useLazyMapLoad(containerRef)
-
+  const [search, setSearch] = useState('')
   useEffect(() => {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/map-tile-sw.js').catch(console.error)
@@ -89,6 +90,12 @@ export const MapContainer = () => {
           <MainMessage />
         </div>
       )}
+      <SearchBar
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="지금 피크인 곳을 검색해보세요."
+        description="벚꽃 만개 지역"
+      />
       <LocationBtn />
       <Nav activeTab="map" />
     </div>
