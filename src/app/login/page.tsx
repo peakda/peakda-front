@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import MainMessage from '@/components/ui/MainMessage'
+import MainMessage from '@/components/ui/message/MainMessage'
 import SocialLoginBtns from './_components/SocialLoginBtns'
 
 export const metadata: Metadata = {

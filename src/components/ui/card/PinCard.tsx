@@ -1,6 +1,6 @@
 import React from 'react'
-import Tag from './Tag'
-import PinText from './PinText'
+import Tag from '../display/Tag'
+import PinText from '../display/PinText'
 import { SingleImageProps } from '@/types/types'
 import Image from 'next/image'
 

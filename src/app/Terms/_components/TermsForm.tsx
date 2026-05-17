@@ -1,6 +1,6 @@
 'use client'
 
-import { Checkbox } from '@/components/ui/checkbox'
+import { Checkbox } from '@/components/ui/form/checkbox'
 import { ChevronRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'

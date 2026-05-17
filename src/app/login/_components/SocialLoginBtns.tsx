@@ -1,5 +1,5 @@
 'use client'
-import Button from '@/components/ui/Button'
+import Button from '@/components/ui/button/Button'
 import { handleKakaoLogin } from '@/lib/kakao/kakaoLogin'
 import Image from 'next/image'
 

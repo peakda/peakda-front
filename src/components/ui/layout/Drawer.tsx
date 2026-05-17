@@ -3,7 +3,7 @@
 import { Drawer as VaulDrawer } from 'vaul'
 import { useState } from 'react'
 import { useDrawerStore } from '@/stores/useDrawerStore'
-import Button from './Button'
+import Button from '../button/Button'
 
 export function Drawer() {
   const [activeTab, setActiveTab] = useState<'region' | 'timing' | 'flowers'>('region')

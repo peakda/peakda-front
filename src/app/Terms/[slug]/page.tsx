@@ -1,5 +1,5 @@
-import LeftArrow from '@/components/ui/LeftArrow'
-import Header from '@/components/ui/Header'
+import LeftArrow from '@/components/ui/button/LeftArrow'
+import Header from '@/components/ui/layout/Header'
 
 interface PageProps {
   params: Promise<{ slug: string }>

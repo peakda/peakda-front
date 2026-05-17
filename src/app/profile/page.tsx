@@ -1,9 +1,9 @@
 'use client'
 
-import { Badge } from '@/components/ui/Badge'
-import Button from '@/components/ui/Button'
-import Header from '@/components/ui/Header'
-import InputFiled from '@/components/ui/InputFiled'
+import { Badge } from '@/components/ui/display/Badge'
+import Button from '@/components/ui/button/Button'
+import Header from '@/components/ui/layout/Header'
+import InputFiled from '@/components/ui/form/InputFiled'
 import { useCheckNickname } from '@/hooks/useCheckNickname'
 import { cn } from '@/lib/utils/cn'
 import { useUploadThing } from '@/lib/uploadthing'
