@@ -1,26 +1,368 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@keyframes bounce-smooth {
+  0% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-20px);
+  }
+  60% {
+    transform: translateY(-8px);
+  }
+  80% {
+    transform: translateY(-3px);
+  }
+  100% {
+    transform: translateY(0);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@keyframes drop-in {
+  0% {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(6px);
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(-3px);
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ============================================================
+   PEAKDA Color Primitives → Tailwind utilities
+   bg-gray-50, text-pink-300, border-green-300 등으로 사용
+   ============================================================ */
+@theme {
+  --font-sans: var(--font-pretendard);
+  --font-advent: var(--font-advent-pro);
+  --animate-bounce-smooth: bounce-smooth 0.8s ease-out 1 forwards;
+  --animate-drop-in: drop-in 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 1 forwards;
+  /* gray */
+  --color-gray-0: #ffffff;
+  --color-gray-50: #f8f9fb;
+  --color-gray-100: #f0f2f5;
+  --color-gray-200: #e8eaee;
+  --color-gray-300: #d0d4db;
+  --color-gray-400: #a8b0bc;
+  --color-gray-500: #8c95a4;
+  --color-gray-600: #6a7382;
+  --color-gray-700: #4e5666;
+  --color-gray-800: #363d4a;
+  --color-gray-900: #2c313a;
+  --color-gray-950: #1a1d24;
+
+  /* pink */
+  --color-pink-50: #fff0f2;
+  --color-pink-100: #ffcfd6;
+  --color-pink-200: #ffa8b4;
+  --color-pink-300: #ff7f92;
+  --color-pink-400: #f7576b;
+  --color-pink-500: #ec3248;
+  --color-pink-600: #c41f33;
+  --color-pink-700: #9c1228;
+  --color-pink-800: #72091a;
+  --color-pink-900: #45060f;
+
+  /* green */
+  --color-green-50: #f0f8e8;
+  --color-green-100: #d5ecc0;
+  --color-green-200: #a9d188;
+  --color-green-300: #8dc468;
+  --color-green-400: #68ac40;
+  --color-green-500: #4a8e24;
+  --color-green-600: #386d19;
+  --color-green-700: #285011;
+  --color-green-800: #1a3608;
+  --color-green-900: #0d1d03;
+
+  /* yellow */
+  --color-yellow-50: #fffce8;
+  --color-yellow-100: #fff3b5;
+  --color-yellow-200: #ffe87a;
+  --color-yellow-300: #ffd63a;
+  --color-yellow-400: #f0b800;
+  --color-yellow-500: #d49d00;
+  --color-yellow-600: #a87a00;
+  --color-yellow-700: #7c5a00;
+  --color-yellow-800: #503a00;
+  --color-yellow-900: #2b1f00;
+
+  --color-error: #ef441e;
+
+  /* brand semantic → Tailwind: bg-brand-primary, text-brand-secondary */
+  --color-brand-primary: #ff7f92;
+  --color-brand-secondary: #8dc468;
+  --color-brand-warning: #ef441e;
+
+  /* flower → Tailwind: bg-flower-plum, text-flower-cherry 등 */
+  --color-flower-plum: #ff7f92;
+  --color-flower-forsythia: #ffd63a;
+  --color-flower-azalea: #e82a78;
+  --color-flower-cherry: #ffa8b4;
+  --color-flower-canola: #ffe87a;
+  --color-flower-royal-azalea: #dc3f62;
+  --color-flower-hydrangea: #97caff;
+  --color-flower-lotus: #ffcfd6;
+  --color-flower-cosmos: #f07088;
+  --color-flower-pink-muhly: #d87ba0;
+  --color-flower-pampas-grass: #c2aa8a;
+  --color-flower-autumn-maple: #f0603a;
+  --color-flower-camellia: #c8202a;
+}
+
+/* ============================================================
+   shadcn/ui semantic tokens + PEAKDA Border Radius
+   @theme inline → CSS 변수를 Tailwind utility로 참조
+   ============================================================ */
+@theme inline {
+  --font-heading: var(--font-sans);
+  --font-sans: var(--font-sans);
+
+  /* shadcn color tokens */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-warning: var(--color-brand-warning);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* PEAKDA Semantic: Background */
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-primary-0: var(--bg-primary-0);
+  --color-bg-primary-10: var(--bg-primary-10);
+  --color-bg-primary-80: var(--bg-primary-80);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-secondary-50: var(--bg-secondary-50);
+  --color-bg-secondary-80: var(--bg-secondary-80);
+  --color-bg-tertiary: var(--bg-tertiary);
+  --color-bg-tertiary-70: var(--bg-tertiary-70);
+  --color-bg-quaternary: var(--bg-quaternary);
+  --color-bg-quaternary-2: var(--bg-quaternary-2);
+  --color-bg-quaternary-0: var(--bg-quaternary-0);
+  --color-bg-quaternary-10: var(--bg-quaternary-10);
+  --color-bg-quaternary-50: var(--bg-quaternary-50);
+  --color-bg-quaternary-80: var(--bg-quaternary-80);
+
+  /* PEAKDA Semantic: Text */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-quaternary: var(--text-quaternary);
+  --color-text-primary-inverse: var(--text-primary-inverse);
+
+  /* PEAKDA Semantic: Icon */
+  --color-icon-primary: var(--icon-primary);
+  --color-icon-secondary: var(--icon-secondary);
+  --color-icon-tertiary: var(--icon-tertiary);
+  --color-icon-quaternary: var(--icon-quaternary);
+  --color-icon-primary-inverse: var(--icon-primary-inverse);
+
+  /* PEAKDA Semantic: Border */
+  --color-border-primary: var(--border-primary);
+  --color-border-secondary: var(--border-secondary);
+  --color-border-tertiary: var(--border-tertiary);
+  --color-border-primary-inverse: var(--border-primary-inverse);
+  --color-border-primary-inverse-10: var(--border-primary-inverse-10);
+  --color-border-primary-inverse-70: var(--border-primary-inverse-70);
+
+  /* PEAKDA Border Radius (Figma 토큰 1:1) */
+  --radius-none: 0px;
+  --radius-sm: 2px;
+  --radius: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-2xl: 12px;
+  --radius-3xl: 16px;
+  --radius-4xl: 20px;
+  --radius-5xl: 24px;
+  --radius-6xl: 32px;
+  --radius-7xl: 40px;
+  --radius-8xl: 48px;
+  --radius-full: 9999px;
+}
+
+/* ============================================================
+   :root — shadcn 기본값 + PEAKDA 시맨틱 CSS 변수
+   ============================================================ */
+:root {
+  /* shadcn/ui */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: #ff7f92;
+  --primary-foreground: #f8f9fb;
+  --secondary: #8dc468;
+  --secondary-foreground: #f8f9fb;
+  --muted: #f0f2f5;
+  --muted-foreground: #8c95a4;
+  --accent: #f0f2f5;
+  --accent-foreground: #4e5666;
+  --destructive: #ef441e;
+  --border: #f0f2f5;
+  --input: #f0f2f5;
+  --ring: #ff7f92;
+  --chart-1: #ff7f92;
+  --chart-2: #8dc468;
+  --chart-3: #ffd63a;
+  --chart-4: #97caff;
+  --chart-5: #f0603a;
+  --sidebar: #f8f9fb;
+  --sidebar-foreground: #1a1d24;
+  --sidebar-primary: #ff7f92;
+  --sidebar-primary-foreground: #f8f9fb;
+  --sidebar-accent: #f0f2f5;
+  --sidebar-accent-foreground: #4e5666;
+  --sidebar-border: #f0f2f5;
+  --sidebar-ring: #ff7f92;
+
+  /* ── PEAKDA Semantic: Background ── */
+  --bg-primary: #ffffff;
+  --bg-primary-0: rgba(255, 255, 255, 0);
+  --bg-primary-10: rgba(255, 255, 255, 0.1);
+  --bg-primary-80: rgba(255, 255, 255, 0.6); /* 토큰명 80%, 실제 alpha 0.6 */
+  --bg-secondary: #f8f9fb;
+  --bg-secondary-50: rgba(250, 250, 247, 0.5);
+  --bg-secondary-80: rgba(250, 250, 247, 0.8);
+  --bg-tertiary: #e8eaee;
+  --bg-tertiary-70: rgba(232, 234, 238, 0.7);
+  --bg-quaternary: #d0d4db;
+  --bg-quaternary-2: #a8b0bc;
+  --bg-quaternary-0: rgba(30, 25, 22, 0);
+  --bg-quaternary-10: rgba(30, 25, 22, 0.1);
+  --bg-quaternary-50: rgba(30, 25, 22, 0.5);
+  --bg-quaternary-80: rgba(30, 25, 22, 0.8);
+
+  /* ── PEAKDA Semantic: Text ── */
+  --text-primary: #1a1d24;
+  --text-secondary: #4e5666;
+  --text-tertiary: #8c95a4;
+  --text-quaternary: #a8b0bc;
+  --text-primary-inverse: #f8f9fb;
+
+  /* ── PEAKDA Semantic: Icon ── */
+  --icon-primary: #2c313a;
+  --icon-secondary: #4e5666;
+  --icon-tertiary: #8c95a4;
+  --icon-quaternary: #a8b0bc;
+  --icon-primary-inverse: #f8f9fb;
+
+  /* ── PEAKDA Semantic: Border ── */
+  --border-primary: #f0f2f5;
+  --border-secondary: #d0d4db;
+  --border-tertiary: #a8b0bc;
+  --border-primary-inverse: #363d4a;
+  --border-primary-inverse-10: rgba(54, 48, 40, 0.1);
+  --border-primary-inverse-70: rgba(54, 48, 40, 0.7);
+
+  /* ── PEAKDA Flower Colors (13종 사용) ── */
+  --flower-plum: #ff7f92; /* 매화 */
+  --flower-forsythia: #ffd63a; /* 개나리 */
+  --flower-azalea: #e82a78; /* 진달래 */
+  --flower-cherry: #ffa8b4; /* 벚꽃 */
+  --flower-canola: #ffe87a; /* 유채 */
+  --flower-royal-azalea: #dc3f62; /* 철쭉 */
+  --flower-hydrangea: #97caff; /* 수국 */
+  --flower-lotus: #ffcfd6; /* 연꽃 */
+  --flower-cosmos: #f07088; /* 코스모스 */
+  --flower-pink-muhly: #d87ba0; /* 핑크뮬리 */
+  --flower-pampas-grass: #c2aa8a; /* 억새 */
+  --flower-autumn-maple: #f0603a; /* 단풍 */
+  --flower-camellia: #c8202a; /* 동백 */
+
+  /* ── Effects ── */
+  --blur-default: 8px;
+
+  /* ── Typography ── */
+  --font-family: var(--font-pretendard);
+  --font-family-logo: 'Advent Pro', 'Advent Pro Expanded', sans-serif;
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: #ff7f92;
+  --primary-foreground: #1a1d24;
+  --secondary: #8dc468;
+  --secondary-foreground: #1a1d24;
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: #ef441e;
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: #ff7f92;
+  --chart-1: #ff7f92;
+  --chart-2: #8dc468;
+  --chart-3: #ffd63a;
+  --chart-4: #97caff;
+  --chart-5: #f0603a;
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: #ff7f92;
+  --sidebar-primary-foreground: #1a1d24;
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: #ff7f92;
+  --border-primary: #f0f2f5;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-family);
+  }
+  html {
+    @apply font-sans;
+  }
 }
