@@ -18,7 +18,7 @@ export default function PinCard({
       {/* 상단 이미지 영역 */}
       <div className="relative h-48 bg-gray-200">
         {imageUrl && (
-          <Image src={imageUrl} alt={title} className="aspect-video h-full w-full object-cover" />
+          <Image src={imageUrl} alt={title} fill sizes="(max-width: 430px) 100vw, 430px" className="object-cover" />
         )}
 
         {/* 우측 상단 품절/상태 배지 */}

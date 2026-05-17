@@ -9,5 +9,6 @@ export const customInstance = async <T>(url: string, options?: RequestInit): Pro
     throw { response: { status: res.status, data: await res.json() } };
   }
 
-  return res.json() as T;
+  const data = await res.json();
+  return { data, status: res.status, headers: res.headers } as T;
 };

@@ -5,7 +5,6 @@ import { type BorderVariant } from './Input'
 const borderVariantClass: Record<BorderVariant, string> = {
   none: 'border-[var(--border-primary)]',
   secondary: 'border-[var(--colors-secondary)]',
-  'border-secondary': 'border-secondary',
   warning: 'border-[var(--color-brand-warning)]',
 }
 
