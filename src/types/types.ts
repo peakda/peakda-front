@@ -7,7 +7,7 @@ export interface CardProps {
   className?: string
 }
 
-export interface stepProps {
+export interface StepProps {
   title: string
   description: string
   image: string

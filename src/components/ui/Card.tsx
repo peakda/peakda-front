@@ -19,7 +19,7 @@ export default function Card({
       onClick={onClick}
       onKeyDown={(e) => e.key === 'Enter' && onClick?.()}
       className={cn(
-        'rounded-xl bg-[#F8F9FB] transition-colors',
+        'bg-bg-secondary rounded-xl transition-colors',
         isBig
           ? 'flex h-[67px] w-full items-center gap-1 px-2 py-3.5'
           : 'flex h-[84px] flex-col items-center gap-0.5 px-3 py-3.5 text-center',
@@ -57,7 +57,7 @@ export default function Card({
         </p>
         <p
           className={cn(
-            'text-muted-foreground truncate font-normal text-gray-500',
+            'text-muted-foreground truncate font-normal text-[#888888]',
             isBig ? 'text-[12px]' : 'text-[10px]'
           )}
         >

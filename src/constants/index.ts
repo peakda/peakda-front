@@ -1,6 +1,6 @@
-import { stepProps } from '@/types/types'
+import { StepProps } from '@/types/types'
 
-export const STEPS: stepProps[] = [
+export const STEPS: StepProps[] = [
   {
     title: '지금 가면 가장 예쁜 곳 ',
     description: '만개 3일을 놓치지 않도록\n 지금 딱 좋은 계절 명소를 알려드릴게요',

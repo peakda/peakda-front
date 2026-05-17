@@ -1,6 +1,7 @@
 import React from 'react'
 import { Asterisk } from 'lucide-react'
 import Input, { type BorderVariant } from './Input'
+import { cn } from '@/lib/utils/cn'
 
 interface InputFiledProps {
   title?: string
@@ -16,6 +17,8 @@ interface InputFiledProps {
   error?: string
   disabled?: boolean
   variant?: BorderVariant
+  isAvailable?: boolean
+  isError?: boolean
 }
 
 const InputFiled = ({
@@ -27,12 +30,15 @@ const InputFiled = ({
   maxLength,
   message,
   error,
-  disabled = false,
   value,
   onChange,
-  variant = 'secondary',
+  variant = 'none',
   placeholder,
+  isAvailable,
+  isError,
 }: InputFiledProps) => {
+  const isMesssage = value && value?.length > 0
+
   return (
     <div className="flex w-full flex-col gap-1">
       {(title || description) && (
@@ -55,11 +61,11 @@ const InputFiled = ({
         <div className="relative flex-1">
           <Input
             variant={variant}
-            error={!!error}
+            error={isError}
             value={value}
             onChange={onChange}
             maxLength={maxLength}
-            disabled={disabled}
+            disabled={isAvailable}
             placeholder={placeholder}
           />
           {maxLength && (
@@ -73,15 +79,18 @@ const InputFiled = ({
           <button
             onClick={onButtonClick}
             disabled={!value || value.length < 1}
-            className="h-12 cursor-pointer rounded-3xl bg-[#96CE71] px-4 py-2 text-[15px] font-medium whitespace-nowrap text-white transition-colors hover:bg-[#85ba63] disabled:cursor-not-allowed disabled:bg-[#d0d4db]"
+            className={cn(
+              'h-12 cursor-pointer rounded-3xl bg-[#96CE71] px-4 py-2 text-[15px] font-medium whitespace-nowrap text-white transition-colors hover:bg-[#85ba63] disabled:cursor-not-allowed disabled:bg-[#d0d4db]',
+              isAvailable ? 'invisible' : 'visible'
+            )}
           >
             {buttonText}
           </button>
         )}
       </div>
 
-      {error && <p className="text-sm text-rose-500">{error}</p>}
-      {!error && message && <p className="text-sm text-[#4E5666]">{message}</p>}
+      {error && !isAvailable && <p className="text-sm text-rose-500">{error}</p>}
+      {!error && message && isMesssage && <p className="text-sm text-[#4E5666]">{message}</p>}
     </div>
   )
 }

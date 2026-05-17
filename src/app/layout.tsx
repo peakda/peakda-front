@@ -1,6 +1,15 @@
 import type { Metadata } from 'next'
 import { Advent_Pro } from 'next/font/google'
+import localFont from 'next/font/local'
 import './globals.css'
+import { Providers } from '@/app/_components/Providers'
+
+const pretendard = localFont({
+  src: './fonts/PretendardVariable.woff2',
+  variable: '--font-pretendard',
+  display: 'swap',
+  weight: '45 920',
+})
 
 const adventPro = Advent_Pro({
   subsets: ['latin'],
@@ -19,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="ko" className={adventPro.variable}>
+    <html lang="ko" className={`${pretendard.variable} ${adventPro.variable}`}>
       <head>
         {/* DNS 미리 해석 */}
         <link rel="dns-prefetch" href="//dapi.kakao.com" />
@@ -35,7 +44,9 @@ export default function RootLayout({
       </head>
       <body vaul-drawer-wrapper="" className="bg-gray-100" suppressHydrationWarning>
         <div className="relative mx-auto flex min-h-dvh w-full flex-col overflow-hidden bg-[#FFFFFF] sm:max-w-107.5">
-          <main className="flex flex-1 flex-col">{children}</main>
+          <Providers>
+            <main className="flex flex-1 flex-col">{children}</main>
+          </Providers>
         </div>
       </body>
     </html>

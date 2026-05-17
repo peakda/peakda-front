@@ -5,28 +5,50 @@ import { ChevronRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-export function TermsForm() {
+interface TermsFormProps {
+  onRequiredChange: (allRequiredChecked: boolean) => void
+}
+
+export function TermsForm({ onRequiredChange }: TermsFormProps) {
   const router = useRouter()
   const [items, setItems] = useState([
-    { id: 'age', label: '[필수] 이용약관 동의', checked: false, slug: 'terms-of-service' },
-    { id: 'service', label: '[필수] 개인정보 동의', checked: false, slug: 'privacy-policy' },
+    {
+      id: 'age',
+      label: '[필수] 이용약관 동의',
+      checked: false,
+      required: true,
+      slug: 'terms-of-service',
+    },
+    {
+      id: 'service',
+      label: '[필수] 개인정보 동의',
+      checked: false,
+      required: true,
+      slug: 'privacy-policy',
+    },
     {
       id: 'privacy',
       label: '[선택] 마케팅푸시 동의',
       checked: false,
+      required: false,
       slug: 'marketing-push-consent',
     },
   ])
 
+  const updateItems = (next: typeof items) => {
+    setItems(next)
+    onRequiredChange(next.filter((i) => i.required).every((i) => i.checked))
+  }
+
   // 전체 동의 핸들러
   const allChecked = items.every((item) => item.checked)
   const handleAllCheck = (checked: boolean) => {
-    setItems(items.map((item) => ({ ...item, checked })))
+    updateItems(items.map((item) => ({ ...item, checked })))
   }
 
   // 개별 항목 핸들러
   const handleSingleCheck = (id: string, checked: boolean) => {
-    setItems(items.map((item) => (item.id === id ? { ...item, checked } : item)))
+    updateItems(items.map((item) => (item.id === id ? { ...item, checked } : item)))
   }
 
   return (
@@ -53,12 +75,13 @@ export function TermsForm() {
             onCheckedChange={(checked: boolean) => handleSingleCheck(item.id, checked)}
             className="rounded-md"
           />
-          <label htmlFor={item.id} className="cursor-pointer text-base">
+          <label htmlFor={item.id} className="text-text-primary cursor-pointer text-base">
             {item.label}
           </label>
           <ChevronRight
             onClick={() => router.push(`/Terms/${item.slug}`)}
-            className="ml-auto cursor-pointer text-gray-500 transition-colors duration-200 hover:text-gray-600"
+            strokeWidth={1.2}
+            className="text-icon-secondary ml-auto cursor-pointer transition-colors duration-200 hover:text-gray-600"
           />
         </div>
       ))}

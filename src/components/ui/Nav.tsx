@@ -6,10 +6,10 @@ interface NavProps {
 }
 
 export default function Nav({ activeTab }: NavProps) {
-  const itemClass = 'flex cursor-pointer flex-col items-center justify-center'
+  const itemClass = 'flex cursor-pointer flex-col items-center gap-1 justify-center'
 
   return (
-    <div className="border-border shadow-background h-24 w-full min-w-[375px] border bg-white px-4 py-2">
+    <div className="border-border shadow-background fixed bottom-0 z-10 h-20 w-full min-w-[375px] border bg-white px-4 py-2">
       <div className="flex justify-around text-sm">
         {/* 지도 */}
         <div className={itemClass}>
@@ -55,7 +55,7 @@ export default function Nav({ activeTab }: NavProps) {
         {/* My */}
         <div className={itemClass}>
           <div
-            className={`rounded-full bg-gray-200 p-0.5 ${activeTab === 'my' ? 'opacity-100' : 'opacity-50'}`}
+            className={`rounded-full bg-gray-200 p-1 ${activeTab === 'my' ? 'opacity-100' : 'opacity-50'}`}
           >
             <Image src={'./icons/my.svg'} alt="My" width={18} height={18} />
           </div>

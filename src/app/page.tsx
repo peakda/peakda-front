@@ -1,9 +1,5 @@
-import MainMessage from '@/components/ui/MainMessage'
+import SplashScreen from '@/app/_components/SplashScreen'
 
 export default function Home() {
-  return (
-    <div className="flex min-h-screen flex-col items-center justify-center py-11">
-      <MainMessage />
-    </div>
-  )
+  return <SplashScreen />
 }
