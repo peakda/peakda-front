@@ -30,7 +30,6 @@ const InputFiled = ({
   maxLength,
   message,
   error,
-  disabled = false,
   value,
   onChange,
   variant = 'none',

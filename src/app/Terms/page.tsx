@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation'
 export default function TermsPage() {
   const router = useRouter()
   const [canSubmit, setCanSubmit] = useState(false)
-  console.log(canSubmit)
+
   return (
     <>
       <div className="relative flex h-dvh w-full flex-col py-11">

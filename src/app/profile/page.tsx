@@ -41,12 +41,7 @@ export default function ProfilePage() {
       setProfileImageUrl(res[0].ufsUrl)
     },
   })
-  const {
-    isPending: signupPending,
-    check: submit,
-    isError: signupError,
-    message: signupMessage,
-  } = useSignUpComplete(nickname, profileImageUrl)
+  const { isPending: signupPending, check: submit } = useSignUpComplete(nickname, profileImageUrl)
 
   const toggleBadge = useCallback((flower: string) => {
     setSelected((prev) =>
