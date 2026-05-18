@@ -15,7 +15,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const BASE =
-  'inline-flex items-center justify-center gap-1.5 font-medium rounded-2xl transition-colors duration-150 cursor-pointer disabled:cursor-not-allowed select-none'
+  'inline-flex items-center justify-center gap-1.5 font-medium rounded-3xl transition-colors duration-150 cursor-pointer disabled:cursor-not-allowed select-none'
 
 const SIZE: Record<ButtonSize, string> = {
   lg: 'h-12 px-6 text-[15px] font-medium w-full',

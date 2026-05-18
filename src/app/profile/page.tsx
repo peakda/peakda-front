@@ -57,7 +57,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="relative flex h-screen flex-col">
+    <div className="relative flex min-h-screen flex-col pb-12">
       <div className="h-14">
         <Header
           left={<LeftArrow />}
@@ -129,7 +129,7 @@ export default function ProfilePage() {
           isError={isError}
         />
       </div>
-      <div className="flex flex-2 flex-col gap-2 p-4">
+      <div className="flex flex-1 flex-col gap-2 p-4">
         <div className="flex items-center gap-1">
           <h3 className="text-[16px] font-semibold tracking-tight text-gray-700">
             어떤 꽃·자연이 좋으세요?
@@ -155,7 +155,7 @@ export default function ProfilePage() {
           })}
         </div>
       </div>
-      <div className="absolute right-0 bottom-2 left-0 z-10 p-4">
+      <div className="fixed right-0 bottom-2 left-0 z-10 mx-auto max-w-107.5 px-4">
         <Button
           variant="filled"
           size="lg"
@@ -163,7 +163,7 @@ export default function ProfilePage() {
           disabled={isUploading || signupPending}
           onClick={() => submit()}
         >
-          시작하기
+          PEAKDA 시작하기
         </Button>
       </div>
     </div>

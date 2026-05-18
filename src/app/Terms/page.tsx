@@ -41,7 +41,7 @@ export default function TermsPage() {
             onClick={() => router.push('/profile')}
             className="bg-brand-secondary hover:bg-brand-secondary active:bg-brand-secondary w-full cursor-pointer text-white disabled:cursor-not-allowed"
           >
-            시작하기
+            동의하고 계속하기
           </Button>
         </div>
       </div>
