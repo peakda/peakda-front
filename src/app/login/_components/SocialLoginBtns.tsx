@@ -9,27 +9,27 @@ export default function SocialLoginBtns() {
       <Button
         size="lg"
         variant="filled"
-        className="bg-[#000000] text-white hover:bg-[#000000]"
-        leftIcon={<Image src="/images/Apple.png" alt="애플 로고" width={20} height={20} />}
+        className="rounded-3xl bg-[#000000] text-white hover:bg-[#000000]"
+        leftIcon={<Image src="/images/Apple.png" alt="애플 로고" width={28} height={28} />}
       >
-        애플 로그인
+        애플로 시작하기
       </Button>
       <Button
         onClick={handleKakaoLogin}
         size="lg"
-        className="bg-[#FEE500] text-black hover:bg-[#FEE500]"
+        className="rounded-3xl bg-[#FEE500] text-black hover:bg-[#FEE500]"
         variant="filled"
-        leftIcon={<Image src="/images/Kakao.png" alt="애플 로고" width={20} height={20} />}
+        leftIcon={<Image src="/images/Kakao.png" alt="애플 로고" width={24} height={24} />}
       >
-        카카오 로그인
+        카카오로 시작하기
       </Button>
       <Button
         size="lg"
-        className="bg-[#03A94D] text-white hover:bg-[#03A94D]"
+        className="rounded-3xl bg-[#03A94D] text-white hover:bg-[#03A94D]"
         variant="filled"
-        leftIcon={<Image src="/images/Naver.png" alt="애플 로고" width={20} height={20} />}
+        leftIcon={<Image src="/images/Naver.png" alt="애플 로고" width={24} height={24} />}
       >
-        네이버 로그인
+        네이버로 시작하기
       </Button>
     </div>
   )

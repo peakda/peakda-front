@@ -7,10 +7,10 @@ import InputFiled from '@/components/ui/form/InputFiled'
 import { useCheckNickname } from '@/hooks/useCheckNickname'
 import { cn } from '@/lib/utils/cn'
 import { useUploadThing } from '@/lib/uploadthing'
-import { ChevronLeft } from 'lucide-react'
 import Image from 'next/image'
 import { useCallback, useRef, useState } from 'react'
 import { useSignUpComplete } from '@/hooks/useSignUpComplete'
+import LeftArrow from '@/components/ui/button/LeftArrow'
 
 const FLOWER_LIST = [
   '동백꽃',
@@ -60,7 +60,7 @@ export default function ProfilePage() {
     <div className="relative flex h-screen flex-col">
       <div className="h-14">
         <Header
-          left={<ChevronLeft className="cursor-pointer" />}
+          left={<LeftArrow />}
           center={<div className="text-[15px] font-medium text-[#000000]">프로필 설정</div>}
         />
       </div>
