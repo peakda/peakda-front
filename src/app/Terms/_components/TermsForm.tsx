@@ -1,6 +1,6 @@
 'use client'
 
-import { Checkbox } from '@/components/ui/checkbox'
+import { Checkbox } from '@/components/ui/form/checkbox'
 import { ChevronRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -81,7 +81,7 @@ export function TermsForm({ onRequiredChange }: TermsFormProps) {
           <ChevronRight
             onClick={() => router.push(`/Terms/${item.slug}`)}
             strokeWidth={1.2}
-            className="text-icon-secondary ml-auto cursor-pointer transition-colors duration-200 hover:text-gray-600"
+            className="text-icon-secondary ml-auto h-6 w-6 cursor-pointer transition-colors duration-200 hover:text-gray-600"
           />
         </div>
       ))}

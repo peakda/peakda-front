@@ -1,9 +1,9 @@
 'use client'
-import Header from '@/components/ui/Header'
-import { Drawer } from '@/components/ui/Drawer'
-import Button from '@/components/ui/Button'
+import Header from '@/components/ui/layout/Header'
+import { Drawer } from '@/components/ui/layout/Drawer'
+import Button from '@/components/ui/button/Button'
 import { TermsForm } from './_components/TermsForm'
-import LeftArrow from '@/components/ui/LeftArrow'
+import LeftArrow from '@/components/ui/button/LeftArrow'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
@@ -41,7 +41,7 @@ export default function TermsPage() {
             onClick={() => router.push('/profile')}
             className="bg-brand-secondary hover:bg-brand-secondary active:bg-brand-secondary w-full cursor-pointer text-white disabled:cursor-not-allowed"
           >
-            시작하기
+            동의하고 계속하기
           </Button>
         </div>
       </div>

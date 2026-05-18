@@ -18,8 +18,23 @@ const adventPro = Advent_Pro({
 })
 
 export const metadata: Metadata = {
-  title: 'Peakda',
-  description: '계절 여행 타이밍 안내 서비스',
+  title: {
+    default: 'Peakda | 계절 여행 타이밍',
+    template: 'Peakda | %s',
+  },
+  description: '벚꽃·단풍 등 20여 개 계절 명소의 실시간 개화 상태를 확인하세요.',
+  keywords: ['벚꽃', '단풍', '꽃구경', '계절여행', '개화시기', '피크다'],
+  icons: {
+    icon: '/icons/favicon.svg',
+    shortcut: '/icons/favicon.svg',
+    apple: '/icons/favicon.svg',
+  },
+  openGraph: {
+    title: 'Peakda | 계절 여행 타이밍',
+    description: '벚꽃·단풍 등 20여 개 계절 명소의 실시간 개화 상태를 확인하세요.',
+    locale: 'ko_KR',
+    type: 'website',
+  },
 }
 
 export default function RootLayout({

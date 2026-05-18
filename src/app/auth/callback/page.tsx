@@ -1,7 +1,7 @@
 'use client'
 
 import { useCurrentUser } from '@/api/facades/auth'
-import MainMessage from '@/components/ui/MainMessage'
+import MainMessage from '@/components/ui/message/MainMessage'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 

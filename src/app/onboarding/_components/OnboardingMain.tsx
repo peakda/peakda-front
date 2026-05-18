@@ -1,5 +1,5 @@
-import Card from '@/components/ui/Card'
-import OnboardingMessage from '@/components/ui/OnboardingMessage'
+import Card from '@/components/ui/card/Card'
+import OnboardingMessage from '@/components/ui/message/OnboardingMessage'
 import { cn } from '@/lib/utils/cn'
 import { StepProps } from '@/types/types'
 

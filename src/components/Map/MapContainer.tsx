@@ -2,14 +2,14 @@
 
 import { useLazyMapLoad } from '@/hooks/useLazyMapLoad'
 import { useEffect, useRef, useState } from 'react'
-import MainMessage from '../ui/MainMessage'
-import Header from '../ui/Header'
+import MainMessage from '../ui/message/MainMessage'
+import Header from '../ui/layout/Header'
 import Image from 'next/image'
 import { prefetchInitialTiles } from '@/lib/kakao/tilePrefetch'
-import Nav from '../ui/Nav'
-import LocationBtn from '../ui/LocationBtn'
-import { SearchBar } from '../ui/SearchBar'
-import Category from '../ui/Category'
+import Nav from '../ui/layout/Nav'
+import LocationBtn from '../ui/button/LocationBtn'
+import { SearchBar } from '../ui/form/SearchBar'
+import Category from '../ui/category/Category'
 
 const DEFAULT_CENTER = {
   lat: 36.5665,
