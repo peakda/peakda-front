@@ -1,7 +1,7 @@
 'use client'
 
-import Button from '@/components/ui/Button'
-import Header from '@/components/ui/Header'
+import Button from '@/components/ui/button/Button'
+import Header from '@/components/ui/layout/Header'
 import { useCarousel } from '@/hooks/useEmblaCarousel'
 import type { StepProps } from '@/types/types'
 import { useRouter } from 'next/navigation'

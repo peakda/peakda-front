@@ -1,22 +1,21 @@
-import fs from "fs";
+import fs from 'fs'
 
-const SKIP_PATHS = [];
+const SKIP_PATHS = []
 
-const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
-const res = await fetch(`${baseUrl}/v3/api-docs`);
+const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080'
+const res = await fetch(`${baseUrl}/v3/api-docs`)
 
 if (!res.ok) {
-  console.error(`Failed to fetch swagger: ${res.status} ${res.statusText}`);
-  process.exit(1);
+  console.error(`Failed to fetch swagger: ${res.status} ${res.statusText}`)
+  process.exit(1)
 }
 
-const spec = await res.json();
+const spec = await res.json()
 
 for (const path of Object.keys(spec.paths ?? {})) {
   if (SKIP_PATHS.some((s) => path.includes(s))) {
-    delete spec.paths[path];
+    delete spec.paths[path]
   }
 }
 
-fs.writeFileSync("./swagger.json", JSON.stringify(spec, null, 2));
-console.log(`✓ swagger.json saved from ${baseUrl}/v3/api-docs`);
+fs.writeFileSync('./swagger.json', JSON.stringify(spec, null, 2))

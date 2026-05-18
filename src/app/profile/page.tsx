@@ -1,16 +1,16 @@
 'use client'
 
-import { Badge } from '@/components/ui/Badge'
-import Button from '@/components/ui/Button'
-import Header from '@/components/ui/Header'
-import InputFiled from '@/components/ui/InputFiled'
+import { Badge } from '@/components/ui/display/Badge'
+import Button from '@/components/ui/button/Button'
+import Header from '@/components/ui/layout/Header'
+import InputFiled from '@/components/ui/form/InputFiled'
 import { useCheckNickname } from '@/hooks/useCheckNickname'
 import { cn } from '@/lib/utils/cn'
 import { useUploadThing } from '@/lib/uploadthing'
-import { ChevronLeft } from 'lucide-react'
 import Image from 'next/image'
 import { useCallback, useRef, useState } from 'react'
 import { useSignUpComplete } from '@/hooks/useSignUpComplete'
+import LeftArrow from '@/components/ui/button/LeftArrow'
 
 const FLOWER_LIST = [
   '동백꽃',
@@ -57,10 +57,10 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="relative flex h-screen flex-col">
+    <div className="relative flex min-h-screen flex-col pb-12">
       <div className="h-14">
         <Header
-          left={<ChevronLeft className="cursor-pointer" />}
+          left={<LeftArrow />}
           center={<div className="text-[15px] font-medium text-[#000000]">프로필 설정</div>}
         />
       </div>
@@ -129,7 +129,7 @@ export default function ProfilePage() {
           isError={isError}
         />
       </div>
-      <div className="flex flex-2 flex-col gap-2 p-4">
+      <div className="flex flex-1 flex-col gap-2 p-4">
         <div className="flex items-center gap-1">
           <h3 className="text-[16px] font-semibold tracking-tight text-gray-700">
             어떤 꽃·자연이 좋으세요?
@@ -155,7 +155,7 @@ export default function ProfilePage() {
           })}
         </div>
       </div>
-      <div className="absolute right-0 bottom-2 left-0 z-10 p-4">
+      <div className="fixed right-0 bottom-2 left-0 z-10 mx-auto max-w-107.5 px-4">
         <Button
           variant="filled"
           size="lg"
@@ -163,7 +163,7 @@ export default function ProfilePage() {
           disabled={isUploading || signupPending}
           onClick={() => submit()}
         >
-          시작하기
+          PEAKDA 시작하기
         </Button>
       </div>
     </div>

@@ -1,9 +1,9 @@
 import Image from 'next/image'
-import HeartBtn from './HeartBtn'
+import HeartBtn from '../button/HeartBtn'
 import { Badge } from './Badge'
 import Tag from './Tag'
 import { X } from 'lucide-react'
-import IconBtn from './IconBtn'
+import IconBtn from '../button/IconBtn'
 
 interface PinTextProps {
   title: string
