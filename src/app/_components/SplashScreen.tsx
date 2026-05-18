@@ -1,6 +1,7 @@
 'use client'
 
 import { Alarm } from '@/components/ui/display/Alarm'
+import { Stepper } from '@/components/ui/display/Stepper'
 import MainMessage from '@/components/ui/message/MainMessage'
 import { cn } from '@/lib/utils/cn'
 import { useRouter } from 'next/navigation'
@@ -44,6 +45,7 @@ export default function SplashScreen() {
           timestamp: '방금 전',
         }}
       />
+      <Stepper currentStep={2} steps={5} />
     </div>
   )
 }
