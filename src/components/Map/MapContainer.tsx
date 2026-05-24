@@ -11,6 +11,7 @@ import LocationBtn from '../ui/button/LocationBtn'
 import { SearchBar } from '../ui/form/SearchBar'
 import Category from '../ui/category/Category'
 import { toast } from 'sonner'
+import { useMapPins, type MapSpot } from '@/hooks/useMapPins'
 
 const DEFAULT_CENTER = {
   lat: 37.5662,
@@ -33,11 +34,27 @@ const initMap = (container: HTMLElement) => {
   return map
 }
 
+const TEST_SPOTS: MapSpot[] = [
+  {
+    lat: 37.5662,
+    lng: 126.9785,
+    maxStage: 'Peak',
+    flowers: [
+      { src: '/flowers/벚꽃.svg', alt: '벚꽃' },
+      { src: '/flowers/매화.svg', alt: '매화' },
+      { src: '/flowers/진달래.svg', alt: '진달래' },
+    ],
+  },
+]
+
 export const MapContainer = () => {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<kakao.maps.Map | null>(null)
+  const [mapInstance, setMapInstance] = useState<kakao.maps.Map | null>(null)
   const { isReady, error, retry } = useLazyMapLoad(containerRef)
   const [search, setSearch] = useState('')
+
+  useMapPins(mapInstance, TEST_SPOTS)
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
@@ -83,6 +100,7 @@ export const MapContainer = () => {
 
     prefetchInitialTiles(DEFAULT_CENTER, 13)
     mapRef.current = initMap(containerRef.current)
+    setMapInstance(mapRef.current)
 
     navigator.geolocation.getCurrentPosition(
       ({ coords }) => {

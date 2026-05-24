@@ -20,6 +20,16 @@ declare namespace kakao.maps {
     getPosition(): LatLng
   }
 
+  class CustomOverlay {
+    constructor(options: CustomOverlayOptions)
+    setMap(map: Map | null): void
+    setPosition(latlng: LatLng): void
+    getPosition(): LatLng
+    setContent(content: string | HTMLElement): void
+    setVisible(visible: boolean): void
+    setZIndex(zIndex: number): void
+  }
+
   function load(callback: () => void): void
 
   enum MapTypeId {
@@ -41,6 +51,16 @@ declare namespace kakao.maps {
   interface MarkerOptions {
     map?: Map
     position: LatLng
+  }
+
+  interface CustomOverlayOptions {
+    position: LatLng
+    content: string | HTMLElement
+    map?: Map
+    xAnchor?: number
+    yAnchor?: number
+    zIndex?: number
+    clickable?: boolean
   }
 }
 
