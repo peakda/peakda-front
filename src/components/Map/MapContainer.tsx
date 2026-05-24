@@ -1,7 +1,7 @@
 'use client'
 
 import { useLazyMapLoad } from '@/hooks/useLazyMapLoad'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import MainMessage from '../ui/message/MainMessage'
 import Header from '../ui/layout/Header'
 import Image from 'next/image'
@@ -10,11 +10,14 @@ import Nav from '../ui/layout/Nav'
 import LocationBtn from '../ui/button/LocationBtn'
 import { SearchBar } from '../ui/form/SearchBar'
 import Category from '../ui/category/Category'
+import { toast } from 'sonner'
 
 const DEFAULT_CENTER = {
-  lat: 36.5665,
-  lng: 127.978,
+  lat: 37.5662,
+  lng: 126.9785,
 }
+
+const NETWORK_TOAST_ID = 'map-network-error'
 
 const initMap = (container: HTMLElement) => {
   const map = new kakao.maps.Map(container, {
@@ -32,8 +35,10 @@ const initMap = (container: HTMLElement) => {
 
 export const MapContainer = () => {
   const containerRef = useRef<HTMLDivElement>(null)
-  const isReady = useLazyMapLoad(containerRef)
+  const mapRef = useRef<kakao.maps.Map | null>(null)
+  const { isReady, error, retry } = useLazyMapLoad(containerRef)
   const [search, setSearch] = useState('')
+
   useEffect(() => {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/map-tile-sw.js').catch(console.error)
@@ -41,10 +46,52 @@ export const MapContainer = () => {
   }, [])
 
   useEffect(() => {
-    if (!isReady || !containerRef.current) return
+    if (!error) return
+    toast.error('지도를 불러오지 못했습니다.', {
+      id: NETWORK_TOAST_ID,
+      description: '네트워크 연결을 확인해주세요.',
+      action: {
+        label: '재시도',
+        onClick: retry,
+      },
+      duration: Infinity,
+    })
+  }, [error, retry])
+
+  useEffect(() => {
+    if (!isReady) return
+    toast.dismiss(NETWORK_TOAST_ID)
+  }, [isReady])
+
+  const handleLocate = useCallback(() => {
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        mapRef.current?.panTo(new kakao.maps.LatLng(coords.latitude, coords.longitude))
+      },
+      (err) => {
+        if (err.code === err.PERMISSION_DENIED) {
+          toast.error('위치 권한이 필요합니다.', {
+            description: '브라우저 설정에서 위치 권한을 허용해주세요.',
+          })
+        }
+      }
+    )
+  }, [])
+
+  useEffect(() => {
+    if (!isReady || !containerRef.current || mapRef.current) return
 
     prefetchInitialTiles(DEFAULT_CENTER, 13)
-    initMap(containerRef.current)
+    mapRef.current = initMap(containerRef.current)
+
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        mapRef.current?.panTo(new kakao.maps.LatLng(coords.latitude, coords.longitude))
+      },
+      () => {
+        // 권한 거부 또는 위치 오류 시 서울 시청(DEFAULT_CENTER) 유지
+      }
+    )
   }, [isReady])
 
   return (
@@ -100,7 +147,7 @@ export const MapContainer = () => {
         placeholder="지금 피크인 곳을 검색해보세요."
         description="벚꽃 만개 지역"
       />
-      <LocationBtn />
+      <LocationBtn onLocate={handleLocate} />
       <Nav activeTab="map" />
     </div>
   )

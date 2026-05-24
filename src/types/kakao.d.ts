@@ -2,6 +2,7 @@ declare namespace kakao.maps {
   class Map {
     constructor(container: HTMLElement, options: MapOptions)
     setCenter(latlng: LatLng): void
+    panTo(latlng: LatLng): void
     getCenter(): LatLng
     setLevel(level: number): void
     getLevel(): number
