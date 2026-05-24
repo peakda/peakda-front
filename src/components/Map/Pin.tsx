@@ -34,8 +34,7 @@ export function Pin({ flowers, maxStage }: PinProps) {
   const badgeLabel = flowers.length > 99 ? '+99' : `+${flowers.length}`
 
   return (
-    <div className="relative inline-block">
-      {/* pill */}
+    <div className="inline-flex flex-col items-center">
       <div
         className={cn(
           'relative z-10 flex items-center gap-1 rounded-full border bg-white p-1.5 shadow-sm',
@@ -57,7 +56,7 @@ export function Pin({ flowers, maxStage }: PinProps) {
         ))}
         {showBadge && (
           <div
-            className="flex items-center justify-center rounded-full px-1 py-0.5   text-[11px] font-semibold text-white"
+            className="flex items-center justify-center rounded-full px-1 py-0.5 text-[11px] font-semibold text-white"
             style={{ backgroundColor: borderColor }}
           >
             {badgeLabel}
@@ -65,20 +64,10 @@ export function Pin({ flowers, maxStage }: PinProps) {
         )}
       </div>
 
-      {/* tail: SVG triangle centered below pill, overlaps 2px to hide junction */}
-      <div className="absolute -bottom-2 left-1/2 z-10 -mt-[2px] -translate-x-1/2">
-        <svg width="10" height="10" viewBox="0 0 14 9" fill={borderColor}>
-          <polygon points="0,0 14,0 7,9" fill={borderColor} />
-          <polyline
-            points="0,0 7,9 14,0"
-            fill="none"
-            stroke={borderColor}
-            strokeWidth="2"
-            strokeLinecap="butt"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </div>
+      {/* tail: 1px 오버랩으로 pill 경계 숨김, normal flow이므로 container 높이에 포함 */}
+      <svg className="-mt-px" width="10" height="8" viewBox="0 0 14 9">
+        <polygon points="0,0 14,0 7,9" fill={borderColor} />
+      </svg>
     </div>
   )
 }

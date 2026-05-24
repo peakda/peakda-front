@@ -4,7 +4,7 @@ declare namespace kakao.maps {
     setCenter(latlng: LatLng): void
     panTo(latlng: LatLng): void
     getCenter(): LatLng
-    setLevel(level: number): void
+    setLevel(level: number, options?: { anchor?: LatLng; animate?: boolean }): void
     getLevel(): number
   }
 
@@ -31,6 +31,11 @@ declare namespace kakao.maps {
   }
 
   function load(callback: () => void): void
+
+  namespace event {
+    function addListener(target: object, type: string, handler: () => void): void
+    function removeListener(target: object, type: string, handler: () => void): void
+  }
 
   enum MapTypeId {
     ROADMAP = 1,

@@ -100,3 +100,8 @@
 | 외부 API        | Route Handler 프록시 경유 필수 (키 노출 방지)             |
 | 카카오맵        | `dynamic import + ssr: false` 필수                        |
 | 로그            | `console.log` 금지, `console.error`·`console.warn`만 허용 |
+
+### 하지말 것
+
+생각의 시간이 길어지면(60초) 다른 생각으로 전환하기
+테스트 코드를 생성하고 그것에 맞는 코드를 짜기 생성된 코드에 테스트 코드를 맞추면 안됨
