@@ -48,7 +48,7 @@ export default function PinText({
           </IconBtn>
           {variant === 'list' && (
             <IconBtn size="md">
-              <X />
+              <Image src={'./icons/alram.svg'} alt="알람" width={20} height={20} />
             </IconBtn>
           )}
         </div>

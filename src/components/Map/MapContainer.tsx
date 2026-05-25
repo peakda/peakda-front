@@ -12,7 +12,7 @@ import LocationBtn from '../ui/button/LocationBtn'
 import { SearchBar } from '../ui/form/SearchBar'
 import Category from '../ui/category/Category'
 import { toast } from 'sonner'
-import { useMapCluster } from '@/hooks/useMapPins'
+import { useMapCluster, type MapSpot } from '@/hooks/useMapPins'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import { TEST_SPOTS } from '@/constants/testSpots'
 
@@ -56,9 +56,30 @@ export const MapContainer = () => {
   const mapRef = useRef<kakao.maps.Map | null>(null)
   const [mapInstance, setMapInstance] = useState<kakao.maps.Map | null>(null)
   const { isReady, error, retry } = useLazyMapLoad(containerRef)
-  const { snapHeight, openDrawer } = useDrawerStore()
+  const { snapHeight, openFilterDrawer, openPinDrawer } = useDrawerStore()
 
-  useMapCluster(mapInstance, TEST_SPOTS)
+  const handlePinClick = useCallback(
+    (_spot: MapSpot) => {
+      openPinDrawer(
+        TEST_SPOTS.map((s) => ({
+          type: 'list' as const,
+          title:
+            s.flowers
+              .map((f) => f.alt ?? '')
+              .filter(Boolean)
+              .join(', ') || '명소',
+          location: '위치 정보 없음',
+          description: `현재 ${s.maxStage === 'Peak' ? '만개' : s.maxStage === 'Start' ? '개화 시작' : '개화 전'} 상태입니다.`,
+          Badges: s.flowers.map((f) => f.alt ?? '').filter(Boolean),
+          isFavorite: false,
+          images: s.flowers.map((f) => f.src),
+        }))
+      )
+    },
+    [openPinDrawer]
+  )
+
+  useMapCluster(mapInstance, TEST_SPOTS, handlePinClick)
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
@@ -127,7 +148,7 @@ export const MapContainer = () => {
             </div>
           }
           right={
-            <div className="bg-bg-primary border-border-primary relative rounded-full p-1">
+            <div className="bg-bg-primary-80 border-border-primary relative rounded-full p-1">
               <Image
                 src={'/icons/alram.svg'}
                 alt="알람"
@@ -152,7 +173,7 @@ export const MapContainer = () => {
       <SearchBar
         placeholder="지금 피크인 곳을 검색해보세요."
         description="벚꽃 만개 지역"
-        onFilterClick={openDrawer}
+        onFilterClick={openFilterDrawer}
       />
       <LocationBtn
         onLocate={handleLocate}

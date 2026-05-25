@@ -88,7 +88,7 @@ function clusterSpots(spots: MapSpot[], level: number): ClusterGroup[] {
   }))
 }
 
-export function useMapCluster(map: kakao.maps.Map | null, spots: MapSpot[]) {
+export function useMapCluster(map: kakao.maps.Map | null, spots: MapSpot[], onPinClick?: (spot: MapSpot) => void) {
   const overlaysRef = useRef<kakao.maps.CustomOverlay[]>([])
 
   useEffect(() => {
@@ -129,9 +129,14 @@ export function useMapCluster(map: kakao.maps.Map | null, spots: MapSpot[]) {
           overlaysRef.current.push(overlay)
         } else {
           cluster.spots.forEach((spot) => {
+            const container = document.createElement('div')
+            container.innerHTML = createPinHTML(spot.flowers, spot.maxStage)
+            container.style.cursor = 'pointer'
+            if (onPinClick) container.addEventListener('click', () => onPinClick(spot))
+
             const overlay = new kakao.maps.CustomOverlay({
               position: new kakao.maps.LatLng(spot.lat, spot.lng),
-              content: createPinHTML(spot.flowers, spot.maxStage),
+              content: container,
               xAnchor: 0.5,
               yAnchor: 1,
             })
