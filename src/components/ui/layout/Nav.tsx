@@ -1,11 +1,15 @@
+'use client'
+
 import { Plus } from 'lucide-react'
 import Image from 'next/image'
+import { useDrawerStore } from '@/stores/useDrawerStore'
 
 interface NavProps {
   activeTab: 'map' | 'recommend' | 'feed' | 'my' | 'none'
 }
 
 export default function Nav({ activeTab }: NavProps) {
+  const { openDrawer } = useDrawerStore()
   const itemClass = 'flex cursor-pointer flex-col items-center gap-1 justify-center'
 
   return (
@@ -36,7 +40,7 @@ export default function Nav({ activeTab }: NavProps) {
         </div>
 
         {/* 플러스 버튼 (중앙) */}
-        <div className="bg-brand-secondary mt-2 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full">
+        <div className="bg-brand-secondary mt-2 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full" onClick={openDrawer}>
           <Plus size={20} className="text-white" />
         </div>
 

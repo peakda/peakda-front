@@ -1,11 +1,12 @@
 import Image from 'next/image'
 import { cn } from '@/lib/utils/cn'
+import { useState } from 'react'
 
 interface SearchBarProps {
   placeholder?: string
   description?: string
-  value: string
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  value?: string
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
   onFilterClick?: () => void
   className?: string
 }
@@ -13,11 +14,14 @@ interface SearchBarProps {
 export const SearchBar = ({
   placeholder,
   description,
-  value,
-  onChange,
+  value: valueProp,
+  onChange: onChangeProp,
   onFilterClick,
   className,
 }: SearchBarProps) => {
+  const [internalValue, setInternalValue] = useState('')
+  const value = valueProp ?? internalValue
+  const onChange = onChangeProp ?? ((e: React.ChangeEvent<HTMLInputElement>) => setInternalValue(e.target.value))
   const isInput = value.length > 0
   return (
     <div

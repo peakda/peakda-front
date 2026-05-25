@@ -2,6 +2,7 @@
 
 import { useLazyMapLoad } from '@/hooks/useLazyMapLoad'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import dynamic from 'next/dynamic'
 import MainMessage from '../ui/message/MainMessage'
 import Header from '../ui/layout/Header'
 import Image from 'next/image'
@@ -11,7 +12,14 @@ import LocationBtn from '../ui/button/LocationBtn'
 import { SearchBar } from '../ui/form/SearchBar'
 import Category from '../ui/category/Category'
 import { toast } from 'sonner'
-import { useMapCluster, type MapSpot } from '@/hooks/useMapPins'
+import { useMapCluster } from '@/hooks/useMapPins'
+import { useDrawerStore } from '@/stores/useDrawerStore'
+import { TEST_SPOTS } from '@/constants/testSpots'
+
+const Drawer = dynamic(
+  () => import('@/components/ui/layout/Drawer').then((m) => ({ default: m.Drawer })),
+  { ssr: false }
+)
 
 const DEFAULT_CENTER = {
   lat: 37.5662,
@@ -19,6 +27,18 @@ const DEFAULT_CENTER = {
 }
 
 const NETWORK_TOAST_ID = 'map-network-error'
+
+function panToCurrentLocation(
+  map: kakao.maps.Map,
+  onPermissionDenied?: () => void
+) {
+  navigator.geolocation.getCurrentPosition(
+    ({ coords }) => map.panTo(new kakao.maps.LatLng(coords.latitude, coords.longitude)),
+    (err) => {
+      if (err.code === err.PERMISSION_DENIED) onPermissionDenied?.()
+    }
+  )
+}
 
 const initMap = (container: HTMLElement) => {
   const map = new kakao.maps.Map(container, {
@@ -34,57 +54,12 @@ const initMap = (container: HTMLElement) => {
   return map
 }
 
-const TEST_SPOTS: MapSpot[] = [
-  {
-    lat: 37.5662,
-    lng: 126.9785,
-    maxStage: 'Peak',
-    flowers: [{ src: '/flowers/cherry-blossom.svg', alt: '벚꽃' }, { src: '/flowers/plum.svg', alt: '매화' }],
-  },
-  {
-    lat: 37.5700,
-    lng: 126.9820,
-    maxStage: 'Start',
-    flowers: [{ src: '/flowers/cherry-blossom.svg', alt: '벚꽃' }],
-  },
-  {
-    lat: 37.5640,
-    lng: 126.9750,
-    maxStage: 'Peak',
-    flowers: [{ src: '/flowers/cherry-blossom.svg', alt: '벚꽃' }, { src: '/flowers/royal-azalea.svg', alt: '진달래' }],
-  },
-  {
-    lat: 35.1796,
-    lng: 129.0756,
-    maxStage: 'Peak',
-    flowers: [{ src: '/flowers/cherry-blossom.svg', alt: '벚꽃' }],
-  },
-  {
-    lat: 35.1600,
-    lng: 129.0600,
-    maxStage: 'Start',
-    flowers: [{ src: '/flowers/plum.svg', alt: '매화' }],
-  },
-  {
-    lat: 33.4996,
-    lng: 126.5312,
-    maxStage: 'Before',
-    flowers: [{ src: '/flowers/canola.svg', alt: '유채꽃' }],
-  },
-  {
-    lat: 37.8813,
-    lng: 127.7298,
-    maxStage: 'Start',
-    flowers: [{ src: '/flowers/royal-azalea.svg', alt: '진달래' }],
-  },
-]
-
 export const MapContainer = () => {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<kakao.maps.Map | null>(null)
   const [mapInstance, setMapInstance] = useState<kakao.maps.Map | null>(null)
   const { isReady, error, retry } = useLazyMapLoad(containerRef)
-  const [search, setSearch] = useState('')
+  const { snapHeight } = useDrawerStore()
 
   useMapCluster(mapInstance, TEST_SPOTS)
 
@@ -113,18 +88,12 @@ export const MapContainer = () => {
   }, [isReady])
 
   const handleLocate = useCallback(() => {
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        mapRef.current?.panTo(new kakao.maps.LatLng(coords.latitude, coords.longitude))
-      },
-      (err) => {
-        if (err.code === err.PERMISSION_DENIED) {
-          toast.error('위치 권한이 필요합니다.', {
-            description: '브라우저 설정에서 위치 권한을 허용해주세요.',
-          })
-        }
-      }
-    )
+    if (!mapRef.current) return
+    panToCurrentLocation(mapRef.current, () => {
+      toast.error('위치 권한이 필요합니다.', {
+        description: '브라우저 설정에서 위치 권한을 허용해주세요.',
+      })
+    })
   }, [])
 
   useEffect(() => {
@@ -133,15 +102,7 @@ export const MapContainer = () => {
     prefetchInitialTiles(DEFAULT_CENTER, 13)
     mapRef.current = initMap(containerRef.current)
     setMapInstance(mapRef.current)
-
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        mapRef.current?.panTo(new kakao.maps.LatLng(coords.latitude, coords.longitude))
-      },
-      () => {
-        // 권한 거부 또는 위치 오류 시 서울 시청(DEFAULT_CENTER) 유지
-      }
-    )
+    panToCurrentLocation(mapRef.current)
   }, [isReady])
 
   return (
@@ -192,13 +153,18 @@ export const MapContainer = () => {
       <Category />
 
       <SearchBar
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
         placeholder="지금 피크인 곳을 검색해보세요."
         description="벚꽃 만개 지역"
       />
-      <LocationBtn onLocate={handleLocate} />
+      <LocationBtn
+        onLocate={handleLocate}
+        style={{
+          bottom: snapHeight > 0 ? `${snapHeight + 16}px` : '96px',
+          transition: 'bottom 0.5s cubic-bezier(0.32,0.72,0,1)',
+        }}
+      />
       <Nav activeTab="map" />
+      <Drawer />
     </div>
   )
 }

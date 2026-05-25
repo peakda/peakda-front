@@ -1,7 +1,6 @@
 import Image from 'next/image'
 import { cn } from '@/lib/utils/cn'
-
-type Stage = 'Before' | 'Start' | 'Peak'
+import { type Stage, STAGE_COLOR } from '@/constants/map'
 
 export interface FlowerItem {
   src: string
@@ -13,12 +12,6 @@ interface PinProps {
   maxStage: Stage
 }
 
-const BORDER_COLOR: Record<Stage, string> = {
-  Before: '#a8b0bc',
-  Start: '#ff7f92',
-  Peak: '#f7576B',
-}
-
 const BORDER_CLASS: Record<Stage, string> = {
   Before: 'border-border-tertiary',
   Start: 'border-pink-300',
@@ -26,7 +19,7 @@ const BORDER_CLASS: Record<Stage, string> = {
 }
 
 export function Pin({ flowers, maxStage }: PinProps) {
-  const borderColor = BORDER_COLOR[maxStage]
+  const borderColor = STAGE_COLOR[maxStage]
   const borderClass = BORDER_CLASS[maxStage]
 
   const visibleFlowers = flowers.slice(0, Math.min(flowers.length, 3))

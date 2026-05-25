@@ -6,13 +6,21 @@ interface FlowerCardProps {
   date: string
   image: string
   selected?: boolean
+  onClick?: () => void
 }
 
-export default function FlowerCard({ label, date, image, selected = false }: FlowerCardProps) {
+export default function FlowerCard({
+  label,
+  date,
+  image,
+  selected = false,
+  onClick,
+}: FlowerCardProps) {
   return (
     <div
+      onClick={onClick}
       className={cn(
-        'border-border-primary flex h-[90px] w-[60px] flex-col items-center justify-center gap-1 rounded-lg border p-3',
+        'border-border-primary flex min-h-[90px] min-w-[60px] flex-col items-center justify-center gap-1 rounded-lg border p-3',
         selected && 'border-primary bg-pink-50'
       )}
     >

@@ -1,15 +1,6 @@
 import Image from 'next/image'
 import type { MapSpot } from '@/hooks/useMapPins'
-
-type Stage = 'Before' | 'Start' | 'Peak'
-
-const STAGE_PRIORITY: Record<Stage, number> = { Before: 0, Start: 1, Peak: 2 }
-
-const BG_COLOR: Record<Stage, string> = {
-  Before: '#a8b0bc',
-  Start: '#ff7f92',
-  Peak: '#f7576b',
-}
+import { type Stage, STAGE_COLOR, STAGE_PRIORITY } from '@/constants/map'
 
 interface ClusterPinProps {
   spots: MapSpot[]
@@ -21,7 +12,7 @@ export function ClusterPin({ spots }: ClusterPinProps) {
     'Before'
   )
 
-  const bgColor = BG_COLOR[maxStage]
+  const bgColor = STAGE_COLOR[maxStage]
 
   const allFlowers = spots.flatMap((s) => s.flowers)
   const countBySrc = new Map<string, { flower: (typeof allFlowers)[0]; count: number }>()

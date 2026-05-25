@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react'
 import type { FlowerItem } from '@/components/Map/Pin'
-
-type Stage = 'Before' | 'Start' | 'Peak'
+import { type Stage, STAGE_COLOR, STAGE_PRIORITY } from '@/constants/map'
 
 export interface MapSpot {
   lat: number
@@ -16,20 +15,15 @@ interface ClusterGroup {
   lng: number
 }
 
-const STAGE_COLOR: Record<Stage, string> = {
-  Before: '#a8b0bc',
-  Start: '#ff7f92',
-  Peak: '#f7576b',
-}
-
-const STAGE_PRIORITY: Record<Stage, number> = { Before: 0, Start: 1, Peak: 2 }
-
 function createPinHTML(flowers: FlowerItem[], maxStage: Stage): string {
   const color = STAGE_COLOR[maxStage]
   const grayscale = maxStage === 'Before' ? 'opacity:0.4;filter:grayscale(1);' : ''
   const imgs = flowers
     .slice(0, 3)
-    .map((f) => `<img src="${f.src}" alt="${f.alt ?? ''}" width="24" height="24" style="width:24px;height:24px;flex-shrink:0;object-fit:contain;${grayscale}">`)
+    .map(
+      (f) =>
+        `<img src="${f.src}" alt="${f.alt ?? ''}" width="24" height="24" style="width:24px;height:24px;flex-shrink:0;object-fit:contain;${grayscale}">`
+    )
     .join('')
   const badge =
     flowers.length >= 2
@@ -100,12 +94,17 @@ export function useMapCluster(map: kakao.maps.Map | null, spots: MapSpot[]) {
   useEffect(() => {
     if (!map) return
 
+    const clusterCache = new Map<number, ClusterGroup[]>()
+
     const renderOverlays = () => {
       overlaysRef.current.forEach((o) => o.setMap(null))
       overlaysRef.current = []
 
       const level = map.getLevel()
-      const clusters = clusterSpots(spots, level)
+      if (!clusterCache.has(level)) {
+        clusterCache.set(level, clusterSpots(spots, level))
+      }
+      const clusters = clusterCache.get(level)!
 
       clusters.forEach((cluster) => {
         const isCluster = cluster.spots.length >= 2 && level >= 4
