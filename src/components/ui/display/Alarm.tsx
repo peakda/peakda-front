@@ -27,7 +27,7 @@ export function Alarm({ item }: AlarmProps) {
   return (
     <div
       className={cn(
-        'border-border-primary flex w-full items-start gap-3 border py-3',
+        'border-border-primary flex w-full items-start gap-3 border-b py-3',
         isRead ? 'opacity-70' : 'bg-bg-primary'
       )}
     >
@@ -45,7 +45,7 @@ export function Alarm({ item }: AlarmProps) {
         {description && <p className="text-text-secondary mt-0.5 text-sm">{description}</p>}
         {type === 'following' && onFollowBack && (
           <div className="mt-1.5">
-            <Button size="sm" variant="outlined" onClick={onFollowBack}>
+            <Button size="sm" variant="outlined" onClick={onFollowBack} className="rounded-md">
               맞팔로우
             </Button>
           </div>
