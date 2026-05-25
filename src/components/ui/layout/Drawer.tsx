@@ -56,9 +56,19 @@ const FALL_FLOWERS = [
   { label: '단풍', date: '10-11월', image: '/flowers/maple.svg' },
 ]
 
-function SwipeableContent({ children }: { children: React.ReactNode }) {
+function SwipeableContent({
+  children,
+  snap,
+  onExpandToFull,
+}: {
+  children: React.ReactNode
+  snap: string | number | null
+  onExpandToFull: () => void
+}) {
   const { active, setActive } = useTabsContext()
   const touchStart = useRef({ x: 0, y: 0 })
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const snapPx = typeof snap === 'string' ? parseInt(snap) : typeof snap === 'number' ? snap : 400
 
   function handleTouchStart(e: React.TouchEvent) {
     touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
@@ -67,20 +77,32 @@ function SwipeableContent({ children }: { children: React.ReactNode }) {
   function handleTouchEnd(e: React.TouchEvent) {
     const dx = e.changedTouches[0].clientX - touchStart.current.x
     const dy = e.changedTouches[0].clientY - touchStart.current.y
-    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return
 
-    const currentIndex = TABS.findIndex((t) => t.value === active)
-    if (dx < 0 && currentIndex < TABS.length - 1) {
-      setActive(TABS[currentIndex + 1].value)
-    } else if (dx > 0 && currentIndex > 0) {
-      setActive(TABS[currentIndex - 1].value)
+    // 수평 스와이프 → 탭 전환
+    if (Math.abs(dx) >= 50 && Math.abs(dx) > Math.abs(dy)) {
+      const currentIndex = TABS.findIndex((t) => t.value === active)
+      if (dx < 0 && currentIndex < TABS.length - 1) {
+        setActive(TABS[currentIndex + 1].value)
+      } else if (dx > 0 && currentIndex > 0) {
+        setActive(TABS[currentIndex - 1].value)
+      }
+      return
+    }
+
+    // 스크롤 최상단에서 위로 스와이프 → 650px 확장
+    const isAtTop = (scrollRef.current?.scrollTop ?? 1) === 0
+    if (dy < -60 && Math.abs(dy) > Math.abs(dx) && isAtTop && snap === '400px') {
+      onExpandToFull()
     }
   }
 
   return (
     <div
-      className="flex-1 overflow-y-auto p-4 pb-24"
+      ref={scrollRef}
+      className="no-scrollbar min-h-0 flex-1 overflow-y-auto p-4 pt-0 pb-24"
+      style={{ maxHeight: `${snapPx - 72}px` }}
       data-vaul-no-drag
+      onPointerDown={(e) => e.stopPropagation()}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
@@ -105,8 +127,9 @@ export function Drawer() {
 
   function handleSnapChange(value: string | number | null) {
     setSnap(value)
-    if (typeof value === 'string') setSnapHeight(parseInt(value))
-    // null = 드래그 중간 상태, closeDrawer가 snapHeight를 0으로 처리
+    // isOpen 가드: Vaul이 닫힌 후 500ms 뒤에 snapPoints[0]으로 reset 호출하는데
+    // 이때 isOpen=false이므로 setSnapHeight를 막아 LocationBtn이 튀는 현상을 방지
+    if (typeof value === 'string' && isOpen) setSnapHeight(parseInt(value))
   }
 
   return (
@@ -125,31 +148,40 @@ export function Drawer() {
 
           <div className="mx-auto mt-4 mb-2 h-1.5 w-12 shrink-0 rounded-full bg-zinc-300" />
 
-          <Tabs defaultValue="region" tabs={TABS} className="flex flex-1 flex-col overflow-hidden">
-            <SwipeableContent>
-              <TabPanels tabs={TABS}>
-                <div className="grid grid-cols-2 gap-2">
-                  {REGIONS.map((r) => (
-                    <FilterCard
-                      key={r.title}
-                      title={r.title}
-                      subTitle={r.subTitle}
-                      isActive={selectedRegions.has(r.title)}
-                      onClick={() => setSelectedRegions(toggle(selectedRegions, r.title))}
-                    />
-                  ))}
+          <Tabs
+            defaultValue="region"
+            tabs={TABS}
+            className="flex min-h-0 flex-1 flex-col overflow-hidden"
+          >
+            <SwipeableContent snap={snap} onExpandToFull={() => setSnap('650px')}>
+              <TabPanels tabs={TABS} className="min-h-0 flex-1">
+                <div>
+                  <p>권역 선택</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {REGIONS.map((r) => (
+                      <FilterCard
+                        key={r.title}
+                        title={r.title}
+                        subTitle={r.subTitle}
+                        isActive={selectedRegions.has(r.title)}
+                        onClick={() => setSelectedRegions(toggle(selectedRegions, r.title))}
+                      />
+                    ))}
+                  </div>
                 </div>
-
-                <div className="grid grid-cols-3 gap-2">
-                  {TIMINGS.map((t) => (
-                    <FilterCard
-                      key={t.title}
-                      title={t.title}
-                      subTitle={t.subTitle}
-                      isActive={selectedTimings.has(t.title)}
-                      onClick={() => setSelectedTimings(toggle(selectedTimings, t.title))}
-                    />
-                  ))}
+                <div>
+                  <p>지금 상태</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {TIMINGS.map((t) => (
+                      <FilterCard
+                        key={t.title}
+                        title={t.title}
+                        subTitle={t.subTitle}
+                        isActive={selectedTimings.has(t.title)}
+                        onClick={() => setSelectedTimings(toggle(selectedTimings, t.title))}
+                      />
+                    ))}
+                  </div>
                 </div>
 
                 <div className="space-y-6">

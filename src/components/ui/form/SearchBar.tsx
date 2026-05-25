@@ -21,7 +21,9 @@ export const SearchBar = ({
 }: SearchBarProps) => {
   const [internalValue, setInternalValue] = useState('')
   const value = valueProp ?? internalValue
-  const onChange = onChangeProp ?? ((e: React.ChangeEvent<HTMLInputElement>) => setInternalValue(e.target.value))
+
+  const onChange =
+    onChangeProp ?? ((e: React.ChangeEvent<HTMLInputElement>) => setInternalValue(e.target.value))
   const isInput = value.length > 0
   return (
     <div
@@ -37,7 +39,7 @@ export const SearchBar = ({
             placeholder={placeholder}
             className="placeholder:text-text-primary flex-1 bg-transparent text-base font-medium text-slate-900 outline-none placeholder:-translate-y-1"
           />
-          <button type="button" onClick={onFilterClick}>
+          <button type="button" className="cursor-pointer" onClick={onFilterClick}>
             <Image src="./icons/filter.svg" alt="필터" width={24} height={24} />
           </button>
         </div>

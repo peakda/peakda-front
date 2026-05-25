@@ -28,10 +28,7 @@ const DEFAULT_CENTER = {
 
 const NETWORK_TOAST_ID = 'map-network-error'
 
-function panToCurrentLocation(
-  map: kakao.maps.Map,
-  onPermissionDenied?: () => void
-) {
+function panToCurrentLocation(map: kakao.maps.Map, onPermissionDenied?: () => void) {
   navigator.geolocation.getCurrentPosition(
     ({ coords }) => map.panTo(new kakao.maps.LatLng(coords.latitude, coords.longitude)),
     (err) => {
@@ -59,7 +56,7 @@ export const MapContainer = () => {
   const mapRef = useRef<kakao.maps.Map | null>(null)
   const [mapInstance, setMapInstance] = useState<kakao.maps.Map | null>(null)
   const { isReady, error, retry } = useLazyMapLoad(containerRef)
-  const { snapHeight } = useDrawerStore()
+  const { snapHeight, openDrawer } = useDrawerStore()
 
   useMapCluster(mapInstance, TEST_SPOTS)
 
@@ -155,6 +152,7 @@ export const MapContainer = () => {
       <SearchBar
         placeholder="지금 피크인 곳을 검색해보세요."
         description="벚꽃 만개 지역"
+        onFilterClick={openDrawer}
       />
       <LocationBtn
         onLocate={handleLocate}
