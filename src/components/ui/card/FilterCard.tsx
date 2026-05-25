@@ -9,7 +9,7 @@ export default function FilterCard({ title, subTitle, isActive = false, onClick 
   return (
     <button
       onClick={onClick}
-      className={`flex flex-col items-center justify-center rounded-lg border p-3 transition-colors ${
+      className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border p-3 transition-colors ${
         isActive ? 'border-primary bg-pink-50' : 'border-border-primary'
       } `}
     >

@@ -20,7 +20,7 @@ export default function FlowerCard({
     <div
       onClick={onClick}
       className={cn(
-        'border-border-primary flex min-h-[90px] min-w-[60px] flex-col items-center justify-center gap-1 rounded-lg border p-3',
+        'border-border-primary flex min-h-[90px] min-w-[60px] cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border p-3',
         selected && 'border-primary bg-pink-50'
       )}
     >

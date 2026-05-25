@@ -156,7 +156,7 @@ export function Drawer() {
             <SwipeableContent snap={snap} onExpandToFull={() => setSnap('650px')}>
               <TabPanels tabs={TABS} className="min-h-0 flex-1">
                 <div>
-                  <p>권역 선택</p>
+                  <p className="text-text-secondary font-semibold">권역 선택</p>
                   <div className="grid grid-cols-2 gap-2">
                     {REGIONS.map((r) => (
                       <FilterCard
@@ -170,7 +170,7 @@ export function Drawer() {
                   </div>
                 </div>
                 <div>
-                  <p>지금 상태</p>
+                  <p className="text-text-secondary font-semibold">지금 상태</p>
                   <div className="grid grid-cols-3 gap-2">
                     {TIMINGS.map((t) => (
                       <FilterCard
@@ -186,7 +186,7 @@ export function Drawer() {
 
                 <div className="space-y-6">
                   <div>
-                    <p className="mb-3 text-sm font-bold text-gray-700">봄</p>
+                    <p className="text-text-secondary mb-1 font-semibold">봄</p>
                     <div className="grid grid-cols-4 gap-2">
                       {SPRING_FLOWERS.map((f) => (
                         <FlowerCard
@@ -201,7 +201,7 @@ export function Drawer() {
                     </div>
                   </div>
                   <div>
-                    <p className="mb-3 text-sm font-bold text-gray-700">여름</p>
+                    <p className="text-text-secondary mb-1 font-semibold">여름</p>
                     <div className="grid grid-cols-4 gap-3">
                       {SUMMER_FLOWERS.map((f) => (
                         <FlowerCard
@@ -216,7 +216,7 @@ export function Drawer() {
                     </div>
                   </div>
                   <div>
-                    <p className="mb-3 text-sm font-bold text-gray-700">가을</p>
+                    <p className="text-text-secondary mb-1 font-semibold">가을</p>
                     <div className="grid grid-cols-4 gap-3">
                       {FALL_FLOWERS.map((f) => (
                         <FlowerCard
