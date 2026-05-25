@@ -1,9 +1,11 @@
 'use client'
 
 import { Alarm, AlarmItemData } from '@/components/ui/display/Alarm'
+import Button from '@/components/ui/button/Button'
 import { TabPanels } from '@/components/ui/Tab/TabPanel'
 import { Tabs } from '@/components/ui/Tab/Tab'
 import { TabItem } from '@/context/TabContext'
+import { Plus } from 'lucide-react'
 
 const TABS: TabItem[] = [
   { value: 'All', label: '전체' },
@@ -85,7 +87,44 @@ const allAlarms: AlarmItemData[] = [...activityAlarms, ...announcementAlarms].so
   a.isRead === b.isRead ? 0 : a.isRead ? 1 : -1
 )
 
-function AlarmList({ items }: { items: AlarmItemData[] }) {
+const EMPTY_TEXT: Record<string, string> = {
+  all: '타이밍 알림은 만개가 가까워지면 알려드려요',
+  activity: '다른 사용자를 팔로우하거나\n기록을 남기면 알림이 와요',
+  announcement: '서비스 업데이트나\n시즌 안내가 도착하면 알려드려요',
+}
+
+function AlarmList({ items, label }: { items: AlarmItemData[]; label: string }) {
+  if (items.length) {
+    return (
+      <div className="flex h-[calc(100vh-130px)] flex-col items-center justify-center gap-2 px-4 py-12 text-center">
+        <p className="text-text-primary text-xl font-semibold">아직 알림이 없어요</p>
+        <p className="text-text-tertiary text-base whitespace-pre-line">{EMPTY_TEXT[label]}</p>
+        {label === 'all' && (
+          <Button
+            variant="filled"
+            color="primary"
+            size="md"
+            leftIcon={<Plus className="h-5 w-5" strokeWidth={1.5} />}
+            className="rounded-2xl px-6 py-5"
+          >
+            찜 명소 추가하기
+          </Button>
+        )}
+        {label === 'activity' && (
+          <Button
+            variant="filled"
+            color="primary"
+            size="md"
+            leftIcon={<Plus className="h-5 w-5" strokeWidth={1.5} />}
+            className="rounded-2xl px-6 py-5"
+          >
+            기록 남기기
+          </Button>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="px-4">
       {items.map((item) => (
@@ -99,9 +138,9 @@ export function NotificationTabs() {
   return (
     <Tabs tabs={TABS} defaultValue="All">
       <TabPanels tabs={TABS}>
-        <AlarmList items={allAlarms} />
-        <AlarmList items={activityAlarms} />
-        <AlarmList items={announcementAlarms} />
+        <AlarmList items={allAlarms} label="all" />
+        <AlarmList items={activityAlarms} label="activity" />
+        <AlarmList items={announcementAlarms} label="announcement" />
       </TabPanels>
     </Tabs>
   )
