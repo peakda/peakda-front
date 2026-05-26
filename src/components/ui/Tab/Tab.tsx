@@ -45,7 +45,10 @@ export function Tabs({
         <div
           role="tablist"
           aria-label={ariaLabel}
-          className="grid w-full grid-cols-3 border-b border-gray-200 px-4"
+          className={cn(
+            'grid w-full border-b border-gray-200 px-4',
+            ({ 2: 'grid-cols-2', 3: 'grid-cols-3', 4: 'grid-cols-4' } as Record<number, string>)[tabs.length] ?? 'grid-cols-3'
+          )}
         >
           {tabs.map((tab) => (
             <TabTrigger key={tab.value} tab={tab} tabs={tabs} />

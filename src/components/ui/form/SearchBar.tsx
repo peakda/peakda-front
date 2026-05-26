@@ -1,12 +1,12 @@
 import Image from 'next/image'
 import { cn } from '@/lib/utils/cn'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 interface SearchBarProps {
   placeholder?: string
   description?: string
-  value?: string
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
+
   onFilterClick?: () => void
   className?: string
 }
@@ -21,7 +21,7 @@ export const SearchBar = ({
 }: SearchBarProps) => {
   const [internalValue, setInternalValue] = useState('')
   const value = valueProp ?? internalValue
-
+  const router = useRouter()
   const onChange =
     onChangeProp ?? ((e: React.ChangeEvent<HTMLInputElement>) => setInternalValue(e.target.value))
   const isInput = value.length > 0
@@ -34,10 +34,10 @@ export const SearchBar = ({
           <Image src="./icons/search.svg" alt="검색" width={24} height={24} />
           <input
             type="text"
-            value={value}
-            onChange={onChange}
             placeholder={placeholder}
-            className="placeholder:text-text-primary flex-1 bg-transparent text-base font-medium text-slate-900 outline-none placeholder:-translate-y-1"
+            readOnly
+            onClick={() => router.push('/search')}
+            className="placeholder:text-text-primary flex-1 cursor-pointer bg-transparent text-base font-medium text-slate-900 outline-none placeholder:-translate-y-1"
           />
           <button type="button" className="cursor-pointer" onClick={onFilterClick}>
             <Image src="./icons/filter.svg" alt="필터" width={24} height={24} />
