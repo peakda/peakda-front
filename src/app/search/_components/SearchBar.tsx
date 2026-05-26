@@ -17,7 +17,15 @@ export default function SearchBar({ query, hasQuery, setQuery }: SearchBarProps)
         <Input
           value={query}
           variant="none"
-          leftIcon={<Image src={'./icons/search.svg'} alt="검색 아이콘" width={24} height={24} />}
+          leftIcon={
+            <Image
+              src={'./icons/search.svg'}
+              alt="검색 아이콘"
+              width={24}
+              height={24}
+              className="text-icon-quaternary"
+            />
+          }
           rightIcon={
             hasQuery ? (
               <button type="button" onClick={() => setQuery('')}>

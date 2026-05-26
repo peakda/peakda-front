@@ -3,8 +3,7 @@
 import { useState } from 'react'
 import { Tabs } from '@/components/ui/Tab/Tab'
 import { TabPanels } from '@/components/ui/Tab/TabPanel'
-import { Avatar } from '@/components/ui/display/Avatar'
-import Button from '@/components/ui/button/Button'
+
 import { TabItem } from '@/context/TabContext'
 import SearchBar from './_components/SearchBar'
 import RecentList from './_components/RecentList'
