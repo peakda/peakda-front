@@ -40,7 +40,10 @@ export default function SearchBar({ query, hasQuery, setQuery }: SearchBarProps)
         />
       </div>
 
-      <button onClick={() => setQuery('')} className="text-text-secondary shrink-0 text-sm">
+      <button
+        onClick={() => setQuery('')}
+        className="text-text-secondary shrink-0 cursor-pointer text-sm"
+      >
         취소
       </button>
     </div>

@@ -1,6 +1,6 @@
 import Button from '@/components/ui/button/Button'
 import { Avatar } from '@/components/ui/display/Avatar'
-import { UserProps } from '../page'
+import { UserProps } from './UserPanel'
 
 interface Props {
   user: UserProps

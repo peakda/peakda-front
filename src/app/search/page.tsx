@@ -3,27 +3,17 @@
 import { useState } from 'react'
 import { Tabs } from '@/components/ui/Tab/Tab'
 import { TabPanels } from '@/components/ui/Tab/TabPanel'
-
 import { TabItem } from '@/context/TabContext'
 import SearchBar from './_components/SearchBar'
 import RecentList from './_components/RecentList'
 import HotChipList from './_components/HotChipList'
-
-import SpotCard from '@/components/ui/card/SpotCard'
-import UserList from './_components/UserList'
+import { SpotPanel, SPOTProps } from './_components/SpotPanel'
+import { UserPanel, UserProps } from './_components/UserPanel'
 
 const SEARCH_TABS: TabItem[] = [
   { value: 'spot', label: '스팟' },
   { value: 'user', label: '유저' },
 ]
-
-export interface SPOTProps {
-  id: number
-  name: string
-  location: string
-  status: string
-  nameList: string[]
-}
 
 const MOCK_SPOTS: SPOTProps[] = [
   {
@@ -70,22 +60,15 @@ const MOCK_SPOTS: SPOTProps[] = [
   },
 ]
 
-export interface UserProps {
-  id: number
-  name: string
-  stats: string
-  following: boolean
-}
-
 const MOCK_USERS: UserProps[] = [
-  { id: 1, name: '닉네임', stats: '가족 nnn · 팔로위 nnn', following: false },
-  { id: 2, name: '닉네임', stats: '팔로워 nnn · 팔로위 nnn', following: false },
-  { id: 3, name: '닉네임', stats: '가족 500 · 팔로위 1000', following: false },
-  { id: 4, name: '닉네임', stats: '가족 600 · 팔로위 1100', following: true },
-  { id: 5, name: '닉네임', stats: '가족 700 · 팔로위 1100', following: false },
-  { id: 6, name: '닉네임', stats: '가족 800 · 팔로위 1200', following: false },
-  { id: 7, name: '닉네임', stats: '가족 900 · 팔로위 1300', following: true },
-  { id: 8, name: '닉네임', stats: '가족 1000 · 팔로위 1400', following: false },
+  // { id: 1, name: '닉네임', stats: '가족 nnn · 팔로위 nnn', following: false },
+  // { id: 2, name: '닉네임', stats: '팔로워 nnn · 팔로위 nnn', following: false },
+  // { id: 3, name: '닉네임', stats: '가족 500 · 팔로위 1000', following: false },
+  // { id: 4, name: '닉네임', stats: '가족 600 · 팔로위 1100', following: true },
+  // { id: 5, name: '닉네임', stats: '가족 700 · 팔로위 1100', following: false },
+  // { id: 6, name: '닉네임', stats: '가족 800 · 팔로위 1200', following: false },
+  // { id: 7, name: '닉네임', stats: '가족 900 · 팔로위 1300', following: true },
+  // { id: 8, name: '닉네임', stats: '가족 1000 · 팔로위 1400', following: false },
 ]
 
 export default function SearchPage() {
@@ -127,19 +110,8 @@ export default function SearchPage() {
             스팟 결과 <span className="text-text-secondary font-medium">{MOCK_SPOTS.length}</span>개
           </span>
           <TabPanels tabs={SEARCH_TABS} className="mt-0">
-            {/* 스팟 패널 */}
-            <ul className="divide-y divide-gray-100">
-              {MOCK_SPOTS.map((spot, idx) => (
-                <SpotCard spot={spot} key={idx} />
-              ))}
-            </ul>
-
-            {/* 유저 패널 */}
-            <ul className="divide-y divide-gray-100">
-              {MOCK_USERS.map((user) => (
-                <UserList user={user} key={user.id} />
-              ))}
-            </ul>
+            <SpotPanel spots={MOCK_SPOTS} />
+            <UserPanel users={MOCK_USERS} />
           </TabPanels>
         </Tabs>
       )}
