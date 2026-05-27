@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { Drawer as VaulDrawer } from 'vaul'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import Button from '../button/Button'
 import { FilterDrawerContent } from './FilterDrawerContent'
@@ -10,6 +10,17 @@ import PinList from '../display/PinList'
 export function Drawer() {
   const { isOpen, type, pinListData, closeDrawer, setSnapHeight } = useDrawerStore()
   const [snap, setSnap] = useState<string | number | null>('400px')
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isOpen])
   const snapPx = typeof snap === 'string' ? parseInt(snap) : typeof snap === 'number' ? snap : 400
 
   const snapPoints = ['400px', 0.9]
@@ -44,8 +55,12 @@ export function Drawer() {
 
           <div className="mx-auto mt-4 mb-2 h-1.5 w-12 shrink-0 rounded-full bg-zinc-300" />
 
-          {type === 'filter' ? (
-            <FilterDrawerContent snap={snap} onExpandToFull={() => setSnap(0.9)} />
+          {type === 'filter' || type === 'flower-filter' ? (
+            <FilterDrawerContent
+              snap={snap}
+              onExpandToFull={() => setSnap(0.9)}
+              flowersOnly={type === 'flower-filter'}
+            />
           ) : pinListData.length > 0 ? (
             <div
               className="no-scrollbar min-h-0 flex-1 overflow-y-auto pb-24"

@@ -1,16 +1,20 @@
+'use client'
 import IconBtn from '@/components/ui/button/IconBtn'
 import Input from '@/components/ui/form/Input'
 import { X } from 'lucide-react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { Dispatch, SetStateAction } from 'react'
 
 interface SearchBarProps {
   query: string
   hasQuery: boolean
   setQuery: Dispatch<SetStateAction<string>>
+  isCancle?: boolean
 }
 
-export default function SearchBar({ query, hasQuery, setQuery }: SearchBarProps) {
+export default function SearchInput({ query, hasQuery, setQuery, isCancle }: SearchBarProps) {
+  const router = useRouter()
   return (
     <div className="flex items-center gap-4 px-4 pt-2 pb-2">
       <div className="flex-1">
@@ -40,12 +44,14 @@ export default function SearchBar({ query, hasQuery, setQuery }: SearchBarProps)
         />
       </div>
 
-      <button
-        onClick={() => setQuery('')}
-        className="text-text-secondary shrink-0 cursor-pointer text-sm"
-      >
-        취소
-      </button>
+      {isCancle && (
+        <button
+          onClick={() => router.back()}
+          className="text-text-secondary shrink-0 cursor-pointer text-sm"
+        >
+          취소
+        </button>
+      )}
     </div>
   )
 }

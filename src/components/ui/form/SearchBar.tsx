@@ -1,12 +1,10 @@
 import Image from 'next/image'
 import { cn } from '@/lib/utils/cn'
-import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 interface SearchBarProps {
   placeholder?: string
   description?: string
-
   onFilterClick?: () => void
   className?: string
 }
@@ -14,17 +12,12 @@ interface SearchBarProps {
 export const SearchBar = ({
   placeholder,
   description,
-  value: valueProp,
-  onChange: onChangeProp,
+
   onFilterClick,
   className,
 }: SearchBarProps) => {
-  const [internalValue, setInternalValue] = useState('')
-  const value = valueProp ?? internalValue
   const router = useRouter()
-  const onChange =
-    onChangeProp ?? ((e: React.ChangeEvent<HTMLInputElement>) => setInternalValue(e.target.value))
-  const isInput = value.length > 0
+
   return (
     <div
       className={cn('absolute top-12 z-10 flex h-12 w-full flex-col gap-1 px-4 py-1', className)}
@@ -43,7 +36,7 @@ export const SearchBar = ({
             <Image src="./icons/filter.svg" alt="필터" width={24} height={24} />
           </button>
         </div>
-        {description && !isInput && (
+        {description && (
           <p className="absolute bottom-1 pl-8 text-xs tracking-tight text-[#4E5666]">
             {description}
           </p>

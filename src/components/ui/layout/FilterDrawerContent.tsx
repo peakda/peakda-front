@@ -118,18 +118,95 @@ function SwipeableContent({
 interface FilterDrawerContentProps {
   snap: string | number | null
   onExpandToFull: () => void
+  flowersOnly?: boolean
 }
 
-export function FilterDrawerContent({ snap, onExpandToFull }: FilterDrawerContentProps) {
+export function FilterDrawerContent({ snap, onExpandToFull, flowersOnly = false }: FilterDrawerContentProps) {
   const [selectedRegions, setSelectedRegions] = useState<Set<string>>(new Set())
   const [selectedTimings, setSelectedTimings] = useState<Set<string>>(new Set())
   const [selectedFlowers, setSelectedFlowers] = useState<Set<string>>(new Set())
+  const touchStart = useRef({ x: 0, y: 0 })
 
   function toggle(set: Set<string>, value: string): Set<string> {
     const next = new Set(set)
     if (next.has(value)) next.delete(value)
     else next.add(value)
     return next
+  }
+
+  const snapPx =
+    typeof snap === 'string'
+      ? parseInt(snap)
+      : typeof snap === 'number' && snap <= 1
+        ? Math.round(snap * (typeof window !== 'undefined' ? window.innerHeight : 800))
+        : typeof snap === 'number'
+          ? snap
+          : 400
+
+  if (flowersOnly) {
+    return (
+      <div
+        className="no-scrollbar min-h-0 flex-1 overflow-y-auto p-4 pb-24"
+        style={{ maxHeight: `${snapPx - 30}px` }}
+        data-vaul-no-drag
+        onPointerDown={(e) => e.stopPropagation()}
+        onTouchStart={(e) => {
+          touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+        }}
+        onTouchEnd={(e) => {
+          const dy = e.changedTouches[0].clientY - touchStart.current.y
+          if (dy < -60 && snap === '400px') onExpandToFull()
+        }}
+      >
+        <div className="space-y-6">
+          <div>
+            <p className="text-text-secondary mb-1 font-semibold">봄</p>
+            <div className="grid grid-cols-4 gap-2">
+              {SPRING_FLOWERS.map((f) => (
+                <FlowerCard
+                  key={f.label}
+                  label={f.label}
+                  date={f.date}
+                  image={f.image}
+                  selected={selectedFlowers.has(f.label)}
+                  onClick={() => setSelectedFlowers(toggle(selectedFlowers, f.label))}
+                />
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="text-text-secondary mb-1 font-semibold">여름</p>
+            <div className="grid grid-cols-4 gap-3">
+              {SUMMER_FLOWERS.map((f) => (
+                <FlowerCard
+                  key={f.label}
+                  label={f.label}
+                  date={f.date}
+                  image={f.image}
+                  selected={selectedFlowers.has(f.label)}
+                  onClick={() => setSelectedFlowers(toggle(selectedFlowers, f.label))}
+                />
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="text-text-secondary mb-1 font-semibold">가을</p>
+            <div className="grid grid-cols-4 gap-3">
+              {FALL_FLOWERS.map((f) => (
+                <FlowerCard
+                  key={f.label}
+                  label={f.label}
+                  date={f.date}
+                  image={f.image}
+                  selected={selectedFlowers.has(f.label)}
+                  onClick={() => setSelectedFlowers(toggle(selectedFlowers, f.label))}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (

@@ -4,7 +4,7 @@ import IconBtn from '../button/IconBtn'
 import { Badge } from '../display/Badge'
 import Tag from '../display/Tag'
 import { cn } from '@/lib/utils/cn'
-import { SPOTProps } from '@/app/search/page'
+import { SPOTProps } from '@/app/search/_components/SpotPanel'
 
 interface Props {
   spot: SPOTProps

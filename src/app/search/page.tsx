@@ -4,11 +4,11 @@ import { useState } from 'react'
 import { Tabs } from '@/components/ui/Tab/Tab'
 import { TabPanels } from '@/components/ui/Tab/TabPanel'
 import { TabItem } from '@/context/TabContext'
-import SearchBar from './_components/SearchBar'
 import RecentList from './_components/RecentList'
 import HotChipList from './_components/HotChipList'
 import { SpotPanel, SPOTProps } from './_components/SpotPanel'
 import { UserPanel, UserProps } from './_components/UserPanel'
+import SearchInput from './_components/SearchInput'
 
 const SEARCH_TABS: TabItem[] = [
   { value: 'spot', label: '스팟' },
@@ -61,14 +61,14 @@ const MOCK_SPOTS: SPOTProps[] = [
 ]
 
 const MOCK_USERS: UserProps[] = [
-  // { id: 1, name: '닉네임', stats: '가족 nnn · 팔로위 nnn', following: false },
-  // { id: 2, name: '닉네임', stats: '팔로워 nnn · 팔로위 nnn', following: false },
-  // { id: 3, name: '닉네임', stats: '가족 500 · 팔로위 1000', following: false },
-  // { id: 4, name: '닉네임', stats: '가족 600 · 팔로위 1100', following: true },
-  // { id: 5, name: '닉네임', stats: '가족 700 · 팔로위 1100', following: false },
-  // { id: 6, name: '닉네임', stats: '가족 800 · 팔로위 1200', following: false },
-  // { id: 7, name: '닉네임', stats: '가족 900 · 팔로위 1300', following: true },
-  // { id: 8, name: '닉네임', stats: '가족 1000 · 팔로위 1400', following: false },
+  { id: 1, name: '닉네임', stats: '가족 nnn · 팔로위 nnn', following: false },
+  { id: 2, name: '닉네임', stats: '팔로워 nnn · 팔로위 nnn', following: false },
+  { id: 3, name: '닉네임', stats: '가족 500 · 팔로위 1000', following: false },
+  { id: 4, name: '닉네임', stats: '가족 600 · 팔로위 1100', following: true },
+  { id: 5, name: '닉네임', stats: '가족 700 · 팔로위 1100', following: false },
+  { id: 6, name: '닉네임', stats: '가족 800 · 팔로위 1200', following: false },
+  { id: 7, name: '닉네임', stats: '가족 900 · 팔로위 1300', following: true },
+  { id: 8, name: '닉네임', stats: '가족 1000 · 팔로위 1400', following: false },
 ]
 
 export default function SearchPage() {
@@ -89,7 +89,7 @@ export default function SearchPage() {
   return (
     <div className="flex min-h-screen flex-col bg-white">
       {/* 상단 검색 바 */}
-      <SearchBar query={query} hasQuery={hasQuery} setQuery={setQuery} />
+      <SearchInput query={query} hasQuery={hasQuery} setQuery={setQuery} isCancle />
       {!hasQuery ? (
         /* 빈 상태 */
         <div className="flex flex-col gap-6 px-4 py-2">
