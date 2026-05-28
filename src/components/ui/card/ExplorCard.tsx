@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { CardBadge } from '@/components/ui/card/CardBadge'
 
 interface PeakCardProps {
   type: 'peak'
@@ -45,24 +46,16 @@ export function ExplorCard(props: ExplorCardProps) {
         {/* Peak 뱃지 */}
         {props.type === 'peak' && (
           <>
-            <span className="bg-bg-quaternary-80 absolute top-2 left-2 rounded px-2 py-1 text-[10px] leading-none text-white">
-              {props.visitorCount}명 다녀옴
-            </span>
-            <span className="absolute top-2 right-2 rounded-full bg-rose-400 px-2 py-1 text-[10px] leading-none text-white">
-              만개 {props.bloomPercent}%
-            </span>
+            <CardBadge variant="dark" label={`${props.visitorCount}명 다녀옴`} className="absolute top-2 left-2" />
+            <CardBadge variant="bloom" label={`만개 ${props.bloomPercent}%`} className="absolute top-2 right-2" />
           </>
         )}
 
         {/* Festival 뱃지 */}
         {props.type === 'festival' && (
           <>
-            <span className="bg-bg-secondary text-text-secondary absolute top-2 left-2 rounded px-2 py-1 text-[10px] leading-none">
-              {props.dateRange}
-            </span>
-            <span className="text-brand-secondary absolute top-2 right-2 rounded bg-green-50 px-2 py-1 text-[10px] leading-none">
-              {props.status}
-            </span>
+            <CardBadge variant="secondary" label={props.dateRange} className="absolute top-2 left-2" />
+            <CardBadge variant="green" label={props.status} className="absolute top-2 right-2" />
           </>
         )}
 
