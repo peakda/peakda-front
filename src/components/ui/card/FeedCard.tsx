@@ -71,12 +71,6 @@ export function FeedCard({
         <MoreMenu isOwner={isOwner} onEdit={onEdit} onDelete={onDelete} onReport={onReport} />
       </div>
 
-      {/* 방문일 + 상태 뱃지 */}
-      <div className="flex items-center gap-2">
-        <CardBadge label={`${visitDate} 방문`} variant="secondary" />
-        <CardBadge label={statusLabel} variant={statusVariant} />
-      </div>
-
       {/* 이미지 캐러셀 */}
       <div className="relative overflow-hidden rounded-2xl">
         <div ref={emblaRef} className="overflow-hidden">
@@ -93,6 +87,12 @@ export function FeedCard({
               </div>
             ))}
           </div>
+        </div>
+
+        {/* 방문일 + 상태 뱃지 */}
+        <div className="absolute top-2 left-2 flex items-center gap-1">
+          <CardBadge label={`${visitDate} 방문`} variant="secondary" />
+          <CardBadge label={statusLabel} variant={statusVariant} />
         </div>
 
         {/* 이미지 번호 */}

@@ -4,16 +4,19 @@ export default function CategoryChip({
   label,
   selected,
   onClick,
+  className,
 }: {
   label: string
   selected: string
   onClick: () => void
+  className?: string
 }) {
   return (
     <div
       onClick={onClick}
       className={cn(
-        'flex h-[28px] w-[58px] cursor-pointer items-center justify-center rounded-full px-2 py-1',
+        'flex h-[28px] w-[60px] cursor-pointer items-center justify-center rounded-full px-2 py-1',
+        className,
         selected === label && 'bg-brand-secondary transition-colors duration-300'
       )}
     >

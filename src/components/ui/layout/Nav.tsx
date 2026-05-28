@@ -44,7 +44,7 @@ export default function Nav({ activeTab }: NavProps) {
         </div>
 
         {/* 피드 */}
-        <div className={itemClass}>
+        <div className={itemClass} onClick={() => router.push('/feed')}>
           <Image
             src={'./icons/feed.svg'}
             alt="피드"
