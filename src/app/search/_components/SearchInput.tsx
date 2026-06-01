@@ -11,9 +11,11 @@ interface SearchBarProps {
   hasQuery: boolean
   setQuery: Dispatch<SetStateAction<string>>
   isCancle?: boolean
+  placeholder?: string
+  onFocus?: () => void
 }
 
-export default function SearchInput({ query, hasQuery, setQuery, isCancle }: SearchBarProps) {
+export default function SearchInput({ query, hasQuery, setQuery, isCancle, placeholder = '검색어를 입력하세요.', onFocus }: SearchBarProps) {
   const router = useRouter()
   return (
     <div className="flex items-center gap-4 px-4 pt-2 pb-2">
@@ -40,7 +42,8 @@ export default function SearchInput({ query, hasQuery, setQuery, isCancle }: Sea
             ) : undefined
           }
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="검색어를 입력하세요."
+          onFocus={onFocus}
+          placeholder={placeholder}
         />
       </div>
 
