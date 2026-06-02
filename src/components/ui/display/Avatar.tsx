@@ -15,11 +15,17 @@ const SIZE: Record<AvatarSize, string> = {
   lg: 'h-10 w-10',
 }
 
+const IMAGESIZE: Record<AvatarSize, string> = {
+  sm: 'h-4 w-4',
+  md: 'h-5 w-5',
+  lg: 'h-6 w-6',
+}
+
 export function Avatar({ imageUrl, size = 'sm', className }: AvatarProps) {
   return (
     <div
       className={cn(
-        'bg-bg-tertiary relative shrink-0 overflow-hidden rounded-full',
+        'bg-bg-tertiary relative flex shrink-0 items-center justify-center overflow-hidden rounded-full',
         SIZE[size],
         className
       )}
@@ -27,7 +33,13 @@ export function Avatar({ imageUrl, size = 'sm', className }: AvatarProps) {
       {imageUrl ? (
         <Image src={imageUrl} alt="" fill className="object-cover" />
       ) : (
-        <Image src="/icons/person.svg" alt="" fill className="object-cover" />
+        <Image
+          src="/icons/person.svg"
+          alt=""
+          width={30}
+          height={30}
+          className={cn('object-cover', IMAGESIZE[size])}
+        />
       )}
     </div>
   )

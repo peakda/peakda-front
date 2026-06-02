@@ -17,7 +17,10 @@ export default function HeartBtn({ InitFavorite, className }: HeartBtnProps) {
   return (
     <button onClick={toggleHeart}>
       <Heart
-        className={cn(isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-300', className)}
+        className={cn(
+          isFavorite ? 'fill-brand-primary text-brand-primary' : 'text-gray-300',
+          className
+        )}
       />
     </button>
   )

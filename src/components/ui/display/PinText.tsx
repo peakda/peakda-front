@@ -2,7 +2,6 @@ import Image from 'next/image'
 import HeartBtn from '../button/HeartBtn'
 import { Badge } from './Badge'
 import Tag from './Tag'
-import { X } from 'lucide-react'
 import IconBtn from '../button/IconBtn'
 
 interface PinTextProps {
@@ -48,7 +47,7 @@ export default function PinText({
           </IconBtn>
           {variant === 'list' && (
             <IconBtn size="md">
-              <X />
+              <Image src={'./icons/alram.svg'} alt="알람" width={20} height={20} />
             </IconBtn>
           )}
         </div>

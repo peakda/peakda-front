@@ -1,13 +1,28 @@
 import { create } from 'zustand'
+import type { MultiImageProps } from '@/types/types'
+
+type DrawerType = 'filter' | 'flower-filter' | 'pin'
 
 interface DrawerState {
   isOpen: boolean
-  openDrawer: () => void
+  type: DrawerType
+  snapHeight: number
+  pinListData: MultiImageProps[]
+  openFilterDrawer: () => void
+  openFlowerFilterDrawer: () => void
+  openPinDrawer: (data: MultiImageProps[]) => void
   closeDrawer: () => void
+  setSnapHeight: (h: number) => void
 }
 
 export const useDrawerStore = create<DrawerState>((set) => ({
   isOpen: false,
-  openDrawer: () => set({ isOpen: true }),
-  closeDrawer: () => set({ isOpen: false }),
+  type: 'filter',
+  snapHeight: 0,
+  pinListData: [],
+  openFilterDrawer: () => set({ isOpen: true, type: 'filter', snapHeight: 400 }),
+  openFlowerFilterDrawer: () => set({ isOpen: true, type: 'flower-filter', snapHeight: 400 }),
+  openPinDrawer: (data) => set({ isOpen: true, type: 'pin', pinListData: data, snapHeight: 400 }),
+  closeDrawer: () => set({ isOpen: false, snapHeight: 0, pinListData: [] }),
+  setSnapHeight: (h) => set({ snapHeight: h }),
 }))

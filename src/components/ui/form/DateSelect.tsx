@@ -43,6 +43,7 @@ const DateSelect = ({
 
         <input
           type="text"
+          readOnly
           value={value}
           placeholder={placeholder}
           onFocus={() => setIsFocused(true)}

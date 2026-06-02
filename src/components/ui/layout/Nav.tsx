@@ -1,18 +1,21 @@
+'use client'
+
 import { Plus } from 'lucide-react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
 interface NavProps {
-  activeTab: 'map' | 'recommend' | 'feed' | 'my' | 'none'
+  activeTab: 'map' | 'explore' | 'feed' | 'my' | 'none'
 }
 
 export default function Nav({ activeTab }: NavProps) {
   const itemClass = 'flex cursor-pointer flex-col items-center gap-1 justify-center'
-
+  const router = useRouter()
   return (
-    <div className="border-border shadow-background fixed bottom-0 z-10 h-20 w-full min-w-[375px] border bg-white px-4 py-2">
+    <div className="border-border shadow-background fixed right-0 bottom-0 left-0 z-10 mx-auto h-20 max-w-[430px] border bg-white px-4 py-2">
       <div className="flex justify-around text-sm">
         {/* 지도 */}
-        <div className={itemClass}>
+        <div className={itemClass} onClick={() => router.push('/map')}>
           <Image
             src={'./icons/explore.svg'}
             alt="지도"
@@ -24,15 +27,15 @@ export default function Nav({ activeTab }: NavProps) {
         </div>
 
         {/* 추천 */}
-        <div className={itemClass}>
+        <div className={itemClass} onClick={() => router.push('/explore')}>
           <Image
             src={'./icons/mapSearch.svg'}
-            alt="추천"
+            alt="탐색"
             width={20}
             height={20}
-            className={activeTab === 'recommend' ? 'opacity-100' : 'opacity-50'}
+            className={activeTab === 'explore' ? 'opacity-100' : 'opacity-50'}
           />
-          <p className={activeTab === 'recommend' ? 'text-black' : 'text-gray-400'}>추천</p>
+          <p className={activeTab === 'explore' ? 'text-black' : 'text-gray-400'}>탐색</p>
         </div>
 
         {/* 플러스 버튼 (중앙) */}
@@ -41,7 +44,7 @@ export default function Nav({ activeTab }: NavProps) {
         </div>
 
         {/* 피드 */}
-        <div className={itemClass}>
+        <div className={itemClass} onClick={() => router.push('/feed')}>
           <Image
             src={'./icons/feed.svg'}
             alt="피드"
