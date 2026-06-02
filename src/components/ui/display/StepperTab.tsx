@@ -13,7 +13,7 @@ export default function StepperTab({ currentStep, totalSteps }: Props) {
                     key={i}
                     className={cn(
                         "flex-1 rounded-full",
-                        i === currentStep ? "bg-brand-secondary" : "bg-bg-tertiary"
+                        i <= currentStep ? "bg-brand-secondary" : "bg-bg-tertiary"
                     )}
                 />
             ))}

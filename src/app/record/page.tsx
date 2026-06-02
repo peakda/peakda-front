@@ -10,6 +10,7 @@ import SearchInput from '@/app/search/_components/SearchInput'
 import Button from '@/components/ui/button/Button'
 import DateSelect from '@/components/ui/form/DateSelect'
 import { Badge } from '@/components/ui/display/Badge'
+import Textarea from '@/components/ui/form/Textarea'
 
 type Category = '유명명소' | '동네스팟'
 
@@ -25,6 +26,26 @@ interface PhotoItem {
   previewUrl: string
 }
 
+const FLOWERS = [
+  '동백꽃',
+  '매화',
+  '개나리',
+  '벚꽃',
+  '철쭉',
+  '진달래',
+  '수국',
+  '연꽃',
+  '코스모스',
+  '단풍',
+  '핑크뮬리',
+  '억새',
+  '유채꽃',
+  '라일락',
+  '튤립',
+]
+const FLOWERS_DEFAULT_COUNT = 8
+const STATUS_OPTIONS = ['이르다', '피기 시작', '절정', '늦었다']
+
 const MOCK_RESULTS: LocationResult[] = [
   { id: 1, name: '장소명', address: '경상남도 창원시 진해구', badge: '동네스팟' },
   { id: 2, name: '장소명', address: '경상남도 창원시 진해구', badge: '유명장소' },
@@ -36,6 +57,7 @@ const MOCK_RESULTS: LocationResult[] = [
 
 export default function RecordPage() {
   const router = useRouter()
+  const [step, setStep] = useState(0)
   const [location, setLocation] = useState('')
   const [category, setCategory] = useState<Category>('유명명소')
   const [showCategoryPicker, setShowCategoryPicker] = useState(false)
@@ -45,10 +67,19 @@ export default function RecordPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedResult, setSelectedResult] = useState<LocationResult | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [selectedFlowers, setSelectedFlowers] = useState<string[]>([])
+  const [selectedStatus, setSelectedStatus] = useState('')
+  const [memo, setMemo] = useState('')
+  const [showAllFlowers, setShowAllFlowers] = useState(false)
+
+  const toggleFlower = (flower: string) =>
+    setSelectedFlowers((prev) =>
+      prev.includes(flower) ? prev.filter((f) => f !== flower) : [...prev, flower]
+    )
 
   const hasLocation = location.trim().length > 0
   const hasSearchQuery = searchQuery.trim().length > 0
-  const isValid = hasLocation && photoItems.length > 0 && date.trim().length > 0
+  const isValid = hasLocation && photoItems.length > 0
 
   const handlePhotoAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? [])
@@ -72,6 +103,119 @@ export default function RecordPage() {
     setIsSearchMode(false)
     setSearchQuery('')
     setSelectedResult(null)
+  }
+
+  if (step === 1) {
+    const visibleFlowers = showAllFlowers ? FLOWERS : FLOWERS.slice(0, FLOWERS_DEFAULT_COUNT)
+    const isStep2Valid = selectedFlowers.length > 0 && selectedStatus !== ''
+
+    return (
+      <div className="flex min-h-screen flex-col bg-white">
+        <div className="h-14">
+          <Header
+            left={
+              <button onClick={() => setStep(0)}>
+                <ChevronLeft size={24} />
+              </button>
+            }
+            center={<span className="text-[15px] font-medium">스팟 기록</span>}
+          />
+        </div>
+
+        <div className="px-4">
+          <StepperTab currentStep={1} totalSteps={2} />
+        </div>
+
+        <div className="flex flex-1 flex-col gap-6 overflow-y-auto pt-6 pb-8">
+          <div className="flex flex-col gap-1 px-4">
+            <h2 className="text-xl font-semibold">이 스팟의 모습은 어땠나요?</h2>
+            <p className="text-text-tertiary text-sm">
+              식물 종류와 개화 상태, 그날의 추억을 들려주세요.
+            </p>
+          </div>
+
+          {/* 식물 */}
+          <div className="flex flex-col gap-2 px-4">
+            <p className="text-sm font-medium">
+              식물 <span className="text-brand-primary">*</span>
+              <span className="text-text-tertiary ml-1 font-normal">복수선택 가능</span>
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {visibleFlowers.map((flower) => {
+                const isSelected = selectedFlowers.includes(flower)
+                return (
+                  <Badge
+                    key={flower}
+                    label={flower}
+                    variant="ghost"
+                    color="gray"
+                    className={cn(
+                      'cursor-pointer rounded-xl px-3.5 py-2',
+                      isSelected && 'border-brand-secondary text-text-secondary bg-green-50'
+                    )}
+                    onClick={() => toggleFlower(flower)}
+                  />
+                )
+              })}
+              {!showAllFlowers && (
+                <Badge
+                  label="더 많은 식물"
+                  leftIcon={<Plus size={12} />}
+                  variant="ghost"
+                  color="gray"
+                  className="cursor-pointer rounded-xl px-3.5 py-2"
+                  onClick={() => setShowAllFlowers(true)}
+                />
+              )}
+            </div>
+          </div>
+
+          {/* 상태 */}
+          <div className="flex flex-col gap-2 px-4">
+            <p className="text-sm font-medium">
+              상태 <span className="text-brand-primary">*</span>
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {STATUS_OPTIONS.map((status) => (
+                <Button
+                  key={status}
+                  variant="outlined"
+                  color={selectedStatus === status ? 'primary' : 'default'}
+                  size="md"
+                  onClick={() => setSelectedStatus(status)}
+                  className={cn(
+                    'w-20 rounded-2xl px-2',
+                    selectedStatus === status && 'bg-green-50'
+                  )}
+                >
+                  {status}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* 메모 */}
+          <div className="flex flex-col gap-2 px-4">
+            <p className="text-sm font-medium">
+              메모 <span className="text-text-tertiary font-normal">(선택)</span>
+            </p>
+            <Textarea
+              value={memo}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setMemo(e.target.value)}
+              placeholder="해당 장소에 대한 추억과 풍경을 작성해주세요."
+              rows={5}
+              variant="none"
+            />
+          </div>
+        </div>
+
+        <div className="p-4 pb-8">
+          <Button variant="filled" color="primary" size="lg" disabled={!isStep2Valid}>
+            게시하기
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   if (isSearchMode) {
@@ -112,12 +256,15 @@ export default function RecordPage() {
                 )}
               >
                 <div className="flex flex-col items-start gap-0.5">
-                  <span className="text-sm font-medium text-text-primary">{result.name}</span>
-                  <span className="text-xs text-text-tertiary">{result.address}</span>
+                  <span className="text-text-primary text-sm font-medium">{result.name}</span>
+                  <span className="text-text-tertiary text-xs">{result.address}</span>
                 </div>
                 <Badge
                   label={result.badge}
-                  className={cn('bg-bg-primary', result.badge === '동네스팟' ? 'text-yellow-500' : 'text-green-400')}
+                  className={cn(
+                    'bg-bg-primary',
+                    result.badge === '동네스팟' ? 'text-yellow-500' : 'text-green-400'
+                  )}
                 />
               </button>
             ))}
@@ -159,7 +306,9 @@ export default function RecordPage() {
       <div className="flex flex-1 flex-col gap-6 pt-6">
         <div className="flex flex-col gap-1 px-4">
           <h2 className="text-xl font-semibold">어디에 있는 스팟인가요?</h2>
-          <p className="text-sm text-text-tertiary">스팟의 위치와 사진, 다녀온 날짜를 알려주세요.</p>
+          <p className="text-text-tertiary text-sm">
+            스팟의 위치와 사진, 다녀온 날짜를 알려주세요.
+          </p>
         </div>
 
         {/* 위치 */}
@@ -171,11 +320,11 @@ export default function RecordPage() {
             <div className="flex flex-col gap-2 px-4">
               <button
                 onClick={() => setIsSearchMode(true)}
-                className="bg-bg-secondary border-border-secondary flex h-12 w-full items-center rounded-3xl border px-4 text-left text-base text-text-primary"
+                className="bg-bg-secondary border-border-secondary text-text-primary flex h-12 w-full items-center rounded-3xl border px-4 text-left text-base"
               >
                 {location}
               </button>
-              <div className="flex items-center justify-between p-1.5 rounded-2xl w-1/2 bg-green-50">
+              <div className="flex w-1/2 items-center justify-between rounded-2xl bg-green-50 p-1.5">
                 <div className="flex items-center gap-1.5">
                   <span
                     className={cn(
@@ -183,14 +332,14 @@ export default function RecordPage() {
                       category === '유명명소' ? 'bg-green-400' : 'bg-yellow-500'
                     )}
                   />
-                  <span className="text-sm text-text-secondary">{category}로 인식</span>
+                  <span className="text-text-secondary text-sm">{category}로 인식</span>
                 </div>
                 <Button
                   onClick={() => setShowCategoryPicker((v) => !v)}
-                  size='sm'
-                  variant='outlined'
-                  color='default'
-                  className='bg-bg-primary px-4 py-2 text-sm text-text-secondary font-medium'
+                  size="sm"
+                  variant="outlined"
+                  color="default"
+                  className="bg-bg-primary text-text-secondary px-4 py-2 text-sm font-medium"
                 >
                   변경
                 </Button>
@@ -234,14 +383,21 @@ export default function RecordPage() {
             <p className="text-sm font-medium">
               사진 <span className="text-brand-primary">*</span>
             </p>
-            <p className="text-xs text-text-secondary">최대 5장, 첫 사진이 대표 이미지</p>
+            <p className="text-text-secondary text-xs">최대 5장, 첫 사진이 대표 이미지</p>
           </div>
           {photoItems.length > 0 && (
             <div className="flex gap-2 overflow-x-auto pb-1">
               {photoItems.map((item, i) => (
-                <div key={i} className="bg-bg-secondary relative h-24 w-24 shrink-0 overflow-hidden rounded-xl">
+                <div
+                  key={i}
+                  className="bg-bg-secondary relative h-24 w-24 shrink-0 overflow-hidden rounded-xl"
+                >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={item.previewUrl} alt={`사진 ${i + 1}`} className="h-full w-full object-cover" />
+                  <img
+                    src={item.previewUrl}
+                    alt={`사진 ${i + 1}`}
+                    className="h-full w-full object-cover"
+                  />
                   <button
                     onClick={() => handleRemovePhoto(i)}
                     className="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60"
@@ -283,7 +439,13 @@ export default function RecordPage() {
       </div>
 
       <div className="p-4 pb-8">
-        <Button variant="filled" color="primary" size="lg" disabled={!isValid}>
+        <Button
+          variant="filled"
+          color="primary"
+          size="lg"
+          disabled={!isValid}
+          onClick={() => setStep(1)}
+        >
           다음
         </Button>
       </div>
