@@ -1,11 +1,10 @@
 import Image from 'next/image'
 import { cn } from '@/lib/utils/cn'
+import { useRouter } from 'next/navigation'
 
 interface SearchBarProps {
   placeholder?: string
   description?: string
-  value: string
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onFilterClick?: () => void
   className?: string
 }
@@ -13,12 +12,12 @@ interface SearchBarProps {
 export const SearchBar = ({
   placeholder,
   description,
-  value,
-  onChange,
+
   onFilterClick,
   className,
 }: SearchBarProps) => {
-  const isInput = value.length > 0
+  const router = useRouter()
+
   return (
     <div
       className={cn('absolute top-12 z-10 flex h-12 w-full flex-col gap-1 px-4 py-1', className)}
@@ -28,16 +27,16 @@ export const SearchBar = ({
           <Image src="./icons/search.svg" alt="검색" width={24} height={24} />
           <input
             type="text"
-            value={value}
-            onChange={onChange}
             placeholder={placeholder}
-            className="placeholder:text-text-primary flex-1 bg-transparent text-base font-medium text-slate-900 outline-none placeholder:-translate-y-1"
+            readOnly
+            onClick={() => router.push('/search')}
+            className="placeholder:text-text-primary flex-1 cursor-pointer bg-transparent text-base font-medium text-slate-900 outline-none placeholder:-translate-y-1"
           />
-          <button type="button" onClick={onFilterClick}>
+          <button type="button" className="cursor-pointer" onClick={onFilterClick}>
             <Image src="./icons/filter.svg" alt="필터" width={24} height={24} />
           </button>
         </div>
-        {description && !isInput && (
+        {description && (
           <p className="absolute bottom-1 pl-8 text-xs tracking-tight text-[#4E5666]">
             {description}
           </p>

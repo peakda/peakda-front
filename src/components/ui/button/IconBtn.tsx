@@ -9,7 +9,7 @@ interface IconBtnProps {
   className?: string
 }
 const BASE =
-  'items-center justify-center flex rounded-full transition-colors duration-200 cursor-pointer bg-white border border-border-primary'
+  'items-center justify-center flex rounded-full transition-colors duration-200 cursor-pointer bg-bg-secondary border border-border-primary'
 
 const SIZE: Record<IconBtnSize, string> = {
   lg: 'h-12 w-12 p-1 ',

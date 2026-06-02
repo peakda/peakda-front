@@ -42,7 +42,14 @@ export function Tabs({
     <TabsContext.Provider value={{ active, setActive, uid, mounted: mountedRef.current }}>
       <div className={cn('w-full', className)}>
         {/* Tab List */}
-        <div role="tablist" aria-label={ariaLabel} className="flex border-b border-gray-200">
+        <div
+          role="tablist"
+          aria-label={ariaLabel}
+          className={cn(
+            'grid w-full border-b border-gray-200 px-4',
+            ({ 2: 'grid-cols-2', 3: 'grid-cols-3', 4: 'grid-cols-4' } as Record<number, string>)[tabs.length] ?? 'grid-cols-3'
+          )}
+        >
           {tabs.map((tab) => (
             <TabTrigger key={tab.value} tab={tab} tabs={tabs} />
           ))}
