@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { X, Plus, ChevronLeft } from 'lucide-react'
+import { X, Plus, ChevronLeft, Check } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils/cn'
 import Header from '@/components/ui/layout/Header'
@@ -11,6 +11,7 @@ import Button from '@/components/ui/button/Button'
 import DateSelect from '@/components/ui/form/DateSelect'
 import { Badge } from '@/components/ui/display/Badge'
 import Textarea from '@/components/ui/form/Textarea'
+import { PlantSelectDrawer } from '@/app/record/_components/PlantSelectDrawer'
 import { useKakaoPlaces, type KakaoPlace } from '@/hooks/useKakaoPlaces'
 import { usePlants } from '@/api/facades/plant'
 import { useMatchSpot } from '@/api/facades/spot'
@@ -62,7 +63,8 @@ export default function RecordPage() {
   const [selectedPlantIds, setSelectedPlantIds] = useState<number[]>([])
   const [selectedStatus, setSelectedStatus] = useState<BloomStage | ''>('')
   const [memo, setMemo] = useState('')
-  const [showAllPlants, setShowAllPlants] = useState(false)
+  const [plantDrawerOpen, setPlantDrawerOpen] = useState(false)
+  const [isComplete, setIsComplete] = useState(false)
 
   const { results, search } = useKakaoPlaces()
   const { data: plants } = usePlants()
@@ -176,14 +178,76 @@ export default function RecordPage() {
       }
 
       await createRecord.mutateAsync({ data: payload })
-      router.back()
+      setIsComplete(true)
     } catch (err) {
       console.error(err)
     }
   }
 
+  // 완료 화면 → "계속 기록하기": 입력값을 모두 초기화하고 Step1로 복귀
+  const handleRecordAgain = () => {
+    photoItems.forEach((item) => URL.revokeObjectURL(item.previewUrl))
+    setStep(0)
+    setLocation('')
+    setSelectedSpot(null)
+    setCategory('유명명소')
+    setShowCategoryPicker(false)
+    setPhotoItems([])
+    setDate('')
+    setIsSearchMode(false)
+    setSearchQuery('')
+    setSelectedPlace(null)
+    setSelectedPlantIds([])
+    setSelectedStatus('')
+    setMemo('')
+    setPlantDrawerOpen(false)
+    setIsComplete(false)
+  }
+
+  if (isComplete) {
+    return (
+      <div className="flex min-h-screen flex-col bg-white">
+        <div className="h-14">
+          <Header center={<span className="text-[15px] font-medium">스팟 기록</span>} />
+        </div>
+
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 px-4 text-center">
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-50">
+            <Check size={36} className="text-brand-secondary" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <h2 className="text-xl font-semibold">기록이 등록되었어요!</h2>
+            <p className="text-text-tertiary text-sm">지도 속 타이밍에 반영해보아요</p>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2 p-4 pb-8">
+          <Button
+            variant="filled"
+            color="primary"
+            size="lg"
+            onClick={() => router.push('/map')}
+          >
+            지도로 확인하기
+          </Button>
+          <Button variant="outlined" color="primary" size="lg" onClick={handleRecordAgain}>
+            계속 기록하기
+          </Button>
+          <Button variant="ghost" color="default" size="lg" onClick={() => router.back()}>
+            종료
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
   if (step === 1) {
-    const visiblePlants = showAllPlants ? (plants ?? []) : (plants ?? []).slice(0, PLANTS_DEFAULT_COUNT)
+    // 기본 노출 식물(앞 8개) + 그 밖에서 선택된 식물(드로어에서 선택/추가)을 함께 노출
+    const basePlants = (plants ?? []).slice(0, PLANTS_DEFAULT_COUNT)
+    const extraSelected = (plants ?? []).filter(
+      (p) => selectedPlantIds.includes(p.id) && !basePlants.some((b) => b.id === p.id)
+    )
+    const visiblePlants = [...basePlants, ...extraSelected]
     const isStep2Valid = selectedPlantIds.length > 0 && selectedStatus !== ''
 
     return (
@@ -234,16 +298,14 @@ export default function RecordPage() {
                   />
                 )
               })}
-              {!showAllPlants && (plants ?? []).length > PLANTS_DEFAULT_COUNT && (
-                <Badge
-                  label="더 많은 식물"
-                  leftIcon={<Plus size={12} />}
-                  variant="ghost"
-                  color="gray"
-                  className="cursor-pointer rounded-xl px-3.5 py-2"
-                  onClick={() => setShowAllPlants(true)}
-                />
-              )}
+              <Badge
+                label="더 많은 식물"
+                leftIcon={<Plus size={12} />}
+                variant="ghost"
+                color="gray"
+                className="cursor-pointer rounded-xl px-3.5 py-2"
+                onClick={() => setPlantDrawerOpen(true)}
+              />
             </div>
           </div>
 
@@ -297,6 +359,14 @@ export default function RecordPage() {
             게시하기
           </Button>
         </div>
+
+        <PlantSelectDrawer
+          open={plantDrawerOpen}
+          onOpenChange={setPlantDrawerOpen}
+          plants={plants ?? []}
+          selectedIds={selectedPlantIds}
+          onToggle={togglePlant}
+        />
       </div>
     )
   }
