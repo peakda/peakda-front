@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { X, Plus, ChevronLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils/cn'
@@ -11,75 +11,81 @@ import Button from '@/components/ui/button/Button'
 import DateSelect from '@/components/ui/form/DateSelect'
 import { Badge } from '@/components/ui/display/Badge'
 import Textarea from '@/components/ui/form/Textarea'
+import { useKakaoPlaces, type KakaoPlace } from '@/hooks/useKakaoPlaces'
+import { usePlants } from '@/api/facades/plant'
+import { useMatchSpot } from '@/api/facades/spot'
+import { useCreateSpotRecord, useUploadSpotRecordPhotos } from '@/api/facades/spot-record'
+import type { CreateSpotRecordRequest } from '@/api/generated/peakdaApi.schemas'
 
 type Category = '유명명소' | '동네스팟'
-
-interface LocationResult {
-  id: number
-  name: string
-  address: string
-  badge: string
-}
 
 interface PhotoItem {
   file: File
   previewUrl: string
 }
 
-const FLOWERS = [
-  '동백꽃',
-  '매화',
-  '개나리',
-  '벚꽃',
-  '철쭉',
-  '진달래',
-  '수국',
-  '연꽃',
-  '코스모스',
-  '단풍',
-  '핑크뮬리',
-  '억새',
-  '유채꽃',
-  '라일락',
-  '튤립',
-]
-const FLOWERS_DEFAULT_COUNT = 8
-const STATUS_OPTIONS = ['이르다', '피기 시작', '절정', '늦었다']
+// 매칭/생성에 필요한 스팟 정보 (카카오 검색 + 스팟 매칭 결과)
+interface SelectedSpot {
+  name: string
+  address: string | null
+  latitude: number
+  longitude: number
+  kakaoPlaceId: string
+  existingSpotId: number | null
+  attractionId: number | null
+}
 
-const MOCK_RESULTS: LocationResult[] = [
-  { id: 1, name: '장소명', address: '경상남도 창원시 진해구', badge: '동네스팟' },
-  { id: 2, name: '장소명', address: '경상남도 창원시 진해구', badge: '유명장소' },
-  { id: 3, name: '장소명', address: '경상남도 창원시 진해구', badge: '유명장소' },
-  { id: 4, name: '장소명', address: '경상남도 창원시 진해구', badge: '유명장소' },
-  { id: 5, name: '장소명', address: '경상남도 창원시 진해구', badge: '유명장소' },
-  { id: 6, name: '장소명', address: '경상남도 창원시 진해구', badge: '유명장소' },
-]
+const PLANTS_DEFAULT_COUNT = 8
+
+const STATUS_OPTIONS = [
+  { label: '이르다', value: 'EARLY' },
+  { label: '피기 시작', value: 'STARTING' },
+  { label: '절정', value: 'PEAK' },
+  { label: '늦었다', value: 'LATE' },
+] as const
+
+type BloomStage = (typeof STATUS_OPTIONS)[number]['value']
 
 export default function RecordPage() {
   const router = useRouter()
   const [step, setStep] = useState(0)
   const [location, setLocation] = useState('')
+  const [selectedSpot, setSelectedSpot] = useState<SelectedSpot | null>(null)
   const [category, setCategory] = useState<Category>('유명명소')
   const [showCategoryPicker, setShowCategoryPicker] = useState(false)
   const [photoItems, setPhotoItems] = useState<PhotoItem[]>([])
   const [date, setDate] = useState('')
   const [isSearchMode, setIsSearchMode] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedResult, setSelectedResult] = useState<LocationResult | null>(null)
+  const [selectedPlace, setSelectedPlace] = useState<KakaoPlace | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [selectedFlowers, setSelectedFlowers] = useState<string[]>([])
-  const [selectedStatus, setSelectedStatus] = useState('')
+  const [selectedPlantIds, setSelectedPlantIds] = useState<number[]>([])
+  const [selectedStatus, setSelectedStatus] = useState<BloomStage | ''>('')
   const [memo, setMemo] = useState('')
-  const [showAllFlowers, setShowAllFlowers] = useState(false)
+  const [showAllPlants, setShowAllPlants] = useState(false)
 
-  const toggleFlower = (flower: string) =>
-    setSelectedFlowers((prev) =>
-      prev.includes(flower) ? prev.filter((f) => f !== flower) : [...prev, flower]
+  const { results, search } = useKakaoPlaces()
+  const { data: plants } = usePlants()
+  const matchSpot = useMatchSpot()
+  const uploadPhotos = useUploadSpotRecordPhotos()
+  const createRecord = useCreateSpotRecord()
+
+  // 검색어 변경 시 카카오 장소 검색 (디바운스)
+  useEffect(() => {
+    if (!isSearchMode) return
+    const timer = setTimeout(() => search(searchQuery), 300)
+    return () => clearTimeout(timer)
+  }, [searchQuery, isSearchMode, search])
+
+  const togglePlant = (id: number) =>
+    setSelectedPlantIds((prev) =>
+      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
     )
 
   const hasLocation = location.trim().length > 0
   const hasSearchQuery = searchQuery.trim().length > 0
   const isValid = hasLocation && photoItems.length > 0
+  const isSubmitting = matchSpot.isPending || uploadPhotos.isPending || createRecord.isPending
 
   const handlePhotoAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? [])
@@ -95,19 +101,90 @@ export default function RecordPage() {
     })
   }
 
-  const handleSelectLocation = () => {
-    if (!selectedResult) return
-    setLocation(selectedResult.name)
-    setCategory(selectedResult.badge === '동네스팟' ? '동네스팟' : '유명명소')
+  // 카카오 장소 선택 → 좌표 기반 스팟 매칭 → 제안 분류로 카테고리 초기화
+  const handleSelectPlace = async () => {
+    if (!selectedPlace) return
+
+    const latitude = Number(selectedPlace.y)
+    const longitude = Number(selectedPlace.x)
+    const address = selectedPlace.road_address_name || selectedPlace.address_name || null
+
+    try {
+      const match = await matchSpot.mutateAsync({
+        data: {
+          latitude,
+          longitude,
+          name: selectedPlace.place_name,
+          address,
+          kakaoPlaceId: selectedPlace.id,
+        },
+      })
+      const matchData = match.data.data
+      const suggestedType = matchData?.suggestedType ?? 'LOCAL'
+
+      setSelectedSpot({
+        name: selectedPlace.place_name,
+        address,
+        latitude,
+        longitude,
+        kakaoPlaceId: selectedPlace.id,
+        existingSpotId: matchData?.spot?.id ?? null,
+        attractionId: matchData?.spot?.attractionId ?? null,
+      })
+      setLocation(selectedPlace.place_name)
+      setCategory(suggestedType === 'ATTRACTION' ? '유명명소' : '동네스팟')
+    } catch (err) {
+      console.error(err)
+      return
+    }
+
     setShowCategoryPicker(false)
     setIsSearchMode(false)
     setSearchQuery('')
-    setSelectedResult(null)
+    setSelectedPlace(null)
+  }
+
+  // 사진 업로드 → photoKeys 확보 → PUBLISHED 기록 생성
+  const handlePublish = async () => {
+    if (!selectedSpot || selectedStatus === '') return
+
+    try {
+      const photoKeys: string[] = []
+      for (const item of photoItems) {
+        const res = await uploadPhotos.mutateAsync({ data: { images: item.file } })
+        const key = res.data.data?.photos[0]?.objectKey
+        if (key) photoKeys.push(key)
+      }
+
+      const payload: CreateSpotRecordRequest = {
+        spotInput: {
+          existingSpotId: selectedSpot.existingSpotId,
+          type: category === '유명명소' ? 'ATTRACTION' : 'LOCAL',
+          attractionId: selectedSpot.attractionId,
+          name: selectedSpot.name,
+          address: selectedSpot.address,
+          latitude: selectedSpot.latitude,
+          longitude: selectedSpot.longitude,
+          kakaoPlaceId: selectedSpot.kakaoPlaceId,
+        },
+        visitedDate: date ? date.replaceAll('.', '-') : null,
+        bloomStage: selectedStatus,
+        memo: memo.trim() || null,
+        plantIds: selectedPlantIds,
+        photoKeys,
+        status: 'PUBLISHED',
+      }
+
+      await createRecord.mutateAsync({ data: payload })
+      router.back()
+    } catch (err) {
+      console.error(err)
+    }
   }
 
   if (step === 1) {
-    const visibleFlowers = showAllFlowers ? FLOWERS : FLOWERS.slice(0, FLOWERS_DEFAULT_COUNT)
-    const isStep2Valid = selectedFlowers.length > 0 && selectedStatus !== ''
+    const visiblePlants = showAllPlants ? (plants ?? []) : (plants ?? []).slice(0, PLANTS_DEFAULT_COUNT)
+    const isStep2Valid = selectedPlantIds.length > 0 && selectedStatus !== ''
 
     return (
       <div className="flex min-h-screen flex-col bg-white">
@@ -141,30 +218,30 @@ export default function RecordPage() {
               <span className="text-text-tertiary ml-1 font-normal">복수선택 가능</span>
             </p>
             <div className="flex flex-wrap gap-2">
-              {visibleFlowers.map((flower) => {
-                const isSelected = selectedFlowers.includes(flower)
+              {visiblePlants.map((plant) => {
+                const isSelected = selectedPlantIds.includes(plant.id)
                 return (
                   <Badge
-                    key={flower}
-                    label={flower}
+                    key={plant.id}
+                    label={plant.name}
                     variant="ghost"
                     color="gray"
                     className={cn(
                       'cursor-pointer rounded-xl px-3.5 py-2',
                       isSelected && 'border-brand-secondary text-text-secondary bg-green-50'
                     )}
-                    onClick={() => toggleFlower(flower)}
+                    onClick={() => togglePlant(plant.id)}
                   />
                 )
               })}
-              {!showAllFlowers && (
+              {!showAllPlants && (plants ?? []).length > PLANTS_DEFAULT_COUNT && (
                 <Badge
                   label="더 많은 식물"
                   leftIcon={<Plus size={12} />}
                   variant="ghost"
                   color="gray"
                   className="cursor-pointer rounded-xl px-3.5 py-2"
-                  onClick={() => setShowAllFlowers(true)}
+                  onClick={() => setShowAllPlants(true)}
                 />
               )}
             </div>
@@ -178,17 +255,17 @@ export default function RecordPage() {
             <div className="flex flex-wrap gap-2">
               {STATUS_OPTIONS.map((status) => (
                 <Button
-                  key={status}
+                  key={status.value}
                   variant="outlined"
-                  color={selectedStatus === status ? 'primary' : 'default'}
+                  color={selectedStatus === status.value ? 'primary' : 'default'}
                   size="md"
-                  onClick={() => setSelectedStatus(status)}
+                  onClick={() => setSelectedStatus(status.value)}
                   className={cn(
                     'w-20 rounded-2xl px-2',
-                    selectedStatus === status && 'bg-green-50'
+                    selectedStatus === status.value && 'bg-green-50'
                   )}
                 >
-                  {status}
+                  {status.label}
                 </Button>
               ))}
             </div>
@@ -210,7 +287,13 @@ export default function RecordPage() {
         </div>
 
         <div className="p-4 pb-8">
-          <Button variant="filled" color="primary" size="lg" disabled={!isStep2Valid}>
+          <Button
+            variant="filled"
+            color="primary"
+            size="lg"
+            disabled={!isStep2Valid || isSubmitting}
+            onClick={handlePublish}
+          >
             게시하기
           </Button>
         </div>
@@ -246,26 +329,23 @@ export default function RecordPage() {
 
         {hasSearchQuery && (
           <div className="flex-1 overflow-y-auto">
-            {MOCK_RESULTS.map((result) => (
+            {results.map((result) => (
               <button
                 key={result.id}
-                onClick={() => setSelectedResult(result)}
+                onClick={() => setSelectedPlace(result)}
                 className={cn(
                   'flex w-full items-center justify-between px-4 py-3',
-                  selectedResult?.id === result.id && 'bg-brand-secondary/10'
+                  selectedPlace?.id === result.id && 'bg-brand-secondary/10'
                 )}
               >
                 <div className="flex flex-col items-start gap-0.5">
-                  <span className="text-text-primary text-sm font-medium">{result.name}</span>
-                  <span className="text-text-tertiary text-xs">{result.address}</span>
+                  <span className="text-text-primary text-sm font-medium">
+                    {result.place_name}
+                  </span>
+                  <span className="text-text-tertiary text-xs">
+                    {result.road_address_name || result.address_name}
+                  </span>
                 </div>
-                <Badge
-                  label={result.badge}
-                  className={cn(
-                    'bg-bg-primary',
-                    result.badge === '동네스팟' ? 'text-yellow-500' : 'text-green-400'
-                  )}
-                />
               </button>
             ))}
           </div>
@@ -276,8 +356,8 @@ export default function RecordPage() {
             variant="filled"
             color="primary"
             size="lg"
-            disabled={!selectedResult}
-            onClick={handleSelectLocation}
+            disabled={!selectedPlace || matchSpot.isPending}
+            onClick={handleSelectPlace}
           >
             선택
           </Button>
