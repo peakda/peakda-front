@@ -26,10 +26,12 @@ import type {
 
 import type {
   ApiResponseNicknameCheckResponse,
+  ApiResponseProfileImageResponse,
   ApiResponseUnit,
   ApiResponseUserInfoResponse,
   CheckNicknameParams,
-  SignupCompleteRequest
+  SignupCompleteRequest,
+  SignupProfileImageUploadForm
 } from '../peakdaApi.schemas';
 
 import { customInstance } from '../../mutator/index';
@@ -39,7 +41,91 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export type completeSignupResponse200 = {
+export type uploadSignupProfileImageResponse200 = {
+  data: ApiResponseProfileImageResponse
+  status: 200
+}
+
+export type uploadSignupProfileImageResponseSuccess = (uploadSignupProfileImageResponse200) & {
+  headers: Headers;
+};
+;
+
+export type uploadSignupProfileImageResponse = (uploadSignupProfileImageResponseSuccess)
+
+export const getUploadSignupProfileImageUrl = () => {
+
+
+
+
+  return `/api/auth/signup/profile-image`
+}
+
+/**
+ * signup-token 쿠키로 인증된 사용자가 회원가입 완료 전에 프로필 이미지를 업로드한다. 이미지는 temp 영역에 저장되며, 가입 완료 시 정식 영역으로 이관된다. 응답으로 받은 profileImageKey 를 /signup/complete 의 profileImageUrl 로 전달해야 한다.
+ * @summary 회원가입 임시 프로필 이미지 업로드
+ */
+export const uploadSignupProfileImage = async (signupProfileImageUploadForm: SignupProfileImageUploadForm, options?: RequestInit): Promise<uploadSignupProfileImageResponse> => {
+    const formData = new FormData();
+formData.append(`image`, signupProfileImageUploadForm.image);
+
+  return customInstance<uploadSignupProfileImageResponse>(getUploadSignupProfileImageUrl(),
+  {
+    ...options,
+    method: 'POST'
+    ,
+    body: formData
+  }
+);}
+
+
+
+
+export const getUploadSignupProfileImageMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadSignupProfileImage>>, TError,{data: SignupProfileImageUploadForm}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof uploadSignupProfileImage>>, TError,{data: SignupProfileImageUploadForm}, TContext> => {
+
+const mutationKey = ['uploadSignupProfileImage'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadSignupProfileImage>>, {data: SignupProfileImageUploadForm}> = (props) => {
+          const {data} = props ?? {};
+
+          return  uploadSignupProfileImage(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UploadSignupProfileImageMutationResult = NonNullable<Awaited<ReturnType<typeof uploadSignupProfileImage>>>
+    export type UploadSignupProfileImageMutationBody = SignupProfileImageUploadForm
+    export type UploadSignupProfileImageMutationError = unknown
+
+    /**
+ * @summary 회원가입 임시 프로필 이미지 업로드
+ */
+export const useUploadSignupProfileImage = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadSignupProfileImage>>, TError,{data: SignupProfileImageUploadForm}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof uploadSignupProfileImage>>,
+        TError,
+        {data: SignupProfileImageUploadForm},
+        TContext
+      > => {
+      return useMutation(getUploadSignupProfileImageMutationOptions(options), queryClient);
+    }
+    export type completeSignupResponse200 = {
   data: ApiResponseUnit
   status: 200
 }
@@ -507,124 +593,6 @@ export function useGetCurrentUser<TData = Awaited<ReturnType<typeof getCurrentUs
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetCurrentUserQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-
-export type getOauth2AuthorizationKakaoResponse302 = {
-  data: void
-  status: 302
-}
-
-;
-export type getOauth2AuthorizationKakaoResponseError = (getOauth2AuthorizationKakaoResponse302) & {
-  headers: Headers;
-};
-
-export type getOauth2AuthorizationKakaoResponse = (getOauth2AuthorizationKakaoResponseError)
-
-export const getGetOauth2AuthorizationKakaoUrl = () => {
-
-
-
-
-  return `/oauth2/authorization/kakao`
-}
-
-/**
- * 이 엔드포인트는 API 호출용이 아니라 브라우저 이동용입니다.
-
-카카오 로그인은 Swagger UI의 Execute 버튼이 아니라 아래 링크를 클릭해서 시작하세요.
-
-- [Local 카카오 로그인 시작](http://localhost:8080/oauth2/authorization/kakao)
-- [Develop 카카오 로그인 시작](https://peakda-dev.up.railway.app/oauth2/authorization/kakao)
- * @summary 카카오 로그인 시작 - 링크 클릭용
- */
-export const getOauth2AuthorizationKakao = async ( options?: RequestInit): Promise<getOauth2AuthorizationKakaoResponse> => {
-
-  return customInstance<getOauth2AuthorizationKakaoResponse>(getGetOauth2AuthorizationKakaoUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetOauth2AuthorizationKakaoQueryKey = () => {
-    return [
-    `/oauth2/authorization/kakao`
-    ] as const;
-    }
-
-
-export const getGetOauth2AuthorizationKakaoQueryOptions = <TData = Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>, TError = void>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetOauth2AuthorizationKakaoQueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>> = ({ signal }) => getOauth2AuthorizationKakao({ signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetOauth2AuthorizationKakaoQueryResult = NonNullable<Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>>
-export type GetOauth2AuthorizationKakaoQueryError = void
-
-
-export function useGetOauth2AuthorizationKakao<TData = Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>, TError = void>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>,
-          TError,
-          Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetOauth2AuthorizationKakao<TData = Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>, TError = void>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>,
-          TError,
-          Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetOauth2AuthorizationKakao<TData = Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>, TError = void>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary 카카오 로그인 시작 - 링크 클릭용
- */
-
-export function useGetOauth2AuthorizationKakao<TData = Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>, TError = void>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getOauth2AuthorizationKakao>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetOauth2AuthorizationKakaoQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

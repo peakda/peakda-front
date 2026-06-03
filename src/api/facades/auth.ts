@@ -6,8 +6,10 @@ import {
   getGetCurrentUserQueryKey,
   logout,
   refresh,
+  uploadSignupProfileImage,
   useCompleteSignup as useCompleteSignupGen,
   useGetCurrentUser,
+  useUploadSignupProfileImage as useUploadSignupProfileImageGen,
 } from '@/api/generated/auth/auth'
 import type { SignupCompleteRequest } from '@/api/generated/peakdaApi.schemas'
 
@@ -35,6 +37,11 @@ export async function completeSignupApi(payload: SignupCompleteRequest) {
   return res
 }
 
+export async function uploadSignupProfileImageApi(image: Blob) {
+  const res = await uploadSignupProfileImage({ image })
+  return res.data.data ?? null
+}
+
 export async function refreshApi() {
   await refresh()
 }
@@ -49,6 +56,10 @@ export const useCurrentUser = () =>
   useGetCurrentUser({
     query: { select: (res) => res.data.data ?? null },
   })
+
+// mutate({ data: { image } }) 형태로 호출
+// 회원가입 임시 업로드 — 응답의 profileImageKey 를 completeSignup 의 profileImageUrl 로 전달
+export const useUploadSignupProfileImage = () => useUploadSignupProfileImageGen()
 
 // mutate({ data: payload }) 형태로 호출
 // 성공 시 유저 정보 캐시 자동 무효화
