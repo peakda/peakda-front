@@ -8,7 +8,14 @@ import { Badge } from '@/components/ui/display/Badge'
 import Button from '@/components/ui/button/Button'
 import SearchInput from '@/app/search/_components/SearchInput'
 import { useSearchPlants, useSuggestPlant } from '@/api/facades/plant'
+import { PlantResponseSeasonsItem } from '@/api/generated/peakdaApi.schemas'
 import type { PlantResponse } from '@/api/generated/peakdaApi.schemas'
+
+const SEASON_GROUPS = [
+  { key: PlantResponseSeasonsItem.SPRING, label: '봄' },
+  { key: PlantResponseSeasonsItem.SUMMER, label: '여름' },
+  { key: PlantResponseSeasonsItem.AUTUMN_WINTER, label: '가을·겨울' },
+] as const
 
 interface PlantSelectDrawerProps {
   open: boolean
@@ -37,10 +44,16 @@ export function PlantSelectDrawer({
   const { data: searched, isFetching } = useSearchPlants(keyword)
   const suggestPlant = useSuggestPlant()
 
-  // 검색어가 있으면 검색 결과, 없으면 전체 식물 목록
-  const visiblePlants = keyword ? (searched ?? []) : plants
   const noResults = keyword.length > 0 && !isFetching && (searched?.length ?? 0) === 0
   const selectedPlants = plants.filter((p) => selectedIds.includes(p.id))
+
+  // 전체 목록은 계절별로 그룹핑 (여러 계절 식물은 각 섹션에 중복 표시)
+  const seasonGroups = SEASON_GROUPS.map((group) => ({
+    ...group,
+    items: plants.filter((p) => p.seasons.includes(group.key)),
+  })).filter((group) => group.items.length > 0)
+  // 계절 정보가 없는 식물 (사용자가 직접 추가)
+  const etcPlants = plants.filter((p) => p.seasons.length === 0)
 
   // 검색 결과에 없는 식물을 직접 추가 → 추가 즉시 선택
   const handleSuggest = async () => {
@@ -53,6 +66,23 @@ export function PlantSelectDrawer({
     } catch (err) {
       console.error(err)
     }
+  }
+
+  const renderPlantBadge = (plant: PlantResponse) => {
+    const isSelected = selectedIds.includes(plant.id)
+    return (
+      <Badge
+        key={plant.id}
+        label={plant.name}
+        variant="ghost"
+        color="gray"
+        className={cn(
+          'cursor-pointer rounded-xl px-3.5 py-2',
+          isSelected && 'border-brand-secondary text-text-secondary bg-green-50'
+        )}
+        onClick={() => onToggle(plant.id)}
+      />
+    )
   }
 
   return (
@@ -115,24 +145,22 @@ export function PlantSelectDrawer({
                   &apos;{keyword}&apos; 직접 추가하기
                 </Button>
               </div>
+            ) : keyword ? (
+              <div className="flex flex-wrap gap-2">{(searched ?? []).map(renderPlantBadge)}</div>
             ) : (
-              <div className="flex flex-wrap gap-2">
-                {visiblePlants.map((plant) => {
-                  const isSelected = selectedIds.includes(plant.id)
-                  return (
-                    <Badge
-                      key={plant.id}
-                      label={plant.name}
-                      variant="ghost"
-                      color="gray"
-                      className={cn(
-                        'cursor-pointer rounded-xl px-3.5 py-2',
-                        isSelected && 'border-brand-secondary text-text-secondary bg-green-50'
-                      )}
-                      onClick={() => onToggle(plant.id)}
-                    />
-                  )
-                })}
+              <div className="flex flex-col gap-4">
+                {seasonGroups.map((group) => (
+                  <div key={group.key} className="flex flex-col gap-2">
+                    <h3 className="text-text-secondary text-sm font-medium">{group.label}</h3>
+                    <div className="flex flex-wrap gap-2">{group.items.map(renderPlantBadge)}</div>
+                  </div>
+                ))}
+                {etcPlants.length > 0 && (
+                  <div className="flex flex-col gap-2">
+                    <h3 className="text-text-secondary text-sm font-medium">기타</h3>
+                    <div className="flex flex-wrap gap-2">{etcPlants.map(renderPlantBadge)}</div>
+                  </div>
+                )}
               </div>
             )}
           </div>
