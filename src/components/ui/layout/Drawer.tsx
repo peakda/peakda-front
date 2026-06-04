@@ -5,6 +5,8 @@ import { useState, useEffect } from 'react'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import Button from '../button/Button'
 import { FilterDrawerContent } from './FilterDrawerContent'
+import { LogoutDrawerContent } from './LogoutDrawerContent'
+import { WithdrawDrawerContent } from './WithdrawDrawerContent'
 import PinList from '../display/PinList'
 
 export function Drawer() {
@@ -22,6 +24,28 @@ export function Drawer() {
     }
   }, [isOpen])
   const snapPx = typeof snap === 'string' ? parseInt(snap) : typeof snap === 'number' ? snap : 400
+
+  // 로그아웃 / 회원탈퇴 확인 시트: snap 없이 콘텐츠 높이에 맞춰 올라오는 바텀시트
+  if (type === 'logout' || type === 'withdraw') {
+    return (
+      <VaulDrawer.Root open={isOpen} onOpenChange={(open) => !open && closeDrawer()}>
+        <VaulDrawer.Portal>
+          <VaulDrawer.Overlay className="fixed inset-0 z-100 mx-auto max-w-[430px] bg-black/40" />
+          <VaulDrawer.Content className="fixed right-0 bottom-0 left-0 z-100 mx-auto flex max-w-[430px] flex-col rounded-t-[20px] bg-white outline-none">
+            <VaulDrawer.Title className="sr-only">
+              {type === 'logout' ? '로그아웃' : '계정 탈퇴'}
+            </VaulDrawer.Title>
+            <div className="mx-auto mt-4 mb-2 h-1.5 w-12 shrink-0 rounded-full bg-zinc-300" />
+            {type === 'logout' ? (
+              <LogoutDrawerContent onClose={closeDrawer} />
+            ) : (
+              <WithdrawDrawerContent onClose={closeDrawer} />
+            )}
+          </VaulDrawer.Content>
+        </VaulDrawer.Portal>
+      </VaulDrawer.Root>
+    )
+  }
 
   const snapPoints = ['400px', 0.9]
 
