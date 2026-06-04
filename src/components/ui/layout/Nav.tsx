@@ -39,7 +39,10 @@ export default function Nav({ activeTab }: NavProps) {
         </div>
 
         {/* 플러스 버튼 (중앙) */}
-        <div className="bg-brand-secondary mt-2 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full">
+        <div
+          className="bg-brand-secondary mt-2 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full"
+          onClick={() => router.push('/record')}
+        >
           <Plus size={20} className="text-white" />
         </div>
 
@@ -56,7 +59,7 @@ export default function Nav({ activeTab }: NavProps) {
         </div>
 
         {/* My */}
-        <div className={itemClass}>
+        <div className={itemClass} onClick={() => router.push('/my')}>
           <div
             className={`rounded-full bg-gray-200 p-1 ${activeTab === 'my' ? 'opacity-100' : 'opacity-50'}`}
           >
