@@ -19,20 +19,6 @@ export interface SpotDetail {
   festival?: FestivalInfo
 }
 
-export interface SpotFeed {
-  authorName: string
-  location: string
-  timeAgo: string
-  visitDate: string
-  statusLabel: string
-  statusVariant: 'dark' | 'bloom' | 'secondary' | 'green'
-  images: string[]
-  flowers: { emoji: string; label: string }[]
-  content: string
-  reactions: { emoji: string; count: number }[]
-  isOwner?: boolean
-}
-
 const MOCK_SPOTS: Record<string, SpotDetail> = {
   // 일반 스팟
   '1': {
@@ -75,37 +61,3 @@ const MOCK_SPOTS: Record<string, SpotDetail> = {
 export function getMockSpot(id: string): SpotDetail {
   return MOCK_SPOTS[id] ?? MOCK_SPOTS['1']
 }
-
-export const MOCK_SPOT_FEEDS: SpotFeed[] = [
-  {
-    authorName: 'Nickname',
-    location: '진해 경화역 공원',
-    timeAgo: '2시간전',
-    visitDate: '2026.05.28',
-    statusLabel: '이르다',
-    statusVariant: 'green',
-    images: ['/images/explore.png', '/images/explore.png'],
-    flowers: [{ emoji: '🌸', label: '벚꽃' }],
-    content: '아직 개화가 시작되지 않았지만, 산책로가 정말 예뻐요!',
-    reactions: [
-      { emoji: '❤️', count: 999 },
-      { emoji: '😀', count: 999 },
-    ],
-  },
-  {
-    authorName: 'FlowerLover',
-    location: '진해 경화역 공원',
-    timeAgo: '5시간전',
-    visitDate: '2026.05.27',
-    statusLabel: '절정',
-    statusVariant: 'bloom',
-    images: ['/images/explore.png'],
-    flowers: [{ emoji: '🌸', label: '벚꽃' }],
-    content: '벚꽃이 정말 절정이에요! 지금 바로 가세요.',
-    reactions: [
-      { emoji: '❤️', count: 234 },
-      { emoji: '😀', count: 56 },
-    ],
-    isOwner: true,
-  },
-]

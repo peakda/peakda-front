@@ -21,7 +21,7 @@ interface Reaction {
   onClick?: () => void
 }
 
-interface FeedCardProps {
+export interface FeedCardProps {
   authorName: string
   location: string
   timeAgo: string

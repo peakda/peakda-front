@@ -10,7 +10,9 @@ import { CardBadge } from '@/components/ui/card/CardBadge'
 import { FeedCard } from '@/components/ui/card/FeedCard'
 import { Drawer } from '@/components/ui/layout/Drawer'
 import { useDrawerStore } from '@/stores/useDrawerStore'
-import { getMockSpot, MOCK_SPOT_FEEDS } from '@/app/spot/[id]/_data'
+import { useSpotRecordsBySpot } from '@/api/facades/spot-record'
+import { toFeedCardProps } from '@/lib/utils/spotRecordToFeed'
+import { getMockSpot } from '@/app/spot/[id]/_data'
 
 export default function SpotDetailPage() {
   const router = useRouter()
@@ -18,7 +20,11 @@ export default function SpotDetailPage() {
   const openSaveSpotDrawer = useDrawerStore((s) => s.openSaveSpotDrawer)
 
   const spot = getMockSpot(id)
-  const previewFeed = MOCK_SPOT_FEEDS[0]
+  const { data } = useSpotRecordsBySpot({
+    spotId: Number(id),
+    pageRequest: { page: 0, size: 1 },
+  })
+  const previewRecord = data?.content?.[0]
 
   const handleSave = () => openSaveSpotDrawer({ name: spot.name, location: spot.location })
 
@@ -113,7 +119,7 @@ export default function SpotDetailPage() {
             더보기
           </button>
         </div>
-        <FeedCard {...previewFeed} />
+        {previewRecord && <FeedCard {...toFeedCardProps(previewRecord)} />}
       </div>
 
       {/* 하단 CTA */}
