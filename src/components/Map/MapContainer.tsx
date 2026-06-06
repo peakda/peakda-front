@@ -59,20 +59,16 @@ export const MapContainer = () => {
   const { snapHeight, openFilterDrawer, openPinDrawer } = useDrawerStore()
 
   const handlePinClick = useCallback(
-    (_spot: MapSpot) => {
+    (spot: MapSpot) => {
       openPinDrawer(
-        TEST_SPOTS.map((s) => ({
+        spot.flowers.map((f) => ({
           type: 'list' as const,
-          title:
-            s.flowers
-              .map((f) => f.alt ?? '')
-              .filter(Boolean)
-              .join(', ') || '명소',
+          title: f.alt || '명소',
           location: '위치 정보 없음',
-          description: `현재 ${s.maxStage === 'Peak' ? '만개' : s.maxStage === 'Start' ? '개화 시작' : '개화 전'} 상태입니다.`,
-          Badges: s.flowers.map((f) => f.alt ?? '').filter(Boolean),
+          description: `현재 ${spot.maxStage === 'Peak' ? '만개' : spot.maxStage === 'Start' ? '개화 시작' : '개화 전'} 상태입니다.`,
+          Badges: f.alt ? [f.alt] : [],
           isFavorite: false,
-          images: s.flowers.map((f) => f.src),
+          images: [f.src],
         }))
       )
     },
@@ -142,13 +138,13 @@ export const MapContainer = () => {
                 height={32}
                 className="h-8 w-8.5"
               />
-              <p className="font-advent text-color-green-700 text-center text-[30px] font-semibold! tracking-tight">
+              <p className="font-advent text-center text-[30px] font-semibold! tracking-tight text-green-700">
                 Peakda
               </p>
             </div>
           }
           right={
-            <div className="bg-bg-primary-80 border-border-primary relative rounded-full p-1">
+            <div className="bg-bg-primary-80 border-border-primary relative flex h-10 w-10 items-center justify-center rounded-full p-1">
               <Image
                 src={'/icons/alram.svg'}
                 alt="알람"
@@ -156,7 +152,7 @@ export const MapContainer = () => {
                 height={20}
                 className="h-6 w-6"
               />
-              <div className="absolute top-1.5 right-1.5 h-1 w-1 rounded-full bg-pink-500"></div>
+              <div className="absolute top-2.5 right-2.5 h-1 w-1 rounded-full bg-pink-500"></div>
             </div>
           }
         />
@@ -168,7 +164,7 @@ export const MapContainer = () => {
         </div>
       )}
 
-      <Category />
+      <Category isMap/>
 
       <SearchBar
         placeholder="지금 피크인 곳을 검색해보세요."

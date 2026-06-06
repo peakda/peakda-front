@@ -24,7 +24,14 @@ export function Drawer() {
       document.body.style.overflow = ''
     }
   }, [isOpen])
-  const snapPx = typeof snap === 'string' ? parseInt(snap) : typeof snap === 'number' ? snap : 400
+  const snapPx =
+    typeof snap === 'string'
+      ? parseInt(snap)
+      : typeof snap === 'number' && snap <= 1
+        ? Math.round(snap * (typeof window !== 'undefined' ? window.innerHeight : 800))
+        : typeof snap === 'number'
+          ? snap
+          : 400
 
   // 로그아웃 / 회원탈퇴 / 찜 확인 시트: snap 없이 콘텐츠 높이에 맞춰 올라오는 바텀시트
   if (type === 'logout' || type === 'withdraw' || type === 'save-spot') {
@@ -79,7 +86,7 @@ export function Drawer() {
             {type === 'filter' ? '검색 필터' : '명소 정보'}
           </VaulDrawer.Title>
 
-          <div className="mx-auto mt-4 mb-2 h-1.5 w-12 shrink-0 rounded-full bg-zinc-300" />
+          <div className="bg-icon-quaternary mx-auto mt-4 mb-2 h-1 w-12 shrink-0 rounded-full" />
 
           {type === 'filter' || type === 'flower-filter' ? (
             <FilterDrawerContent

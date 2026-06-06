@@ -14,7 +14,7 @@ export default function MainMessage() {
         placeholder="blur"
         blurDataURL="data:image/png;base64,..."
       />
-      <h1 className="font-advent text-color-green-700 text-center text-[40px] font-semibold! tracking-tight">
+      <h1 className="font-advent text-center text-[40px] font-semibold! tracking-tight text-green-700">
         Peakda
       </h1>
       <p className="text-text-secondary text-center font-sans text-base font-semibold tracking-tight">

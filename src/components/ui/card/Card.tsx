@@ -21,7 +21,7 @@ export default function Card({
       className={cn(
         'bg-bg-secondary rounded-xl transition-colors',
         isBig
-          ? 'flex h-[67px] w-full items-center gap-1 px-2 py-3.5'
+          ? 'flex h-[67px] w-full items-center gap-3 px-2 py-3.5'
           : 'flex h-[84px] flex-col items-center gap-0.5 px-3 py-3.5 text-center',
         className
       )}
