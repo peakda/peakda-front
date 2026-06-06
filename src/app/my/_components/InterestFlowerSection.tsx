@@ -12,7 +12,13 @@ export function InterestFlowerSection({ flowers, action = '편집' }: Props) {
       <SectionHeader title="관심 식물" action={action} />
       <div className="flex flex-wrap gap-2 px-4">
         {flowers.map((flower) => (
-          <Badge key={flower} label={flower} variant="soft" color="green" />
+          <Badge
+            key={flower}
+            label={flower}
+            variant="outline"
+            color="green"
+            className="rounded-lg"
+          />
         ))}
       </div>
     </section>

@@ -156,11 +156,16 @@ export default function ExplorePage() {
         />
       </div>
 
-      <SearchInput query={query} hasQuery={hasQuery} setQuery={setQuery} />
+      <SearchInput
+        query={query}
+        hasQuery={hasQuery}
+        setQuery={setQuery}
+        placeholder="스팟, 지역, 식물을 검색해보세요."
+      />
 
       {/* 지금이 딱 좋아에요 */}
       <section className="mt-2">
-        <SectionHeader title="지금이 딱 좋아에요" count={PEAK_SPOTS.length} showAll />
+        <SectionHeader title="지금이 절정이에요" count={PEAK_SPOTS.length} showAll />
         <div className="flex gap-3 overflow-x-auto px-4 pb-4 [&::-webkit-scrollbar]:hidden">
           {PEAK_SPOTS.map((card) => (
             <ExplorCard key={card.name} {...card} />

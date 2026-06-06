@@ -41,7 +41,7 @@ export default function RecentList({
           {recentSearches.map((item) => (
             <li key={item} className="flex items-center gap-3 py-1">
               <button className="flex items-center gap-3" onClick={() => setQuery(item)}>
-                <Clock className="text-icon-quaternary h-4 w-4 shrink-0" strokeWidth={1} />
+                <Clock className="text-icon-secondary h-4 w-4 shrink-0" strokeWidth={1} />
                 <span className="text-text-secondary cursor-pointer text-sm">{item}</span>
               </button>
               <button onClick={() => removeRecent(item)}>

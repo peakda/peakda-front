@@ -12,7 +12,7 @@ interface Props {
 const NOTICES = [
   '방문 기록 24개 · 방문 예정이 모두 삭제돼요',
   '찜·저장한 스팟과 만개 알림이 사라져요',
-  '동일 이메일로 재가입 시 데이터 복구가 불가능해요',
+  '동일 계정 재가입 시 데이터 복구가 불가능해요',
 ]
 
 export function WithdrawDrawerContent({ onClose }: Props) {
@@ -22,11 +22,12 @@ export function WithdrawDrawerContent({ onClose }: Props) {
     <div className="flex flex-col gap-1 px-5 pt-2 pb-8 text-center">
       <h2 className="text-text-primary text-lg font-bold">정말 탈퇴하실건가요?</h2>
       <p className="text-text-secondary mb-3 text-sm">
-        탈퇴시 기록·저장 내역이 모두 사라지고, 복구할 수 없어요.
+        탈퇴시 기록·저장 내역이 모두 사라지고,
+        <br /> 복구할 수 없어요.
       </p>
 
       {/* 주의 사항 */}
-      <div className="bg-bg-tertiary mb-3 flex flex-col gap-2 rounded-xl p-4 text-left">
+      <div className="bg-bg-secondary mb-3 flex flex-col gap-2 rounded-xl p-4 text-left">
         <p className="text-text-primary text-sm font-semibold">계정 탈퇴 주의 사항</p>
         <ul className="flex flex-col gap-1.5">
           {NOTICES.map((notice) => (
@@ -38,6 +39,9 @@ export function WithdrawDrawerContent({ onClose }: Props) {
         </ul>
       </div>
 
+      <p className="text-text-primary w-full text-left font-semibold">
+        위 내용을 읽고 동의하시면 확인을 해주세요.
+      </p>
       {/* 동의 체크 */}
       <button
         type="button"
@@ -47,12 +51,13 @@ export function WithdrawDrawerContent({ onClose }: Props) {
         <span
           className={cn(
             'flex h-5 w-5 shrink-0 items-center justify-center rounded-md border',
-            agreed ? 'border-rose-500 bg-rose-500' : 'border-gray-300 bg-white'
+            agreed ? 'border-brand-secondary bg-brand-secondary' : 'border-gray-300 bg-white'
           )}
         >
           {agreed && <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />}
         </span>
-        <span className="text-text-secondary text-sm">계정 탈퇴 내용을 확인했어요.</span>
+
+        <span className="text-text-primary text-sm">계정 탈퇴 내용을 동의합니다.</span>
       </button>
 
       <Button
@@ -61,7 +66,7 @@ export function WithdrawDrawerContent({ onClose }: Props) {
         size="lg"
         disabled={!agreed}
         onClick={onClose}
-        className="w-full bg-rose-500 text-white hover:bg-rose-500 active:bg-rose-500"
+        className="bg-brand-warning hovebg-brand-warning active: bg-brand-warning w-full text-white"
       >
         계정 탈퇴 및 데이터 삭제
       </Button>

@@ -15,6 +15,7 @@ import { toast } from 'sonner'
 import { useMapCluster, type MapSpot } from '@/hooks/useMapPins'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import { TEST_SPOTS } from '@/constants/testSpots'
+import { useRouter } from 'next/navigation'
 
 const Drawer = dynamic(
   () => import('@/components/ui/layout/Drawer').then((m) => ({ default: m.Drawer })),
@@ -53,6 +54,7 @@ const initMap = (container: HTMLElement) => {
 
 export const MapContainer = () => {
   const containerRef = useRef<HTMLDivElement>(null)
+  const router = useRouter()
   const mapRef = useRef<kakao.maps.Map | null>(null)
   const [mapInstance, setMapInstance] = useState<kakao.maps.Map | null>(null)
   const { isReady, error, retry } = useLazyMapLoad(containerRef)
@@ -144,7 +146,10 @@ export const MapContainer = () => {
             </div>
           }
           right={
-            <div className="bg-bg-primary-80 border-border-primary relative flex h-10 w-10 items-center justify-center rounded-full p-1">
+            <div
+              className="bg-bg-primary-80 border-border-primary relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-full p-1"
+              onClick={() => router.push('/notification')}
+            >
               <Image
                 src={'/icons/alram.svg'}
                 alt="알람"
@@ -164,7 +169,7 @@ export const MapContainer = () => {
         </div>
       )}
 
-      <Category isMap/>
+      <Category isMap />
 
       <SearchBar
         placeholder="지금 피크인 곳을 검색해보세요."

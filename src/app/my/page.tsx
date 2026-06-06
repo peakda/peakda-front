@@ -1,3 +1,4 @@
+'use client'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Settings } from 'lucide-react'
@@ -9,6 +10,8 @@ import { ProfileStats } from '@/app/my/_components/ProfileStats'
 import { InterestFlowerSection } from '@/app/my/_components/InterestFlowerSection'
 import { MyRecordSection } from '@/app/my/_components/MyRecordSection'
 import { SavedSpotSection } from '@/app/my/_components/SavedSpotSection'
+import IconBtn from '@/components/ui/button/IconBtn'
+import { useRouter } from 'next/navigation'
 
 const INTEREST_FLOWERS = ['동백꽃', '매화', '개나리', '벚꽃', '철쭉']
 
@@ -46,6 +49,7 @@ const SAVED_SPOTS: SPOTProps[] = [
 ]
 
 export default function MyPage() {
+  const router = useRouter()
   return (
     <div className="bg-bg-primary relative flex min-h-screen w-full flex-col pb-24">
       <div className="h-14">
@@ -53,7 +57,13 @@ export default function MyPage() {
           left={<div className="text-text-primary text-xl font-semibold">My</div>}
           right={
             <div className="flex items-center gap-3">
-              <Image src="/icons/alram.svg" alt="알림" width={22} height={22} />
+              <Image
+                src="/icons/alram.svg"
+                alt="알림"
+                width={22}
+                height={22}
+                onClick={() => router.push('/notification')}
+              />
               <Link href="/my/settings">
                 <Settings className="text-icon-secondary h-5.5 w-5.5" strokeWidth={1.8} />
               </Link>
@@ -64,12 +74,12 @@ export default function MyPage() {
 
       {/* 프로필 */}
       <div className="flex items-center gap-3 px-4 py-3">
-        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gray-200">
+        <IconBtn size="md" className="bg-bg-tertiary">
           <Image src="/icons/person.svg" alt="프로필" width={26} height={26} />
-        </div>
+        </IconBtn>
         <span className="text-text-primary flex-1 text-lg font-semibold">Nickname</span>
         <Link href="/profile/edit">
-          <Button variant="outlined" size="sm">
+          <Button variant="outlined" size="sm" className="rounded-lg py-3.5">
             프로필 편집
           </Button>
         </Link>

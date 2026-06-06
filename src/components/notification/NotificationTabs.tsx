@@ -94,7 +94,7 @@ const EMPTY_TEXT: Record<string, string> = {
 }
 
 function AlarmList({ items, label }: { items: AlarmItemData[]; label: string }) {
-  if (items.length) {
+  if (!items.length) {
     return (
       <div className="flex h-[calc(100vh-130px)] flex-col items-center justify-center gap-2 px-4 py-12 text-center">
         <p className="text-text-primary text-xl font-semibold">아직 알림이 없어요</p>

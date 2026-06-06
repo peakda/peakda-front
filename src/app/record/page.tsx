@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
 import { X, Plus, ChevronLeft, Check } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils/cn'
@@ -17,6 +18,7 @@ import { usePlants } from '@/api/facades/plant'
 import { useMatchSpot } from '@/api/facades/spot'
 import { useCreateSpotRecord, useUploadSpotRecordPhotos } from '@/api/facades/spot-record'
 import type { CreateSpotRecordRequest } from '@/api/generated/peakdaApi.schemas'
+import LeftArrow from '@/components/ui/button/LeftArrow'
 
 type Category = '유명명소' | '동네스팟'
 
@@ -222,12 +224,7 @@ export default function RecordPage() {
         </div>
 
         <div className="flex flex-col gap-2 p-4 pb-8">
-          <Button
-            variant="filled"
-            color="primary"
-            size="lg"
-            onClick={() => router.push('/map')}
-          >
+          <Button variant="filled" color="primary" size="lg" onClick={() => router.push('/map')}>
             지도로 확인하기
           </Button>
           <Button variant="outlined" color="primary" size="lg" onClick={handleRecordAgain}>
@@ -269,8 +266,8 @@ export default function RecordPage() {
 
         <div className="flex flex-1 flex-col gap-6 overflow-y-auto pt-6 pb-8">
           <div className="flex flex-col gap-1 px-4">
-            <h2 className="text-xl font-semibold">이 스팟의 모습은 어땠나요?</h2>
-            <p className="text-text-tertiary text-sm">
+            <h2 className="text-text-primary text-xl font-semibold">이 스팟의 모습은 어땠나요?</h2>
+            <p className="text-text-secondary text-sm">
               식물 종류와 개화 상태, 그날의 추억을 들려주세요.
             </p>
           </div>
@@ -377,9 +374,14 @@ export default function RecordPage() {
         <div className="h-14">
           <Header
             left={
-              <button onClick={() => setIsSearchMode(false)}>
-                <ChevronLeft size={24} />
-              </button>
+              <Image
+                src={'../icons/LeftArrow.svg'}
+                alt="왼쪽 화살표"
+                className="h-6 w-6 cursor-pointer"
+                width={24}
+                height={24}
+                onClick={() => setIsSearchMode(false)}
+              />
             }
             center={<span className="text-[15px] font-medium">위치 검색</span>}
           />
@@ -409,9 +411,7 @@ export default function RecordPage() {
                 )}
               >
                 <div className="flex flex-col items-start gap-0.5">
-                  <span className="text-text-primary text-sm font-medium">
-                    {result.place_name}
-                  </span>
+                  <span className="text-text-primary text-sm font-medium">{result.place_name}</span>
                   <span className="text-text-tertiary text-xs">
                     {result.road_address_name || result.address_name}
                   </span>
@@ -440,11 +440,7 @@ export default function RecordPage() {
     <div className="flex min-h-screen flex-col bg-white">
       <div className="h-14">
         <Header
-          left={
-            <button onClick={() => router.back()}>
-              <X size={24} />
-            </button>
-          }
+          left={<LeftArrow />}
           center={<span className="text-[15px] font-medium">스팟 기록</span>}
         />
       </div>
@@ -572,7 +568,7 @@ export default function RecordPage() {
               size="md"
               leftIcon={<Plus size={16} />}
               onClick={() => fileInputRef.current?.click()}
-              className="w-fit"
+              className="w-fit rounded-2xl py-5"
             >
               사진 추가
             </Button>

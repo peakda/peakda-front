@@ -27,7 +27,7 @@ function Stat({ value, label, href }: { value: string; label: string; href?: str
 export function ProfileStats({ recordCount, followerCount, followingCount }: ProfileStatsProps) {
   return (
     <div className="px-4">
-      <div className="bg-bg-tertiary flex items-center rounded-xl py-4">
+      <div className="bg-bg-secondary flex items-center rounded-xl py-4">
         <Stat value={recordCount} label="기록" />
         <div className="h-8 w-px bg-gray-200" />
         <Stat value={followerCount} label="팔로워" href="/followers" />

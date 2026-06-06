@@ -42,7 +42,7 @@ export default function SettingsPage() {
         <Toggle initialStatus={true} />
       </div>
 
-      <div className="bg-bg-tertiary h-2" />
+      <div className="bg-bg-secondary h-2" />
 
       {/* 정보 */}
       <SectionTitle>정보</SectionTitle>
@@ -57,11 +57,11 @@ export default function SettingsPage() {
           className="flex cursor-pointer items-center justify-between px-4 py-3.5"
         >
           <span className="text-text-primary text-base">{label}</span>
-          <ChevronRight className="text-icon-secondary h-5 w-5" />
+          <ChevronRight className="text-icon-quaternary h-5 w-5 scale-x-150 scale-y-150" />
         </button>
       ))}
 
-      <div className="bg-bg-tertiary h-2" />
+      <div className="bg-bg-secondary h-2" />
 
       {/* 계정 */}
       <SectionTitle>계정</SectionTitle>
