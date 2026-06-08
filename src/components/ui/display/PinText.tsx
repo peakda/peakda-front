@@ -21,7 +21,6 @@ export default function PinText({
   description,
   Badges = [],
   isFavorite = false,
-  tag,
   variant = 'card',
 }: PinTextProps) {
   return (
