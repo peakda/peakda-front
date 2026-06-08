@@ -14,43 +14,41 @@ const TABS: TabItem[] = [
 ]
 
 const REGIONS = [
-  { title: '수도권', subTitle: '서울·경기·인천' },
-  { title: '강원도', subTitle: '강릉·속초·춘천 등' },
-  { title: '충청도', subTitle: '대전·천안·청주 등' },
-  { title: '경상도', subTitle: '부산·대구·경주 등' },
-  { title: '전라도', subTitle: '광주·전주·순천 등' },
-  { title: '제주도', subTitle: '제주 전역' },
+  { title: '수도권', subTitle: '서울 · 경기 · 인천 등' },
+  { title: '강원도', subTitle: '강릉 · 속초 · 춘천 등' },
+  { title: '충청도', subTitle: '대전 · 공주 · 천안 등' },
+  { title: '경상도', subTitle: '부산 · 경주 · 진해 등' },
+  { title: '전라도', subTitle: '광주 · 전주 · 순천 등' },
+  { title: '제주도', subTitle: '제주 · 서귀포' },
 ]
 
 const TIMINGS = [
-  { title: '1-2월', subTitle: '겨울 개화' },
-  { title: '3월', subTitle: '봄 시작' },
-  { title: '4월', subTitle: '봄 절정' },
-  { title: '5월', subTitle: '초여름' },
-  { title: '6-7월', subTitle: '여름' },
-  { title: '9-11월', subTitle: '가을' },
+  { title: '절정', subTitle: '지금 피크에요!' },
+  { title: '피기시작', subTitle: '1~2주 내 절정' },
+  { title: '이르다', subTitle: '미리 계획 중' },
 ]
 
 const SPRING_FLOWERS = [
-  { label: '매화', date: '2-3월', image: '/flowers/plum.svg' },
-  { label: '동백꽃', date: '1-3월', image: '/flowers/camellia.svg' },
+  { label: '매화', date: '1-2월', image: '/flowers/plum.svg' },
+  { label: '동백꽃', date: '11-3월', image: '/flowers/camellia.svg' },
   { label: '벚꽃', date: '3-4월', image: '/flowers/cherry-blossom.svg' },
   { label: '개나리', date: '3-4월', image: '/flowers/forsythia.svg' },
   { label: '진달래', date: '3-4월', image: '/flowers/azalea.svg' },
+  { label: '유채꽃', date: '4-5월', image: '/flowers/canola.svg' },
   { label: '철쭉', date: '4-5월', image: '/flowers/royal-azalea.svg' },
-  { label: '유채꽃', date: '3-5월', image: '/flowers/canola.svg' },
-  { label: '튤립', date: '4-5월', image: '/flowers/tulip.svg' },
 ]
 
 const SUMMER_FLOWERS = [
-  { label: '수국', date: '6-7월', image: '/flowers/hydrangea.svg' },
-  { label: '연꽃', date: '7-8월', image: '/flowers/lotus.svg' },
   { label: '해바라기', date: '7-9월', image: '/flowers/sunflower.svg' },
+  { label: '수국', date: '6-8월', image: '/flowers/hydrangea.svg' },
+  { label: '연꽃', date: '7-8월', image: '/flowers/lotus.svg' },
 ]
 
 const FALL_FLOWERS = [
   { label: '코스모스', date: '9-10월', image: '/flowers/cosmos.svg' },
+  { label: '국화', date: '9-11월', image: '/flowers/cherry-blossom.svg' },
   { label: '단풍', date: '10-11월', image: '/flowers/maple.svg' },
+  { label: '억새', date: '9-11월', image: '/flowers/cherry-blossom.svg' },
 ]
 
 function SwipeableContent({
@@ -121,7 +119,11 @@ interface FilterDrawerContentProps {
   flowersOnly?: boolean
 }
 
-export function FilterDrawerContent({ snap, onExpandToFull, flowersOnly = false }: FilterDrawerContentProps) {
+export function FilterDrawerContent({
+  snap,
+  onExpandToFull,
+  flowersOnly = false,
+}: FilterDrawerContentProps) {
   const [selectedRegions, setSelectedRegions] = useState<Set<string>>(new Set())
   const [selectedTimings, setSelectedTimings] = useState<Set<string>>(new Set())
   const [selectedFlowers, setSelectedFlowers] = useState<Set<string>>(new Set())
@@ -190,7 +192,7 @@ export function FilterDrawerContent({ snap, onExpandToFull, flowersOnly = false 
             </div>
           </div>
           <div>
-            <p className="text-text-secondary mb-1 font-semibold">가을</p>
+            <p className="text-text-secondary mb-1 font-semibold">가을 · 겨울</p>
             <div className="grid grid-cols-4 gap-3">
               {FALL_FLOWERS.map((f) => (
                 <FlowerCard
@@ -218,7 +220,7 @@ export function FilterDrawerContent({ snap, onExpandToFull, flowersOnly = false 
       <SwipeableContent snap={snap} onExpandToFull={onExpandToFull}>
         <TabPanels tabs={TABS} className="min-h-0 flex-1">
           <div>
-            <p className="text-text-secondary font-semibold">권역 선택</p>
+            <p className="text-text-secondary mb-1 font-semibold">권역 선택</p>
             <div className="grid grid-cols-2 gap-2">
               {REGIONS.map((r) => (
                 <FilterCard
@@ -233,7 +235,7 @@ export function FilterDrawerContent({ snap, onExpandToFull, flowersOnly = false 
           </div>
 
           <div>
-            <p className="text-text-secondary font-semibold">지금 상태</p>
+            <p className="text-text-secondary mb-1 font-semibold">지금 상태</p>
             <div className="grid grid-cols-3 gap-2">
               {TIMINGS.map((t) => (
                 <FilterCard
@@ -279,7 +281,7 @@ export function FilterDrawerContent({ snap, onExpandToFull, flowersOnly = false 
               </div>
             </div>
             <div>
-              <p className="text-text-secondary mb-1 font-semibold">가을</p>
+              <p className="text-text-secondary mb-1 font-semibold">가을 · 겨울</p>
               <div className="grid grid-cols-4 gap-3">
                 {FALL_FLOWERS.map((f) => (
                   <FlowerCard

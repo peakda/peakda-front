@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 
 interface MoreMenuProps {
@@ -28,12 +29,12 @@ export function MoreMenu({ isOwner, onEdit, onDelete, onReport }: MoreMenuProps)
       <button
         onClick={() => setOpen((prev) => !prev)}
         aria-label="더보기"
-        className="flex h-8 w-8 items-center justify-center rounded-full text-lg leading-none text-text-secondary hover:bg-bg-secondary"
+        className="text-text-secondary hover:bg-bg-secondary flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-lg leading-none"
       >
-        ···
+        <Image src={'/icons/more.svg'} alt="더보기" width={25} height={20} />
       </button>
       {open && (
-        <div className="absolute right-0 top-9 z-20 min-w-[100px] overflow-hidden rounded-xl border border-border-primary bg-white shadow-lg">
+        <div className="border-border-primary absolute top-9 right-0 z-20 min-w-[100px] overflow-hidden rounded-xl border bg-white shadow-lg">
           {isOwner ? (
             <>
               <button
@@ -41,18 +42,18 @@ export function MoreMenu({ isOwner, onEdit, onDelete, onReport }: MoreMenuProps)
                   onEdit?.()
                   setOpen(false)
                 }}
-                className="w-full px-4 py-2.5 text-left text-sm text-text-primary hover:bg-bg-secondary"
+                className="text-text-primary hover:bg-bg-secondary w-full px-4 py-2.5 text-center text-sm"
               >
-                수정하기
+                수정
               </button>
               <button
                 onClick={() => {
                   onDelete?.()
                   setOpen(false)
                 }}
-                className="w-full px-4 py-2.5 text-left text-sm text-red-500 hover:bg-bg-secondary"
+                className="hover:bg-bg-secondary w-full px-4 py-2.5 text-center text-sm text-red-500"
               >
-                삭제하기
+                삭제
               </button>
             </>
           ) : (
@@ -61,7 +62,7 @@ export function MoreMenu({ isOwner, onEdit, onDelete, onReport }: MoreMenuProps)
                 onReport?.()
                 setOpen(false)
               }}
-              className="w-full px-4 py-2.5 text-left text-sm text-red-500 hover:bg-bg-secondary"
+              className="hover:bg-bg-secondary w-full px-4 py-2.5 text-center text-sm text-red-500"
             >
               신고하기
             </button>

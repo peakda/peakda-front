@@ -9,9 +9,14 @@ const DEFAULT_CATEGORIES = ['전체', '명소', '동네']
 interface CategoryProps {
   categories?: string[]
   className?: string
+  isMap?: boolean
 }
 
-export default function Category({ categories = DEFAULT_CATEGORIES, className }: CategoryProps) {
+export default function Category({
+  categories = DEFAULT_CATEGORIES,
+  className,
+  isMap,
+}: CategoryProps) {
   const [selected, setSelected] = useState(categories[0])
 
   return (
@@ -23,7 +28,7 @@ export default function Category({ categories = DEFAULT_CATEGORIES, className }:
             key={cate}
             selected={selected}
             onClick={() => setSelected(cate)}
-            className="w-auto"
+            className={cn(isMap ? '' : 'w-auto')}
           />
         ))}
       </div>

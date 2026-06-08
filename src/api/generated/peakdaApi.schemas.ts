@@ -6,6 +6,513 @@
  * OpenAPI spec version: v1
  */
 /**
+ * 프로필 이미지 업로드 multipart form
+ */
+export interface ProfileImageUploadForm {
+  /** 업로드할 이미지 파일 (jpeg/png/webp, 최대 5MB) */
+  image: Blob;
+}
+
+/**
+ * 사이즈 variant 별 presigned URL 매핑
+ */
+export type ProfileImageResponseVariants = {[key: string]: string};
+
+/**
+ * 프로필 이미지 업로드 결과
+ */
+export interface ProfileImageResponse {
+  /** 대표 이미지 presigned URL. 즉시 표시용 (만료 있음) */
+  profileImageUrl: string;
+  /** 대표 이미지의 저장소 key. 회원가입 임시 업로드의 경우 이 값을 /signup/complete 의 profileImageUrl 로 그대로 전달해야 한다. */
+  profileImageKey: string;
+  /** 사이즈 variant 별 presigned URL 매핑 */
+  variants: ProfileImageResponseVariants;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseProfileImageResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: ProfileImageResponse | null;
+}
+
+/**
+ * 개화/단풍 상태 (PUBLISHED 시 필수)
+ * @nullable
+ */
+export type CreateSpotRecordRequestBloomStage = typeof CreateSpotRecordRequestBloomStage[keyof typeof CreateSpotRecordRequestBloomStage] | null;
+
+
+export const CreateSpotRecordRequestBloomStage = {
+  EARLY: 'EARLY',
+  STARTING: 'STARTING',
+  PEAK: 'PEAK',
+  LATE: 'LATE',
+} as const;
+
+/**
+ * 기록 상태
+ */
+export type CreateSpotRecordRequestStatus = typeof CreateSpotRecordRequestStatus[keyof typeof CreateSpotRecordRequestStatus];
+
+
+export const CreateSpotRecordRequestStatus = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+} as const;
+
+/**
+ * 사용자가 토글한 최종 분류 (ATTRACTION/LOCAL)
+ */
+export type SpotInputRequestType = typeof SpotInputRequestType[keyof typeof SpotInputRequestType];
+
+
+export const SpotInputRequestType = {
+  ATTRACTION: 'ATTRACTION',
+  LOCAL: 'LOCAL',
+} as const;
+
+/**
+ * 스팟 기록 생성/수정 시 스팟 식별·생성 입력
+ */
+export interface SpotInputRequest {
+  /**
+     * 이미 매칭되어 알려진 스팟 id. 있으면 다른 필드는 무시되고 그 스팟을 사용한다.
+     * @nullable
+     */
+  existingSpotId?: number | null;
+  /** 사용자가 토글한 최종 분류 (ATTRACTION/LOCAL) */
+  type: SpotInputRequestType;
+  /**
+     * ATTRACTION 일 때 attraction id
+     * @nullable
+     */
+  attractionId?: number | null;
+  /**
+     * 스팟 표시명
+     * @minLength 0
+     * @maxLength 200
+     */
+  name: string;
+  /**
+     * 주소 (선택)
+     * @minLength 0
+     * @maxLength 500
+     * @nullable
+     */
+  address?: string | null;
+  /**
+     * 위도
+     * @minimum -90
+     * @maximum 90
+     */
+  latitude: number;
+  /**
+     * 경도
+     * @minimum -180
+     * @maximum 180
+     */
+  longitude: number;
+  /**
+     * 카카오 장소 id (선택, LOCAL 중복 탐지에 사용)
+     * @minLength 0
+     * @maxLength 100
+     * @nullable
+     */
+  kakaoPlaceId?: string | null;
+}
+
+/**
+ * 스팟 기록 생성 — DRAFT 면 임시저장, PUBLISHED 면 즉시 게시. 사용자에게 기존 DRAFT 가 있으면 같은 행을 덮어쓰거나 promote 한다.
+ */
+export interface CreateSpotRecordRequest {
+  /** 스팟 식별·생성 입력 */
+  spotInput: SpotInputRequest;
+  /**
+     * 방문 일자 (PUBLISHED 시 필수)
+     * @nullable
+     */
+  visitedDate?: string | null;
+  /**
+     * 개화/단풍 상태 (PUBLISHED 시 필수)
+     * @nullable
+     */
+  bloomStage?: CreateSpotRecordRequestBloomStage;
+  /**
+     * 메모 (최대 1000자)
+     * @minLength 0
+     * @maxLength 1000
+     * @nullable
+     */
+  memo?: string | null;
+  /**
+     * 선택한 식물 id 리스트. PUBLISHED 시 1개 이상, ACTIVE 상태만 허용.
+     * @minItems 0
+     * @maxItems 10
+     */
+  plantIds: number[];
+  /**
+     * 사전 업로드된 사진 key 리스트 (순서 = 표시 순서). PUBLISHED 시 1~5장.
+     * @minItems 0
+     * @maxItems 5
+     */
+  photoKeys: string[];
+  /** 기록 상태 */
+  status: CreateSpotRecordRequestStatus;
+}
+
+export type SpotSummaryType = typeof SpotSummaryType[keyof typeof SpotSummaryType];
+
+
+export const SpotSummaryType = {
+  ATTRACTION: 'ATTRACTION',
+  LOCAL: 'LOCAL',
+} as const;
+
+/**
+ * 스팟 요약
+ */
+export interface SpotSummary {
+  id: number;
+  type: SpotSummaryType;
+  name: string;
+  /** @nullable */
+  address?: string | null;
+  /** @nullable */
+  attractionId?: number | null;
+}
+
+/**
+ * 작성자 요약
+ */
+export interface UserSummary {
+  id: number;
+  nickname: string;
+  /**
+     * 프로필 이미지 URL (key 인 경우 presigned URL 로 변환된 값)
+     * @nullable
+     */
+  profileImageUrl?: string | null;
+}
+
+/**
+ * 개화/단풍 상태
+ * @nullable
+ */
+export type SpotRecordResponseBloomStage = typeof SpotRecordResponseBloomStage[keyof typeof SpotRecordResponseBloomStage] | null;
+
+
+export const SpotRecordResponseBloomStage = {
+  EARLY: 'EARLY',
+  STARTING: 'STARTING',
+  PEAK: 'PEAK',
+  LATE: 'LATE',
+} as const;
+
+/**
+ * 식물 요약
+ */
+export interface PlantSummary {
+  id: number;
+  name: string;
+}
+
+/**
+ * 사진 항목 — url 은 응답 시점 발급 presigned URL
+ */
+export interface PhotoEntry {
+  objectKey: string;
+  url: string;
+  sortOrder: number;
+}
+
+/**
+ * 기록 상태
+ */
+export type SpotRecordResponseStatus = typeof SpotRecordResponseStatus[keyof typeof SpotRecordResponseStatus];
+
+
+export const SpotRecordResponseStatus = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+} as const;
+
+/**
+ * 스팟 기록 상세 응답
+ */
+export interface SpotRecordResponse {
+  /** 기록 PK */
+  id: number;
+  /** 스팟 요약 */
+  spot: SpotSummary;
+  /** 작성자 요약 */
+  user: UserSummary;
+  /**
+     * 방문 일자
+     * @nullable
+     */
+  visitedDate?: string | null;
+  /**
+     * 개화/단풍 상태
+     * @nullable
+     */
+  bloomStage?: SpotRecordResponseBloomStage;
+  /**
+     * 메모
+     * @nullable
+     */
+  memo?: string | null;
+  /** 기록된 식물 목록 */
+  plants: PlantSummary[];
+  /** 첨부 사진 목록 (sortOrder 오름차순) */
+  photos: PhotoEntry[];
+  /** 기록 상태 */
+  status: SpotRecordResponseStatus;
+  /**
+     * 게시 시각 (DRAFT 이면 null)
+     * @nullable
+     */
+  publishedAt?: string | null;
+  /** 최초 생성 시각 */
+  createdAt: string;
+  /** 최종 수정 시각 */
+  updatedAt: string;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseSpotRecordResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: SpotRecordResponse | null;
+}
+
+/**
+ * 스팟 기록 사진 업로드 multipart form
+ */
+export interface SpotRecordPhotoUploadForm {
+  /** 업로드할 이미지 파일들 (jpeg/png/webp, 1~5장, 단일 파일 최대 10MB) */
+  images: Blob;
+}
+
+/**
+ * 업로드된 단일 사진
+ */
+export interface UploadedSpotRecordPhoto {
+  /** ObjectStorage 저장 key. 기록 생성 시 photoKeys 로 그대로 전달 */
+  objectKey: string;
+  /** 즉시 미리보기용 presigned URL (만료 있음, DB 저장 금지) */
+  previewUrl: string;
+}
+
+/**
+ * 스팟 기록 사진 업로드 결과
+ */
+export interface SpotRecordPhotoUploadResponse {
+  /** 업로드된 사진 목록 (업로드 순서 유지) */
+  photos: UploadedSpotRecordPhoto[];
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseSpotRecordPhotoUploadResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: SpotRecordPhotoUploadResponse | null;
+}
+
+/**
+ * 스팟 매칭 요청 — 카카오 검색에서 받은 좌표/이름을 보낸다
+ */
+export interface SpotMatchRequest {
+  /**
+     * 위도 (WGS84)
+     * @minimum -90
+     * @maximum 90
+     */
+  latitude: number;
+  /**
+     * 경도 (WGS84)
+     * @minimum -180
+     * @maximum 180
+     */
+  longitude: number;
+  /**
+     * 장소 이름 (LOCAL 스팟 생성 시 표시명으로 사용)
+     * @minLength 0
+     * @maxLength 200
+     */
+  name: string;
+  /**
+     * 주소 (선택)
+     * @minLength 0
+     * @maxLength 500
+     * @nullable
+     */
+  address?: string | null;
+  /**
+     * 카카오 장소 id (있다면 전달, LOCAL 중복 탐지에 사용)
+     * @minLength 0
+     * @maxLength 100
+     * @nullable
+     */
+  kakaoPlaceId?: string | null;
+}
+
+/**
+ * 스팟 분류
+ */
+export type MatchedSpotType = typeof MatchedSpotType[keyof typeof MatchedSpotType];
+
+
+export const MatchedSpotType = {
+  ATTRACTION: 'ATTRACTION',
+  LOCAL: 'LOCAL',
+} as const;
+
+/**
+ * 매칭된 스팟 요약
+ */
+export interface MatchedSpot {
+  /** 스팟 PK */
+  id: number;
+  /** 스팟 분류 */
+  type: MatchedSpotType;
+  /** 스팟 표시명 */
+  name: string;
+  /**
+     * 스팟 주소
+     * @nullable
+     */
+  address?: string | null;
+  /**
+     * ATTRACTION 일 때 attraction id
+     * @nullable
+     */
+  attractionId?: number | null;
+}
+
+/**
+ * 제안되는 분류. 매칭 결과가 없으면 LOCAL 을 기본 제안
+ */
+export type SpotMatchResponseSuggestedType = typeof SpotMatchResponseSuggestedType[keyof typeof SpotMatchResponseSuggestedType];
+
+
+export const SpotMatchResponseSuggestedType = {
+  ATTRACTION: 'ATTRACTION',
+  LOCAL: 'LOCAL',
+} as const;
+
+/**
+ * 스팟 매칭 결과
+ */
+export interface SpotMatchResponse {
+  /** 기존 스팟과 매칭되었는지 여부 */
+  matched: boolean;
+  spot?: MatchedSpot | null;
+  /** 제안되는 분류. 매칭 결과가 없으면 LOCAL 을 기본 제안 */
+  suggestedType: SpotMatchResponseSuggestedType;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseSpotMatchResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: SpotMatchResponse | null;
+}
+
+/**
+ * 검색에서 찾지 못한 식물을 사용자가 추가 제안
+ */
+export interface SuggestPlantRequest {
+  /**
+     * 제안할 식물 이름 (공백 정규화 후 저장)
+     * @minLength 1
+     * @maxLength 30
+     */
+  name: string;
+}
+
+/**
+ * 식물 상태. 사용자에게 노출되는 식물은 항상 ACTIVE.
+ */
+export type PlantResponseStatus = typeof PlantResponseStatus[keyof typeof PlantResponseStatus];
+
+
+export const PlantResponseStatus = {
+  ACTIVE: 'ACTIVE',
+  PENDING: 'PENDING',
+  REJECTED: 'REJECTED',
+} as const;
+
+export type PlantResponseSeasonsItem = typeof PlantResponseSeasonsItem[keyof typeof PlantResponseSeasonsItem];
+
+
+export const PlantResponseSeasonsItem = {
+  SPRING: 'SPRING',
+  SUMMER: 'SUMMER',
+  AUTUMN_WINTER: 'AUTUMN_WINTER',
+} as const;
+
+/**
+ * 식물 응답 — 마스터 칩, 검색 결과, 제안 응답 공용
+ */
+export interface PlantResponse {
+  /** 식물 PK */
+  id: number;
+  /** 식물 이름 */
+  name: string;
+  /** 식물 상태. 사용자에게 노출되는 식물은 항상 ACTIVE. */
+  status: PlantResponseStatus;
+  /** 주개화 계절 셋. 사용자가 직접 추가한 식물은 비어있을 수 있다. */
+  seasons: PlantResponseSeasonsItem[];
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponsePlantResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: PlantResponse | null;
+}
+
+/**
+ * 회원가입 임시 프로필 이미지 업로드 multipart form
+ */
+export interface SignupProfileImageUploadForm {
+  /** 업로드할 이미지 파일 (jpeg/png/webp, 최대 5MB) */
+  image: Blob;
+}
+
+/**
  * 소셜 회원가입 완료 요청
  */
 export interface SignupCompleteRequest {
@@ -17,7 +524,7 @@ export interface SignupCompleteRequest {
      */
   nickname: string;
   /**
-     * 프로필 이미지 URL. 미지정 시 OAuth2 제공자 프로필 이미지가 사용됨
+     * 프로필 이미지 값. (1) 가입 시 임시 업로드 endpoint 로 받은 key (`temp/signup/{sessionId}/main.jpg`) 또는 (2) OAuth2 제공자가 준 외부 URL. 미지정 시 OAuth2 제공자 프로필 이미지가 사용됨.
      * @nullable
      */
   profileImageUrl?: string | null;
@@ -38,6 +545,166 @@ export interface ApiResponseUnit {
      * @nullable
      */
   data?: null;
+}
+
+/**
+ * 개화/단풍 상태 교체
+ * @nullable
+ */
+export type UpdateSpotRecordRequestBloomStage = typeof UpdateSpotRecordRequestBloomStage[keyof typeof UpdateSpotRecordRequestBloomStage] | null;
+
+
+export const UpdateSpotRecordRequestBloomStage = {
+  EARLY: 'EARLY',
+  STARTING: 'STARTING',
+  PEAK: 'PEAK',
+  LATE: 'LATE',
+} as const;
+
+/**
+ * 스팟 기록 부분 수정 — null 필드는 기존 값을 유지한다. plantIds/photoKeys 는 제공 시 전체를 교체한다 (orphan 사진은 자동 정리).
+ */
+export interface UpdateSpotRecordRequest {
+  /**
+     * 방문 일자 교체
+     * @nullable
+     */
+  visitedDate?: string | null;
+  /**
+     * 개화/단풍 상태 교체
+     * @nullable
+     */
+  bloomStage?: UpdateSpotRecordRequestBloomStage;
+  /**
+     * 메모 교체 (최대 1000자, 빈 문자열을 보내면 메모 삭제)
+     * @minLength 0
+     * @maxLength 1000
+     * @nullable
+     */
+  memo?: string | null;
+  /**
+     * 식물 id 리스트 교체 (null 이면 변경하지 않음)
+     * @minItems 0
+     * @maxItems 10
+     * @nullable
+     */
+  plantIds?: number[] | null;
+  /**
+     * 사진 key 리스트 교체 (null 이면 변경하지 않음, 빠진 key 는 자동 삭제)
+     * @minItems 0
+     * @maxItems 5
+     * @nullable
+     */
+  photoKeys?: string[] | null;
+}
+
+/**
+ * 공통 페이지 요청 (0-based)
+ */
+export interface PageRequest {
+  /**
+     * 0-based 페이지 번호
+     * @minimum 0
+     */
+  page?: number;
+  /**
+     * 페이지 크기 (최대 50)
+     * @minimum 1
+     * @maximum 50
+     */
+  size?: number;
+}
+
+/**
+ * @nullable
+ */
+export type SpotRecordSummaryResponseBloomStage = typeof SpotRecordSummaryResponseBloomStage[keyof typeof SpotRecordSummaryResponseBloomStage] | null;
+
+
+export const SpotRecordSummaryResponseBloomStage = {
+  EARLY: 'EARLY',
+  STARTING: 'STARTING',
+  PEAK: 'PEAK',
+  LATE: 'LATE',
+} as const;
+
+export type SpotRecordSummaryResponseStatus = typeof SpotRecordSummaryResponseStatus[keyof typeof SpotRecordSummaryResponseStatus];
+
+
+export const SpotRecordSummaryResponseStatus = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+} as const;
+
+/**
+ * 스팟 기록 목록용 요약 — 대표 사진 1장만 포함
+ */
+export interface SpotRecordSummaryResponse {
+  id: number;
+  spotId: number;
+  spotName: string;
+  user: UserSummary;
+  /** @nullable */
+  visitedDate?: string | null;
+  /** @nullable */
+  bloomStage?: SpotRecordSummaryResponseBloomStage;
+  /** @nullable */
+  memo?: string | null;
+  plants: PlantSummary[];
+  coverPhoto?: PhotoEntry | null;
+  status: SpotRecordSummaryResponseStatus;
+  /** @nullable */
+  publishedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * 공통 페이지 응답 (0-based)
+ */
+export interface PageResponseSpotRecordSummaryResponse {
+  /** 현재 페이지의 항목 리스트 */
+  content: SpotRecordSummaryResponse[];
+  /** 0-based 현재 페이지 */
+  page: number;
+  /** 페이지 크기 */
+  size: number;
+  /** 전체 항목 수 */
+  totalElements: number;
+  /** 전체 페이지 수 */
+  totalPages: number;
+  /** 다음 페이지 존재 여부 */
+  hasNext: boolean;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponsePageResponseSpotRecordSummaryResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: PageResponseSpotRecordSummaryResponse | null;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseListPlantResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  /**
+     * 응답 본문 (성공 시 채워지고, 에러 시 생략됨)
+     * @nullable
+     */
+  data?: PlantResponse[] | null;
 }
 
 /**
@@ -89,7 +756,7 @@ export interface UserInfoResponse {
      */
   nickname?: string | null;
   /**
-     * 프로필 이미지 URL
+     * 프로필 이미지 URL. OAuth2 제공자가 준 외부 URL 그대로이거나, 우리 버킷 객체의 presigned URL (만료 있음)
      * @nullable
      */
   profileImageUrl?: string | null;
@@ -109,6 +776,28 @@ export interface ApiResponseUserInfoResponse {
   message: string;
   data?: UserInfoResponse | null;
 }
+
+export type ListBySpotParams = {
+spotId: number;
+pageRequest: PageRequest;
+};
+
+export type ListMineParams = {
+status: ListMineStatus;
+pageRequest: PageRequest;
+};
+
+export type ListMineStatus = typeof ListMineStatus[keyof typeof ListMineStatus];
+
+
+export const ListMineStatus = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+} as const;
+
+export type SearchParams = {
+keyword: string;
+};
 
 export type CheckNicknameParams = {
 /**

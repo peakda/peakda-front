@@ -20,15 +20,15 @@ export default function SpotCard({ spot }: Props) {
         <span className="text-text-primary text-base font-semibold">{spot.name}</span>
         <span className="text-text-secondary text-sm">{spot.location}</span>
         <div className="flex gap-1">
+          {spot.nameList.map((name, idx) => (
+            <Tag text={name} key={idx} />
+          ))}
           <Badge
             label={spot.status}
             variant="soft"
             color="pink"
             className={cn('w-fit', spot.status === '빨리가요' && 'bg-rose-100 text-rose-500')}
           />
-          {spot.nameList.map((name, idx) => (
-            <Tag text={name} key={idx} />
-          ))}
         </div>
       </div>
       <div className="flex items-center gap-2">

@@ -19,6 +19,8 @@ const nextConfig: NextConfig = {
       // UploadThing CDN
       { protocol: 'https', hostname: 'utfs.io' },
       { protocol: 'https', hostname: '*.ufs.sh' },
+      // UploadThing 스토리지 (프로필 이미지 presigned URL)
+      { protocol: 'https', hostname: 't3.storageapi.dev' },
       // 카카오 소셜 로그인 프로필
       { protocol: 'https', hostname: 'k.kakaocdn.net' },
       // 네이버 소셜 로그인 프로필

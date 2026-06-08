@@ -46,15 +46,27 @@ export function ExplorCard(props: ExplorCardProps) {
         {/* Peak 뱃지 */}
         {props.type === 'peak' && (
           <>
-            <CardBadge variant="dark" label={`${props.visitorCount}명 다녀옴`} className="absolute top-2 left-2" />
-            <CardBadge variant="bloom" label={`만개 ${props.bloomPercent}%`} className="absolute top-2 right-2" />
+            <CardBadge
+              variant="dark"
+              label={`${props.visitorCount}명 다녀옴`}
+              className="absolute top-2 left-2"
+            />
+            <CardBadge
+              variant="bloom"
+              label={`만개 ${props.bloomPercent}%`}
+              className="absolute top-2 right-2"
+            />
           </>
         )}
 
         {/* Festival 뱃지 */}
         {props.type === 'festival' && (
           <>
-            <CardBadge variant="secondary" label={props.dateRange} className="absolute top-2 left-2" />
+            <CardBadge
+              variant="secondary"
+              label={props.dateRange}
+              className="absolute top-2 left-2"
+            />
             <CardBadge variant="green" label={props.status} className="absolute top-2 right-2" />
           </>
         )}
@@ -72,7 +84,7 @@ export function ExplorCard(props: ExplorCardProps) {
       {!isCourse && (
         <div className="mt-2 px-0.5">
           <p className="text-sm font-semibold text-gray-900">{props.name}</p>
-          <p className="mt-0.5 text-xs text-gray-500">{props.description}</p>
+          <p className="text-text-secondary mt-0.5 text-xs">{props.description}</p>
         </div>
       )}
     </div>

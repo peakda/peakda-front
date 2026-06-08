@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils/cn'
 import React, { ReactNode } from 'react'
 
-type Variant = 'soft' | 'filled' | 'ghost'
+type Variant = 'soft' | 'filled' | 'ghost' | 'outline'
 type Color = 'gray' | 'pink' | 'white' | 'green'
 
 interface Props {
@@ -32,6 +32,12 @@ const styles: Record<Variant, Record<Color, string>> = {
     pink: 'text-pink-500',
     white: 'text-secondary',
     green: 'text-green-600',
+  },
+  outline: {
+    gray: 'bg-slate-50 text-slate-500 border border-slate-300',
+    pink: 'bg-pink-50 text-pink-500 border border-pink-300',
+    white: 'bg-white text-secondary border border-border-secondary',
+    green: 'bg-green-50 text-green-600 border border-green-300',
   },
 }
 
