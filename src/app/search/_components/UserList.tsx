@@ -15,8 +15,8 @@ export default function UserList({ user }: Props) {
         <span className="text-xs text-gray-400">{user.stats}</span>
       </div>
       <Button
-        variant={user.following ? 'filled' : 'outlined'}
-        color={user.following ? 'primary' : 'default'}
+        variant={'outlined'}
+        color={user.following ? 'selected' : 'default'}
         size="sm"
         className="rounded-lg"
       >

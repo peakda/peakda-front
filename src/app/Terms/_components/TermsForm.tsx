@@ -61,7 +61,7 @@ export function TermsForm({ onRequiredChange }: TermsFormProps) {
           onCheckedChange={handleAllCheck}
           className="rounded-md"
         />
-        <label htmlFor="all" className="cursor-pointer font-bold">
+        <label htmlFor="all" className="cursor-pointer font-semibold">
           전체 동의
         </label>
       </div>

@@ -21,7 +21,7 @@ interface Reaction {
   onClick?: () => void
 }
 
-interface FeedCardProps {
+export interface FeedCardProps {
   authorName: string
   location: string
   timeAgo: string
@@ -57,17 +57,23 @@ export function FeedCard({
   const { emblaRef, selectedIndex, scrollSnaps, scrollTo } = useCarousel({ loop: true })
 
   return (
-    <div className="flex flex-col gap-3 bg-bg-primary px-4 py-4">
+    <div className="bg-bg-primary flex flex-col gap-3 px-4 py-4">
       {/* 헤더 */}
       <div className="flex items-center gap-2">
         <IconBtn size="md">
           <Image src="/icons/person.svg" alt="프로필" width={16} height={16} />
         </IconBtn>
         <div className="flex flex-1 flex-col">
-          <span className="text-sm font-semibold text-text-primary">{authorName}</span>
-          <span className="text-xs text-text-tertiary">{location}</span>
+          <div className="flex items-center gap-2">
+            <span className="text-text-primary text-sm font-semibold">{authorName}</span>
+            <span className="text-text-quaternary mt-1 text-xs">{timeAgo}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Image src={'./icons/Pin.svg'} alt="지역" width={15} height={15} color="#8C95A4" />
+            <span className="text-text-tertiary mt-1 text-xs">{location}</span>
+          </div>
         </div>
-        <span className="text-xs text-text-quaternary">{timeAgo}</span>
+
         <MoreMenu isOwner={isOwner} onEdit={onEdit} onDelete={onDelete} onReport={onReport} />
       </div>
 
@@ -130,7 +136,7 @@ export function FeedCard({
       )}
 
       {/* 본문 */}
-      <p className="text-sm leading-relaxed text-text-primary">{content}</p>
+      <p className="text-text-primary text-sm leading-relaxed">{content}</p>
 
       {/* 반응 버튼 */}
       <div className="flex gap-2">

@@ -3,6 +3,7 @@ import HeartBtn from '../button/HeartBtn'
 import { Badge } from './Badge'
 import Tag from './Tag'
 import IconBtn from '../button/IconBtn'
+import { CardBadge } from '../card/CardBadge'
 
 interface PinTextProps {
   title: string
@@ -20,7 +21,6 @@ export default function PinText({
   description,
   Badges = [],
   isFavorite = false,
-  tag,
   variant = 'card',
 }: PinTextProps) {
   return (
@@ -29,14 +29,14 @@ export default function PinText({
         <div>
           {/* 메인 제목 */}
           <div className="relative flex items-center gap-1">
-            {tag && <Tag text="절정" className="" />}
+            <Tag text="절정" />
             <h3 className="text-base font-semibold text-gray-900">{title}</h3>
           </div>
 
           {/* 위치 정보 */}
           <div className="text-text-secondary mt-1 flex items-center gap-1">
             <Image src={'/icons/Pin.svg'} alt="핀 이미지" width={20} height={20} />
-            <span className="text-sm">{location}</span>
+            <span className="text-text-secondary text-sm">{location}</span>
           </div>
         </div>
 
@@ -54,17 +54,23 @@ export default function PinText({
       </div>
 
       {/* 방문 기록 및 상세 정보 */}
-      <p className="mt-2 text-xs text-gray-400">{description}</p>
+      <div className="mt-2 flex items-center gap-2">
+        <p className="text-text-tertiary text-xs">{description}</p>
+        <CardBadge label="이르다" variant="green" />
+      </div>
 
       {/* 하단 태그 목록 */}
       <div className="mt-3 flex gap-2">
         {Badges.map((badge, index) => (
           <Badge
-            leftIcon={<Image src={'flowers/벚꽃.svg'} alt="벚꽃" width={20} height={20} />}
+            leftIcon={
+              <Image src={'flowers/cherry-blossom.svg'} alt="벚꽃" width={20} height={20} />
+            }
             key={index}
             label={badge}
             variant="filled"
             color="pink"
+            className="px-2"
           />
         ))}
       </div>

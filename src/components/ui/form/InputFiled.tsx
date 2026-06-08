@@ -1,6 +1,7 @@
 import React from 'react'
-import { Asterisk } from 'lucide-react'
+import { Asterisk, X } from 'lucide-react'
 import Input, { type BorderVariant } from './Input'
+import IconBtn from '@/components/ui/button/IconBtn'
 import { cn } from '@/lib/utils/cn'
 
 interface InputFiledProps {
@@ -12,6 +13,7 @@ interface InputFiledProps {
   placeholder?: string
   value?: string
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
+  onClear?: () => void
   maxLength?: number
   message?: string
   error?: string
@@ -32,6 +34,7 @@ const InputFiled = ({
   error,
   value,
   onChange,
+  onClear,
   variant = 'none',
   placeholder,
   isAvailable,
@@ -68,11 +71,20 @@ const InputFiled = ({
             disabled={isAvailable}
             placeholder={placeholder}
           />
-          {maxLength && (
-            <span className="absolute top-1/2 right-4 -translate-y-1/2 text-sm text-slate-300">
-              {value?.toString().length ?? 0}/{maxLength}
-            </span>
-          )}
+          <div className="absolute top-1/2 right-4 flex -translate-y-1/2 items-center gap-2">
+            {maxLength && (
+              <span className="text-sm text-slate-300">
+                {value?.toString().length ?? 0}/{maxLength}
+              </span>
+            )}
+            {isMesssage && onClear && (
+              <button type="button" onClick={onClear}>
+                <IconBtn size="sm" className="bg-bg-quaternary-2">
+                  <X size={14} color="white" />
+                </IconBtn>
+              </button>
+            )}
+          </div>
         </div>
 
         {buttonText && (

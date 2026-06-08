@@ -19,7 +19,11 @@ class KakaoSDKLoader {
     this.promise = new Promise((resolve, reject) => {
       const script = document.createElement('script')
 
-      script.src = `//dapi.kakao.com/v2/maps/sdk.js` + `?appkey=${appKey}` + `&autoload=false`
+      script.src =
+        `//dapi.kakao.com/v2/maps/sdk.js` +
+        `?appkey=${appKey}` +
+        `&autoload=false` +
+        `&libraries=services`
 
       script.async = true // 파싱 블로킹 없음
       script.defer = true // DOM 완성 후 실행

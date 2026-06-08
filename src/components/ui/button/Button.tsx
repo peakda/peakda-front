@@ -3,7 +3,7 @@ import { ButtonHTMLAttributes, forwardRef, ReactNode } from 'react'
 
 type ButtonVariant = 'filled' | 'outlined' | 'ghost'
 type ButtonSize = 'lg' | 'md' | 'sm'
-type ButtonColor = 'primary' | 'default'
+type ButtonColor = 'primary' | 'default' | 'selected'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant
@@ -29,16 +29,19 @@ const VARIANT_COLOR: Record<ButtonVariant, Record<ButtonColor, string>> = {
       'bg-brand-secondary text-white  active:bg-brand-secondary text-text-primary-inverse disabled:bg-bg-quaternary disabled:text-text-primary-inverse',
     default:
       'bg-gray-200 text-gray-500 hover:bg-gray-300 \ disabled:bg-bg-quaternary disabled:text-text-primary-inverse',
+    selected: '',
   },
   outlined: {
     primary:
       'border border-green-500 text-green-600 hover:bg-green-50 active:bg-green-100 disabled:border-gray-200 disabled:text-gray-300',
     default:
       'border border-gray-300 text-gray-600 hover:bg-gray-50  disabled:border-gray-200 disabled:text-gray-300',
+    selected: 'bg-green-50 border border-brand-secondary text-text-secondary hover:bg-green-50 ',
   },
   ghost: {
     primary: 'text-green-600 hover:bg-green-50 active:bg-green-100 disabled:text-gray-300',
     default: 'text-gray-500 hover:bg-gray-100 active:bg-gray-200 disabled:text-gray-300',
+    selected: '',
   },
 }
 
@@ -63,7 +66,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       >
         {leftIcon && (
-          <span className="rounded- flex items-center text-[1em]" aria-hidden>
+          <span className="flex items-center rounded text-[1em]" aria-hidden>
             {leftIcon}
           </span>
         )}

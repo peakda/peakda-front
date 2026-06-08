@@ -6,7 +6,7 @@ import Header from '@/components/ui/layout/Header'
 import InputFiled from '@/components/ui/form/InputFiled'
 import { useCheckNickname } from '@/hooks/useCheckNickname'
 import { cn } from '@/lib/utils/cn'
-import { useUploadThing } from '@/lib/uploadthing'
+import { useUploadSignupProfileImage } from '@/api/facades/auth'
 import Image from 'next/image'
 import { useCallback, useRef, useState } from 'react'
 import { useSignUpComplete } from '@/hooks/useSignUpComplete'
@@ -32,16 +32,13 @@ export default function ProfilePage() {
   const [nickname, setNickname] = useState('')
   const [selected, setSelected] = useState<string[]>([])
   const [preview, setPreview] = useState<string | null>(null)
-  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null)
+  // 회원가입 임시 업로드 응답의 profileImageKey — signup complete 로 그대로 전달
+  const [profileImageKey, setProfileImageKey] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const { isAvailable, isPending, check, isError, message } = useCheckNickname(nickname)
-  const { startUpload, isUploading } = useUploadThing('profileImage', {
-    onClientUploadComplete: (res) => {
-      setProfileImageUrl(res[0].ufsUrl)
-    },
-  })
-  const { isPending: signupPending, check: submit } = useSignUpComplete(nickname, profileImageUrl)
+  const { mutate: uploadImage, isPending: isUploading } = useUploadSignupProfileImage()
+  const { isPending: signupPending, check: submit } = useSignUpComplete(nickname, profileImageKey)
 
   const toggleBadge = useCallback((flower: string) => {
     setSelected((prev) =>
@@ -53,7 +50,23 @@ export default function ProfilePage() {
     const file = e.target.files?.[0]
     if (!file) return
     setPreview(URL.createObjectURL(file))
-    startUpload([file])
+    uploadImage(
+      { data: { image: file } },
+      {
+        onSuccess: (res) => {
+          const data = res.data.data
+          if (!data) return
+          setPreview(data.profileImageUrl)
+          setProfileImageKey(data.profileImageKey)
+        },
+      }
+    )
+  }
+
+  const handleDeleteImage = () => {
+    // 회원가입 임시 업로드에는 삭제 API 가 없어 로컬 상태만 비운다 (가입 완료 시 미전달)
+    setPreview(null)
+    setProfileImageKey(null)
   }
 
   return (
@@ -98,7 +111,7 @@ export default function ProfilePage() {
         </button>
         {preview && (
           <button
-            onClick={() => setPreview(null)}
+            onClick={handleDeleteImage}
             className="bg-brand-secondary absolute right-10 bottom-0 cursor-pointer rounded-xl px-2 py-1 text-white"
           >
             초기화

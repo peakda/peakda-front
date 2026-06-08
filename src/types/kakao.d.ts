@@ -32,6 +32,34 @@ declare namespace kakao.maps {
 
   function load(callback: () => void): void
 
+  namespace services {
+    enum Status {
+      OK = 'OK',
+      ZERO_RESULT = 'ZERO_RESULT',
+      ERROR = 'ERROR',
+    }
+
+    interface PlacesSearchResultItem {
+      id: string
+      place_name: string
+      address_name: string
+      road_address_name: string
+      category_name: string
+      /** 경도 (longitude) */
+      x: string
+      /** 위도 (latitude) */
+      y: string
+    }
+
+    class Places {
+      constructor()
+      keywordSearch(
+        keyword: string,
+        callback: (data: PlacesSearchResultItem[], status: Status) => void
+      ): void
+    }
+  }
+
   namespace event {
     function addListener(target: object, type: string, handler: () => void): void
     function removeListener(target: object, type: string, handler: () => void): void
