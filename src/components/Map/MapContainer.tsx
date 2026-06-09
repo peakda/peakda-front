@@ -1,7 +1,7 @@
 'use client'
 
 import { useLazyMapLoad } from '@/hooks/useLazyMapLoad'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import MainMessage from '../ui/message/MainMessage'
 import Header from '../ui/layout/Header'
@@ -14,7 +14,9 @@ import Category from '../ui/category/Category'
 import { toast } from 'sonner'
 import { useMapCluster, type MapSpot } from '@/hooks/useMapPins'
 import { useDrawerStore } from '@/stores/useDrawerStore'
-import { TEST_SPOTS } from '@/constants/testSpots'
+import { useBloomMap } from '@/api/facades/seasonal-bloom'
+import { bloomToMapSpots } from '@/lib/utils/bloomToMapSpots'
+import type { MapParams } from '@/api/generated/peakdaApi.schemas'
 import { useRouter } from 'next/navigation'
 
 const Drawer = dynamic(
@@ -57,8 +59,12 @@ export const MapContainer = () => {
   const router = useRouter()
   const mapRef = useRef<kakao.maps.Map | null>(null)
   const [mapInstance, setMapInstance] = useState<kakao.maps.Map | null>(null)
+  const [bbox, setBbox] = useState<MapParams | null>(null)
   const { isReady, error, retry } = useLazyMapLoad(containerRef)
   const { snapHeight, openFilterDrawer, openPinDrawer } = useDrawerStore()
+
+  const { data: bloomData } = useBloomMap(bbox)
+  const spots = useMemo(() => (bloomData ? bloomToMapSpots(bloomData) : []), [bloomData])
 
   const handlePinClick = useCallback(
     (spot: MapSpot) => {
@@ -66,7 +72,7 @@ export const MapContainer = () => {
         spot.flowers.map((f) => ({
           type: 'list' as const,
           title: f.alt || '명소',
-          location: '위치 정보 없음',
+          location: spot.title ?? '위치 정보 없음',
           description: `현재 ${spot.maxStage === 'Peak' ? '만개' : spot.maxStage === 'Start' ? '개화 시작' : '개화 전'} 상태입니다.`,
           Badges: f.alt ? [f.alt] : [],
           isFavorite: false,
@@ -77,7 +83,28 @@ export const MapContainer = () => {
     [openPinDrawer]
   )
 
-  useMapCluster(mapInstance, TEST_SPOTS, handlePinClick)
+  useMapCluster(mapInstance, spots, handlePinClick)
+
+  // 지도 이동/줌이 멈출 때(idle)마다 현재 영역(bbox)으로 개화현황을 다시 조회한다.
+  useEffect(() => {
+    if (!mapInstance) return
+
+    const updateBbox = () => {
+      const bounds = mapInstance.getBounds()
+      const sw = bounds.getSouthWest()
+      const ne = bounds.getNorthEast()
+      setBbox({
+        minLat: sw.getLat(),
+        minLng: sw.getLng(),
+        maxLat: ne.getLat(),
+        maxLng: ne.getLng(),
+      })
+    }
+
+    updateBbox()
+    kakao.maps.event.addListener(mapInstance, 'idle', updateBbox)
+    return () => kakao.maps.event.removeListener(mapInstance, 'idle', updateBbox)
+  }, [mapInstance])
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
