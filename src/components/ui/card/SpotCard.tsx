@@ -8,9 +8,12 @@ import { SPOTProps } from '@/app/search/_components/SpotPanel'
 
 interface Props {
   spot: SPOTProps
+  // 실제 찜 연동용 — 넘기면 HeartBtn 이 add/remove API 를 호출한다(없으면 로컬 토글).
+  favoriteSpotId?: number
+  initialFavorite?: boolean
 }
 
-export default function SpotCard({ spot }: Props) {
+export default function SpotCard({ spot, favoriteSpotId, initialFavorite = false }: Props) {
   return (
     <div key={spot.id} className="flex items-center gap-3 px-4 py-3">
       <div className="relative h-20 w-20 shrink-0">
@@ -23,17 +26,19 @@ export default function SpotCard({ spot }: Props) {
           {spot.nameList.map((name, idx) => (
             <Tag text={name} key={idx} />
           ))}
-          <Badge
-            label={spot.status}
-            variant="soft"
-            color="pink"
-            className={cn('w-fit', spot.status === '빨리가요' && 'bg-rose-100 text-rose-500')}
-          />
+          {spot.status && (
+            <Badge
+              label={spot.status}
+              variant="soft"
+              color="pink"
+              className={cn('w-fit', spot.status === '빨리가요' && 'bg-rose-100 text-rose-500')}
+            />
+          )}
         </div>
       </div>
       <div className="flex items-center gap-2">
         <IconBtn size="md">
-          <HeartBtn InitFavorite={false} className="h-5 w-5" />
+          <HeartBtn InitFavorite={initialFavorite} spotId={favoriteSpotId} className="h-5 w-5" />
         </IconBtn>
         <IconBtn size="md">
           <Bell className="h-5 w-5 text-gray-300" />

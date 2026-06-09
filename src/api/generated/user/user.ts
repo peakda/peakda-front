@@ -5,35 +5,46 @@
  * 계절 여행 타이밍 안내 서비스 API 문서
  * OpenAPI spec version: v1
  */
-import { useMutation } from '@tanstack/react-query'
+import {
+  useMutation
+} from '@tanstack/react-query';
 import type {
   MutationFunction,
   QueryClient,
   UseMutationOptions,
-  UseMutationResult,
-} from '@tanstack/react-query'
+  UseMutationResult
+} from '@tanstack/react-query';
 
 import type {
   ApiResponseProfileImageResponse,
   ApiResponseUnit,
-  ProfileImageUploadForm,
-} from '../peakdaApi.schemas'
+  ProfileImageUploadForm
+} from '../peakdaApi.schemas';
 
-import { customInstance } from '../../mutator/index'
+import { customInstance } from '../../mutator/index';
 
-type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1]
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+
 
 export type uploadProfileImageResponse200 = {
   data: ApiResponseProfileImageResponse
   status: 200
 }
 
-export type uploadProfileImageResponseSuccess = uploadProfileImageResponse200 & {
-  headers: Headers
-}
-export type uploadProfileImageResponse = uploadProfileImageResponseSuccess
+export type uploadProfileImageResponseSuccess = (uploadProfileImageResponse200) & {
+  headers: Headers;
+};
+;
+
+export type uploadProfileImageResponse = (uploadProfileImageResponseSuccess)
 
 export const getUploadProfileImageUrl = () => {
+
+
+
+
   return `/api/users/me/profile-image`
 }
 
@@ -41,95 +52,83 @@ export const getUploadProfileImageUrl = () => {
  * 현재 로그인한 사용자의 프로필 이미지를 업로드한다. 서버에서 thumbnail(128x128), main(512x512) 사이즈로 리사이즈 후 스토리지에 저장한다.
  * @summary 프로필 이미지 업로드
  */
-export const uploadProfileImage = async (
-  profileImageUploadForm: ProfileImageUploadForm,
-  options?: RequestInit
-): Promise<uploadProfileImageResponse> => {
-  const formData = new FormData()
-  formData.append(`image`, profileImageUploadForm.image)
+export const uploadProfileImage = async (profileImageUploadForm: ProfileImageUploadForm, options?: RequestInit): Promise<uploadProfileImageResponse> => {
+    const formData = new FormData();
+formData.append(`image`, profileImageUploadForm.image);
 
-  return customInstance<uploadProfileImageResponse>(getUploadProfileImageUrl(), {
+  return customInstance<uploadProfileImageResponse>(getUploadProfileImageUrl(),
+  {
     ...options,
-    method: 'POST',
-    body: formData,
-  })
-}
-
-export const getUploadProfileImageMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof uploadProfileImage>>,
-    TError,
-    { data: ProfileImageUploadForm },
-    TContext
-  >
-  request?: SecondParameter<typeof customInstance>
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof uploadProfileImage>>,
-  TError,
-  { data: ProfileImageUploadForm },
-  TContext
-> => {
-  const mutationKey = ['uploadProfileImage']
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined }
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof uploadProfileImage>>,
-    { data: ProfileImageUploadForm }
-  > = (props) => {
-    const { data } = props ?? {}
-
-    return uploadProfileImage(data, requestOptions)
+    method: 'POST'
+    ,
+    body: formData
   }
+);}
 
-  return { mutationFn, ...mutationOptions }
-}
 
-export type UploadProfileImageMutationResult = NonNullable<
-  Awaited<ReturnType<typeof uploadProfileImage>>
->
-export type UploadProfileImageMutationBody = ProfileImageUploadForm
-export type UploadProfileImageMutationError = unknown
 
-/**
+
+export const getUploadProfileImageMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadProfileImage>>, TError,{data: ProfileImageUploadForm}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof uploadProfileImage>>, TError,{data: ProfileImageUploadForm}, TContext> => {
+
+const mutationKey = ['uploadProfileImage'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadProfileImage>>, {data: ProfileImageUploadForm}> = (props) => {
+          const {data} = props ?? {};
+
+          return  uploadProfileImage(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UploadProfileImageMutationResult = NonNullable<Awaited<ReturnType<typeof uploadProfileImage>>>
+    export type UploadProfileImageMutationBody = ProfileImageUploadForm
+    export type UploadProfileImageMutationError = unknown
+
+    /**
  * @summary 프로필 이미지 업로드
  */
-export const useUploadProfileImage = <TError = unknown, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof uploadProfileImage>>,
-      TError,
-      { data: ProfileImageUploadForm },
-      TContext
-    >
-    request?: SecondParameter<typeof customInstance>
-  },
-  queryClient?: QueryClient
-): UseMutationResult<
-  Awaited<ReturnType<typeof uploadProfileImage>>,
-  TError,
-  { data: ProfileImageUploadForm },
-  TContext
-> => {
-  return useMutation(getUploadProfileImageMutationOptions(options), queryClient)
-}
-export type deleteProfileImageResponse200 = {
+export const useUploadProfileImage = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadProfileImage>>, TError,{data: ProfileImageUploadForm}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof uploadProfileImage>>,
+        TError,
+        {data: ProfileImageUploadForm},
+        TContext
+      > => {
+      return useMutation(getUploadProfileImageMutationOptions(options), queryClient);
+    }
+    export type deleteProfileImageResponse200 = {
   data: ApiResponseUnit
   status: 200
 }
 
-export type deleteProfileImageResponseSuccess = deleteProfileImageResponse200 & {
-  headers: Headers
-}
-export type deleteProfileImageResponse = deleteProfileImageResponseSuccess
+export type deleteProfileImageResponseSuccess = (deleteProfileImageResponse200) & {
+  headers: Headers;
+};
+;
+
+export type deleteProfileImageResponse = (deleteProfileImageResponseSuccess)
 
 export const getDeleteProfileImageUrl = () => {
+
+
+
+
   return `/api/users/me/profile-image`
 }
 
@@ -137,61 +136,61 @@ export const getDeleteProfileImageUrl = () => {
  * 현재 로그인한 사용자의 프로필 이미지를 삭제한다.
  * @summary 프로필 이미지 삭제
  */
-export const deleteProfileImage = async (
-  options?: RequestInit
-): Promise<deleteProfileImageResponse> => {
-  return customInstance<deleteProfileImageResponse>(getDeleteProfileImageUrl(), {
+export const deleteProfileImage = async ( options?: RequestInit): Promise<deleteProfileImageResponse> => {
+
+  return customInstance<deleteProfileImageResponse>(getDeleteProfileImageUrl(),
+  {
     ...options,
-    method: 'DELETE',
-  })
-}
+    method: 'DELETE'
 
-export const getDeleteProfileImageMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteProfileImage>>,
-    TError,
-    void,
-    TContext
-  >
-  request?: SecondParameter<typeof customInstance>
-}): UseMutationOptions<Awaited<ReturnType<typeof deleteProfileImage>>, TError, void, TContext> => {
-  const mutationKey = ['deleteProfileImage']
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined }
 
-  const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteProfileImage>>, void> = () => {
-    return deleteProfileImage(requestOptions)
   }
+);}
 
-  return { mutationFn, ...mutationOptions }
-}
 
-export type DeleteProfileImageMutationResult = NonNullable<
-  Awaited<ReturnType<typeof deleteProfileImage>>
->
 
-export type DeleteProfileImageMutationError = unknown
 
-/**
+export const getDeleteProfileImageMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteProfileImage>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteProfileImage>>, TError,void, TContext> => {
+
+const mutationKey = ['deleteProfileImage'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteProfileImage>>, void> = () => {
+
+
+          return  deleteProfileImage(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteProfileImageMutationResult = NonNullable<Awaited<ReturnType<typeof deleteProfileImage>>>
+
+    export type DeleteProfileImageMutationError = unknown
+
+    /**
  * @summary 프로필 이미지 삭제
  */
-export const useDeleteProfileImage = <TError = unknown, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof deleteProfileImage>>,
-      TError,
-      void,
-      TContext
-    >
-    request?: SecondParameter<typeof customInstance>
-  },
-  queryClient?: QueryClient
-): UseMutationResult<Awaited<ReturnType<typeof deleteProfileImage>>, TError, void, TContext> => {
-  return useMutation(getDeleteProfileImageMutationOptions(options), queryClient)
-}
+export const useDeleteProfileImage = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteProfileImage>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteProfileImage>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getDeleteProfileImageMutationOptions(options), queryClient);
+    }

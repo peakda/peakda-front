@@ -6,6 +6,23 @@
  * OpenAPI spec version: v1
  */
 /**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseUnit {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  /**
+     * 응답 본문 (성공 시 채워지고, 에러 시 생략됨)
+     * @nullable
+     */
+  data?: null;
+}
+
+/**
  * 프로필 이미지 업로드 multipart form
  */
 export interface ProfileImageUploadForm {
@@ -445,6 +462,56 @@ export interface ApiResponseSpotMatchResponse {
 }
 
 /**
+ * 스팟 분류
+ */
+export type SpotFavoriteResponseType = typeof SpotFavoriteResponseType[keyof typeof SpotFavoriteResponseType];
+
+
+export const SpotFavoriteResponseType = {
+  ATTRACTION: 'ATTRACTION',
+  LOCAL: 'LOCAL',
+} as const;
+
+/**
+ * 찜한 스팟
+ */
+export interface SpotFavoriteResponse {
+  /** 스팟 PK */
+  spotId: number;
+  /** 스팟 분류 */
+  type: SpotFavoriteResponseType;
+  /** 스팟 표시명 */
+  name: string;
+  /**
+     * 스팟 주소
+     * @nullable
+     */
+  address?: string | null;
+  /**
+     * ATTRACTION 일 때 attraction id
+     * @nullable
+     */
+  attractionId?: number | null;
+  /** 만개 알림 수신 여부 */
+  notifyEnabled: boolean;
+  /** 찜한 시각 */
+  favoritedAt: string;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseSpotFavoriteResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: SpotFavoriteResponse | null;
+}
+
+/**
  * 검색에서 찾지 못한 식물을 사용자가 추가 제안
  */
 export interface SuggestPlantRequest {
@@ -531,23 +598,6 @@ export interface SignupCompleteRequest {
 }
 
 /**
- * 공통 응답 envelope
- */
-export interface ApiResponseUnit {
-  /** HTTP status code */
-  status: number;
-  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
-  code: string;
-  /** 사람이 읽는 메시지 */
-  message: string;
-  /**
-     * 응답 본문 (성공 시 채워지고, 에러 시 생략됨)
-     * @nullable
-     */
-  data?: null;
-}
-
-/**
  * 개화/단풍 상태 교체
  * @nullable
  */
@@ -599,6 +649,14 @@ export interface UpdateSpotRecordRequest {
 }
 
 /**
+ * 찜한 스팟 만개 알림 설정 변경 요청
+ */
+export interface UpdateFavoriteNotifyRequest {
+  /** 만개 알림 수신 여부 */
+  enabled: boolean;
+}
+
+/**
  * 공통 페이지 요청 (0-based)
  */
 export interface PageRequest {
@@ -613,6 +671,83 @@ export interface PageRequest {
      * @maximum 50
      */
   size?: number;
+}
+
+/**
+ * 팔로우 관계의 사용자 정보 (팔로워/팔로잉 목록 항목)
+ */
+export interface FollowUserResponse {
+  /** 사용자 PK */
+  userId: number;
+  /** 닉네임 */
+  nickname: string;
+  /**
+     * 프로필 이미지 URL (없으면 null)
+     * @nullable
+     */
+  profileImageUrl?: string | null;
+  /** 현재 로그인 사용자가 이 사용자를 팔로우 중인지 여부. false 이면 '팔로우'(맞팔로우) 버튼, true 이면 '팔로잉' 버튼을 노출한다. */
+  following: boolean;
+  /** 팔로우 관계가 생성된 시각 */
+  followedAt: string;
+}
+
+/**
+ * 공통 페이지 응답 (0-based)
+ */
+export interface PageResponseFollowUserResponse {
+  /** 현재 페이지의 항목 리스트 */
+  content: FollowUserResponse[];
+  /** 0-based 현재 페이지 */
+  page: number;
+  /** 페이지 크기 */
+  size: number;
+  /** 전체 항목 수 */
+  totalElements: number;
+  /** 전체 페이지 수 */
+  totalPages: number;
+  /** 다음 페이지 존재 여부 */
+  hasNext: boolean;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponsePageResponseFollowUserResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: PageResponseFollowUserResponse | null;
+}
+
+/**
+ * 사용자 팔로우 통계 요약 (유저 프로필 헤더용)
+ */
+export interface FollowSummaryResponse {
+  /** 대상 사용자 PK */
+  userId: number;
+  /** 팔로워 수 (이 사용자를 팔로우하는 사람 수) */
+  followerCount: number;
+  /** 팔로잉 수 (이 사용자가 팔로우하는 사람 수) */
+  followingCount: number;
+  /** 현재 로그인 사용자가 이 사용자를 팔로우 중인지 여부. 본인 프로필이면 항상 false. */
+  following: boolean;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseFollowSummaryResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: FollowSummaryResponse | null;
 }
 
 /**
@@ -688,6 +823,306 @@ export interface ApiResponsePageResponseSpotRecordSummaryResponse {
   /** 사람이 읽는 메시지 */
   message: string;
   data?: PageResponseSpotRecordSummaryResponse | null;
+}
+
+/**
+ * 찜한 스팟 목록
+ */
+export interface SpotFavoriteListResponse {
+  /** 찜한 스팟 총 개수 */
+  count: number;
+  /** 찜한 스팟 목록 (최근 찜한 순) */
+  favorites: SpotFavoriteResponse[];
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseSpotFavoriteListResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: SpotFavoriteListResponse | null;
+}
+
+/**
+ * 꽃 카테고리
+ */
+export type BloomSlotCategory = typeof BloomSlotCategory[keyof typeof BloomSlotCategory];
+
+
+export const BloomSlotCategory = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  COSMOS: 'COSMOS',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
+} as const;
+
+/**
+ * 현재 상태 (PREPARING/STARTED/PEAK)
+ */
+export type BloomSlotStatus = typeof BloomSlotStatus[keyof typeof BloomSlotStatus];
+
+
+export const BloomSlotStatus = {
+  PREPARING: 'PREPARING',
+  STARTED: 'STARTED',
+  PEAK: 'PEAK',
+  ENDED: 'ENDED',
+} as const;
+
+/**
+ * 명소×카테고리 현재 상태 슬롯
+ */
+export interface BloomSlot {
+  /** 꽃 카테고리 */
+  category: BloomSlotCategory;
+  /** 카테고리 표시명 */
+  displayName: string;
+  /** 현재 상태 (PREPARING/STARTED/PEAK) */
+  status: BloomSlotStatus;
+  /** 신뢰도 (0~1) */
+  confidence: number;
+}
+
+/**
+ * 명소 1건과 그 꽃 슬롯들
+ */
+export interface BloomMapItem {
+  /** 명소 id */
+  attractionId: number;
+  /** 명소명 */
+  title: string;
+  /**
+     * 위도
+     * @nullable
+     */
+  latitude?: number | null;
+  /**
+     * 경도
+     * @nullable
+     */
+  longitude?: number | null;
+  /** 이 명소의 꽃 슬롯들 */
+  blooms: BloomSlot[];
+}
+
+/**
+ * 지도 영역 내 명소별 현재 개화 상태 (핀 3단계, ENDED 제외)
+ */
+export interface BloomMapResponse {
+  /**
+     * 상태 산출 기준일 (없으면 null)
+     * @nullable
+     */
+  baseDate?: string | null;
+  /** 명소 수 */
+  count: number;
+  /** 명소 목록 */
+  attractions: BloomMapItem[];
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseBloomMapResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: BloomMapResponse | null;
+}
+
+/**
+ * 꽃 카테고리
+ */
+export type BloomPeakItemCategory = typeof BloomPeakItemCategory[keyof typeof BloomPeakItemCategory];
+
+
+export const BloomPeakItemCategory = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  COSMOS: 'COSMOS',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
+} as const;
+
+/**
+ * 절정 명소 1건
+ */
+export interface BloomPeakItem {
+  /** 명소 id */
+  attractionId: number;
+  /** 명소명 */
+  title: string;
+  /**
+     * 위도
+     * @nullable
+     */
+  latitude?: number | null;
+  /**
+     * 경도
+     * @nullable
+     */
+  longitude?: number | null;
+  /** 꽃 카테고리 */
+  category: BloomPeakItemCategory;
+  /** 카테고리 표시명 */
+  displayName: string;
+  /** 신뢰도 (0~1) */
+  confidence: number;
+  /**
+     * 절정 시작일
+     * @nullable
+     */
+  peakStartDate?: string | null;
+  /**
+     * 절정 종료일
+     * @nullable
+     */
+  peakEndDate?: string | null;
+  /**
+     * 절정 지속일 (양 끝 포함)
+     * @nullable
+     */
+  peakDurationDays?: number | null;
+}
+
+/**
+ * 지금이 절정인 명소 목록 (status=PEAK)
+ */
+export interface BloomPeakListResponse {
+  /**
+     * 상태 산출 기준일 (없으면 null)
+     * @nullable
+     */
+  baseDate?: string | null;
+  /** 절정 명소 수 */
+  count: number;
+  /** 절정 명소 목록 */
+  items: BloomPeakItem[];
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseBloomPeakListResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: BloomPeakListResponse | null;
+}
+
+/**
+ * 꽃 카테고리
+ */
+export type BloomCalendarResponseCategory = typeof BloomCalendarResponseCategory[keyof typeof BloomCalendarResponseCategory];
+
+
+export const BloomCalendarResponseCategory = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  COSMOS: 'COSMOS',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
+} as const;
+
+/**
+ * 예상 상태
+ */
+export type BloomCalendarDayStatus = typeof BloomCalendarDayStatus[keyof typeof BloomCalendarDayStatus];
+
+
+export const BloomCalendarDayStatus = {
+  PREPARING: 'PREPARING',
+  STARTED: 'STARTED',
+  PEAK: 'PEAK',
+  ENDED: 'ENDED',
+} as const;
+
+/**
+ * 특정 일자의 예상 상태
+ */
+export interface BloomCalendarDay {
+  /** 일자 */
+  date: string;
+  /** 예상 상태 */
+  status: BloomCalendarDayStatus;
+}
+
+/**
+ * 단일 명소×카테고리의 향후 예상 만개 캘린더 (온디맨드 시뮬레이션)
+ */
+export interface BloomCalendarResponse {
+  /** 명소 id */
+  attractionId: number;
+  /** 꽃 카테고리 */
+  category: BloomCalendarResponseCategory;
+  /** 카테고리 표시명 */
+  displayName: string;
+  /**
+     * 올해(인근 시즌) 절정 시작일
+     * @nullable
+     */
+  peakStartDate?: string | null;
+  /**
+     * 절정 종료일
+     * @nullable
+     */
+  peakEndDate?: string | null;
+  /**
+     * 절정 지속일 (양 끝 포함)
+     * @nullable
+     */
+  peakDurationDays?: number | null;
+  /** 오늘부터의 일별 상태 타임라인 */
+  days: BloomCalendarDay[];
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseBloomCalendarResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: BloomCalendarResponse | null;
 }
 
 /**
@@ -782,6 +1217,14 @@ spotId: number;
 pageRequest: PageRequest;
 };
 
+export type FollowingsParams = {
+pageRequest: PageRequest;
+};
+
+export type FollowersParams = {
+pageRequest: PageRequest;
+};
+
 export type ListMineParams = {
 status: ListMineStatus;
 pageRequest: PageRequest;
@@ -793,6 +1236,104 @@ export type ListMineStatus = typeof ListMineStatus[keyof typeof ListMineStatus];
 export const ListMineStatus = {
   DRAFT: 'DRAFT',
   PUBLISHED: 'PUBLISHED',
+} as const;
+
+export type MapParams = {
+/**
+ * 남서 위도
+ */
+minLat: number;
+/**
+ * 북동 위도
+ */
+maxLat: number;
+/**
+ * 남서 경도
+ */
+minLng: number;
+/**
+ * 북동 경도
+ */
+maxLng: number;
+/**
+ * 꽃 카테고리 필터 (생략 시 전체)
+ */
+category?: MapCategory;
+};
+
+export type MapCategory = typeof MapCategory[keyof typeof MapCategory];
+
+
+export const MapCategory = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  COSMOS: 'COSMOS',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
+} as const;
+
+export type PeakParams = {
+/**
+ * 꽃 카테고리 필터 (생략 시 전체)
+ */
+category?: PeakCategory;
+};
+
+export type PeakCategory = typeof PeakCategory[keyof typeof PeakCategory];
+
+
+export const PeakCategory = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  COSMOS: 'COSMOS',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
+} as const;
+
+export type CalendarParams = {
+/**
+ * 명소 id
+ */
+attractionId: number;
+/**
+ * 꽃 카테고리
+ */
+category: CalendarCategory;
+};
+
+export type CalendarCategory = typeof CalendarCategory[keyof typeof CalendarCategory];
+
+
+export const CalendarCategory = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  COSMOS: 'COSMOS',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
 } as const;
 
 export type SearchParams = {

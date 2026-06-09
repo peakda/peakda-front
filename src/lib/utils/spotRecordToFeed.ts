@@ -1,5 +1,9 @@
-import type { SpotRecordSummaryResponse } from '@/api/generated/peakdaApi.schemas'
+import type {
+  SpotRecordResponse,
+  SpotRecordSummaryResponse,
+} from '@/api/generated/peakdaApi.schemas'
 import type { FeedCardProps } from '@/components/ui/card/FeedCard'
+import type { MyRecord } from '@/app/my/_components/MyRecordSection'
 
 const BLOOM_LABEL = {
   EARLY: '이르다',
@@ -45,5 +49,35 @@ export function toFeedCardProps(record: SpotRecordSummaryResponse): FeedCardProp
     flowers: record.plants.map((plant) => ({ emoji: '🌸', label: plant.name })),
     content: record.memo ?? '',
     reactions: [],
+  }
+}
+
+// SpotRecordResponse(상세) → FeedCard props
+// 상세는 사진 전체(photos)를 포함하므로 캐러셀에 모두 노출한다.
+export function detailToFeedCardProps(
+  record: SpotRecordResponse,
+  options?: Pick<FeedCardProps, 'isOwner' | 'onEdit' | 'onDelete' | 'onReport'>
+): FeedCardProps {
+  return {
+    authorName: record.user.nickname,
+    location: record.spot.name,
+    timeAgo: formatTimeAgo(record.publishedAt ?? record.createdAt),
+    visitDate: toDot(record.visitedDate ?? record.createdAt),
+    statusLabel: record.bloomStage ? BLOOM_LABEL[record.bloomStage] : '상태 미정',
+    statusVariant: record.bloomStage ? BLOOM_VARIANT[record.bloomStage] : 'secondary',
+    images: record.photos.length > 0 ? record.photos.map((p) => p.url) : ['/images/explore.png'],
+    flowers: record.plants.map((plant) => ({ emoji: '🌸', label: plant.name })),
+    content: record.memo ?? '',
+    reactions: [],
+    ...options,
+  }
+}
+
+// SpotRecordSummaryResponse → MyRecord(내 기록 썸네일)
+// 한계: 인기 여부 데이터가 없어 isPopular 는 설정하지 않는다.
+export function toMyRecordThumb(record: SpotRecordSummaryResponse): MyRecord {
+  return {
+    image: record.coverPhoto?.url ?? '/images/explore.png',
+    date: toDot(record.visitedDate ?? record.createdAt),
   }
 }

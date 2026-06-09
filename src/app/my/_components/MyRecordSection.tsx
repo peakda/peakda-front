@@ -4,7 +4,7 @@ import IconBtn from '@/components/ui/button/IconBtn'
 import { SectionHeader } from '@/app/my/_components/SectionHeader'
 import { MyFeed } from '@/app/my/_components/MyFeed'
 
-interface MyRecord {
+export interface MyRecord {
   image: string
   date: string
   isPopular?: boolean
@@ -12,13 +12,14 @@ interface MyRecord {
 
 interface Props {
   records: MyRecord[]
+  count?: number
   canRecord?: boolean
 }
 
-export function MyRecordSection({ records, canRecord = true }: Props) {
+export function MyRecordSection({ records, count, canRecord = true }: Props) {
   return (
     <section className="mt-4">
-      <SectionHeader title={`내 기록 (${records.length})`} action="전체" />
+      <SectionHeader title={`내 기록 (${count ?? records.length})`} action="전체" />
       {records.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-8 text-center">
           <IconBtn className="h-16 w-16">

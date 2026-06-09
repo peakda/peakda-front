@@ -12,17 +12,10 @@ import { MyRecordSection } from '@/app/my/_components/MyRecordSection'
 import { SavedSpotSection } from '@/app/my/_components/SavedSpotSection'
 import IconBtn from '@/components/ui/button/IconBtn'
 import { useRouter } from 'next/navigation'
+import { useMySpotRecords } from '@/api/facades/spot-record'
+import { toMyRecordThumb } from '@/lib/utils/spotRecordToFeed'
 
 const INTEREST_FLOWERS = ['동백꽃', '매화', '개나리', '벚꽃', '철쭉']
-
-const MY_FEEDS = [
-  { image: '/images/explore.png', date: 'yy.mm.dd', isPopular: true },
-  { image: '/images/explore.png', date: 'yy.mm.dd', isPopular: true },
-  { image: '/images/explore.png', date: 'yy.mm.dd', isPopular: true },
-  { image: '/images/explore.png', date: 'yy.mm.dd', isPopular: true },
-  { image: '/images/explore.png', date: 'yy.mm.dd', isPopular: true },
-  { image: '/images/explore.png', date: 'yy.mm.dd', isPopular: true },
-]
 
 const SAVED_SPOTS: SPOTProps[] = [
   {
@@ -50,6 +43,12 @@ const SAVED_SPOTS: SPOTProps[] = [
 
 export default function MyPage() {
   const router = useRouter()
+  const { data: myRecords } = useMySpotRecords({
+    status: 'PUBLISHED',
+    pageRequest: { page: 0, size: 6 },
+  })
+  const records = (myRecords?.content ?? []).map(toMyRecordThumb)
+
   return (
     <div className="bg-bg-primary relative flex min-h-screen w-full flex-col pb-24">
       <div className="h-14">
@@ -86,13 +85,17 @@ export default function MyPage() {
       </div>
 
       {/* 통계 */}
-      <ProfileStats recordCount="24" followerCount="n,nnn" followingCount="nnn" />
+      <ProfileStats
+        recordCount={String(myRecords?.totalElements ?? 0)}
+        followerCount="n,nnn"
+        followingCount="nnn"
+      />
 
       {/* 관심 식물 */}
       <InterestFlowerSection flowers={INTEREST_FLOWERS} />
 
       {/* 내 기록 */}
-      <MyRecordSection records={MY_FEEDS} />
+      <MyRecordSection records={records} count={myRecords?.totalElements} />
 
       {/* 저장한 스팟 */}
       <SavedSpotSection spots={SAVED_SPOTS} />
