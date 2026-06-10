@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useRef, useState } from 'react'
 import { useSignUpComplete } from '@/hooks/useSignUpComplete'
 import LeftArrow from '@/components/ui/button/LeftArrow'
+import { toast } from 'sonner'
 
 const FLOWER_LIST = [
   '동백꽃',
@@ -36,7 +37,6 @@ export default function ProfilePage() {
   const [preview, setPreview] = useState<string | null>(null)
   // 회원가입 임시 업로드 응답의 profileImageKey — signup complete 로 그대로 전달
   const [profileImageKey, setProfileImageKey] = useState<string | null>(null)
-  const [imageError, setImageError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const { isAvailable, isPending, check, isError, message } = useCheckNickname(nickname)
@@ -54,7 +54,6 @@ export default function ProfilePage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    setImageError(null)
     setPreview(URL.createObjectURL(file))
     uploadImage(
       { data: { image: file } },
@@ -64,14 +63,15 @@ export default function ProfilePage() {
           if (!data) return
           setPreview(data.profileImageUrl)
           setProfileImageKey(data.profileImageKey)
+          toast.success('프로필 이미지가 업로드되었어요.')
         },
         onError: (error) => {
-          // 업로드 실패 시 미리보기/키를 비워 업로드되지 않은 상태로 되돌리고, API 메시지를 표시한다.
+          // 업로드 실패 시 미리보기/키를 비워 업로드되지 않은 상태로 되돌리고, API 메시지를 토스트로 안내한다.
           setPreview(null)
           setProfileImageKey(null)
           const message = (error as { response?: { data?: { message?: string } } })?.response?.data
             ?.message
-          setImageError(message ?? '이미지 업로드에 실패했어요.')
+          toast.error(message ?? '이미지 업로드에 실패했어요.')
         },
       }
     )
@@ -139,7 +139,6 @@ export default function ProfilePage() {
           onChange={handleFileChange}
         />
       </div>
-      {imageError && <p className="px-4 text-center text-sm text-rose-500">{imageError}</p>}
       <div className="flex w-full flex-1 flex-col gap-2 p-4">
         <InputFiled
           title="닉네임"
@@ -147,9 +146,15 @@ export default function ProfilePage() {
           description="특수문자 제외 2~10자 이내로 작성해주세요."
           value={nickname}
           onChange={(e) => setNickname(e.target.value)}
+          onClear={() => setNickname('')}
           placeholder="닉네임을 작성해주세요"
           buttonText="중복확인"
-          onButtonClick={() => check()}
+          onButtonClick={async () => {
+            const res = await check()
+            if (res.data?.data?.available) {
+              toast.success('사용 가능한 닉네임이에요.')
+            }
+          }}
           disabled={nickname.length > 9 || isPending}
           message="닉네임을 작성해주세요"
           error={message}
