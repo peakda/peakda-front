@@ -27,21 +27,6 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'phinf.pstatic.net' },
     ],
   },
-  async rewrites() {
-    // 브라우저는 same-origin(/api, /oauth2)으로 요청하고, Next 서버가 백엔드로 프록시한다.
-    // → 응답 쿠키가 프론트 도메인의 first-party 쿠키로 저장되어 cross-site 쿠키 문제를 회피한다.
-    const apiOrigin = process.env.NEXT_PUBLIC_API_URL
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${apiOrigin}/api/:path*`,
-      },
-      {
-        source: '/oauth2/:path*',
-        destination: `${apiOrigin}/oauth2/:path*`,
-      },
-    ]
-  },
 }
 
 export default nextConfig

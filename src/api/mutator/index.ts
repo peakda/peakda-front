@@ -1,6 +1,6 @@
-// 브라우저는 same-origin 프록시(/api)를 경유해 first-party 쿠키를 주고받고,
-// 서버 환경에서는 상대경로 fetch 가 불가하므로 백엔드 절대 URL 을 사용한다.
-const getBaseUrl = () => (typeof window === 'undefined' ? (process.env.NEXT_PUBLIC_API_URL ?? '') : '')
+// 프론트(Vercel)·백엔드(Railway) 도메인이 달라, 브라우저/서버 모두 백엔드를 직접 호출하고
+// 크로스사이트 쿠키(SameSite=None; Secure)를 credentials: 'include' 로 주고받는다.
+const getBaseUrl = () => process.env.NEXT_PUBLIC_API_URL ?? ''
 
 // 동시 401 요청이 refresh 를 중복 호출하지 않도록 진행 중인 refresh 를 공유한다.
 let refreshPromise: Promise<void> | null = null
