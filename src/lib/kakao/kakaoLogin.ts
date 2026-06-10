@@ -1,4 +1,4 @@
 export const handleKakaoLogin = () => {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL
-  window.location.href = `${baseUrl}/oauth2/authorization/kakao`
+  // same-origin 프록시(/oauth2)를 경유해 백엔드 OAuth 로 진입한다.
+  window.location.href = '/oauth2/authorization/kakao'
 }
