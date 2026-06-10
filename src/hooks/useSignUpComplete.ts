@@ -1,6 +1,5 @@
 'use client'
-import { completeSignupApi } from '@/api/facades/auth'
-import { useQuery } from '@tanstack/react-query'
+import { useCompleteSignup } from '@/api/facades/auth'
 
 interface ApiError {
   response: {
@@ -9,23 +8,20 @@ interface ApiError {
   }
 }
 
-export const useSignUpComplete = (nickname: string, profileImageUrl: string | null) => {
-  const { data, isPending, refetch, isError, error } = useQuery<
-    Awaited<ReturnType<typeof completeSignupApi>>,
-    ApiError
-  >({
-    queryKey: ['completeSignUp', nickname, profileImageUrl],
-    queryFn: () => completeSignupApi({ nickname, profileImageUrl }),
-    enabled: false,
-    retry: false,
-    staleTime: 0,
-    gcTime: 0,
-  })
+export const useSignUpComplete = (
+  nickname: string,
+  profileImageUrl: string | null,
+  options?: { onSuccess?: () => void }
+) => {
+  const { mutate, data, isPending, isError, error } = useCompleteSignup()
+
+  const submit = () =>
+    mutate({ data: { nickname, profileImageUrl } }, { onSuccess: options?.onSuccess })
 
   return {
-    message: data?.data.message ?? error?.response?.data?.message,
+    message: data?.data.message ?? (error as ApiError | null)?.response?.data?.message,
     isPending,
-    check: refetch,
+    check: submit,
     isError,
   }
 }

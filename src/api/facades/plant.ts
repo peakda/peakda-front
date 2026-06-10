@@ -1,10 +1,10 @@
 import { useQueryClient } from '@tanstack/react-query'
 import {
-  getListQueryKey,
-  list,
+  getList1QueryKey,
+  list1,
   search,
   suggest,
-  useList,
+  useList1,
   useSearch,
   useSuggest as useSuggestGen,
 } from '@/api/generated/plant/plant'
@@ -15,7 +15,7 @@ import type { SuggestPlantRequest } from '@/api/generated/peakdaApi.schemas'
 // ─── plain async (이벤트 기반 호출) ───────────────────────────────────────────
 
 export async function listPlantsApi() {
-  const res = await list()
+  const res = await list1()
   return res.data.data ?? null
 }
 
@@ -32,7 +32,7 @@ export async function suggestPlantApi(payload: SuggestPlantRequest) {
 // ─── React Query hooks (캐싱 / 상태 관리) ────────────────────────────────────
 
 export const usePlants = () =>
-  useList({ query: { select: (res) => res.data.data ?? null } })
+  useList1({ query: { select: (res) => res.data.data ?? null } })
 
 export const useSearchPlants = (keyword: string) =>
   useSearch(
@@ -46,7 +46,7 @@ export const useSuggestPlant = () => {
   const queryClient = useQueryClient()
   return useSuggestGen({
     mutation: {
-      onSuccess: () => queryClient.invalidateQueries({ queryKey: getListQueryKey() }),
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: getList1QueryKey() }),
     },
   })
 }
