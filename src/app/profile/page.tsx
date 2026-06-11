@@ -33,17 +33,22 @@ const FLOWER_LIST = [
 export default function ProfilePage() {
   const router = useRouter()
   const [nickname, setNickname] = useState('')
+  // 중복확인을 통과한 닉네임 — 현재 입력값과 일치할 때만 검증된 것으로 본다
+  const [checkedNickname, setCheckedNickname] = useState<string | null>(null)
   const [selected, setSelected] = useState<string[]>([])
   const [preview, setPreview] = useState<string | null>(null)
   // 회원가입 임시 업로드 응답의 profileImageKey — signup complete 로 그대로 전달
   const [profileImageKey, setProfileImageKey] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const { isAvailable, isPending, check, isError, message } = useCheckNickname(nickname)
+  const { isPending, check, isError, message } = useCheckNickname(nickname)
   const { mutate: uploadImage, isPending: isUploading } = useUploadSignupProfileImage()
   const { isPending: signupPending, check: submit } = useSignUpComplete(nickname, profileImageKey, {
     onSuccess: () => router.replace('/map'),
   })
+
+  // 검증 통과 여부는 저장된 닉네임과 현재 입력의 일치로 파생 — 입력이 바뀌면 자동 무효화
+  const isNicknameVerified = checkedNickname !== null && checkedNickname === nickname
 
   const toggleBadge = useCallback((flower: string) => {
     setSelected((prev) =>
@@ -115,7 +120,7 @@ export default function ProfilePage() {
             alt="프로필 이미지"
             width={100}
             height={100}
-            className="object-cover"
+            className={cn('object-cover', preview && 'rounded-full')}
           />
           {isUploading && (
             <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/30">
@@ -145,20 +150,27 @@ export default function ProfilePage() {
           showAsterisk
           description="특수문자 제외 2~10자 이내로 작성해주세요."
           value={nickname}
-          onChange={(e) => setNickname(e.target.value)}
-          onClear={() => setNickname('')}
+          onChange={(e) => {
+            setNickname(e.target.value)
+            setCheckedNickname(null)
+          }}
+          onClear={() => {
+            setNickname('')
+            setCheckedNickname(null)
+          }}
           placeholder="닉네임을 작성해주세요"
           buttonText="중복확인"
           onButtonClick={async () => {
             const res = await check()
             if (res.data?.data?.available) {
+              setCheckedNickname(nickname)
               toast.success('사용 가능한 닉네임이에요.')
             }
           }}
           disabled={nickname.length > 9 || isPending}
           message="닉네임을 작성해주세요"
           error={message}
-          isAvailable={isAvailable}
+          isAvailable={isNicknameVerified}
           isError={isError}
         />
       </div>
@@ -193,7 +205,7 @@ export default function ProfilePage() {
           variant="filled"
           size="lg"
           className="w-full cursor-pointer bg-[#98C96D] text-white hover:bg-[#98C96D]"
-          disabled={isUploading || signupPending || !profileImageKey || !isAvailable}
+          disabled={isUploading || signupPending || !isNicknameVerified}
           onClick={() => submit()}
         >
           PEAKDA 시작하기
