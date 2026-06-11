@@ -24,7 +24,8 @@ export async function getCurrentUserApi() {
 
 export async function checkNicknameApi(nickname: string) {
   const res = await checkNickname({ value: nickname })
-  return res as unknown as {
+  // res.data = Orval 래퍼의 body. 훅에서 data.data.available 로 접근하므로 body 를 반환한다.
+  return res.data as unknown as {
     status: string
     code: string
     message: string

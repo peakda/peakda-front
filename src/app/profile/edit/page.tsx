@@ -13,6 +13,7 @@ import Image from 'next/image'
 import { Camera } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 const FLOWER_LIST = [
   '동백꽃',
@@ -35,6 +36,8 @@ export default function ProfileEditPage() {
   const { data: user } = useCurrentUser()
 
   const [nickname, setNickname] = useState('')
+  // 중복확인을 통과한 닉네임 — 현재 입력값과 일치할 때만 검증된 것으로 본다
+  const [checkedNickname, setCheckedNickname] = useState<string | null>(null)
   const [selected, setSelected] = useState<string[]>([])
   const [preview, setPreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -46,9 +49,12 @@ export default function ProfileEditPage() {
     setPreview(user.profileImageUrl ?? null)
   }, [user])
 
-  const { isAvailable, isPending, check, isError, message } = useCheckNickname(nickname)
+  const { isPending, check, isError, message } = useCheckNickname(nickname)
   const { mutate: uploadImage, isPending: isUploading } = useUploadProfileImage()
   const { mutate: deleteImage } = useDeleteProfileImage()
+
+  // 검증 통과 여부는 저장된 닉네임과 현재 입력의 일치로 파생 — 입력이 바뀌면 자동 무효화
+  const isNicknameVerified = checkedNickname !== null && checkedNickname === nickname
 
   const toggleBadge = useCallback((flower: string) => {
     setSelected((prev) =>
@@ -136,15 +142,24 @@ export default function ProfileEditPage() {
           showAsterisk
           description="특수문자 제외 2~10자 이내로 작성해주세요."
           value={nickname}
-          onChange={(e) => setNickname(e.target.value)}
+          onChange={(e) => {
+            setNickname(e.target.value)
+            setCheckedNickname(null)
+          }}
           placeholder="닉네임을 작성해주세요"
           buttonText="중복확인"
           maxLength={10}
-          onButtonClick={() => check()}
+          onButtonClick={async () => {
+            const res = await check()
+            if (res.data?.data?.available) {
+              setCheckedNickname(nickname)
+              toast.success('사용 가능한 닉네임이에요.')
+            }
+          }}
           disabled={nickname.length > 9 || isPending}
           message="닉네임을 작성해주세요"
           error={message}
-          isAvailable={isAvailable}
+          isAvailable={isNicknameVerified}
           isError={isError}
         />
       </div>

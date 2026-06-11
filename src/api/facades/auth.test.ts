@@ -25,7 +25,7 @@ describe("facades/auth", () => {
       data: { status: 200, code: "SUCCESS", message: "사용 가능", data: { available: true } },
       status: 200,
     });
-    expect(await checkNicknameApi("테스트닉네임")).toEqual({ available: true });
+    expect((await checkNicknameApi("테스트닉네임")).data).toEqual({ available: true });
   });
 
   it("HTTP 에러 — throw 전파", async () => {
