@@ -6,8 +6,7 @@ export async function matchSpotApi(payload: SpotMatchRequest) {
   return res.data.data ?? null
 }
 
-export const useMatchSpot = () =>
-  useMatchGen({ mutation: { select: (res) => res.data.data ?? null } })
+export const useMatchSpot = () => useMatchGen()
 
 export const useSpotDetail = (id: number) =>
   useGetSpotDetail(id, { query: { select: (res) => res.data.data ?? null } })
