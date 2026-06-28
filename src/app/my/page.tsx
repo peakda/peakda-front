@@ -16,32 +16,9 @@ import { useMySpotRecords } from '@/api/facades/spot-record'
 import { toMyRecordThumb } from '@/lib/utils/spotRecordToFeed'
 import { useCurrentUser } from '@/api/facades/auth'
 import { useFollowSummary } from '@/api/facades/user-follow'
+import { useFavoriteList } from '@/api/facades/spot-favorite'
 
 const INTEREST_FLOWERS = ['동백꽃', '매화', '개나리', '벚꽃', '철쭉']
-
-const SAVED_SPOTS: SPOTProps[] = [
-  {
-    id: 1,
-    name: '경주 벚꽃축제',
-    location: '서울 영등포구',
-    status: '이제 막요',
-    nameList: ['벚꽃'],
-  },
-  {
-    id: 2,
-    name: '서울숲 벚꽃길',
-    location: '서울 영등포구',
-    status: '이제 막요',
-    nameList: ['벚꽃'],
-  },
-  {
-    id: 3,
-    name: '여의도 한강공원 벚꽃길',
-    location: '서울 영등포구',
-    status: '이제 막요',
-    nameList: ['벚꽃'],
-  },
-]
 
 export default function MyPage() {
   const router = useRouter()
@@ -52,6 +29,14 @@ export default function MyPage() {
     pageRequest: { page: 0, size: 6 },
   })
   const records = (myRecords?.content ?? []).map(toMyRecordThumb)
+  const { data: favoriteData } = useFavoriteList()
+  const savedSpots: SPOTProps[] = (favoriteData?.favorites ?? []).slice(0, 3).map((f) => ({
+    id: f.spotId,
+    name: f.name,
+    location: f.address ?? '',
+    status: '',
+    nameList: [],
+  }))
 
   return (
     <div className="bg-bg-primary relative flex min-h-screen w-full flex-col pb-24">
@@ -102,7 +87,7 @@ export default function MyPage() {
       <MyRecordSection records={records} count={myRecords?.totalElements} />
 
       {/* 저장한 스팟 */}
-      <SavedSpotSection spots={SAVED_SPOTS} />
+      <SavedSpotSection spots={savedSpots} />
 
       <Nav activeTab="my" />
     </div>

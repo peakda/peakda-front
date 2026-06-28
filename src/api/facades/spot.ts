@@ -1,4 +1,4 @@
-﻿import { match, useMatch as useMatchGen } from '@/api/facades/generated/spot/spot'
+﻿import { match, useMatch as useMatchGen, useGetSpotDetail } from '@/api/facades/generated/spot/spot'
 import type { SpotMatchRequest } from '@/api/facades/generated/peakdaApi.schemas'
 
 // ?몃옒??洹쒖튃: res.data (Orval ?섑띁) ??res.data.data (諛깆뿏???ㅼ젣 payload)
@@ -14,3 +14,6 @@ export async function matchSpotApi(payload: SpotMatchRequest) {
 
 // mutate({ data: payload }) ?뺥깭濡??몄텧
 export const useMatchSpot = () => useMatchGen()
+
+export const useSpotDetail = (id: number) =>
+  useGetSpotDetail(id, { query: { select: (res) => res.data.data ?? null } })
