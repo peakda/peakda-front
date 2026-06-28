@@ -13,21 +13,22 @@ import { useCallback, useRef, useState } from 'react'
 import { useSignUpComplete } from '@/hooks/useSignUpComplete'
 import LeftArrow from '@/components/ui/button/LeftArrow'
 import { toast } from 'sonner'
+import type { SignupCompleteRequestFavoriteCategoriesItem } from '@/api/facades/generated/peakdaApi.schemas'
 
-const FLOWER_LIST = [
-  '동백꽃',
-  '매화',
-  '개나리',
-  '벚꽃',
-  '진달래',
-  '철쭉',
-  '유채꽃',
-  '수국',
-  '연꽃',
-  '코스모스',
-  '단풍',
-  '핑크뮬리',
-  '억새',
+const FLOWER_LIST: { label: string; value: SignupCompleteRequestFavoriteCategoriesItem }[] = [
+  { label: '동백꽃', value: 'CAMELLIA' },
+  { label: '매화', value: 'PLUM' },
+  { label: '개나리', value: 'FORSYTHIA' },
+  { label: '벚꽃', value: 'CHERRY' },
+  { label: '진달래', value: 'AZALEA' },
+  { label: '철쭉', value: 'AZALEA_KR' },
+  { label: '유채꽃', value: 'CANOLA' },
+  { label: '수국', value: 'HYDRANGEA' },
+  { label: '연꽃', value: 'LOTUS' },
+  { label: '코스모스', value: 'COSMOS' },
+  { label: '단풍', value: 'MAPLE' },
+  { label: '핑크뮬리', value: 'PINK_MUHLY' },
+  { label: '억새', value: 'SILVERGRASS' },
 ]
 
 export default function ProfilePage() {
@@ -35,7 +36,7 @@ export default function ProfilePage() {
   const [nickname, setNickname] = useState('')
   // 중복확인을 통과한 닉네임 — 현재 입력값과 일치할 때만 검증된 것으로 본다
   const [checkedNickname, setCheckedNickname] = useState<string | null>(null)
-  const [selected, setSelected] = useState<string[]>([])
+  const [selected, setSelected] = useState<SignupCompleteRequestFavoriteCategoriesItem[]>([])
   const [preview, setPreview] = useState<string | null>(null)
   // 회원가입 임시 업로드 응답의 profileImageKey — signup complete 로 그대로 전달
   const [profileImageKey, setProfileImageKey] = useState<string | null>(null)
@@ -43,16 +44,16 @@ export default function ProfilePage() {
 
   const { isPending, check, isError, message } = useCheckNickname(nickname)
   const { mutate: uploadImage, isPending: isUploading } = useUploadSignupProfileImage()
-  const { isPending: signupPending, check: submit } = useSignUpComplete(nickname, profileImageKey, {
+  const { isPending: signupPending, check: submit } = useSignUpComplete(nickname, profileImageKey, selected, {
     onSuccess: () => router.replace('/map'),
   })
 
   // 검증 통과 여부는 저장된 닉네임과 현재 입력의 일치로 파생 — 입력이 바뀌면 자동 무효화
   const isNicknameVerified = checkedNickname !== null && checkedNickname === nickname
 
-  const toggleBadge = useCallback((flower: string) => {
+  const toggleBadge = useCallback((value: SignupCompleteRequestFavoriteCategoriesItem) => {
     setSelected((prev) =>
-      prev.includes(flower) ? prev.filter((f) => f !== flower) : [...prev, flower]
+      prev.includes(value) ? prev.filter((f) => f !== value) : [...prev, value]
     )
   }, [])
 
@@ -183,18 +184,18 @@ export default function ProfilePage() {
         </div>
         <div className="flex flex-wrap gap-2">
           {FLOWER_LIST.map((flower) => {
-            const isSelected = selected.includes(flower)
+            const isSelected = selected.includes(flower.value)
             return (
               <Badge
-                key={flower}
-                label={flower}
+                key={flower.value}
+                label={flower.label}
                 variant="ghost"
                 color="gray"
                 className={cn(
                   'cursor-pointer rounded-xl px-3.5 py-2',
                   isSelected && 'border-brand-secondary text-text-secondary bg-green-50'
                 )}
-                onClick={() => toggleBadge(flower)}
+                onClick={() => toggleBadge(flower.value)}
               />
             )
           })}

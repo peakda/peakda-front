@@ -1,4 +1,4 @@
-import { useQueryClient } from '@tanstack/react-query'
+﻿import { useQueryClient } from '@tanstack/react-query'
 import {
   checkNickname,
   completeSignup,
@@ -10,12 +10,12 @@ import {
   useCompleteSignup as useCompleteSignupGen,
   useGetCurrentUser,
   useUploadSignupProfileImage as useUploadSignupProfileImageGen,
-} from '@/api/generated/auth/auth'
-import type { SignupCompleteRequest } from '@/api/generated/peakdaApi.schemas'
+} from '@/api/facades/generated/auth/auth'
+import type { SignupCompleteRequest } from '@/api/facades/generated/peakdaApi.schemas'
 
-// 언래핑 규칙: res.data (Orval 래퍼) → res.data.data (백엔드 실제 payload)
+// ?몃옒??洹쒖튃: res.data (Orval ?섑띁) ??res.data.data (諛깆뿏???ㅼ젣 payload)
 
-// ─── plain async (이벤트 기반 호출) ───────────────────────────────────────────
+// ??? plain async (?대깽??湲곕컲 ?몄텧) ???????????????????????????????????????????
 
 export async function getCurrentUserApi() {
   const res = await getCurrentUser()
@@ -24,7 +24,7 @@ export async function getCurrentUserApi() {
 
 export async function checkNicknameApi(nickname: string) {
   const res = await checkNickname({ value: nickname })
-  // res.data = Orval 래퍼의 body. 훅에서 data.data.available 로 접근하므로 body 를 반환한다.
+  // res.data = Orval ?섑띁??body. ?낆뿉??data.data.available 濡??묎렐?섎?濡?body 瑜?諛섑솚?쒕떎.
   return res.data as unknown as {
     status: string
     code: string
@@ -51,19 +51,19 @@ export async function logoutApi() {
   await logout()
 }
 
-// ─── React Query hooks (캐싱 / 상태 관리) ────────────────────────────────────
+// ??? React Query hooks (罹먯떛 / ?곹깭 愿由? ????????????????????????????????????
 
 export const useCurrentUser = () =>
   useGetCurrentUser({
     query: { select: (res) => res.data.data ?? null },
   })
 
-// mutate({ data: { image } }) 형태로 호출
-// 회원가입 임시 업로드 — 응답의 profileImageKey 를 completeSignup 의 profileImageUrl 로 전달
+// mutate({ data: { image } }) ?뺥깭濡??몄텧
+// ?뚯썝媛???꾩떆 ?낅줈?????묐떟??profileImageKey 瑜?completeSignup ??profileImageUrl 濡??꾨떖
 export const useUploadSignupProfileImage = () => useUploadSignupProfileImageGen()
 
-// mutate({ data: payload }) 형태로 호출
-// 성공 시 유저 정보 캐시 자동 무효화
+// mutate({ data: payload }) ?뺥깭濡??몄텧
+// ?깃났 ???좎? ?뺣낫 罹먯떆 ?먮룞 臾댄슚??
 export const useCompleteSignup = () => {
   const queryClient = useQueryClient()
   return useCompleteSignupGen({

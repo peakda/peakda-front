@@ -1,4 +1,4 @@
-import { useQueryClient } from '@tanstack/react-query'
+﻿import { useQueryClient } from '@tanstack/react-query'
 import {
   follow,
   followers,
@@ -10,18 +10,18 @@ import {
   useFollowings,
   useSummary,
   useUnfollow as useUnfollowGen,
-} from '@/api/generated/user-follow/user-follow'
-import type { FollowersParams, FollowingsParams } from '@/api/generated/peakdaApi.schemas'
+} from '@/api/facades/generated/user-follow/user-follow'
+import type { FollowersParams, FollowingsParams } from '@/api/facades/generated/peakdaApi.schemas'
 
-// 언래핑 규칙: res.data (Orval 래퍼) → res.data.data (백엔드 실제 payload)
+// ?몃옒??洹쒖튃: res.data (Orval ?섑띁) ??res.data.data (諛깆뿏???ㅼ젣 payload)
 
-// 팔로우 변경 시 무효화 대상 — 여러 userId 의 summary·목록이 동시에 바뀌므로 predicate 로 일괄 처리한다.
+// ?붾줈??蹂寃???臾댄슚????????щ윭 userId ??summary쨌紐⑸줉???숈떆??諛붾뚮?濡?predicate 濡??쇨큵 泥섎━?쒕떎.
 const invalidateFollow = (queryClient: ReturnType<typeof useQueryClient>) =>
   queryClient.invalidateQueries({
     predicate: (q) => typeof q.queryKey[0] === 'string' && q.queryKey[0].includes('/follow'),
   })
 
-// ─── plain async (이벤트 기반 호출) ───────────────────────────────────────────
+// ??? plain async (?대깽??湲곕컲 ?몄텧) ???????????????????????????????????????????
 
 export async function followApi(userId: number) {
   await follow(userId)
@@ -46,10 +46,10 @@ export async function followSummaryApi(userId: number) {
   return res.data.data ?? null
 }
 
-// ─── React Query hooks (캐싱 / 상태 관리) ────────────────────────────────────
+// ??? React Query hooks (罹먯떛 / ?곹깭 愿由? ????????????????????????????????????
 
-export const useFollowSummary = (userId: number) =>
-  useSummary(userId, { query: { select: (res) => res.data.data ?? null } })
+export const useFollowSummary = (userId: number | undefined) =>
+  useSummary(userId ?? 0, { query: { enabled: !!userId, select: (res) => res.data.data ?? null } })
 
 export const useFollowingList = (userId: number, params: FollowingsParams) =>
   useFollowings(userId, params, { query: { select: (res) => res.data.data ?? null } })
@@ -57,7 +57,7 @@ export const useFollowingList = (userId: number, params: FollowingsParams) =>
 export const useFollowerList = (userId: number, params: FollowersParams) =>
   useFollowers(userId, params, { query: { select: (res) => res.data.data ?? null } })
 
-// mutate({ userId }) 형태로 호출 — 성공 시 팔로우 관련 캐시 무효화
+// mutate({ userId }) ?뺥깭濡??몄텧 ???깃났 ???붾줈??愿??罹먯떆 臾댄슚??
 
 export const useFollow = () => {
   const queryClient = useQueryClient()

@@ -1,4 +1,4 @@
-import { useQueryClient } from '@tanstack/react-query'
+﻿import { useQueryClient } from '@tanstack/react-query'
 import {
   add,
   getListQueryKey,
@@ -9,15 +9,15 @@ import {
   useList,
   useRemove as useRemoveGen,
   useUpdateNotify as useUpdateNotifyGen,
-} from '@/api/generated/spot-favorite/spot-favorite'
-import type { UpdateFavoriteNotifyRequest } from '@/api/generated/peakdaApi.schemas'
+} from '@/api/facades/generated/spot-favorite/spot-favorite'
+import type { UpdateFavoriteNotifyRequest } from '@/api/facades/generated/peakdaApi.schemas'
 
-// 언래핑 규칙: res.data (Orval 래퍼) → res.data.data (백엔드 실제 payload)
+// ?몃옒??洹쒖튃: res.data (Orval ?섑띁) ??res.data.data (諛깆뿏???ㅼ젣 payload)
 
-// 찜 목록 캐시 키 — mutation 성공 시 무효화 대상
+// 李?紐⑸줉 罹먯떆 ????mutation ?깃났 ??臾댄슚?????
 const favoriteListKey = getListQueryKey()
 
-// ─── plain async (이벤트 기반 호출) ───────────────────────────────────────────
+// ??? plain async (?대깽??湲곕컲 ?몄텧) ???????????????????????????????????????????
 
 export async function addFavoriteApi(spotId: number) {
   const res = await add(spotId)
@@ -38,12 +38,12 @@ export async function favoriteListApi() {
   return res.data.data ?? null
 }
 
-// ─── React Query hooks (캐싱 / 상태 관리) ────────────────────────────────────
+// ??? React Query hooks (罹먯떛 / ?곹깭 愿由? ????????????????????????????????????
 
 export const useFavoriteList = () =>
   useList({ query: { select: (res) => res.data.data ?? null } })
 
-// mutate({ spotId }) 형태로 호출 — 성공 시 찜 목록 캐시 무효화
+// mutate({ spotId }) ?뺥깭濡??몄텧 ???깃났 ??李?紐⑸줉 罹먯떆 臾댄슚??
 
 export const useAddFavorite = () => {
   const queryClient = useQueryClient()
@@ -59,7 +59,7 @@ export const useRemoveFavorite = () => {
   })
 }
 
-// mutate({ spotId, data: { enabled } }) 형태로 호출
+// mutate({ spotId, data: { enabled } }) ?뺥깭濡??몄텧
 export const useUpdateFavoriteNotify = () => {
   const queryClient = useQueryClient()
   return useUpdateNotifyGen({

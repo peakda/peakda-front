@@ -1,3 +1,4 @@
+﻿import { keepPreviousData } from '@tanstack/react-query'
 import {
   calendar,
   map,
@@ -5,15 +6,15 @@ import {
   useCalendar,
   useMap,
   usePeak,
-} from '@/api/generated/seasonal-bloom/seasonal-bloom'
-import type { CalendarParams, MapParams, PeakParams } from '@/api/generated/peakdaApi.schemas'
+} from '@/api/facades/generated/seasonal-bloom/seasonal-bloom'
+import type { CalendarParams, MapParams, PeakParams } from '@/api/facades/generated/peakdaApi.schemas'
 
-// 언래핑 규칙: res.data (Orval 래퍼) → res.data.data (백엔드 실제 payload)
+// ?몃옒??洹쒖튃: res.data (Orval ?섑띁) ??res.data.data (諛깆뿏???ㅼ젣 payload)
 
-// bbox 미준비 시 호출을 막기 위한 더미 — useBloomMap(null) 이면 enabled:false 로 요청하지 않는다.
+// bbox 誘몄?鍮????몄텧??留됯린 ?꾪븳 ?붾? ??useBloomMap(null) ?대㈃ enabled:false 濡??붿껌?섏? ?딅뒗??
 const EMPTY_BBOX: MapParams = { minLat: 0, maxLat: 0, minLng: 0, maxLng: 0 }
 
-// ─── plain async (이벤트 기반 호출) ───────────────────────────────────────────
+// ??? plain async (?대깽??湲곕컲 ?몄텧) ???????????????????????????????????????????
 
 export async function bloomMapApi(params: MapParams) {
   const res = await map(params)
@@ -30,11 +31,15 @@ export async function bloomCalendarApi(params: CalendarParams) {
   return res.data.data ?? null
 }
 
-// ─── React Query hooks (캐싱 / 상태 관리) ────────────────────────────────────
+// ??? React Query hooks (罹먯떛 / ?곹깭 愿由? ????????????????????????????????????
 
 export const useBloomMap = (params: MapParams | null) =>
   useMap(params ?? EMPTY_BBOX, {
-    query: { enabled: params !== null, select: (res) => res.data.data ?? null },
+    query: {
+      enabled: params !== null,
+      select: (res) => res.data.data ?? null,
+      placeholderData: keepPreviousData,
+    },
   })
 
 export const useBloomPeak = (params?: PeakParams) =>

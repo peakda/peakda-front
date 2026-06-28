@@ -5,6 +5,89 @@
  * 계절 여행 타이밍 안내 서비스 API 문서
  * OpenAPI spec version: v1
  */
+export type FavoriteCategoryUpdateRequestCategoriesItem = typeof FavoriteCategoryUpdateRequestCategoriesItem[keyof typeof FavoriteCategoryUpdateRequestCategoriesItem];
+
+
+export const FavoriteCategoryUpdateRequestCategoriesItem = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  COSMOS: 'COSMOS',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
+} as const;
+
+/**
+ * 관심 꽃 카테고리 수정 요청 (전체 교체)
+ */
+export interface FavoriteCategoryUpdateRequest {
+  /**
+     * 관심 꽃 카테고리 목록. 최소 1개 이상 선택해야 한다.
+     * @minItems 1
+     */
+  categories: FavoriteCategoryUpdateRequestCategoriesItem[];
+}
+
+/**
+ * 카테고리
+ */
+export type ItemCategory = typeof ItemCategory[keyof typeof ItemCategory];
+
+
+export const ItemCategory = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  COSMOS: 'COSMOS',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
+} as const;
+
+/**
+ * 관심 꽃 카테고리 1건
+ */
+export interface Item {
+  /** 카테고리 */
+  category: ItemCategory;
+  /** 카테고리 표시명 */
+  displayName: string;
+}
+
+/**
+ * 사용자의 관심 꽃 카테고리 목록
+ */
+export interface FavoriteCategoryResponse {
+  /** 관심 꽃 카테고리 */
+  categories: Item[];
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseFavoriteCategoryResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: FavoriteCategoryResponse | null;
+}
+
 /**
  * 공통 응답 envelope
  */
@@ -579,6 +662,25 @@ export interface SignupProfileImageUploadForm {
   image: Blob;
 }
 
+export type SignupCompleteRequestFavoriteCategoriesItem = typeof SignupCompleteRequestFavoriteCategoriesItem[keyof typeof SignupCompleteRequestFavoriteCategoriesItem];
+
+
+export const SignupCompleteRequestFavoriteCategoriesItem = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  COSMOS: 'COSMOS',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
+} as const;
+
 /**
  * 소셜 회원가입 완료 요청
  */
@@ -595,6 +697,11 @@ export interface SignupCompleteRequest {
      * @nullable
      */
   profileImageUrl?: string | null;
+  /**
+     * 관심 꽃 카테고리 목록. 최소 1개 이상 선택해야 한다.
+     * @minItems 1
+     */
+  favoriteCategories: SignupCompleteRequestFavoriteCategoriesItem[];
 }
 
 /**
@@ -751,6 +858,83 @@ export interface ApiResponseFollowSummaryResponse {
 }
 
 /**
+ * 스팟 유형
+ */
+export type SpotDetailResponseType = typeof SpotDetailResponseType[keyof typeof SpotDetailResponseType];
+
+
+export const SpotDetailResponseType = {
+  ATTRACTION: 'ATTRACTION',
+  LOCAL: 'LOCAL',
+} as const;
+
+/**
+ * 꽃 카테고리
+ */
+export type BloomBannerCategory = typeof BloomBannerCategory[keyof typeof BloomBannerCategory];
+
+
+export const BloomBannerCategory = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  COSMOS: 'COSMOS',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
+} as const;
+
+/**
+ * 현재 개화 상태
+ */
+export type BloomBannerStatus = typeof BloomBannerStatus[keyof typeof BloomBannerStatus];
+
+
+export const BloomBannerStatus = {
+  PREPARING: 'PREPARING',
+  STARTED: 'STARTED',
+  PEAK: 'PEAK',
+  ENDED: 'ENDED',
+} as const;
+
+/**
+ * 올해 만개 시기 배너 — 채택된 개화 추정 1건
+ */
+export interface BloomBanner {
+  /** 꽃 카테고리 */
+  category: BloomBannerCategory;
+  /** 카테고리 표시명 */
+  displayName: string;
+  /** 현재 개화 상태 */
+  status: BloomBannerStatus;
+  /** 신뢰도 (0~1) */
+  confidence: number;
+  /**
+     * 절정 시작일
+     * @nullable
+     */
+  peakStartDate?: string | null;
+  /**
+     * 절정 종료일
+     * @nullable
+     */
+  peakEndDate?: string | null;
+  /**
+     * 절정 지속일 (양 끝 포함)
+     * @nullable
+     */
+  peakDurationDays?: number | null;
+  /** 상태 산출 기준일 */
+  baseDate: string;
+}
+
+/**
  * @nullable
  */
 export type SpotRecordSummaryResponseBloomStage = typeof SpotRecordSummaryResponseBloomStage[keyof typeof SpotRecordSummaryResponseBloomStage] | null;
@@ -792,6 +976,67 @@ export interface SpotRecordSummaryResponse {
   publishedAt?: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+/**
+ * 현재 사용자의 찜 상태
+ */
+export interface FavoriteState {
+  /** 찜 여부 */
+  favorited: boolean;
+  /** 알림 활성화 여부 (찜하지 않았으면 false) */
+  notifyEnabled: boolean;
+}
+
+/**
+ * 스팟 상세 응답 (지도 핀/검색 결과에서 진입하는 단일 스팟 화면)
+ */
+export interface SpotDetailResponse {
+  /** 스팟 PK */
+  id: number;
+  /** 스팟 유형 */
+  type: SpotDetailResponseType;
+  /** 스팟명 */
+  name: string;
+  /**
+     * 주소
+     * @nullable
+     */
+  address?: string | null;
+  /** 위도 */
+  latitude: number;
+  /** 경도 */
+  longitude: number;
+  /**
+     * 연결된 명소 id (LOCAL 스팟이면 null)
+     * @nullable
+     */
+  attractionId?: number | null;
+  /**
+     * 대표 사진 URL — ATTRACTION 은 명소 이미지, 없거나 LOCAL 이면 최근 방문 기록의 대표 사진. 둘 다 없으면 null
+     * @nullable
+     */
+  representativeImageUrl?: string | null;
+  bloom?: BloomBanner | null;
+  /** 게시된 방문 기록 수 */
+  recordCount: number;
+  /** 방문자 기록 프리뷰 (최신 게시순, 최대 3건) */
+  recordPreview: SpotRecordSummaryResponse[];
+  /** 현재 로그인 사용자의 찜 상태 */
+  favorite: FavoriteState;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseSpotDetailResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: SpotDetailResponse | null;
 }
 
 /**
@@ -849,6 +1094,17 @@ export interface ApiResponseSpotFavoriteListResponse {
 }
 
 /**
+ * 핀 유형
+ */
+export type BloomMapPinType = typeof BloomMapPinType[keyof typeof BloomMapPinType];
+
+
+export const BloomMapPinType = {
+  ATTRACTION: 'ATTRACTION',
+  LOCAL: 'LOCAL',
+} as const;
+
+/**
  * 꽃 카테고리
  */
 export type BloomSlotCategory = typeof BloomSlotCategory[keyof typeof BloomSlotCategory];
@@ -884,7 +1140,7 @@ export const BloomSlotStatus = {
 } as const;
 
 /**
- * 명소×카테고리 현재 상태 슬롯
+ * Spot×카테고리 현재 상태 슬롯
  */
 export interface BloomSlot {
   /** 꽃 카테고리 */
@@ -898,7 +1154,39 @@ export interface BloomSlot {
 }
 
 /**
- * 명소 1건과 그 꽃 슬롯들
+ * 지도 핀 1건과 그 꽃 슬롯들
+ */
+export interface BloomMapPin {
+  /**
+     * 스팟 id. 명소형은 Spot 행이 아직 없으면 null (탭 시 /api/spots/match 로 materialize), 동네형은 항상 존재
+     * @nullable
+     */
+  spotId?: number | null;
+  /**
+     * 연결된 명소 id (동네형이면 null)
+     * @nullable
+     */
+  attractionId?: number | null;
+  /** 핀 유형 */
+  type: BloomMapPinType;
+  /** 핀 이름 (명소명 또는 스팟명) */
+  name: string;
+  /**
+     * 위도
+     * @nullable
+     */
+  latitude?: number | null;
+  /**
+     * 경도
+     * @nullable
+     */
+  longitude?: number | null;
+  /** 이 핀의 꽃 슬롯들 */
+  blooms: BloomSlot[];
+}
+
+/**
+ * (deprecated) 명소형 핀 옛 구조 — `BloomMapPin` 사용 권장
  */
 export interface BloomMapItem {
   /** 명소 id */
@@ -920,17 +1208,22 @@ export interface BloomMapItem {
 }
 
 /**
- * 지도 영역 내 명소별 현재 개화 상태 (핀 3단계, ENDED 제외)
+ * 지도 영역 내 Spot 핀별 개화 상태 (핀 3단계, ENDED 제외)
  */
 export interface BloomMapResponse {
   /**
-     * 상태 산출 기준일 (없으면 null)
+     * 명소 개화 추정 산출 기준일 (추정 데이터가 없으면 null)
      * @nullable
      */
   baseDate?: string | null;
-  /** 명소 수 */
+  /** 핀 수 */
   count: number;
-  /** 명소 목록 */
+  /** Spot 핀 목록 (명소형 + 동네형) */
+  pins: BloomMapPin[];
+  /**
+     * (deprecated) `pins` 로 대체됨. 기존 클라 하위호환용으로 명소형(ATTRACTION) 핀만 옛 구조로 함께 제공한다. 신규 연동은 `pins` 를 사용하라. 동네형(LOCAL) 핀은 이 필드에 포함되지 않는다.
+     * @deprecated
+     */
   attractions: BloomMapItem[];
 }
 
@@ -1174,6 +1467,25 @@ export const UserInfoResponseStatus = {
   DEACTIVATED: 'DEACTIVATED',
 } as const;
 
+export type UserInfoResponseFavoriteCategoriesItem = typeof UserInfoResponseFavoriteCategoriesItem[keyof typeof UserInfoResponseFavoriteCategoriesItem];
+
+
+export const UserInfoResponseFavoriteCategoriesItem = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  COSMOS: 'COSMOS',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
+} as const;
+
 /**
  * 현재 로그인한 사용자 정보
  */
@@ -1197,6 +1509,8 @@ export interface UserInfoResponse {
   profileImageUrl?: string | null;
   /** 사용자 상태 */
   status: UserInfoResponseStatus;
+  /** 관심 꽃 카테고리 목록 */
+  favoriteCategories: UserInfoResponseFavoriteCategoriesItem[];
 }
 
 /**
@@ -1259,6 +1573,10 @@ maxLng: number;
  * 꽃 카테고리 필터 (생략 시 전체)
  */
 category?: MapCategory;
+/**
+ * 방문예정일 (생략 시 오늘 기준). 명소형 핀 상태를 해당일 기준으로 재계산한다. 동네형은 최근 관측값 유지.
+ */
+date?: string;
 };
 
 export type MapCategory = typeof MapCategory[keyof typeof MapCategory];

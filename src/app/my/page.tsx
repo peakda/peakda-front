@@ -14,6 +14,8 @@ import IconBtn from '@/components/ui/button/IconBtn'
 import { useRouter } from 'next/navigation'
 import { useMySpotRecords } from '@/api/facades/spot-record'
 import { toMyRecordThumb } from '@/lib/utils/spotRecordToFeed'
+import { useCurrentUser } from '@/api/facades/auth'
+import { useFollowSummary } from '@/api/facades/user-follow'
 
 const INTEREST_FLOWERS = ['동백꽃', '매화', '개나리', '벚꽃', '철쭉']
 
@@ -43,6 +45,8 @@ const SAVED_SPOTS: SPOTProps[] = [
 
 export default function MyPage() {
   const router = useRouter()
+  const { data: me } = useCurrentUser()
+  const { data: followSummary } = useFollowSummary(me?.id)
   const { data: myRecords } = useMySpotRecords({
     status: 'PUBLISHED',
     pageRequest: { page: 0, size: 6 },
@@ -76,7 +80,7 @@ export default function MyPage() {
         <IconBtn size="md" className="bg-bg-tertiary">
           <Image src="/icons/person.svg" alt="프로필" width={26} height={26} />
         </IconBtn>
-        <span className="text-text-primary flex-1 text-lg font-semibold">Nickname</span>
+        <span className="text-text-primary flex-1 text-lg font-semibold">{me?.nickname ?? ''}</span>
         <Link href="/profile/edit">
           <Button variant="outlined" size="sm" className="rounded-lg py-3.5">
             프로필 편집
@@ -87,8 +91,8 @@ export default function MyPage() {
       {/* 통계 */}
       <ProfileStats
         recordCount={String(myRecords?.totalElements ?? 0)}
-        followerCount="n,nnn"
-        followingCount="nnn"
+        followerCount={String(followSummary?.followerCount ?? 0)}
+        followingCount={String(followSummary?.followingCount ?? 0)}
       />
 
       {/* 관심 식물 */}

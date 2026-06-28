@@ -1,16 +1,16 @@
-import { match, useMatch as useMatchGen } from '@/api/generated/spot/spot'
-import type { SpotMatchRequest } from '@/api/generated/peakdaApi.schemas'
+﻿import { match, useMatch as useMatchGen } from '@/api/facades/generated/spot/spot'
+import type { SpotMatchRequest } from '@/api/facades/generated/peakdaApi.schemas'
 
-// 언래핑 규칙: res.data (Orval 래퍼) → res.data.data (백엔드 실제 payload)
+// ?몃옒??洹쒖튃: res.data (Orval ?섑띁) ??res.data.data (諛깆뿏???ㅼ젣 payload)
 
-// ─── plain async (이벤트 기반 호출) ───────────────────────────────────────────
+// ??? plain async (?대깽??湲곕컲 ?몄텧) ???????????????????????????????????????????
 
 export async function matchSpotApi(payload: SpotMatchRequest) {
   const res = await match(payload)
   return res.data.data ?? null
 }
 
-// ─── React Query hooks (캐싱 / 상태 관리) ────────────────────────────────────
+// ??? React Query hooks (罹먯떛 / ?곹깭 愿由? ????????????????????????????????????
 
-// mutate({ data: payload }) 형태로 호출
+// mutate({ data: payload }) ?뺥깭濡??몄텧
 export const useMatchSpot = () => useMatchGen()
