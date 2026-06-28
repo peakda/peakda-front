@@ -16,7 +16,7 @@ import { useSpotRecord, useUpdateSpotRecord } from '@/api/facades/spot-record'
 import type {
   SpotRecordResponse,
   UpdateSpotRecordRequest,
-} from '@/api/generated/peakdaApi.schemas'
+} from '@/api/facades/generated/peakdaApi.schemas'
 
 const PLANTS_DEFAULT_COUNT = 8
 

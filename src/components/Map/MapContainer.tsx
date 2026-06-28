@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useLazyMapLoad } from '@/hooks/useLazyMapLoad'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -16,7 +16,7 @@ import { useMapCluster, type MapSpot } from '@/hooks/useMapPins'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import { useBloomMap } from '@/api/facades/seasonal-bloom'
 import { bloomToMapSpots } from '@/lib/utils/bloomToMapSpots'
-import type { MapParams } from '@/api/generated/peakdaApi.schemas'
+import type { MapParams } from '@/api/facades/generated/peakdaApi.schemas'
 import { useRouter } from 'next/navigation'
 
 const Drawer = dynamic(

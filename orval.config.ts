@@ -5,7 +5,7 @@ export default defineConfig({
     input: { target: "./swagger.json" },
     output: {
       mode: "tags-split",
-      target: "./src/api/generated",
+      target: "./src/api/facades/generated",
       client: "react-query",
       clean: true,
       override: {

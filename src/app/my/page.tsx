@@ -14,40 +14,29 @@ import IconBtn from '@/components/ui/button/IconBtn'
 import { useRouter } from 'next/navigation'
 import { useMySpotRecords } from '@/api/facades/spot-record'
 import { toMyRecordThumb } from '@/lib/utils/spotRecordToFeed'
+import { useCurrentUser } from '@/api/facades/auth'
+import { useFollowSummary } from '@/api/facades/user-follow'
+import { useFavoriteList } from '@/api/facades/spot-favorite'
 
 const INTEREST_FLOWERS = ['동백꽃', '매화', '개나리', '벚꽃', '철쭉']
 
-const SAVED_SPOTS: SPOTProps[] = [
-  {
-    id: 1,
-    name: '경주 벚꽃축제',
-    location: '서울 영등포구',
-    status: '이제 막요',
-    nameList: ['벚꽃'],
-  },
-  {
-    id: 2,
-    name: '서울숲 벚꽃길',
-    location: '서울 영등포구',
-    status: '이제 막요',
-    nameList: ['벚꽃'],
-  },
-  {
-    id: 3,
-    name: '여의도 한강공원 벚꽃길',
-    location: '서울 영등포구',
-    status: '이제 막요',
-    nameList: ['벚꽃'],
-  },
-]
-
 export default function MyPage() {
   const router = useRouter()
+  const { data: me } = useCurrentUser()
+  const { data: followSummary } = useFollowSummary(me?.id)
   const { data: myRecords } = useMySpotRecords({
     status: 'PUBLISHED',
     pageRequest: { page: 0, size: 6 },
   })
   const records = (myRecords?.content ?? []).map(toMyRecordThumb)
+  const { data: favoriteData } = useFavoriteList()
+  const savedSpots: SPOTProps[] = (favoriteData?.favorites ?? []).slice(0, 3).map((f) => ({
+    id: f.spotId,
+    name: f.name,
+    location: f.address ?? '',
+    status: '',
+    nameList: [],
+  }))
 
   return (
     <div className="bg-bg-primary relative flex min-h-screen w-full flex-col pb-24">
@@ -76,7 +65,7 @@ export default function MyPage() {
         <IconBtn size="md" className="bg-bg-tertiary">
           <Image src="/icons/person.svg" alt="프로필" width={26} height={26} />
         </IconBtn>
-        <span className="text-text-primary flex-1 text-lg font-semibold">Nickname</span>
+        <span className="text-text-primary flex-1 text-lg font-semibold">{me?.nickname ?? ''}</span>
         <Link href="/profile/edit">
           <Button variant="outlined" size="sm" className="rounded-lg py-3.5">
             프로필 편집
@@ -87,8 +76,8 @@ export default function MyPage() {
       {/* 통계 */}
       <ProfileStats
         recordCount={String(myRecords?.totalElements ?? 0)}
-        followerCount="n,nnn"
-        followingCount="nnn"
+        followerCount={String(followSummary?.followerCount ?? 0)}
+        followingCount={String(followSummary?.followingCount ?? 0)}
       />
 
       {/* 관심 식물 */}
@@ -98,7 +87,7 @@ export default function MyPage() {
       <MyRecordSection records={records} count={myRecords?.totalElements} />
 
       {/* 저장한 스팟 */}
-      <SavedSpotSection spots={SAVED_SPOTS} />
+      <SavedSpotSection spots={savedSpots} />
 
       <Nav activeTab="my" />
     </div>

@@ -1,7 +1,7 @@
-import type {
+﻿import type {
   SpotRecordResponse,
   SpotRecordSummaryResponse,
-} from '@/api/generated/peakdaApi.schemas'
+} from '@/api/facades/generated/peakdaApi.schemas'
 import type { FeedCardProps } from '@/components/ui/card/FeedCard'
 import type { MyRecord } from '@/app/my/_components/MyRecordSection'
 

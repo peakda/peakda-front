@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
@@ -17,7 +17,7 @@ import { useKakaoPlaces, type KakaoPlace } from '@/hooks/useKakaoPlaces'
 import { usePlants } from '@/api/facades/plant'
 import { useMatchSpot } from '@/api/facades/spot'
 import { useCreateSpotRecord, useUploadSpotRecordPhotos } from '@/api/facades/spot-record'
-import type { CreateSpotRecordRequest } from '@/api/generated/peakdaApi.schemas'
+import type { CreateSpotRecordRequest } from '@/api/facades/generated/peakdaApi.schemas'
 import LeftArrow from '@/components/ui/button/LeftArrow'
 
 type Category = '유명명소' | '동네스팟'
@@ -114,7 +114,7 @@ export default function RecordPage() {
     const address = selectedPlace.road_address_name || selectedPlace.address_name || null
 
     try {
-      const match = await matchSpot.mutateAsync({
+      const matchRes = await matchSpot.mutateAsync({
         data: {
           latitude,
           longitude,
@@ -123,7 +123,7 @@ export default function RecordPage() {
           kakaoPlaceId: selectedPlace.id,
         },
       })
-      const matchData = match.data.data
+      const matchData = matchRes.data.data
       const suggestedType = matchData?.suggestedType ?? 'LOCAL'
 
       setSelectedSpot({

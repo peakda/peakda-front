@@ -1,6 +1,7 @@
 'use client'
 
-import { Heart, Share2, MapPin, Clock, Ticket, CalendarDays } from 'lucide-react'
+import Image from 'next/image'
+import { Heart, Share2, MapPin } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import Header from '@/components/ui/layout/Header'
 import LeftArrow from '@/components/ui/button/LeftArrow'
@@ -10,23 +11,63 @@ import { CardBadge } from '@/components/ui/card/CardBadge'
 import { FeedCard } from '@/components/ui/card/FeedCard'
 import { Drawer } from '@/components/ui/layout/Drawer'
 import { useDrawerStore } from '@/stores/useDrawerStore'
-import { useSpotRecordsBySpot } from '@/api/facades/spot-record'
 import { toFeedCardProps } from '@/lib/utils/spotRecordToFeed'
-import { getMockSpot } from '@/app/spot/[id]/_data'
+import { useSpotDetail } from '@/api/facades/spot'
+import { cn } from '@/lib/utils/cn'
+
+const BLOOM_STATUS_LABEL: Record<string, string> = {
+  PREPARING: '이르다',
+  STARTED: '이제 막요',
+  PEAK: '절정',
+  ENDED: '끝났어요',
+}
+
+const BLOOM_STATUS_VARIANT: Record<string, 'green' | 'bloom' | 'secondary'> = {
+  PREPARING: 'green',
+  STARTED: 'green',
+  PEAK: 'bloom',
+  ENDED: 'secondary',
+}
+
+const BLOOM_CATEGORY_EMOJI: Record<string, string> = {
+  PLUM: '🌸',
+  FORSYTHIA: '🌼',
+  AZALEA_KR: '🌺',
+  CHERRY: '🌸',
+  CANOLA: '🌻',
+  AZALEA: '🌺',
+  HYDRANGEA: '💐',
+  LOTUS: '🪷',
+  COSMOS: '🌸',
+  PINK_MUHLY: '🌸',
+  SILVERGRASS: '🍂',
+  MAPLE: '🍁',
+  CAMELLIA: '🌹',
+}
 
 export default function SpotDetailPage() {
   const router = useRouter()
   const { id } = useParams<{ id: string }>()
   const openSaveSpotDrawer = useDrawerStore((s) => s.openSaveSpotDrawer)
 
-  const spot = getMockSpot(id)
-  const { data } = useSpotRecordsBySpot({
-    spotId: Number(id),
-    pageRequest: { page: 0, size: 1 },
-  })
-  const previewRecord = data?.content?.[0]
+  const { data: spot } = useSpotDetail(Number(id))
 
-  const handleSave = () => openSaveSpotDrawer({ name: spot.name, location: spot.location })
+  if (!spot) return null
+
+  const previewRecord = spot.recordPreview?.[0]
+  const favorited = spot.favorite.favorited
+  const bloomPeriod = (() => {
+    if (!spot.bloom) return ''
+    const { peakStartDate: s, peakEndDate: e } = spot.bloom
+    const fmt = (d: string) => d.slice(5, 10).replace('-', '.')
+    if (s && e) return `${fmt(s)} ~ ${fmt(e)}`
+    if (s) return `${fmt(s)} ~`
+    if (e) return `~ ${fmt(e)}`
+    return ''
+  })()
+
+  const handleSave = () =>
+    openSaveSpotDrawer({ name: spot.name, location: spot.address ?? '' })
 
   return (
     <div className="bg-bg-primary relative flex min-h-screen flex-col pb-28">
@@ -39,7 +80,12 @@ export default function SpotDetailPage() {
                 <Share2 className="h-5 w-5 cursor-pointer text-gray-600" />
               </button>
               <button type="button" aria-label="찜하기" onClick={handleSave}>
-                <Heart className="h-5 w-5 cursor-pointer text-gray-600" />
+                <Heart
+                  className={cn(
+                    'h-5 w-5 cursor-pointer',
+                    favorited ? 'fill-rose-500 text-rose-500' : 'text-gray-600',
+                  )}
+                />
               </button>
             </div>
           }
@@ -48,9 +94,17 @@ export default function SpotDetailPage() {
 
       {/* 대표 이미지 */}
       <div className="relative h-64 bg-gray-200">
-        <div className="absolute top-3 left-3 flex items-center gap-1">
-          <CardBadge label={spot.status} variant={spot.statusVariant} />
-        </div>
+        {spot.representativeImageUrl && (
+          <Image src={spot.representativeImageUrl} alt={spot.name} fill className="object-cover" />
+        )}
+        {spot.bloom && (
+          <div className="absolute top-3 left-3 flex items-center gap-1">
+            <CardBadge
+              label={BLOOM_STATUS_LABEL[spot.bloom.status] ?? spot.bloom.status}
+              variant={BLOOM_STATUS_VARIANT[spot.bloom.status] ?? 'secondary'}
+            />
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-5 px-4 py-4">
@@ -58,53 +112,27 @@ export default function SpotDetailPage() {
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center gap-2">
             <h1 className="text-text-primary text-xl font-bold">{spot.name}</h1>
-            {spot.flowers.map((flower) => (
+            {spot.bloom && (
               <Badge
-                key={flower.label}
-                label={flower.label}
-                leftIcon={<span>{flower.emoji}</span>}
+                label={spot.bloom.displayName}
+                leftIcon={<span>{BLOOM_CATEGORY_EMOJI[spot.bloom.category] ?? '🌸'}</span>}
                 variant="filled"
                 color="pink"
               />
-            ))}
+            )}
           </div>
           <span className="text-text-secondary flex items-center gap-1 text-sm">
             <MapPin className="h-4 w-4 shrink-0" />
-            {spot.location}
+            {spot.address ?? ''}
           </span>
         </div>
 
         {/* 개화 예상 시기 */}
-        <Section title="개화 예상 시기">
-          <Badge label={spot.bloomPeriod} variant="filled" color="green" className="w-fit" />
-        </Section>
-
-        {/* 축제 정보 (축제/행사 스팟에서만) */}
-        {spot.type === 'festival' && spot.festival && (
-          <Section title="축제 정보">
-            <ul className="flex flex-col gap-2.5">
-              <InfoRow icon={<Clock className="h-4 w-4" />} label="운영시간" value={spot.festival.hours} />
-              <InfoRow icon={<Ticket className="h-4 w-4" />} label="요금" value={spot.festival.fee} />
-              <InfoRow
-                icon={<CalendarDays className="h-4 w-4" />}
-                label="기간"
-                value={spot.festival.period}
-              />
-            </ul>
+        {bloomPeriod && (
+          <Section title="개화 예상 시기">
+            <Badge label={bloomPeriod} variant="filled" color="green" className="w-fit" />
           </Section>
         )}
-
-        {/* VISIT 가이드 */}
-        <Section title="VISIT 가이드">
-          <ul className="flex flex-col gap-1.5">
-            {spot.guide.map((tip) => (
-              <li key={tip} className="text-text-secondary flex gap-1.5 text-sm">
-                <span className="text-text-tertiary">·</span>
-                <span>{tip}</span>
-              </li>
-            ))}
-          </ul>
-        </Section>
       </div>
 
       {/* Contents (스팟 피드 미리보기) */}
@@ -114,7 +142,7 @@ export default function SpotDetailPage() {
           <button
             type="button"
             className="text-text-tertiary cursor-pointer text-sm"
-            onClick={() => router.push(`/spot/${spot.id}/feed`)}
+            onClick={() => router.push(`/spot/${id}/feed`)}
           >
             더보기
           </button>
@@ -130,7 +158,9 @@ export default function SpotDetailPage() {
           onClick={handleSave}
           className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-gray-200"
         >
-          <Heart className="h-5 w-5 text-gray-400" />
+          <Heart
+            className={cn('h-5 w-5', favorited ? 'fill-rose-500 text-rose-500' : 'text-gray-400')}
+          />
         </button>
         <Button
           variant="filled"
@@ -154,25 +184,5 @@ function Section({ title, children }: { title: string; children: React.ReactNode
       <h2 className="text-text-primary text-base font-semibold">{title}</h2>
       {children}
     </div>
-  )
-}
-
-function InfoRow({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode
-  label: string
-  value: string
-}) {
-  return (
-    <li className="flex items-center gap-2 text-sm">
-      <span className="text-text-tertiary flex items-center gap-1.5">
-        {icon}
-        {label}
-      </span>
-      <span className="text-text-primary font-medium">{value}</span>
-    </li>
   )
 }

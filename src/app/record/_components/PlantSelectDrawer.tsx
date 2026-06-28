@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { Drawer as VaulDrawer } from 'vaul'
@@ -8,8 +8,8 @@ import { Badge } from '@/components/ui/display/Badge'
 import Button from '@/components/ui/button/Button'
 import SearchInput from '@/app/search/_components/SearchInput'
 import { useSearchPlants, useSuggestPlant } from '@/api/facades/plant'
-import { PlantResponseSeasonsItem } from '@/api/generated/peakdaApi.schemas'
-import type { PlantResponse } from '@/api/generated/peakdaApi.schemas'
+import { PlantResponseSeasonsItem } from '@/api/facades/generated/peakdaApi.schemas'
+import type { PlantResponse } from '@/api/facades/generated/peakdaApi.schemas'
 
 const SEASON_GROUPS = [
   { key: PlantResponseSeasonsItem.SPRING, label: '봄' },
