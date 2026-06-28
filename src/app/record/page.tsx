@@ -114,7 +114,7 @@ export default function RecordPage() {
     const address = selectedPlace.road_address_name || selectedPlace.address_name || null
 
     try {
-      const match = await matchSpot.mutateAsync({
+      const matchData = await matchSpot.mutateAsync({
         data: {
           latitude,
           longitude,
@@ -123,7 +123,6 @@ export default function RecordPage() {
           kakaoPlaceId: selectedPlace.id,
         },
       })
-      const matchData = match.data.data
       const suggestedType = matchData?.suggestedType ?? 'LOCAL'
 
       setSelectedSpot({

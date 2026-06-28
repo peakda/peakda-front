@@ -1,19 +1,13 @@
-﻿import { match, useMatch as useMatchGen, useGetSpotDetail } from '@/api/facades/generated/spot/spot'
+import { match, useMatch as useMatchGen, useGetSpotDetail } from '@/api/facades/generated/spot/spot'
 import type { SpotMatchRequest } from '@/api/facades/generated/peakdaApi.schemas'
-
-// ?몃옒??洹쒖튃: res.data (Orval ?섑띁) ??res.data.data (諛깆뿏???ㅼ젣 payload)
-
-// ??? plain async (?대깽??湲곕컲 ?몄텧) ???????????????????????????????????????????
 
 export async function matchSpotApi(payload: SpotMatchRequest) {
   const res = await match(payload)
   return res.data.data ?? null
 }
 
-// ??? React Query hooks (罹먯떛 / ?곹깭 愿由? ????????????????????????????????????
-
-// mutate({ data: payload }) ?뺥깭濡??몄텧
-export const useMatchSpot = () => useMatchGen()
+export const useMatchSpot = () =>
+  useMatchGen({ mutation: { select: (res) => res.data.data ?? null } })
 
 export const useSpotDetail = (id: number) =>
   useGetSpotDetail(id, { query: { select: (res) => res.data.data ?? null } })

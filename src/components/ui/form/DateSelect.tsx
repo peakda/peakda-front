@@ -107,7 +107,7 @@ const DateSelect = ({
         )}
       >
         <Image
-          src="./icons/Calendar.svg"
+          src="/icons/Calendar.svg"
           alt="캘린더"
           width={20}
           height={20}

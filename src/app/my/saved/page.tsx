@@ -30,7 +30,7 @@ export default function SavedSpotsPage() {
           left={<LeftArrow />}
           center={
             <div className="text-[15px] font-medium text-[#000000]">
-              李쒗븳 ?ㅽ뙚({data?.count ?? 0})
+             찜한 스팟({data?.count ?? 0})
             </div>
           }
         />
