@@ -10,6 +10,7 @@ import Image from 'next/image'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import { Drawer } from '@/components/ui/layout/Drawer'
 import Nav from '@/components/ui/layout/Nav'
+import { useHomeSuggestion } from '@/api/facades/home'
 
 type PeakData = Extract<ExplorCardProps, { type: 'peak' }>
 type FestivalData = Extract<ExplorCardProps, { type: 'festival' }>
@@ -140,6 +141,11 @@ export default function ExplorePage() {
   const [query, setQuery] = useState('')
   const hasQuery = query.trim().length > 0
   const { openFlowerFilterDrawer } = useDrawerStore()
+  const { data: suggestion } = useHomeSuggestion()
+  const searchPlaceholder =
+    suggestion?.available && suggestion.message
+      ? suggestion.message
+      : '스팟, 지역, 식물을 검색해보세요.'
   return (
     <div className="relative flex min-h-screen w-full flex-col bg-white pb-24">
       <div className="h-14">
@@ -160,7 +166,7 @@ export default function ExplorePage() {
         query={query}
         hasQuery={hasQuery}
         setQuery={setQuery}
-        placeholder="스팟, 지역, 식물을 검색해보세요."
+        placeholder={searchPlaceholder}
       />
 
       {/* 지금이 딱 좋아에요 */}

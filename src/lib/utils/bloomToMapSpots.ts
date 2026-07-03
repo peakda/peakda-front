@@ -4,7 +4,7 @@ import { CATEGORY_ICON, STATUS_STAGE, STAGE_PRIORITY, type Stage } from '@/const
 
 // 지도 개화현황 응답 → 핀 데이터. 좌표 없는 명소는 제외한다.
 export function bloomToMapSpots(data: BloomMapResponse): MapSpot[] {
-  return data.pins.flatMap((a) => {
+  return (data.pins ?? []).flatMap((a) => {
     if (a.latitude == null || a.longitude == null) return []
 
     const flowers = a.blooms.map((b) => ({ src: CATEGORY_ICON[b.category], alt: b.displayName }))

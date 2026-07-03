@@ -6,7 +6,7 @@ interface PeakCardProps {
   image: string
   name: string
   description: string
-  visitorCount: number
+  visitorCount?: number
   bloomPercent: number
 }
 
@@ -46,11 +46,13 @@ export function ExplorCard(props: ExplorCardProps) {
         {/* Peak 뱃지 */}
         {props.type === 'peak' && (
           <>
-            <CardBadge
-              variant="dark"
-              label={`${props.visitorCount}명 다녀옴`}
-              className="absolute top-2 left-2"
-            />
+            {props.visitorCount != null && (
+              <CardBadge
+                variant="dark"
+                label={`${props.visitorCount}명 다녀옴`}
+                className="absolute top-2 left-2"
+              />
+            )}
             <CardBadge
               variant="bloom"
               label={`만개 ${props.bloomPercent}%`}

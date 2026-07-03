@@ -15,8 +15,13 @@ import { toast } from 'sonner'
 import { useMapCluster, type MapSpot } from '@/hooks/useMapPins'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import { useBloomMap } from '@/api/facades/seasonal-bloom'
+import { spotPreviewApi } from '@/api/facades/spot'
 import { bloomToMapSpots } from '@/lib/utils/bloomToMapSpots'
-import type { MapParams } from '@/api/facades/generated/peakdaApi.schemas'
+import type {
+  BloomBadgeStatus,
+  MapParams,
+  SpotPreviewItem,
+} from '@/api/facades/generated/peakdaApi.schemas'
 import { useRouter } from 'next/navigation'
 
 const Drawer = dynamic(
@@ -30,6 +35,13 @@ const DEFAULT_CENTER = {
 }
 
 const NETWORK_TOAST_ID = 'map-network-error'
+
+const BADGE_STATUS_LABEL: Record<BloomBadgeStatus, string> = {
+  PREPARING: '개화 전',
+  STARTED: '개화 시작',
+  PEAK: '만개',
+  ENDED: '개화 종료',
+}
 
 function panToCurrentLocation(map: kakao.maps.Map, onPermissionDenied?: () => void) {
   navigator.geolocation.getCurrentPosition(
@@ -67,7 +79,35 @@ export const MapContainer = () => {
   const spots = useMemo(() => (bloomData ? bloomToMapSpots(bloomData) : []), [bloomData])
 
   const handlePinClick = useCallback(
-    (spot: MapSpot) => {
+    async (spot: MapSpot) => {
+      let items: SpotPreviewItem[] = []
+      try {
+        const previewData =
+          spot.attractionId != null ? await spotPreviewApi([spot.attractionId]) : null
+        items = previewData?.items ?? []
+      } catch (e) {
+        console.error(e)
+      }
+
+      // 프리뷰가 있으면 썸네일·상태 뱃지로 드로어를 채운다.
+      if (items.length > 0) {
+        openPinDrawer(
+          items.map((item) => ({
+            type: 'list' as const,
+            title: item.name,
+            location: spot.title ?? '위치 정보 없음',
+            description: item.badge
+              ? `현재 ${BADGE_STATUS_LABEL[item.badge.status]} 상태입니다.`
+              : '',
+            Badges: item.badge ? [item.badge.displayName] : [],
+            isFavorite: false,
+            images: item.thumbnailUrl ? [item.thumbnailUrl] : [],
+          }))
+        )
+        return
+      }
+
+      // 프리뷰가 없으면(좌표만 있는 핀·조회 실패) 기존 개화 데이터로 폴백한다.
       openPinDrawer(
         spot.flowers.map((f) => ({
           type: 'list' as const,

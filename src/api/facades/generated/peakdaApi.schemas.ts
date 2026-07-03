@@ -1071,6 +1071,108 @@ export interface ApiResponsePageResponseSpotRecordSummaryResponse {
 }
 
 /**
+ * 핀 유형
+ */
+export type SpotPreviewItemType = typeof SpotPreviewItemType[keyof typeof SpotPreviewItemType];
+
+
+export const SpotPreviewItemType = {
+  ATTRACTION: 'ATTRACTION',
+  LOCAL: 'LOCAL',
+} as const;
+
+/**
+ * 꽃 카테고리
+ */
+export type BloomBadgeCategory = typeof BloomBadgeCategory[keyof typeof BloomBadgeCategory];
+
+
+export const BloomBadgeCategory = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  COSMOS: 'COSMOS',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
+} as const;
+
+/**
+ * 현재 상태 (PREPARING/STARTED/PEAK)
+ */
+export type BloomBadgeStatus = typeof BloomBadgeStatus[keyof typeof BloomBadgeStatus];
+
+
+export const BloomBadgeStatus = {
+  PREPARING: 'PREPARING',
+  STARTED: 'STARTED',
+  PEAK: 'PEAK',
+  ENDED: 'ENDED',
+} as const;
+
+/**
+ * 대표 개화 단계 뱃지
+ */
+export interface BloomBadge {
+  /** 꽃 카테고리 */
+  category: BloomBadgeCategory;
+  /** 카테고리 표시명 */
+  displayName: string;
+  /** 현재 상태 (PREPARING/STARTED/PEAK) */
+  status: BloomBadgeStatus;
+}
+
+/**
+ * 핀 프리뷰 카드 1건
+ */
+export interface SpotPreviewItem {
+  /** 스팟 id */
+  spotId: number;
+  /** 핀 유형 */
+  type: SpotPreviewItemType;
+  /** 핀 이름 */
+  name: string;
+  /**
+     * 썸네일 이미지 URL (없으면 null)
+     * @nullable
+     */
+  thumbnailUrl?: string | null;
+  badge?: BloomBadge | null;
+  /**
+     * 요청 좌표(lat/lng)로부터의 거리(m). 좌표 미전달 시 null
+     * @nullable
+     */
+  distanceMeters?: number | null;
+}
+
+/**
+ * 핀 클릭 프리뷰 카드 목록 (단일 핀=SCR-011e, 클러스터=SCR-011d 양쪽에서 사용)
+ */
+export interface SpotPreviewResponse {
+  /** 요청한 spotIds 순서를 보존한 프리뷰 카드 목록 (존재하지 않거나 비공개인 id는 제외) */
+  items: SpotPreviewItem[];
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseSpotPreviewResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: SpotPreviewResponse | null;
+}
+
+/**
  * 찜한 스팟 목록
  */
 export interface SpotFavoriteListResponse {
@@ -1419,6 +1521,165 @@ export interface ApiResponseBloomCalendarResponse {
 }
 
 /**
+ * 사용자 검색 결과 1건
+ */
+export interface UserSearchItem {
+  /** 사용자 id */
+  userId: number;
+  /** 닉네임 */
+  nickname: string;
+  /**
+     * 프로필 이미지 URL (없으면 null)
+     * @nullable
+     */
+  profileImageUrl?: string | null;
+}
+
+/**
+ * 공통 페이지 응답 (0-based)
+ */
+export interface PageResponseUserSearchItem {
+  /** 현재 페이지의 항목 리스트 */
+  content: UserSearchItem[];
+  /** 0-based 현재 페이지 */
+  page: number;
+  /** 페이지 크기 */
+  size: number;
+  /** 전체 항목 수 */
+  totalElements: number;
+  /** 전체 페이지 수 */
+  totalPages: number;
+  /** 다음 페이지 존재 여부 */
+  hasNext: boolean;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponsePageResponseUserSearchItem {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: PageResponseUserSearchItem | null;
+}
+
+/**
+ * 스팟 유형
+ */
+export type TrendingSpotItemType = typeof TrendingSpotItemType[keyof typeof TrendingSpotItemType];
+
+
+export const TrendingSpotItemType = {
+  ATTRACTION: 'ATTRACTION',
+  LOCAL: 'LOCAL',
+} as const;
+
+/**
+ * 인기 스팟 1건
+ */
+export interface TrendingSpotItem {
+  /** 스팟 id */
+  spotId: number;
+  /** 스팟 유형 */
+  type: TrendingSpotItemType;
+  /** 스팟명 */
+  name: string;
+  /** 위도 */
+  latitude: number;
+  /** 경도 */
+  longitude: number;
+  /** 찜 수 */
+  favoriteCount: number;
+}
+
+/**
+ * 찜이 많은 순 인기 스팟 목록 (검색 화면 트렌딩)
+ */
+export interface TrendingSpotsResponse {
+  /** 인기 스팟 목록 (찜 많은 순) */
+  items: TrendingSpotItem[];
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseTrendingSpotsResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: TrendingSpotsResponse | null;
+}
+
+/**
+ * 스팟 유형
+ */
+export type SpotSearchItemType = typeof SpotSearchItemType[keyof typeof SpotSearchItemType];
+
+
+export const SpotSearchItemType = {
+  ATTRACTION: 'ATTRACTION',
+  LOCAL: 'LOCAL',
+} as const;
+
+/**
+ * 스팟 검색 결과 1건
+ */
+export interface SpotSearchItem {
+  /** 스팟 id */
+  spotId: number;
+  /** 스팟 유형 */
+  type: SpotSearchItemType;
+  /** 스팟명 */
+  name: string;
+  /**
+     * 주소 (없으면 null)
+     * @nullable
+     */
+  address?: string | null;
+  /** 위도 */
+  latitude: number;
+  /** 경도 */
+  longitude: number;
+}
+
+/**
+ * 공통 페이지 응답 (0-based)
+ */
+export interface PageResponseSpotSearchItem {
+  /** 현재 페이지의 항목 리스트 */
+  content: SpotSearchItem[];
+  /** 0-based 현재 페이지 */
+  page: number;
+  /** 페이지 크기 */
+  size: number;
+  /** 전체 항목 수 */
+  totalElements: number;
+  /** 전체 페이지 수 */
+  totalPages: number;
+  /** 다음 페이지 존재 여부 */
+  hasNext: boolean;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponsePageResponseSpotSearchItem {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: PageResponseSpotSearchItem | null;
+}
+
+/**
  * 공통 응답 envelope
  */
 export interface ApiResponseListPlantResponse {
@@ -1433,6 +1694,80 @@ export interface ApiResponseListPlantResponse {
      * @nullable
      */
   data?: PlantResponse[] | null;
+}
+
+/**
+ * 꽃 카테고리
+ * @nullable
+ */
+export type HomeSuggestionResponseCategory = typeof HomeSuggestionResponseCategory[keyof typeof HomeSuggestionResponseCategory] | null;
+
+
+export const HomeSuggestionResponseCategory = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  COSMOS: 'COSMOS',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
+} as const;
+
+/**
+ * 홈 검색바 보조 카피 (시즌 추천어)
+ */
+export interface HomeSuggestionResponse {
+  /** 추천할 절정 시즌 데이터가 있는지 여부 */
+  available: boolean;
+  /**
+     * 검색바에 노출할 카피 (없으면 null)
+     * @nullable
+     */
+  message?: string | null;
+  /**
+     * 꽃 카테고리
+     * @nullable
+     */
+  category?: HomeSuggestionResponseCategory;
+  /**
+     * 카테고리 표시명
+     * @nullable
+     */
+  displayName?: string | null;
+  /**
+     * 명소 id
+     * @nullable
+     */
+  attractionId?: number | null;
+  /**
+     * 명소명
+     * @nullable
+     */
+  attractionTitle?: string | null;
+  /**
+     * 상태 산출 기준일
+     * @nullable
+     */
+  baseDate?: string | null;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseHomeSuggestionResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: HomeSuggestionResponse | null;
 }
 
 /**
@@ -1552,6 +1887,44 @@ export const ListMineStatus = {
   PUBLISHED: 'PUBLISHED',
 } as const;
 
+export type PreviewParams = {
+/**
+ * 프리뷰할 스팟 id 목록
+ */
+spotIds: number[];
+/**
+ * 꽃 카테고리 필터 (생략 시 각 스팟의 대표 단계)
+ */
+category?: PreviewCategory;
+/**
+ * 거리 계산 기준 위도 (lng 과 함께 생략 가능)
+ */
+lat?: number;
+/**
+ * 거리 계산 기준 경도 (lat 과 함께 생략 가능)
+ */
+lng?: number;
+};
+
+export type PreviewCategory = typeof PreviewCategory[keyof typeof PreviewCategory];
+
+
+export const PreviewCategory = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  COSMOS: 'COSMOS',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
+} as const;
+
 export type MapParams = {
 /**
  * 남서 위도
@@ -1653,6 +2026,22 @@ export const CalendarCategory = {
   MAPLE: 'MAPLE',
   CAMELLIA: 'CAMELLIA',
 } as const;
+
+export type SearchUsersParams = {
+/**
+ * 검색어 (닉네임)
+ */
+q: string;
+pageRequest: PageRequest;
+};
+
+export type SearchSpotsParams = {
+/**
+ * 검색어
+ */
+q: string;
+pageRequest: PageRequest;
+};
 
 export type SearchParams = {
 keyword: string;

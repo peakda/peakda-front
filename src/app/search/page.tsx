@@ -9,6 +9,7 @@ import HotChipList from './_components/HotChipList'
 import { SpotPanel, SPOTProps } from './_components/SpotPanel'
 import { UserPanel, UserProps } from './_components/UserPanel'
 import SearchInput from './_components/SearchInput'
+import { useHomeSuggestion } from '@/api/facades/home'
 
 const SEARCH_TABS: TabItem[] = [
   { value: 'spot', label: '스팟' },
@@ -82,6 +83,10 @@ export default function SearchPage() {
 
   const hasQuery = query.trim().length > 0
 
+  const { data: suggestion } = useHomeSuggestion()
+  const searchPlaceholder =
+    suggestion?.available && suggestion.message ? suggestion.message : undefined
+
   const removeRecent = (item: string) => {
     setRecentSearches((prev) => prev.filter((r) => r !== item))
   }
@@ -89,7 +94,13 @@ export default function SearchPage() {
   return (
     <div className="flex min-h-screen flex-col bg-white">
       {/* 상단 검색 바 */}
-      <SearchInput query={query} hasQuery={hasQuery} setQuery={setQuery} isCancle />
+      <SearchInput
+        query={query}
+        hasQuery={hasQuery}
+        setQuery={setQuery}
+        isCancle
+        placeholder={searchPlaceholder}
+      />
       {!hasQuery ? (
         /* 빈 상태 */
         <div className="flex flex-col gap-6 px-4 py-2">
