@@ -15,6 +15,7 @@ import { toast } from 'sonner'
 import { useMapCluster, type MapSpot } from '@/hooks/useMapPins'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import { useBloomMap } from '@/api/facades/seasonal-bloom'
+import { useHomeSuggestion } from '@/api/facades/home'
 import { spotPreviewApi } from '@/api/facades/spot'
 import { bloomToMapSpots } from '@/lib/utils/bloomToMapSpots'
 import type {
@@ -35,6 +36,15 @@ const DEFAULT_CENTER = {
 }
 
 const NETWORK_TOAST_ID = 'map-network-error'
+
+// bbox를 격자에 스냅해 미세 이동 시 동일 쿼리 키로 수렴시킨다(캐시 히트 + staleTime 작동).
+// 소수점 2자리(≈ 1km) 격자. 뷰를 항상 덮도록 min은 내림, max는 올림.
+const BBOX_GRID = 100
+const snapDown = (v: number) => Math.floor(v * BBOX_GRID) / BBOX_GRID
+const snapUp = (v: number) => Math.ceil(v * BBOX_GRID) / BBOX_GRID
+
+// 지도 정착 후 실제 조회까지의 지연. 연속 이동 중엔 마지막 정착만 조회한다.
+const BBOX_DEBOUNCE_MS = 1000
 
 const BADGE_STATUS_LABEL: Record<BloomBadgeStatus, string> = {
   PREPARING: '개화 전',
@@ -77,6 +87,11 @@ export const MapContainer = () => {
 
   const { data: bloomData } = useBloomMap(bbox)
   const spots = useMemo(() => (bloomData ? bloomToMapSpots(bloomData) : []), [bloomData])
+
+  // 시즌 추천어(홈 검색바 보조 카피). 절정 데이터 없으면(available=false) 기본 문구로 폴백.
+  const { data: suggestion } = useHomeSuggestion()
+  const searchDescription =
+    suggestion?.available && suggestion.message ? suggestion.message : '벚꽃 만개 지역'
 
   const handlePinClick = useCallback(
     async (spot: MapSpot) => {
@@ -125,7 +140,8 @@ export const MapContainer = () => {
 
   useMapCluster(mapInstance, spots, handlePinClick)
 
-  // 지도 이동/줌이 멈출 때(idle)마다 현재 영역(bbox)으로 개화현황을 다시 조회한다.
+  // 지도 이동/줌이 멈출 때(idle) 현재 영역(bbox)으로 개화현황을 조회한다.
+  // 좌표를 격자에 스냅해 캐시가 작동하게 하고, 연속 이동은 debounce로 마지막 정착만 조회한다.
   useEffect(() => {
     if (!mapInstance) return
 
@@ -134,16 +150,25 @@ export const MapContainer = () => {
       const sw = bounds.getSouthWest()
       const ne = bounds.getNorthEast()
       setBbox({
-        minLat: sw.getLat(),
-        minLng: sw.getLng(),
-        maxLat: ne.getLat(),
-        maxLng: ne.getLng(),
+        minLat: snapDown(sw.getLat()),
+        minLng: snapDown(sw.getLng()),
+        maxLat: snapUp(ne.getLat()),
+        maxLng: snapUp(ne.getLng()),
       })
     }
 
-    updateBbox()
-    kakao.maps.event.addListener(mapInstance, 'idle', updateBbox)
-    return () => kakao.maps.event.removeListener(mapInstance, 'idle', updateBbox)
+    let timer: ReturnType<typeof setTimeout>
+    const onIdle = () => {
+      clearTimeout(timer)
+      timer = setTimeout(updateBbox, BBOX_DEBOUNCE_MS)
+    }
+
+    updateBbox() // 첫 진입은 즉시 조회
+    kakao.maps.event.addListener(mapInstance, 'idle', onIdle)
+    return () => {
+      clearTimeout(timer)
+      kakao.maps.event.removeListener(mapInstance, 'idle', onIdle)
+    }
   }, [mapInstance])
 
   useEffect(() => {
@@ -240,7 +265,7 @@ export const MapContainer = () => {
 
       <SearchBar
         placeholder="지금 피크인 곳을 검색해보세요."
-        description="벚꽃 만개 지역"
+        description={searchDescription}
         onFilterClick={openFilterDrawer}
       />
       <LocationBtn
