@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Check } from 'lucide-react'
 import Button from '@/components/ui/button/Button'
 import { cn } from '@/lib/utils/cn'
+import { withdrawApi } from '@/api/facades/user'
 
 interface Props {
   onClose: () => void
@@ -16,7 +18,22 @@ const NOTICES = [
 ]
 
 export function WithdrawDrawerContent({ onClose }: Props) {
+  const router = useRouter()
   const [agreed, setAgreed] = useState(false)
+  const [isWithdrawing, setIsWithdrawing] = useState(false)
+
+  const handleWithdraw = async () => {
+    setIsWithdrawing(true)
+    try {
+      await withdrawApi()
+    } catch (e) {
+      console.error('계정 탈퇴 실패', e)
+      setIsWithdrawing(false)
+      return
+    }
+    onClose()
+    router.replace('/login')
+  }
 
   return (
     <div className="flex flex-col gap-1 px-5 pt-2 pb-8 text-center">
@@ -64,8 +81,8 @@ export function WithdrawDrawerContent({ onClose }: Props) {
         variant="filled"
         color="primary"
         size="lg"
-        disabled={!agreed}
-        onClick={onClose}
+        disabled={!agreed || isWithdrawing}
+        onClick={handleWithdraw}
         className="bg-brand-warning hovebg-brand-warning active: bg-brand-warning w-full text-white"
       >
         계정 탈퇴 및 데이터 삭제

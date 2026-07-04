@@ -8,27 +8,32 @@ import LeftArrow from '@/components/ui/button/LeftArrow'
 import { useCheckNickname } from '@/hooks/useCheckNickname'
 import { cn } from '@/lib/utils/cn'
 import { useCurrentUser } from '@/api/facades/auth'
-import { useUploadProfileImage, useDeleteProfileImage } from '@/api/facades/user'
+import {
+  useUploadProfileImage,
+  useDeleteProfileImage,
+  useUpdateFavoriteCategories,
+} from '@/api/facades/user'
+import type { FavoriteCategoryUpdateRequestCategoriesItem } from '@/api/facades/generated/peakdaApi.schemas'
 import Image from 'next/image'
 import { Camera } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
-const FLOWER_LIST = [
-  '동백꽃',
-  '매화',
-  '개나리',
-  '벚꽃',
-  '진달래',
-  '철쭉',
-  '유채꽃',
-  '수국',
-  '연꽃',
-  '코스모스',
-  '단풍',
-  '핑크뮬리',
-  '억새',
+const FLOWER_LIST: { label: string; value: FavoriteCategoryUpdateRequestCategoriesItem }[] = [
+  { label: '동백꽃', value: 'CAMELLIA' },
+  { label: '매화', value: 'PLUM' },
+  { label: '개나리', value: 'FORSYTHIA' },
+  { label: '벚꽃', value: 'CHERRY' },
+  { label: '진달래', value: 'AZALEA' },
+  { label: '철쭉', value: 'AZALEA_KR' },
+  { label: '유채꽃', value: 'CANOLA' },
+  { label: '수국', value: 'HYDRANGEA' },
+  { label: '연꽃', value: 'LOTUS' },
+  { label: '코스모스', value: 'COSMOS' },
+  { label: '단풍', value: 'MAPLE' },
+  { label: '핑크뮬리', value: 'PINK_MUHLY' },
+  { label: '억새', value: 'SILVERGRASS' },
 ]
 
 export default function ProfileEditPage() {
@@ -38,7 +43,7 @@ export default function ProfileEditPage() {
   const [nickname, setNickname] = useState('')
   // 중복확인을 통과한 닉네임 — 현재 입력값과 일치할 때만 검증된 것으로 본다
   const [checkedNickname, setCheckedNickname] = useState<string | null>(null)
-  const [selected, setSelected] = useState<string[]>([])
+  const [selected, setSelected] = useState<FavoriteCategoryUpdateRequestCategoriesItem[]>([])
   const [preview, setPreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -47,20 +52,42 @@ export default function ProfileEditPage() {
     if (!user) return
     setNickname(user.nickname ?? '')
     setPreview(user.profileImageUrl ?? null)
+    // 응답 카테고리(문자열)와 값이 일치하는 선택지만 초기 선택으로 반영
+    setSelected(
+      FLOWER_LIST.filter((f) => user.favoriteCategories.includes(f.value)).map((f) => f.value)
+    )
   }, [user])
 
   const { isPending, check, isError, message } = useCheckNickname(nickname)
   const { mutate: uploadImage, isPending: isUploading } = useUploadProfileImage()
   const { mutate: deleteImage } = useDeleteProfileImage()
+  const { mutate: updateCategories, isPending: isSaving } = useUpdateFavoriteCategories()
 
   // 검증 통과 여부는 저장된 닉네임과 현재 입력의 일치로 파생 — 입력이 바뀌면 자동 무효화
   const isNicknameVerified = checkedNickname !== null && checkedNickname === nickname
 
-  const toggleBadge = useCallback((flower: string) => {
+  const toggleBadge = useCallback((value: FavoriteCategoryUpdateRequestCategoriesItem) => {
     setSelected((prev) =>
-      prev.includes(flower) ? prev.filter((f) => f !== flower) : [...prev, flower]
+      prev.includes(value) ? prev.filter((f) => f !== value) : [...prev, value]
     )
   }, [])
+
+  const handleSave = () => {
+    if (selected.length === 0) {
+      toast.error('관심 꽃을 최소 1개 선택해주세요.')
+      return
+    }
+    updateCategories(
+      { data: { categories: selected } },
+      {
+        onSuccess: () => {
+          toast.success('관심 꽃이 저장되었어요.')
+          router.push('/my')
+        },
+        onError: () => toast.error('저장에 실패했어요.'),
+      }
+    )
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -174,18 +201,18 @@ export default function ProfileEditPage() {
         </div>
         <div className="flex flex-wrap gap-2">
           {FLOWER_LIST.map((flower) => {
-            const isSelected = selected.includes(flower)
+            const isSelected = selected.includes(flower.value)
             return (
               <Badge
-                key={flower}
-                label={flower}
+                key={flower.value}
+                label={flower.label}
                 variant="ghost"
                 color="gray"
                 className={cn(
                   'cursor-pointer rounded-xl px-3.5 py-2',
                   isSelected && 'border-brand-secondary text-text-secondary bg-green-50'
                 )}
-                onClick={() => toggleBadge(flower)}
+                onClick={() => toggleBadge(flower.value)}
               />
             )
           })}
@@ -199,8 +226,8 @@ export default function ProfileEditPage() {
           size="lg"
           color="primary"
           className="w-full"
-          disabled={isUploading}
-          onClick={() => router.push('/my')}
+          disabled={isUploading || isSaving}
+          onClick={handleSave}
         >
           저장
         </Button>
