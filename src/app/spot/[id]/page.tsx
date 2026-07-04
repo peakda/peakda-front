@@ -67,7 +67,7 @@ export default function SpotDetailPage() {
   })()
 
   const handleSave = () =>
-    openSaveSpotDrawer({ name: spot.name, location: spot.address ?? '' })
+    openSaveSpotDrawer({ spotId: Number(id), name: spot.name, location: spot.address ?? '' })
 
   return (
     <div className="bg-bg-primary relative flex min-h-screen flex-col pb-28">

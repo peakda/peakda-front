@@ -4,6 +4,7 @@ import type { MultiImageProps } from '@/types/types'
 type DrawerType = 'filter' | 'flower-filter' | 'pin' | 'logout' | 'withdraw' | 'save-spot'
 
 export interface SaveSpotData {
+  spotId: number
   name: string
   location: string
 }
