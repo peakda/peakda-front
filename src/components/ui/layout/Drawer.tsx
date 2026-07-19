@@ -8,10 +8,12 @@ import { FilterDrawerContent } from './FilterDrawerContent'
 import { LogoutDrawerContent } from './LogoutDrawerContent'
 import { WithdrawDrawerContent } from './WithdrawDrawerContent'
 import { SaveSpotDrawerContent } from './SaveSpotDrawerContent'
+import { DateSelectDrawerContent } from './DateSelectDrawerContent'
 import PinList from '../display/PinList'
 
 export function Drawer() {
-  const { isOpen, type, pinListData, saveSpotData, closeDrawer, setSnapHeight } = useDrawerStore()
+  const { isOpen, type, pinListData, saveSpotData, dateSelectData, closeDrawer, setSnapHeight } =
+    useDrawerStore()
   const [snap, setSnap] = useState<string | number | null>('400px')
 
   useEffect(() => {
@@ -33,9 +35,16 @@ export function Drawer() {
           ? snap
           : 400
 
-  // 로그아웃 / 회원탈퇴 / 찜 확인 시트: snap 없이 콘텐츠 높이에 맞춰 올라오는 바텀시트
-  if (type === 'logout' || type === 'withdraw' || type === 'save-spot') {
-    const title = type === 'logout' ? '로그아웃' : type === 'withdraw' ? '계정 탈퇴' : '찜 추가'
+  // 로그아웃 / 회원탈퇴 / 찜 확인 / 촬영일자 선택 시트: snap 없이 콘텐츠 높이에 맞춰 올라오는 바텀시트
+  if (type === 'logout' || type === 'withdraw' || type === 'save-spot' || type === 'date-select') {
+    const title =
+      type === 'logout'
+        ? '로그아웃'
+        : type === 'withdraw'
+          ? '계정 탈퇴'
+          : type === 'date-select'
+            ? '촬영일자 선택'
+            : '찜 추가'
     return (
       <VaulDrawer.Root open={isOpen} onOpenChange={(open) => !open && closeDrawer()}>
         <VaulDrawer.Portal>
@@ -47,6 +56,12 @@ export function Drawer() {
               <LogoutDrawerContent onClose={closeDrawer} />
             ) : type === 'withdraw' ? (
               <WithdrawDrawerContent onClose={closeDrawer} />
+            ) : type === 'date-select' && dateSelectData ? (
+              <DateSelectDrawerContent
+                value={dateSelectData.value}
+                onSelect={dateSelectData.onSelect}
+                onClose={closeDrawer}
+              />
             ) : saveSpotData ? (
               <SaveSpotDrawerContent spot={saveSpotData} onClose={closeDrawer} />
             ) : null}

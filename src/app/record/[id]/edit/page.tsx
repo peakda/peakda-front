@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils/cn'
 import Header from '@/components/ui/layout/Header'
+import { Drawer } from '@/components/ui/layout/Drawer'
 import LeftArrow from '@/components/ui/button/LeftArrow'
 import Button from '@/components/ui/button/Button'
 import DateSelect from '@/components/ui/form/DateSelect'
@@ -206,6 +207,8 @@ function RecordEditForm({ record }: { record: SpotRecordResponse }) {
         selectedIds={selectedPlantIds}
         onToggle={togglePlant}
       />
+
+      <Drawer />
     </div>
   )
 }

@@ -1,12 +1,24 @@
 import { create } from 'zustand'
 import type { MultiImageProps } from '@/types/types'
 
-type DrawerType = 'filter' | 'flower-filter' | 'pin' | 'logout' | 'withdraw' | 'save-spot'
+type DrawerType =
+  | 'filter'
+  | 'flower-filter'
+  | 'pin'
+  | 'logout'
+  | 'withdraw'
+  | 'save-spot'
+  | 'date-select'
 
 export interface SaveSpotData {
   spotId: number
   name: string
   location: string
+}
+
+export interface DateSelectData {
+  value: string
+  onSelect: (value: string) => void
 }
 
 interface DrawerState {
@@ -15,12 +27,14 @@ interface DrawerState {
   snapHeight: number
   pinListData: MultiImageProps[]
   saveSpotData: SaveSpotData | null
+  dateSelectData: DateSelectData | null
   openFilterDrawer: () => void
   openFlowerFilterDrawer: () => void
   openPinDrawer: (data: MultiImageProps[]) => void
   openLogoutDrawer: () => void
   openWithdrawDrawer: () => void
   openSaveSpotDrawer: (data: SaveSpotData) => void
+  openDateSelectDrawer: (value: string, onSelect: (value: string) => void) => void
   closeDrawer: () => void
   setSnapHeight: (h: number) => void
 }
@@ -31,6 +45,7 @@ export const useDrawerStore = create<DrawerState>((set) => ({
   snapHeight: 0,
   pinListData: [],
   saveSpotData: null,
+  dateSelectData: null,
   openFilterDrawer: () => set({ isOpen: true, type: 'filter', snapHeight: 400 }),
   openFlowerFilterDrawer: () => set({ isOpen: true, type: 'flower-filter', snapHeight: 400 }),
   openPinDrawer: (data) => set({ isOpen: true, type: 'pin', pinListData: data, snapHeight: 400 }),
@@ -38,6 +53,8 @@ export const useDrawerStore = create<DrawerState>((set) => ({
   openWithdrawDrawer: () => set({ isOpen: true, type: 'withdraw', snapHeight: 0 }),
   openSaveSpotDrawer: (data) =>
     set({ isOpen: true, type: 'save-spot', saveSpotData: data, snapHeight: 0 }),
+  openDateSelectDrawer: (value, onSelect) =>
+    set({ isOpen: true, type: 'date-select', dateSelectData: { value, onSelect }, snapHeight: 0 }),
   closeDrawer: () => set({ isOpen: false, snapHeight: 0, pinListData: [] }),
   setSnapHeight: (h) => set({ snapHeight: h }),
 }))

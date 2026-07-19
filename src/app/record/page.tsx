@@ -6,6 +6,7 @@ import { X, Plus, ChevronLeft, Check } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils/cn'
 import Header from '@/components/ui/layout/Header'
+import { Drawer } from '@/components/ui/layout/Drawer'
 import StepperTab from '@/components/ui/display/StepperTab'
 import SearchInput from '@/app/search/_components/SearchInput'
 import Button from '@/components/ui/button/Button'
@@ -595,6 +596,8 @@ export default function RecordPage() {
           다음
         </Button>
       </div>
+
+      <Drawer />
     </div>
   )
 }
