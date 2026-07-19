@@ -31,7 +31,8 @@
 
 ## API 호출 규칙
 
-- 외부 API는 반드시 /app/api/ Route Handler 경유
+- 백엔드(Railway) API는 `src/api/mutator`의 `customInstance`를 통해 직접 호출한다 — 프런트(Vercel)와 도메인이 달라 크로스사이트 쿠키로 인증을 주고받기 때문에 Route Handler 프록시를 거치지 않는다 (`ARCHITECTURE.md`, `MEMORY.md` 참고)
+- `/app/api/` Route Handler는 백엔드 프록시 용도가 아니라 uploadthing 등 별도 목적으로만 사용
 - TanStack Query로 캐싱, staleTime 명시
 - 에러 처리는 try/catch + 타입 가드로 처리
 
@@ -42,7 +43,7 @@
 - 상대경로 import (../) — @/ 절대경로 사용
 - 인라인 스타일
 - default export (컴포넌트)
-- 외부 API 직접 클라이언트 호출
+- `customInstance`(`src/api/mutator`)를 거치지 않는 임의의 fetch/axios 직접 호출
 
 ## PR 작성 규칙
 

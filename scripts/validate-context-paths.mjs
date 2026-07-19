@@ -60,4 +60,4 @@ if (broken.length > 0) {
   process.exit(1)
 }
 
-console.log(`context path 검증 통과 (${contextFiles.length}개 문서 확인)`)
+console.warn(`context path 검증 통과 (${contextFiles.length}개 문서 확인)`)

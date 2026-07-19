@@ -43,7 +43,7 @@ sequenceDiagram
   end
 ```
 
-> **Note (design deviation)**: 프런트(Vercel)·백엔드(Railway) 도메인이 달라 크로스사이트 쿠키(`SameSite=None; Secure`)로 인증을 주고받는다. 이 때문에 `src/api/mutator/index.ts`는 `NEXT_PUBLIC_API_URL`로 **브라우저/서버에서 백엔드를 직접 호출**하며, `AGENTS.md`의 "외부 API는 Route Handler 프록시 경유" 규칙과는 다르게 동작한다 (원인: mutator 코드 주석에 명시된 의도적 선택). Route Handler 프록시 패턴은 현재 `src/app/api/uploadthing` (파일 업로드)에만 적용되어 있다. 이 불일치를 해소할지(예: 규칙 문서를 현실에 맞게 수정할지, 실제로 프록시로 전환할지)는 별도 결정이 필요하다.
+> **Note**: 프런트(Vercel)·백엔드(Railway) 도메인이 달라 크로스사이트 쿠키(`SameSite=None; Secure`)로 인증을 주고받는다. 이 때문에 `src/api/mutator/index.ts`는 `NEXT_PUBLIC_API_URL`로 **브라우저/서버에서 백엔드를 직접 호출**하는 것이 의도된 설계다 (`AGENTS.md` API 호출 규칙과 일치, 2026-07-19 정합). Route Handler 프록시 패턴은 `src/app/api/uploadthing` (파일 업로드)에만 적용된다.
 
 ## 카카오맵 흐름
 
