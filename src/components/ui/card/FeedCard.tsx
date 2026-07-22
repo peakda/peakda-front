@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
 import { IconBtn } from '@/components/ui/button/IconBtn'
 import { MoreMenu } from '@/components/ui/button/MoreMenu'
@@ -8,20 +9,24 @@ import { Badge } from '@/components/ui/display/Badge'
 import { EmojiBtn } from '@/components/ui/button/EmojiBtn'
 import { useCarousel } from '@/hooks/useEmblaCarousel'
 import { Indecator } from '@/app/onboarding/_components/Indecator'
+import { useAddReaction, useRemoveReaction } from '@/api/facades/feed'
+import { useReport } from '@/api/facades/report'
+import { reactionToggleAction, buildReportRequest } from '@/lib/utils/feed'
+import type { FeedReactionSummaryResponseMyReactionsItem } from '@/api/facades/generated/peakdaApi.schemas'
 
 interface FlowerTag {
   emoji: string
   label: string
 }
 
-interface Reaction {
-  emoji: string
-  count: number
-  selected?: boolean
-  onClick?: () => void
-}
+// 목록 DTO 에는 리액션 집계가 없어 카운트는 표시하지 않고 버튼만 노출한다.
+const REACTIONS: { type: FeedReactionSummaryResponseMyReactionsItem; emoji: string }[] = [
+  { type: 'HEART', emoji: '❤️' },
+  { type: 'SMILE', emoji: '😀' },
+]
 
 export interface FeedCardProps {
+  recordId: number
   authorName: string
   location: string
   timeAgo: string
@@ -31,7 +36,6 @@ export interface FeedCardProps {
   images: string[]
   flowers: FlowerTag[]
   content: string
-  reactions: Reaction[]
   isOwner?: boolean
   onEdit?: () => void
   onDelete?: () => void
@@ -39,6 +43,7 @@ export interface FeedCardProps {
 }
 
 export function FeedCard({
+  recordId,
   authorName,
   location,
   timeAgo,
@@ -48,13 +53,34 @@ export function FeedCard({
   images,
   flowers,
   content,
-  reactions,
   isOwner = false,
   onEdit,
   onDelete,
   onReport,
 }: FeedCardProps) {
   const { emblaRef, selectedIndex, scrollSnaps, scrollTo } = useCarousel({ loop: true })
+
+  // 내 리액션 상태: 목록 DTO 에 정보가 없어 빈 배열로 시작하고 mutation 응답으로만 갱신한다.
+  const [myReactions, setMyReactions] = useState<FeedReactionSummaryResponseMyReactionsItem[]>([])
+  const addReaction = useAddReaction()
+  const removeReaction = useRemoveReaction()
+  const report = useReport()
+
+  const handleReaction = (type: FeedReactionSummaryResponseMyReactionsItem) => {
+    const mutation = reactionToggleAction(myReactions, type) === 'add' ? addReaction : removeReaction
+    mutation.mutate(
+      { id: recordId, params: { reactionType: type } },
+      { onSuccess: (res) => setMyReactions(res.data.data?.myReactions ?? []) }
+    )
+  }
+
+  const handleReport = () => {
+    if (!window.confirm('이 기록을 신고할까요?')) return
+    report.mutate(
+      { data: buildReportRequest(recordId, 'ETC') },
+      { onSuccess: () => window.alert('신고가 접수되었어요') }
+    )
+  }
 
   return (
     <div className="bg-bg-primary flex flex-col gap-3 px-4 py-4">
@@ -74,7 +100,12 @@ export function FeedCard({
           </div>
         </div>
 
-        <MoreMenu isOwner={isOwner} onEdit={onEdit} onDelete={onDelete} onReport={onReport} />
+        <MoreMenu
+          isOwner={isOwner}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onReport={onReport ?? handleReport}
+        />
       </div>
 
       {/* 이미지 캐러셀 */}
@@ -138,15 +169,14 @@ export function FeedCard({
       {/* 본문 */}
       <p className="text-text-primary text-sm leading-relaxed">{content}</p>
 
-      {/* 반응 버튼 */}
+      {/* 반응 버튼 (카운트 없이 버튼만) */}
       <div className="flex gap-2">
-        {reactions.map((reaction, i) => (
+        {REACTIONS.map(({ type, emoji }) => (
           <EmojiBtn
-            key={i}
-            emoji={reaction.emoji}
-            label={`+${reaction.count}`}
-            selected={reaction.selected}
-            onClick={reaction.onClick}
+            key={type}
+            emoji={emoji}
+            selected={myReactions.includes(type)}
+            onClick={() => handleReaction(type)}
           />
         ))}
       </div>

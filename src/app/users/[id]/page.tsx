@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { MoreHorizontal } from 'lucide-react'
@@ -9,56 +10,98 @@ import { ProfileStats } from '@/app/my/_components/ProfileStats'
 import { InterestFlowerSection } from '@/app/my/_components/InterestFlowerSection'
 import { MyRecordSection } from '@/app/my/_components/MyRecordSection'
 import { FollowButton } from '@/components/ui/button/FollowButton'
-import { useFollowSummary } from '@/api/facades/user-follow'
-
-// 목업: 타 유저의 닉네임/프로필이미지/기록/관심식물 조회 API가 없어 유지한다.
-const INTEREST_FLOWERS = ['동백꽃', '매화', '개나리', '벚꽃', '철쭉']
-
-const USER_FEEDS = [
-  { image: '/images/explore.png', date: 'yy.mm.dd', isPopular: true },
-  { image: '/images/explore.png', date: 'yy.mm.dd', isPopular: true },
-  { image: '/images/explore.png', date: 'yy.mm.dd', isPopular: true },
-  { image: '/images/explore.png', date: 'yy.mm.dd', isPopular: true },
-  { image: '/images/explore.png', date: 'yy.mm.dd', isPopular: true },
-  { image: '/images/explore.png', date: 'yy.mm.dd', isPopular: true },
-]
+import { useUserProfile } from '@/api/facades/user-profile'
+import { useBlockUser, useUnblockUser } from '@/api/facades/user-block'
+import { toProfileStats, toFavoriteFlowerLabels } from '@/lib/utils/userProfile'
+import { toMyRecordThumb } from '@/lib/utils/spotRecordToFeed'
 
 export default function UserProfilePage() {
   const params = useParams<{ id: string }>()
   const userId = Number(params.id)
-  const { data: summary } = useFollowSummary(userId)
+  const { data: profile } = useUserProfile(userId)
+
+  const [menuOpen, setMenuOpen] = useState(false)
+  // 프로필 응답에 차단 여부가 없어 로컬로만 추적한다(초기값 false).
+  const [blocked, setBlocked] = useState(false)
+  const blockMutation = useBlockUser()
+  const unblockMutation = useUnblockUser()
+
+  const handleToggleBlock = () => {
+    setMenuOpen(false)
+    if (blocked) {
+      unblockMutation.mutate({ userId }, { onSuccess: () => setBlocked(false) })
+    } else {
+      blockMutation.mutate({ userId }, { onSuccess: () => setBlocked(true) })
+    }
+  }
+
+  const stats = profile ? toProfileStats(profile.stats) : null
+  const flowers = profile ? toFavoriteFlowerLabels(profile.favoriteCategories) : []
+  const records = (profile?.recordPreview ?? []).map(toMyRecordThumb)
 
   return (
     <div className="bg-bg-primary relative flex min-h-screen w-full flex-col pb-12">
       <div className="h-14">
         <Header
           left={<LeftArrow />}
-          center={<div className="text-[15px] font-medium text-[#000000]">Nickname</div>}
-          right={<MoreHorizontal className="text-icon-secondary h-5 w-5 cursor-pointer" />}
+          center={
+            <div className="text-[15px] font-medium text-[#000000]">{profile?.nickname ?? ''}</div>
+          }
+          right={
+            <div className="relative">
+              <MoreHorizontal
+                className="text-icon-secondary h-5 w-5 cursor-pointer"
+                onClick={() => setMenuOpen((v) => !v)}
+              />
+              {menuOpen && (
+                <div className="absolute top-7 right-0 z-50 w-32 overflow-hidden rounded-lg border border-gray-100 bg-white shadow-md">
+                  <button
+                    type="button"
+                    onClick={handleToggleBlock}
+                    className="w-full px-4 py-3 text-left text-sm text-rose-500"
+                  >
+                    {blocked ? '차단 해제' : '차단하기'}
+                  </button>
+                </div>
+              )}
+            </div>
+          }
         />
       </div>
 
       {/* 프로필 */}
       <div className="flex items-center gap-3 px-4 py-3">
-        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gray-200">
-          <Image src="/icons/person.svg" alt="프로필" width={26} height={26} />
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-200">
+          {profile?.profileImageUrl ? (
+            <Image
+              src={profile.profileImageUrl}
+              alt="프로필"
+              width={56}
+              height={56}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <Image src="/icons/person.svg" alt="프로필" width={26} height={26} />
+          )}
         </div>
-        <span className="text-text-primary flex-1 text-lg font-semibold">Nickname</span>
-        {summary && <FollowButton userId={userId} initialFollowing={summary.following} />}
+        <span className="text-text-primary flex-1 text-lg font-semibold">
+          {profile?.nickname ?? ''}
+        </span>
+        {profile && <FollowButton userId={userId} initialFollowing={profile.following} />}
       </div>
 
-      {/* 통계 — 팔로워/팔로잉 수는 실데이터, 기록 수는 API 부재로 목업 */}
+      {/* 통계 */}
       <ProfileStats
-        recordCount="24"
-        followerCount={String(summary?.followerCount ?? 0)}
-        followingCount={String(summary?.followingCount ?? 0)}
+        recordCount={stats?.recordCount ?? '0'}
+        followerCount={stats?.followerCount ?? '0'}
+        followingCount={stats?.followingCount ?? '0'}
       />
 
       {/* 관심 식물 */}
-      <InterestFlowerSection flowers={INTEREST_FLOWERS} />
+      <InterestFlowerSection flowers={flowers} action="" />
 
       {/* 내 기록 */}
-      <MyRecordSection records={USER_FEEDS} canRecord={false} />
+      <MyRecordSection records={records} count={profile?.stats.recordCount} canRecord={false} />
     </div>
   )
 }
