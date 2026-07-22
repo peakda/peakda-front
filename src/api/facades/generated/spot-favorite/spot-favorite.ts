@@ -285,19 +285,19 @@ export const useUpdateNotify = <TError = unknown,
       > => {
       return useMutation(getUpdateNotifyMutationOptions(options), queryClient);
     }
-    export type listResponse200 = {
+    export type list1Response200 = {
   data: ApiResponseSpotFavoriteListResponse
   status: 200
 }
 
-export type listResponseSuccess = (listResponse200) & {
+export type list1ResponseSuccess = (list1Response200) & {
   headers: Headers;
 };
 ;
 
-export type listResponse = (listResponseSuccess)
+export type list1Response = (list1ResponseSuccess)
 
-export const getListUrl = () => {
+export const getList1Url = () => {
 
 
 
@@ -309,9 +309,9 @@ export const getListUrl = () => {
  * 본인이 찜한 스팟을 최근 찜한 순으로 조회한다.
  * @summary 찜한 스팟 목록
  */
-export const list = async ( options?: RequestInit): Promise<listResponse> => {
+export const list1 = async ( options?: RequestInit): Promise<list1Response> => {
 
-  return customInstance<listResponse>(getListUrl(),
+  return customInstance<list1Response>(getList1Url(),
   {
     ...options,
     method: 'GET'
@@ -324,69 +324,69 @@ export const list = async ( options?: RequestInit): Promise<listResponse> => {
 
 
 
-export const getListQueryKey = () => {
+export const getList1QueryKey = () => {
     return [
     `/api/spots/favorites`
     ] as const;
     }
 
 
-export const getListQueryOptions = <TData = Awaited<ReturnType<typeof list>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getList1QueryOptions = <TData = Awaited<ReturnType<typeof list1>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list1>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getList1QueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof list>>> = ({ signal }) => list({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof list1>>> = ({ signal }) => list1({ signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof list>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof list1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type ListQueryResult = NonNullable<Awaited<ReturnType<typeof list>>>
-export type ListQueryError = unknown
+export type List1QueryResult = NonNullable<Awaited<ReturnType<typeof list1>>>
+export type List1QueryError = unknown
 
 
-export function useList<TData = Awaited<ReturnType<typeof list>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof list>>, TError, TData>> & Pick<
+export function useList1<TData = Awaited<ReturnType<typeof list1>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof list1>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof list>>,
+          Awaited<ReturnType<typeof list1>>,
           TError,
-          Awaited<ReturnType<typeof list>>
+          Awaited<ReturnType<typeof list1>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useList<TData = Awaited<ReturnType<typeof list>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list>>, TError, TData>> & Pick<
+export function useList1<TData = Awaited<ReturnType<typeof list1>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list1>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof list>>,
+          Awaited<ReturnType<typeof list1>>,
           TError,
-          Awaited<ReturnType<typeof list>>
+          Awaited<ReturnType<typeof list1>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useList<TData = Awaited<ReturnType<typeof list>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useList1<TData = Awaited<ReturnType<typeof list1>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list1>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 찜한 스팟 목록
  */
 
-export function useList<TData = Awaited<ReturnType<typeof list>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useList1<TData = Awaited<ReturnType<typeof list1>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list1>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getListQueryOptions(options)
+  const queryOptions = getList1QueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

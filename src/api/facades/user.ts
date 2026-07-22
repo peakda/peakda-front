@@ -2,8 +2,10 @@
 import { getGetCurrentUserQueryKey } from '@/api/facades/generated/auth/auth'
 import {
   deleteProfileImage,
+  getMyPage,
   uploadProfileImage,
   useDeleteProfileImage as useDeleteProfileImageGen,
+  useGetMyPage,
   useUpdateFavoriteCategories as useUpdateFavoriteCategoriesGen,
   useUploadProfileImage as useUploadProfileImageGen,
   withdraw,
@@ -27,10 +29,20 @@ export async function withdrawApi() {
   await withdraw()
 }
 
+// 마이페이지 집계(내 정보 + 통계)
+export async function myPageApi() {
+  const res = await getMyPage()
+  return res.data.data ?? null
+}
+
 // ??? React Query hooks (罹먯떛 / ?곹깭 愿由? ????????????????????????????????????
 
 // mutate({ data: { image } }) ?뺥깭濡??몄텧
 // ?깃났 ???좎? ?뺣낫 罹먯떆 臾댄슚??
+// 마이페이지 집계 조회
+export const useMyPage = () =>
+  useGetMyPage({ query: { select: (res) => res.data.data ?? null } })
+
 export const useUploadProfileImage = () => {
   const queryClient = useQueryClient()
   return useUploadProfileImageGen({
