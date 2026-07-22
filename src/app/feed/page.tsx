@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Header } from '@/components/ui/layout/Header'
 import { Nav } from '@/components/ui/layout/Nav'
@@ -13,6 +14,7 @@ import { toFeedCardProps } from '@/lib/utils/spotRecordToFeed'
 const FEED_CATEGORIES = ['전체', '관심 식물', '팔로잉']
 
 export default function FeedPage() {
+  const router = useRouter()
   const [tab, setTab] = useState(FEED_CATEGORIES[0])
 
   const { data, isLoading } = useFeedList({
@@ -55,7 +57,11 @@ export default function FeedPage() {
       ) : (
         <div className="divide-border-primary divide-y">
           {records.map((record) => (
-            <FeedCard key={record.id} {...toFeedCardProps(record)} />
+            <FeedCard
+              key={record.id}
+              {...toFeedCardProps(record)}
+              onOpen={() => router.push(`/feed/${record.id}`)}
+            />
           ))}
         </div>
       )}

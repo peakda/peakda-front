@@ -9,7 +9,8 @@
 pnpm dev               # 개발 서버
 pnpm typecheck         # 타입 체크
 pnpm lint              # 린트
-pnpm test              # vitest
+pnpm test              # vitest (전체)
+pnpm test <경로>       # 특정 파일만 (예: pnpm test src/lib/utils/feed.test.ts)
 pnpm validate:context  # context 문서 경로 검증 (CI에서도 실행)
 ```
 

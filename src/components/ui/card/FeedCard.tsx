@@ -40,6 +40,7 @@ export interface FeedCardProps {
   onEdit?: () => void
   onDelete?: () => void
   onReport?: () => void
+  onOpen?: () => void
 }
 
 export function FeedCard({
@@ -57,6 +58,7 @@ export function FeedCard({
   onEdit,
   onDelete,
   onReport,
+  onOpen,
 }: FeedCardProps) {
   const { emblaRef, selectedIndex, scrollSnaps, scrollTo } = useCarousel({ loop: true })
 
@@ -82,6 +84,19 @@ export function FeedCard({
     )
   }
 
+  const authorInfo = (
+    <>
+      <div className="flex items-center gap-2">
+        <span className="text-text-primary text-sm font-semibold">{authorName}</span>
+        <span className="text-text-quaternary mt-1 text-xs">{timeAgo}</span>
+      </div>
+      <div className="flex items-center gap-1">
+        <Image src={'./icons/Pin.svg'} alt="지역" width={15} height={15} color="#8C95A4" />
+        <span className="text-text-tertiary mt-1 text-xs">{location}</span>
+      </div>
+    </>
+  )
+
   return (
     <div className="bg-bg-primary flex flex-col gap-3 px-4 py-4">
       {/* 헤더 */}
@@ -89,16 +104,13 @@ export function FeedCard({
         <IconBtn size="md">
           <Image src="/icons/person.svg" alt="프로필" width={16} height={16} />
         </IconBtn>
-        <div className="flex flex-1 flex-col">
-          <div className="flex items-center gap-2">
-            <span className="text-text-primary text-sm font-semibold">{authorName}</span>
-            <span className="text-text-quaternary mt-1 text-xs">{timeAgo}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Image src={'./icons/Pin.svg'} alt="지역" width={15} height={15} color="#8C95A4" />
-            <span className="text-text-tertiary mt-1 text-xs">{location}</span>
-          </div>
-        </div>
+        {onOpen ? (
+          <button type="button" onClick={onOpen} className="flex flex-1 flex-col text-left">
+            {authorInfo}
+          </button>
+        ) : (
+          <div className="flex flex-1 flex-col">{authorInfo}</div>
+        )}
 
         <MoreMenu
           isOwner={isOwner}
