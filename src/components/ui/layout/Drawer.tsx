@@ -2,6 +2,7 @@
 
 import { Drawer as VaulDrawer } from 'vaul'
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import { Button } from '@/components/ui/button/Button'
 import { FilterDrawerContent } from './FilterDrawerContent'
@@ -14,7 +15,16 @@ import { PinList } from '@/components/ui/display/PinList'
 export function Drawer() {
   const { isOpen, type, pinListData, saveSpotData, dateSelectData, closeDrawer, setSnapHeight } =
     useDrawerStore()
+  const router = useRouter()
   const [snap, setSnap] = useState<string | number | null>('400px')
+
+  // 핀 드로어의 '명소 보기' → 해당 스팟 상세로 이동(모든 핀 항목은 한 지도 핀=동일 spotId).
+  // spotId 가 없으면(좌표만 있는 핀) 닫기만 한다.
+  const handleViewSpot = () => {
+    const spotId = pinListData[0]?.spotId
+    closeDrawer()
+    if (spotId != null) router.push(`/spot/${spotId}`)
+  }
 
   useEffect(() => {
     if (isOpen) {
@@ -130,7 +140,7 @@ export function Drawer() {
               variant="filled"
               size="lg"
               className="bg-brand-secondary active:bg-brand-secondary hover:bg-brand-secondary w-full cursor-pointer text-white"
-              onClick={closeDrawer}
+              onClick={handleViewSpot}
             >
               명소 보기
             </Button>

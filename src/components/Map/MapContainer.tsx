@@ -117,6 +117,7 @@ export const MapContainer = () => {
             Badges: item.badge ? [item.badge.displayName] : [],
             isFavorite: false,
             images: item.thumbnailUrl ? [item.thumbnailUrl] : [],
+            spotId: item.spotId,
           }))
         )
         return
@@ -132,6 +133,7 @@ export const MapContainer = () => {
           Badges: f.alt ? [f.alt] : [],
           isFavorite: false,
           images: [f.src],
+          spotId: spot.attractionId,
         }))
       )
     },
