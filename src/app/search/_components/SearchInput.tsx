@@ -1,6 +1,6 @@
 'use client'
-import IconBtn from '@/components/ui/button/IconBtn'
-import Input from '@/components/ui/form/Input'
+import { IconBtn } from '@/components/ui/button/IconBtn'
+import { Input } from '@/components/ui/form/Input'
 import { X } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -15,7 +15,7 @@ interface SearchBarProps {
   onFocus?: () => void
 }
 
-export default function SearchInput({ query, hasQuery, setQuery, isCancle, placeholder = '검색어를 입력하세요.', onFocus }: SearchBarProps) {
+export function SearchInput({ query, hasQuery, setQuery, isCancle, placeholder = '검색어를 입력하세요.', onFocus }: SearchBarProps) {
   const router = useRouter()
   return (
     <div className="flex items-center gap-4 px-4 pt-2 pb-2">

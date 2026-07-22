@@ -3,6 +3,16 @@
 - 서비스명: Peakda — 계절 여행 타이밍 안내 (벚꽃·단풍 등 20여 개 명소 실시간 개화 상태)
 - 패키지 매니저: pnpm · 배포: Vercel
 
+## 자주 쓰는 명령어
+
+```bash
+pnpm dev               # 개발 서버
+pnpm typecheck         # 타입 체크
+pnpm lint              # 린트
+pnpm test              # vitest
+pnpm validate:context  # context 문서 경로 검증 (CI에서도 실행)
+```
+
 ## 작업 원칙
 
 1. **먼저 생각하기** — 가정은 명시, 핵심 정보 없으면 질문, 해석이 여러 개면 모두 제시. 구현 방식만 다르면 옵션 제시 후 가장 단순한 안을 기본값으로 제안.
@@ -11,7 +21,7 @@
 3. **최소 변경** — 꼭 필요한 것만 수정. 안 깨진 코드 리팩토링 금지, 기존 스타일 따름. 내 변경으로 안 쓰게 된 import/변수/함수만 정리.
 4. **목표 기반 실행** — 작업을 검증 가능한 기준으로 변환 (예: 필터 추가 → 마커가 필터링되어야 함). 여러 단계 작업은 계획 먼저 제시.
 
-세부 코딩 규칙(Import, 컴포넌트, 상태 관리, 금지 사항, PR 규칙 등)은 `AGENTS.md` 참고. 디렉터리 구조는 `src/CLAUDE.md`, `public/CLAUDE.md` 참고. 전체 구조는 `ARCHITECTURE.md` 참고.
+세부 코딩 규칙(Import, 컴포넌트, 상태 관리, 금지 사항, PR 규칙 등)은 [AGENTS.md](AGENTS.md) 참고. 디렉터리 구조는 [src/CLAUDE.md](src/CLAUDE.md), [public/CLAUDE.md](public/CLAUDE.md) 참고. 전체 구조는 [ARCHITECTURE.md](ARCHITECTURE.md) 참고.
 
 ## 버그 수정 시 설명
 

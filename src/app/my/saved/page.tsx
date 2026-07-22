@@ -1,8 +1,8 @@
 ﻿'use client'
 
-import Header from '@/components/ui/layout/Header'
-import LeftArrow from '@/components/ui/button/LeftArrow'
-import SpotCard from '@/components/ui/card/SpotCard'
+import { Header } from '@/components/ui/layout/Header'
+import { LeftArrow } from '@/components/ui/button/LeftArrow'
+import { SpotCard } from '@/components/ui/card/SpotCard'
 import { SPOTProps } from '@/app/search/_components/SpotPanel'
 import { SavedSpotEmpty } from '@/app/my/_components/SavedSpotEmpty'
 import { useFavoriteList } from '@/api/facades/spot-favorite'

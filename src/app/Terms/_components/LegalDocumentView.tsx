@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils/cn'
-import type { ContentBlock, LegalDocument, LegalSection } from '../_data/legal-content'
+import type { ContentBlock, LegalDocument, LegalSection } from '@/app/Terms/_data/legal-content'
 
 function NoteBox({ text }: { text: string }) {
   return (

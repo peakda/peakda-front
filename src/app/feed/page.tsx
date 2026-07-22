@@ -1,9 +1,9 @@
 'use client'
 
 import Image from 'next/image'
-import Header from '@/components/ui/layout/Header'
-import Nav from '@/components/ui/layout/Nav'
-import Category from '@/components/ui/category/Category'
+import { Header } from '@/components/ui/layout/Header'
+import { Nav } from '@/components/ui/layout/Nav'
+import { Category } from '@/components/ui/category/Category'
 import { FeedCard } from '@/components/ui/card/FeedCard'
 
 const FEED_CATEGORIES = ['전체', '관심 식물', '팔로잉']

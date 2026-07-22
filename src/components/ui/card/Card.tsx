@@ -2,7 +2,7 @@ import { cn } from '@/lib/utils/cn'
 import { CardProps } from '@/types/types'
 import Image from 'next/image'
 
-export default function Card({
+export function Card({
   variant,
   image,
   title,

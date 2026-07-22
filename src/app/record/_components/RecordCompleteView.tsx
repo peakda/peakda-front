@@ -1,6 +1,6 @@
 import { Check } from 'lucide-react'
-import Header from '@/components/ui/layout/Header'
-import Button from '@/components/ui/button/Button'
+import { Header } from '@/components/ui/layout/Header'
+import { Button } from '@/components/ui/button/Button'
 
 interface RecordCompleteViewProps {
   onGoToMap: () => void

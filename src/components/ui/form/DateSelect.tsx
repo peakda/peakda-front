@@ -12,7 +12,7 @@ interface DateSelectProps {
   errorText?: string
 }
 
-const DateSelect = ({
+export const DateSelect = ({
   placeholder = '날짜를 입력해주세요 (yyyy.mm.dd)',
   value,
   onChange,
@@ -61,4 +61,3 @@ const DateSelect = ({
   )
 }
 
-export default DateSelect

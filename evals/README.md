@@ -11,8 +11,8 @@ AI 에이전트(Claude Code 등)가 이 저장소에서 대표적인 작업을 �
 ## Pass 기준 작성 규칙
 
 - 관찰 가능한 결과로만 쓴다 ("타입 에러 없음", "필터 선택 시 마커 개수가 줄어듦" 등). "코드가 깔끔함" 같은 주관적 기준 금지.
-- 태스크는 실제 반복되는 작업 패턴에서 뽑는다 (신규 태스크 추가 시 `MEMORY.md`의 "자주 하는 작업" 섹션도 함께 확인).
+- 태스크는 실제 반복되는 작업 패턴에서 뽑는다 (신규 태스크 추가 시 [MEMORY.md](../MEMORY.md)의 "자주 하는 작업" 섹션도 함께 확인).
 
 ## 회귀 확인
 
-CLAUDE.md/AGENTS.md/ARCHITECTURE.md 등 context 문서를 크게 바꾼 뒤에는 태스크 2-3개를 재실행해 pass-rate가 떨어지지 않았는지 확인한다.
+[CLAUDE.md](../CLAUDE.md), [AGENTS.md](../AGENTS.md), [ARCHITECTURE.md](../ARCHITECTURE.md) 등 context 문서를 크게 바꾼 뒤에는 태스크 2-3개를 재실행해 pass-rate가 떨어지지 않았는지 확인한다.

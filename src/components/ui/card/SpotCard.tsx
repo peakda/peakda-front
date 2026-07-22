@@ -1,8 +1,8 @@
 import { Bell } from 'lucide-react'
-import HeartBtn from '../button/HeartBtn'
-import IconBtn from '../button/IconBtn'
-import { Badge } from '../display/Badge'
-import Tag from '../display/Tag'
+import { HeartBtn } from '@/components/ui/button/HeartBtn'
+import { IconBtn } from '@/components/ui/button/IconBtn'
+import { Badge } from '@/components/ui/display/Badge'
+import { Tag } from '@/components/ui/display/Tag'
 import { cn } from '@/lib/utils/cn'
 import { SPOTProps } from '@/app/search/_components/SpotPanel'
 
@@ -13,7 +13,7 @@ interface Props {
   initialFavorite?: boolean
 }
 
-export default function SpotCard({ spot, favoriteSpotId, initialFavorite = false }: Props) {
+export function SpotCard({ spot, favoriteSpotId, initialFavorite = false }: Props) {
   return (
     <div key={spot.id} className="flex items-center gap-3 px-4 py-3">
       <div className="relative h-20 w-20 shrink-0">

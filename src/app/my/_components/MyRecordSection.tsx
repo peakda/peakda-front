@@ -1,6 +1,6 @@
 import { Images } from 'lucide-react'
-import Button from '@/components/ui/button/Button'
-import IconBtn from '@/components/ui/button/IconBtn'
+import { Button } from '@/components/ui/button/Button'
+import { IconBtn } from '@/components/ui/button/IconBtn'
 import { SectionHeader } from '@/app/my/_components/SectionHeader'
 import { MyFeed } from '@/app/my/_components/MyFeed'
 

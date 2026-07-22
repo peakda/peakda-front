@@ -1,8 +1,8 @@
-import LeftArrow from '@/components/ui/button/LeftArrow'
-import Header from '@/components/ui/layout/Header'
+import { LeftArrow } from '@/components/ui/button/LeftArrow'
+import { Header } from '@/components/ui/layout/Header'
 import { notFound } from 'next/navigation'
-import { LEGAL_CONTENT, type LegalSlug } from '../_data/legal-content'
-import { LegalDocumentView } from '../_components/LegalDocumentView'
+import { LEGAL_CONTENT, type LegalSlug } from '@/app/Terms/_data/legal-content'
+import { LegalDocumentView } from '@/app/Terms/_components/LegalDocumentView'
 
 interface PageProps {
   params: Promise<{ slug: string }>

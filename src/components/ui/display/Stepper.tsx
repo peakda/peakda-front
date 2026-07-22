@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils/cn'
-import { CheckIcon } from '../icon/CheckIcon'
+import { CheckIcon } from '@/components/ui/icon/CheckIcon'
 
 interface StepperProps {
   steps: number

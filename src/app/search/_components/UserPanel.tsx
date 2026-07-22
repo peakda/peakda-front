@@ -1,5 +1,5 @@
-import IconBtn from '@/components/ui/button/IconBtn'
-import UserList from '@/app/search/_components/UserList'
+import { IconBtn } from '@/components/ui/button/IconBtn'
+import { UserList } from '@/app/search/_components/UserList'
 import Image from 'next/image'
 
 export interface UserProps {

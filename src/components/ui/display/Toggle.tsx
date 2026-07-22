@@ -7,7 +7,7 @@ interface Props {
   onChange?: (isOn: boolean) => void
 }
 
-export default function Toggle({ initialStatus, onChange }: Props) {
+export function Toggle({ initialStatus, onChange }: Props) {
   const [isOn, setIsOn] = useState(initialStatus)
   const onToggle = () => {
     setIsOn((prev) => {

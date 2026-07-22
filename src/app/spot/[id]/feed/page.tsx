@@ -1,8 +1,8 @@
 'use client'
 
 import { useParams } from 'next/navigation'
-import Header from '@/components/ui/layout/Header'
-import LeftArrow from '@/components/ui/button/LeftArrow'
+import { Header } from '@/components/ui/layout/Header'
+import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { FeedCard } from '@/components/ui/card/FeedCard'
 import { useSpotRecordsBySpot } from '@/api/facades/spot-record'
 import { useSpotDetail } from '@/api/facades/spot'

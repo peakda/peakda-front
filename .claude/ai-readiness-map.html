@@ -157,8 +157,8 @@
         gap: 6px;
         padding: 4px 10px;
         border-radius: 999px;
-        background: var(--red-soft);
-        color: var(--red);
+        background: var(--green-soft);
+        color: var(--green);
         font-size: 12px;
         font-weight: 600;
         font-family: "JetBrains Mono", monospace;
@@ -168,7 +168,7 @@
         width: 6px;
         height: 6px;
         border-radius: 999px;
-        background: var(--red);
+        background: var(--green);
       }
 
       .score-hero .desc {
@@ -424,10 +424,10 @@
       }
 
       .panel-risk .panel-head {
-        background: var(--red-soft);
+        background: var(--amber-soft);
       }
       .panel-risk .panel-head h3 {
-        color: var(--red);
+        color: var(--amber);
       }
 
       .panel-list {
@@ -577,13 +577,13 @@
           <div class="eyebrow">레포지토리 감사 · AI 준비도 · v2 루브릭</div>
           <h1>Peakda — AI 준비도 지도</h1>
           <div class="sub">
-            7개 카테고리 채점 · 구조 지도 · ROI 우선순위 액션
+            7개 카테고리 채점 · 구조 지도 · ROI 우선순위 액션 · Phase 1-3 + B/C 문서 보강 반영
           </div>
         </div>
         <div class="header-meta">
           <div>점수 측정 <strong>2026-07-19</strong></div>
           <div>브랜치 <strong>feat/10</strong></div>
-          <div>모듈 <strong>2</strong> · 컨텍스트 파일 <strong>3</strong></div>
+          <div>모듈 <strong>2</strong> · 컨텍스트 파일 <strong>6</strong></div>
         </div>
       </header>
 
@@ -591,34 +591,33 @@
         <div class="score-hero">
           <div class="label">AI 준비도 지수</div>
           <div class="value">
-            <span class="num">10</span><span class="denom">/ 100</span>
+            <span class="num">81</span><span class="denom">/ 100</span>
           </div>
           <div class="grade-row">
             <span class="grade-badge">
-              <span class="grade-dot"></span> AI-Hostile · 에이전트 비친화
+              <span class="grade-dot"></span> AI-Ready
             </span>
           </div>
           <div class="desc">
-            7개 카테고리 · 가중치 차등 (A 15 · B 20 · C 20 · D 15 · E 15
-            · F 10 · G 5). 가장 약한 영역은 <strong>A AI 탐색 & 커버리지
-            (0/15)</strong> 와 <strong>C 암묵지 외부화 (0/20)</strong> —
-            루트 <code>CLAUDE.md</code>는 있지만 <code>public</code>,
-            <code>src</code> 모듈 자체에는 context 문서가 없고,
-            MEMORY.md / ADR 도 부재.
+            10점 → 61점 → <strong>81점</strong>으로 상승 (AI-Hostile → AI-Ready). A는 만점,
+            B/C도 quick command·마크다운 링크·Overview/Common patterns 섹션 보강으로 크게 상승.
+            남은 약점은 <strong>G 에이전트 성과 측정 (3/5)</strong>과
+            <strong>D 의존성 매핑 (10/15)</strong> — telemetry 단서 없음, mermaid는 ARCHITECTURE.md에
+            있지만 스코어러가 CLAUDE.md/AGENTS.md/README.md만 스캔해서 미인식(실제 문제는 아님).
           </div>
           <hr />
           <div class="mini-stats">
             <div class="mini-stat">
               <div class="k">컨텍스트 보유 모듈</div>
-              <div class="v" style="color: var(--red)">0 / 2</div>
+              <div class="v" style="color: var(--green)">2 / 2</div>
             </div>
             <div class="mini-stat">
               <div class="k">300줄 초과 파일</div>
-              <div class="v">13</div>
+              <div class="v">11 <span style="font-size: 11px; color: var(--text-3);">(13→11)</span></div>
             </div>
             <div class="mini-stat">
               <div class="k">컨텍스트 파일</div>
-              <div class="v">3</div>
+              <div class="v">6 <span style="font-size: 11px; color: var(--text-3);">(3→6)</span></div>
             </div>
           </div>
         </div>
@@ -640,13 +639,13 @@
             <div>
               <div class="title">AI 탐색 & 커버리지</div>
               <div class="sub">
-                핵심 모듈 2개(<code>public</code>, <code>src</code>) 모두 자체 context 미보유
+                <code>public</code>, <code>src</code> 모두 자체 CLAUDE.md 보유 — 만점
               </div>
             </div>
-            <div class="bar bar-bad">
-              <span style="width: 0%"></span>
+            <div class="bar bar-good">
+              <span style="width: 100%"></span>
             </div>
-            <div class="num">0/15</div>
+            <div class="num">15/15</div>
           </div>
 
           <div class="rule-row">
@@ -654,20 +653,20 @@
             <div>
               <div class="title">컨텍스트 문서 품질</div>
               <div class="sub">
-                CLAUDE.md 161줄로 길이 초과 · quick command/cross-ref 부족
+                quick command 블록 + 마크다운 링크 추가로 대폭 상승. 남은 건 key files·non-obvious 마커 소폭 부족
               </div>
               <div class="subitems">
-                <span>B1 conciseness 1</span>
-                <span>B2 quick cmd 0</span>
-                <span>B3 key files 0</span>
-                <span>B4 non-obvious 0</span>
-                <span>B5 cross-ref 0</span>
+                <span>B1 conciseness 4</span>
+                <span>B2 quick cmd 3</span>
+                <span>B3 key files 2</span>
+                <span>B4 non-obvious 2</span>
+                <span>B5 cross-ref 4</span>
               </div>
             </div>
-            <div class="bar bar-bad">
-              <span style="width: 5%"></span>
+            <div class="bar bar-good">
+              <span style="width: 75%"></span>
             </div>
-            <div class="num">1/20</div>
+            <div class="num">15/20</div>
           </div>
 
           <div class="rule-row">
@@ -675,13 +674,13 @@
             <div>
               <div class="title">암묵지 외부화</div>
               <div class="sub">
-                MEMORY.md / ADR 부재 · dependency·modification pattern 섹션 없음
+                public/src CLAUDE.md에 Overview·Common patterns 섹션 추가로 거의 만점
               </div>
             </div>
-            <div class="bar bar-bad">
-              <span style="width: 0%"></span>
+            <div class="bar bar-good">
+              <span style="width: 90%"></span>
             </div>
-            <div class="num">0/20</div>
+            <div class="num">18/20</div>
           </div>
 
           <div class="rule-row">
@@ -689,13 +688,13 @@
             <div>
               <div class="title">모듈 간 의존성 매핑</div>
               <div class="sub">
-                pnpm workspace 구조는 감지됨 · ARCHITECTURE.md / mermaid 부재
+                ARCHITECTURE.md 신설로 상승 · mermaid는 코드블록 안에 있어 스코어러가 미인식
               </div>
             </div>
-            <div class="bar bar-bad">
-              <span style="width: 13%"></span>
+            <div class="bar bar-warn">
+              <span style="width: 67%"></span>
             </div>
-            <div class="num">2/15</div>
+            <div class="num">10/15</div>
           </div>
 
           <div class="rule-row">
@@ -703,19 +702,19 @@
             <div>
               <div class="title">검증 & 품질 게이트</div>
               <div class="sub">
-                CI workflow · PR template 존재 · husky/evals 부재
+                CI context 검증 스텝 + evals/ 추가로 상승 · hallucinated path 0건
               </div>
               <div class="subitems">
-                <span>E1 ref accuracy 2</span>
+                <span>E1 ref accuracy 5</span>
                 <span>E2 critic review 2</span>
                 <span>E3 task validation 3</span>
-                <span>E4 prompt tests 0</span>
+                <span>E4 prompt tests 2</span>
               </div>
             </div>
-            <div class="bar bar-bad">
-              <span style="width: 47%"></span>
+            <div class="bar bar-good">
+              <span style="width: 80%"></span>
             </div>
-            <div class="num">7/15</div>
+            <div class="num">12/15</div>
           </div>
 
           <div class="rule-row">
@@ -723,13 +722,13 @@
             <div>
               <div class="title">신선도 & 자가 유지보수</div>
               <div class="sub">
-                CI에 context validation 없음 · pre-commit/pre-push path 검증 없음
+                CI validation workflow 가동 · pre-push hook은 아직 없음
               </div>
             </div>
-            <div class="bar bar-bad">
-              <span style="width: 0%"></span>
+            <div class="bar bar-good">
+              <span style="width: 80%"></span>
             </div>
-            <div class="num">0/10</div>
+            <div class="num">8/10</div>
           </div>
 
           <div class="rule-row">
@@ -737,13 +736,13 @@
             <div>
               <div class="title">에이전트 성과 측정</div>
               <div class="sub">
-                evals/benchmarks 부재 · telemetry 단서 없음
+                evals/ 디렉터리 신설 · telemetry 단서는 아직 없음
               </div>
             </div>
-            <div class="bar bar-bad">
-              <span style="width: 0%"></span>
+            <div class="bar bar-warn">
+              <span style="width: 60%"></span>
             </div>
-            <div class="num">0/5</div>
+            <div class="num">3/5</div>
           </div>
         </div>
       </section>
@@ -753,7 +752,7 @@
           <div>
             <h2>구조 지도</h2>
             <div class="sub">
-              노드 = 디렉터리 · 카드 내부 수치는 파일 길이(라인) · 300줄 초과 파일 강조
+              굵은 테두리 = CLAUDE.md 보유 · 카드 내부 수치는 파일 길이(라인)
             </div>
           </div>
           <div class="map-legend">
@@ -769,7 +768,7 @@
                 class="legend-square"
                 style="background: var(--red-soft); border: 1px solid var(--red)"
               ></span>
-              500줄 초과
+              500줄 초과 (orval 생성, 분할 안 함)
             </span>
             <span
               ><span
@@ -782,198 +781,165 @@
         </div>
 
         <div class="map-body">
-          <svg viewBox="0 0 1180 560" xmlns="http://www.w3.org/2000/svg">
+          <svg viewBox="0 0 1180 520" xmlns="http://www.w3.org/2000/svg">
             <g class="grid-bg">
               <path d="M0,80 H1180" />
               <path d="M0,160 H1180" />
               <path d="M0,240 H1180" />
               <path d="M0,320 H1180" />
               <path d="M0,400 H1180" />
-              <path d="M0,480 H1180" />
-              <path d="M290,0 V560" />
-              <path d="M590,0 V560" />
-              <path d="M890,0 V560" />
+              <path d="M290,0 V520" />
+              <path d="M590,0 V520" />
+              <path d="M890,0 V520" />
             </g>
 
-            <text
-              x="145"
-              y="32"
-              text-anchor="middle"
-              class="node-meta"
-              style="font-size: 11px; fill: var(--text-2); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;"
-            >
-              public/ (1 file · no context)
+            <text x="145" y="24" text-anchor="middle" class="node-meta" style="font-size: 11px; fill: var(--text-2); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;">
+              루트 문서
             </text>
-            <text
-              x="440"
-              y="32"
-              text-anchor="middle"
-              class="node-meta"
-              style="font-size: 11px; fill: var(--text-2); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;"
-            >
-              src/app
+            <text x="440" y="24" text-anchor="middle" class="node-meta" style="font-size: 11px; fill: var(--text-2); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;">
+              public/ · src/
             </text>
-            <text
-              x="740"
-              y="32"
-              text-anchor="middle"
-              class="node-meta"
-              style="font-size: 11px; fill: var(--text-2); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;"
-            >
-              src/api/facades/generated
+            <text x="740" y="24" text-anchor="middle" class="node-meta" style="font-size: 11px; fill: var(--text-2); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;">
+              src/api/facades/generated (orval)
             </text>
-            <text
-              x="1035"
-              y="32"
-              text-anchor="middle"
-              class="node-meta"
-              style="font-size: 11px; fill: var(--text-2); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;"
-            >
-              src/components
+            <text x="1035" y="24" text-anchor="middle" class="node-meta" style="font-size: 11px; fill: var(--text-2); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;">
+              src/app/record (분할 완료)
             </text>
 
-            <!-- ROOT CLAUDE.md -->
-            <g transform="translate(440,54)">
-              <rect class="node-card accent" width="300" height="60" rx="8" />
-              <circle cx="22" cy="20" r="12" class="claude-ring" />
-              <circle cx="22" cy="20" r="5" class="claude-dot" />
-              <text x="42" y="24" class="node-title">CLAUDE.md (root)</text>
-              <text x="42" y="40" class="node-meta">
-                코딩 규칙 · 프로젝트 규칙 표 · 161 lines (conciseness 초과)
-              </text>
-              <text x="284" y="24" text-anchor="end" class="node-kpi" style="fill: var(--accent)">
-                루트만
-              </text>
+            <!-- 루트 문서 클러스터 -->
+            <g transform="translate(20,50)">
+              <rect class="node-card accent" width="250" height="50" rx="8" />
+              <circle cx="20" cy="18" r="10" class="claude-ring" />
+              <circle cx="20" cy="18" r="4" class="claude-dot" />
+              <text x="38" y="22" class="node-title">CLAUDE.md</text>
+              <text x="38" y="38" class="node-meta">26줄 · 작업 원칙 압축본</text>
+            </g>
+            <g transform="translate(20,108)">
+              <rect class="node-card" width="250" height="46" rx="8" />
+              <text x="16" y="22" class="node-title">AGENTS.md</text>
+              <text x="16" y="38" class="node-meta">세부 코딩 규칙 (API 호출 규칙 갱신됨)</text>
+            </g>
+            <g transform="translate(20,162)">
+              <rect class="node-card" width="250" height="46" rx="8" />
+              <text x="16" y="22" class="node-title">ARCHITECTURE.md</text>
+              <text x="16" y="38" class="node-meta">API 흐름 + 인증 + 카카오맵 mermaid</text>
+            </g>
+            <g transform="translate(20,216)">
+              <rect class="node-card" width="250" height="46" rx="8" />
+              <text x="16" y="22" class="node-title">MEMORY.md</text>
+              <text x="16" y="38" class="node-meta">결정 이유 · 자주 하는 작업</text>
+            </g>
+            <g transform="translate(20,270)">
+              <rect class="node-card" width="250" height="46" rx="8" />
+              <text x="16" y="22" class="node-title">evals/</text>
+              <text x="16" y="38" class="node-meta">태스크 3개 + pass 기준 + 결과 로그</text>
             </g>
 
-            <!-- public/ column: no context -->
-            <g transform="translate(20,150)">
-              <rect class="node-card" width="250" height="90" rx="8" />
-              <text x="16" y="26" class="node-title">public/</text>
-              <text x="16" y="44" class="node-meta">
-                정적 에셋 + prompt 문서 4개
-              </text>
-              <text x="16" y="62" class="node-meta" style="fill: var(--red); font-weight: 600">
-                자체 CLAUDE.md 없음
-              </text>
+            <!-- public / src 모듈 -->
+            <g transform="translate(320,50)">
+              <rect class="node-card accent" width="250" height="60" rx="8" />
+              <circle cx="20" cy="20" r="10" class="claude-ring" />
+              <circle cx="20" cy="20" r="4" class="claude-dot" />
+              <text x="38" y="24" class="node-title">public/CLAUDE.md</text>
+              <text x="38" y="40" class="node-meta">에셋 구성 + prompt 문서 안내</text>
             </g>
-
-            <!-- src/app -->
-            <g transform="translate(320,150)">
-              <rect class="node-card" width="250" height="150" rx="8" />
-              <text x="16" y="24" class="node-title">src/app</text>
-              <text x="16" y="40" class="node-meta">
-                Next.js App Router · 자체 context 없음
-              </text>
-
-              <g transform="translate(16,52)">
-                <rect class="warm" width="218" height="18" rx="3" />
-                <text x="8" y="13" class="node-meta" style="fill: var(--amber); font-weight:600">
-                  Terms/_data/legal-content.ts
-                </text>
-                <text x="210" y="13" text-anchor="end" class="node-meta" style="fill: var(--amber); font-weight:600">
-                  817
-                </text>
-              </g>
-
-              <g transform="translate(16,74)">
-                <rect class="warm" width="218" height="18" rx="3" />
-                <text x="8" y="13" class="node-meta" style="fill: var(--amber); font-weight:600">
-                  record/page.tsx
-                </text>
-                <text x="210" y="13" text-anchor="end" class="node-meta" style="fill: var(--amber); font-weight:600">
-                  600
-                </text>
+            <g transform="translate(320,122)">
+              <rect class="node-card accent" width="250" height="60" rx="8" />
+              <circle cx="20" cy="20" r="10" class="claude-ring" />
+              <circle cx="20" cy="20" r="4" class="claude-dot" />
+              <text x="38" y="24" class="node-title">src/CLAUDE.md</text>
+              <text x="38" y="40" class="node-meta">디렉터리 맵 + 데이터 흐름 + god file 방침</text>
+            </g>
+            <g transform="translate(320,194)">
+              <rect class="node-card" width="250" height="46" rx="8" />
+              <text x="16" y="22" class="node-title">src/components/ui/layout</text>
+              <g transform="translate(0,26)">
+                <rect class="warm" width="250" height="16" rx="3" />
+                <text x="8" y="12" class="node-meta" style="fill: var(--amber); font-weight:600">FilterDrawerContent.tsx</text>
+                <text x="242" y="12" text-anchor="end" class="node-meta" style="fill: var(--amber); font-weight:600">303</text>
               </g>
             </g>
 
-            <!-- src/api/facades/generated -->
-            <g transform="translate(620,150)">
-              <rect class="node-card" width="250" height="220" rx="8" />
-              <text x="16" y="24" class="node-title">src/api/facades/generated</text>
-              <text x="16" y="40" class="node-meta">
-                orval 자동생성 API 클라이언트
-              </text>
+            <!-- generated (분할 안 함) -->
+            <g transform="translate(620,50)">
+              <rect class="node-card" width="250" height="330" rx="8" stroke-dasharray="4 3" />
+              <text x="16" y="24" class="node-title">generated/ (수정 금지)</text>
+              <text x="16" y="40" class="node-meta">orval tags-split · 공통 schemas는 미분할</text>
 
               <g transform="translate(16,52)">
                 <rect class="hot" width="218" height="18" rx="3" />
-                <text x="8" y="13" class="node-meta" style="fill: var(--red); font-weight:600">
-                  peakdaApi.schemas.ts
-                </text>
-                <text x="210" y="13" text-anchor="end" class="node-meta" style="fill: var(--red); font-weight:600">
-                  2056
-                </text>
+                <text x="8" y="13" class="node-meta" style="fill: var(--red); font-weight:600">peakdaApi.schemas.ts</text>
+                <text x="210" y="13" text-anchor="end" class="node-meta" style="fill: var(--red); font-weight:600">2056</text>
               </g>
               <g transform="translate(16,74)">
                 <rect class="hot" width="218" height="18" rx="3" />
-                <text x="8" y="13" class="node-meta" style="fill: var(--red); font-weight:600">
-                  spot-record/spot-record.ts
-                </text>
-                <text x="210" y="13" text-anchor="end" class="node-meta" style="fill: var(--red); font-weight:600">
-                  810
-                </text>
+                <text x="8" y="13" class="node-meta" style="fill: var(--red); font-weight:600">spot-record/spot-record.ts</text>
+                <text x="210" y="13" text-anchor="end" class="node-meta" style="fill: var(--red); font-weight:600">810</text>
               </g>
               <g transform="translate(16,96)">
                 <rect class="hot" width="218" height="18" rx="3" />
-                <text x="8" y="13" class="node-meta" style="fill: var(--red); font-weight:600">
-                  auth/auth.ts
-                </text>
-                <text x="210" y="13" text-anchor="end" class="node-meta" style="fill: var(--red); font-weight:600">
-                  606
-                </text>
+                <text x="8" y="13" class="node-meta" style="fill: var(--red); font-weight:600">auth/auth.ts</text>
+                <text x="210" y="13" text-anchor="end" class="node-meta" style="fill: var(--red); font-weight:600">606</text>
               </g>
               <g transform="translate(16,118)">
                 <rect class="hot" width="218" height="18" rx="3" />
-                <text x="8" y="13" class="node-meta" style="fill: var(--red); font-weight:600">
-                  user-follow/user-follow.ts
-                </text>
-                <text x="210" y="13" text-anchor="end" class="node-meta" style="fill: var(--red); font-weight:600">
-                  574
-                </text>
+                <text x="8" y="13" class="node-meta" style="fill: var(--red); font-weight:600">user-follow/user-follow.ts</text>
+                <text x="210" y="13" text-anchor="end" class="node-meta" style="fill: var(--red); font-weight:600">574</text>
               </g>
               <g transform="translate(16,140)">
                 <rect class="warm" width="218" height="18" rx="3" />
-                <text x="8" y="13" class="node-meta" style="fill: var(--amber); font-weight:600">
-                  spot-favorite/spot-favorite.ts
-                </text>
-                <text x="210" y="13" text-anchor="end" class="node-meta" style="fill: var(--amber); font-weight:600">
-                  400
-                </text>
+                <text x="8" y="13" class="node-meta" style="fill: var(--amber); font-weight:600">spot-favorite/spot-favorite.ts</text>
+                <text x="210" y="13" text-anchor="end" class="node-meta" style="fill: var(--amber); font-weight:600">400</text>
               </g>
               <g transform="translate(16,162)">
                 <rect fill="var(--grid)" width="218" height="18" rx="3" />
-                <text x="8" y="13" class="node-meta" style="fill: var(--text-2)">
-                  seasonal-bloom · search · user · spot · plant
-                </text>
-                <text x="210" y="13" text-anchor="end" class="node-meta" style="fill: var(--text-2)">
-                  5 more
-                </text>
+                <text x="8" y="13" class="node-meta" style="fill: var(--text-2)">seasonal-bloom · search · user · spot · plant</text>
+                <text x="210" y="13" text-anchor="end" class="node-meta" style="fill: var(--text-2)">5 more</text>
+              </g>
+              <g transform="translate(16,190)">
+                <rect fill="var(--accent-soft)" width="218" height="30" rx="3" />
+                <text x="8" y="13" class="node-meta" style="fill: var(--accent); font-weight:600">orval 8.10 확인 결과:</text>
+                <text x="8" y="26" class="node-meta" style="fill: var(--accent); font-weight:600">tags-split도 schemas 미분할</text>
               </g>
             </g>
 
-            <!-- src/components -->
-            <g transform="translate(920,150)">
-              <rect class="node-card" width="240" height="90" rx="8" />
-              <text x="16" y="24" class="node-title">src/components</text>
-              <text x="16" y="40" class="node-meta">
-                ui / layout · 자체 context 없음
-              </text>
+            <!-- record 분할 결과 -->
+            <g transform="translate(920,50)">
+              <rect class="node-card" width="240" height="330" rx="8" />
+              <text x="16" y="24" class="node-title">app/record/</text>
+              <text x="16" y="40" class="node-meta">603줄 페이지 → orchestrator + 4 view</text>
+
               <g transform="translate(16,52)">
-                <rect class="warm" width="208" height="18" rx="3" />
-                <text x="8" y="13" class="node-meta" style="fill: var(--amber); font-weight:600">
-                  layout/FilterDrawerContent.tsx
-                </text>
-                <text x="200" y="13" text-anchor="end" class="node-meta" style="fill: var(--amber); font-weight:600">
-                  303
-                </text>
+                <rect fill="var(--green-soft)" width="208" height="18" rx="3" />
+                <text x="8" y="13" class="node-meta" style="fill: var(--green); font-weight:600">page.tsx (state)</text>
+                <text x="200" y="13" text-anchor="end" class="node-meta" style="fill: var(--green); font-weight:600">248</text>
+              </g>
+              <g transform="translate(16,74)">
+                <rect fill="var(--grid)" width="208" height="18" rx="3" />
+                <text x="8" y="13" class="node-meta" style="fill: var(--text-2)">LocationStepForm.tsx</text>
+                <text x="200" y="13" text-anchor="end" class="node-meta" style="fill: var(--text-2)">213</text>
+              </g>
+              <g transform="translate(16,96)">
+                <rect fill="var(--grid)" width="208" height="18" rx="3" />
+                <text x="8" y="13" class="node-meta" style="fill: var(--text-2)">DetailsStepForm.tsx</text>
+                <text x="200" y="13" text-anchor="end" class="node-meta" style="fill: var(--text-2)">178</text>
+              </g>
+              <g transform="translate(16,118)">
+                <rect fill="var(--grid)" width="208" height="18" rx="3" />
+                <text x="8" y="13" class="node-meta" style="fill: var(--text-2)">LocationSearchView.tsx</text>
+                <text x="200" y="13" text-anchor="end" class="node-meta" style="fill: var(--text-2)">97</text>
+              </g>
+              <g transform="translate(16,140)">
+                <rect fill="var(--grid)" width="208" height="18" rx="3" />
+                <text x="8" y="13" class="node-meta" style="fill: var(--text-2)">RecordCompleteView.tsx</text>
+                <text x="200" y="13" text-anchor="end" class="node-meta" style="fill: var(--text-2)">41</text>
+              </g>
+              <g transform="translate(16,168)">
+                <rect fill="var(--green-soft)" width="208" height="30" rx="3" />
+                <text x="8" y="13" class="node-meta" style="fill: var(--green); font-weight:600">Playwright 스모크 테스트</text>
+                <text x="8" y="26" class="node-meta" style="fill: var(--green); font-weight:600">렌더 확인 · 콘솔 에러 0건</text>
               </g>
             </g>
-
-            <!-- edges: root -> public, src children (plain, no accent = no module claude.md) -->
-            <path class="edge edge-dash" d="M480,114 C 300,140 250,140 145,150" />
-            <path class="edge edge-dash" d="M540,114 C 480,140 450,140 445,150" />
-            <path class="edge edge-dash" d="M620,114 C 680,140 740,140 745,150" />
-            <path class="edge edge-dash" d="M700,114 C 850,140 1000,140 1040,150" />
           </svg>
         </div>
       </section>
@@ -981,44 +947,53 @@
       <div class="findings">
         <section class="panel panel-strength">
           <div class="panel-head">
-            <h3>강점</h3>
+            <h3>강점 (Phase 1-3 반영)</h3>
             <span class="count">유지할 것들</span>
           </div>
           <ul class="panel-list">
             <li>
               <div class="head">
-                <span class="tag tag-rule">Cat E</span>
-                CI workflow + PR template 존재
+                <span class="tag tag-rule">Cat A · 만점</span>
+                public/src 모두 CLAUDE.md 보유 (0/15 → 15/15)
               </div>
               <div class="note">
-                <code>.github/</code>에 CI workflow와 PR 템플릿이 있어 최소한의 리뷰·검증 게이트가 작동 중.
+                핵심 모듈 커버리지 100%. 새 모듈 추가 시 이 패턴을 유지할 것.
               </div>
             </li>
             <li>
               <div class="head">
-                <span class="tag tag-rule">Cat B</span>
-                루트 CLAUDE.md에 상세한 코딩 규칙 보유
+                <span class="tag tag-rule">Cat E</span>
+                CI에 context path 검증 + evals/ 태스크 3개
               </div>
               <div class="note">
-                Import 규칙 · 컴포넌트 컨벤션 · React/Next.js 원칙 등이 표로 명확히 정리되어 있음 (다만 module 단위로는 미전파).
+                <code>pnpm validate:context</code>가 Lint 이전에 실행되어 hallucinated path를 머지 전에 차단.
               </div>
             </li>
             <li>
               <div class="head">
                 <span class="tag tag-rule">Cat D</span>
-                pnpm workspace 구조 감지됨
+                ARCHITECTURE.md + MEMORY.md로 실제 아키텍처 정합
               </div>
               <div class="note">
-                <code>pnpm-workspace.yaml</code> 존재 — 향후 ARCHITECTURE.md 작성 시 구조 기반으로 삼을 수 있음.
+                API 직접 호출 방식과 AGENTS.md 규칙 간 불일치를 발견해 문서를 현실에 맞게 수정.
               </div>
             </li>
             <li>
               <div class="head">
-                <span class="tag tag-rule">Cat E1</span>
-                컨텍스트 내 인용 경로 0건, hallucinated path 0건
+                <span class="tag tag-rule">Cat B</span>
+                record/page.tsx 603줄 → 5개 파일로 분할, 동작 검증
               </div>
               <div class="note">
-                CLAUDE.md/AGENTS.md가 구체 파일 경로를 인용하지 않아 "깨진 링크"는 없음 — 다만 경로 인용 자체가 없다는 뜻이라 B3 개선 시 주의 필요.
+                상태는 parent에 유지하고 view만 분리 — typecheck·lint·Playwright 스모크 테스트로 확인.
+              </div>
+            </li>
+            <li>
+              <div class="head">
+                <span class="tag tag-rule">Cat B/C</span>
+                quick command 블록 + 마크다운 링크 + Overview/Common patterns 섹션 보강
+              </div>
+              <div class="note">
+                B 5→15, C 8→18로 상승. README.md도 빈 파일에서 실제 시작 가이드로 채움.
               </div>
             </li>
           </ul>
@@ -1026,78 +1001,53 @@
 
         <section class="panel panel-risk">
           <div class="panel-head">
-            <h3>최우선 ROI 액션</h3>
+            <h3>남은 ROI 액션</h3>
             <span class="count">우선순위 정렬</span>
           </div>
           <ul class="panel-list">
             <li>
               <div class="head">
-                <span class="tag tag-rule" style="background: var(--red-soft); color: var(--red)">Cat A · S</span>
-                public, src 2개 핵심 모듈에 CLAUDE.md 신설
-              </div>
-              <div class="note">
-                <strong>Effort 1.0 hr · Impact 9/10.</strong>
-                task당 ~3 min × ~5 task/일 절감 → 모듈 1개당 주 1-2 hr 회수.
-              </div>
-            </li>
-            <li>
-              <div class="head">
-                <span class="tag tag-rule" style="background: var(--red-soft); color: var(--red)">Cat F · S</span>
-                CI 또는 pre-push hook에 context path 검증 추가
-              </div>
-              <div class="note">
-                <strong>Effort 1.0 hr · Impact 8/10.</strong>
-                stale reference를 코드 머지 시점에 차단 — 회귀 방지.
-              </div>
-            </li>
-            <li>
-              <div class="head">
-                <span class="tag tag-rule">Cat B · M</span>
-                과도한 CLAUDE.md를 25-35 lines로 압축
-              </div>
-              <div class="note">
-                <strong>Effort 2.0 hr · Impact 7/10.</strong>
-                "compass, not encyclopedia" 원칙 — agent context 로드 시간 단축 + 핵심 정보 가시성 ↑.
-              </div>
-            </li>
-            <li>
-              <div class="head">
-                <span class="tag tag-rule">Cat D · M</span>
-                ARCHITECTURE.md 또는 mermaid dependency 다이어그램 추가
-              </div>
-              <div class="note">
-                <strong>Effort 2.5 hr · Impact 7/10.</strong>
-                cross-module ripple 추적 → 변경 영향 분석 시간 절반.
-              </div>
-            </li>
-            <li>
-              <div class="head">
-                <span class="tag tag-rule">Cat C · M</span>
-                MEMORY.md 또는 docs/adr/ 도입으로 tribal knowledge 외부화
-              </div>
-              <div class="note">
-                <strong>Effort 3.0 hr · Impact 8/10.</strong>
-                senior 의존 의사결정 외부화 → 신규 agent run 시 오류 ↓.
-              </div>
-            </li>
-            <li>
-              <div class="head">
                 <span class="tag tag-rule">Cat G · L</span>
-                evals/ 디렉터리 + 대표 task pass-rate 측정 도입
+                AI 세션 로그 / telemetry 단서 남기기
               </div>
               <div class="note">
-                <strong>Effort 6.0 hr · Impact 6/10.</strong>
-                AI 회귀 측정 가능 — 개선 ROI 자체를 정량화.
+                <strong>가장 낮은 카테고리(3/5).</strong> evals/results.md 기록을 실제로 쌓거나 세션 로그를 남기면 상승 — 다만 텔레메트리 인프라 구축은 별도 논의 필요.
               </div>
             </li>
             <li>
               <div class="head">
-                <span class="tag tag-rule">Cat B · L</span>
-                god file 6개 분할 (peakdaApi.schemas.ts 2056줄 외)
+                <span class="tag tag-rule">Cat F · S</span>
+                pre-push hook에 context path 검증 추가
               </div>
               <div class="note">
-                <strong>Effort 15.0 hr · Impact 6/10.</strong>
-                파일당 ~5K-10K token 절감 + 편집 정확도 ↑. (단, orval 자동생성 파일은 수동 분할보다 codegen 설정 조정을 우선 검토.)
+                지금은 CI만 검증. husky 도입이 필요해 Phase 1에서 보류했던 항목.
+              </div>
+            </li>
+            <li>
+              <div class="head">
+                <span class="tag tag-rule">Cat B · S</span>
+                핵심 파일 경로 3-5개 추가 인용 + Note/Gotcha 마커 보강
+              </div>
+              <div class="note">
+                B3(2/4)·B4(2/4) 아직 만점 아님 — AGENTS.md에 구체 경로 몇 개만 더 추가하면 소폭 상승.
+              </div>
+            </li>
+            <li>
+              <div class="head">
+                <span class="tag tag-rule">Cat D · 보류</span>
+                mermaid 다이어그램 스코어러 미인식
+              </div>
+              <div class="note">
+                ARCHITECTURE.md에 mermaid 3개가 실제로 있지만, 스코어러가 CLAUDE.md/AGENTS.md/README.md만 스캔해서 못 잡음. 점수 위해 중복 삽입하는 건 실익 없어 보류.
+              </div>
+            </li>
+            <li>
+              <div class="head">
+                <span class="tag tag-rule">Cat B · L (보류)</span>
+                orval 생성 파일 4개는 분할하지 않기로 결정
+              </div>
+              <div class="note">
+                orval 8.10에서 tags-split도 공통 schemas는 안 쪼개짐을 확인. 수동 분할해도 재생성 시 원복되므로 실익 없음 — <code>src/CLAUDE.md</code>에 근거 기록.
               </div>
             </li>
           </ul>
@@ -1105,7 +1055,7 @@
       </div>
 
       <footer>
-        Peakda · AI 준비도 감사 · v2 루브릭 (7 카테고리 / 100점) · 측정일 2026-07-19
+        Peakda · AI 준비도 감사 · v2 루브릭 (7 카테고리 / 100점) · 측정일 2026-07-19 · Phase 1-3 반영 후 재측정
       </footer>
     </div>
   </body>

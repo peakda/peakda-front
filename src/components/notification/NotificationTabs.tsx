@@ -1,7 +1,7 @@
 'use client'
 
 import { Alarm, AlarmItemData } from '@/components/ui/display/Alarm'
-import Button from '@/components/ui/button/Button'
+import { Button } from '@/components/ui/button/Button'
 import { TabPanels } from '@/components/ui/Tab/TabPanel'
 import { Tabs } from '@/components/ui/Tab/Tab'
 import { TabItem } from '@/context/TabContext'

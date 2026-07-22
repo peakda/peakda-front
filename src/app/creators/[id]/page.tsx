@@ -3,9 +3,9 @@
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { MapPin } from 'lucide-react'
-import Header from '@/components/ui/layout/Header'
-import LeftArrow from '@/components/ui/button/LeftArrow'
-import Button from '@/components/ui/button/Button'
+import { Header } from '@/components/ui/layout/Header'
+import { LeftArrow } from '@/components/ui/button/LeftArrow'
+import { Button } from '@/components/ui/button/Button'
 import { Badge } from '@/components/ui/display/Badge'
 import { CardBadge } from '@/components/ui/card/CardBadge'
 

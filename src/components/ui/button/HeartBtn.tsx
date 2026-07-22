@@ -10,7 +10,7 @@ interface HeartBtnProps {
   spotId?: number
 }
 
-export default function HeartBtn({ InitFavorite, className, spotId }: HeartBtnProps) {
+export function HeartBtn({ InitFavorite, className, spotId }: HeartBtnProps) {
   const [isFavorite, setIsFavorite] = useState(InitFavorite)
   const addFavorite = useAddFavorite()
   const removeFavorite = useRemoveFavorite()

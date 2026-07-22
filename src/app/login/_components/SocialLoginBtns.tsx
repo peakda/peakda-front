@@ -1,9 +1,9 @@
 'use client'
-import Button from '@/components/ui/button/Button'
+import { Button } from '@/components/ui/button/Button'
 import { handleKakaoLogin } from '@/lib/kakao/kakaoLogin'
 import Image from 'next/image'
 
-export default function SocialLoginBtns() {
+export function SocialLoginBtns() {
   return (
     <div className="flex w-full flex-1 flex-col items-center justify-center gap-2">
       <Button

@@ -1,13 +1,13 @@
 'use client'
 
 import Image from 'next/image'
-import IconBtn from '@/components/ui/button/IconBtn'
+import { IconBtn } from '@/components/ui/button/IconBtn'
 import { MoreMenu } from '@/components/ui/button/MoreMenu'
 import { CardBadge } from '@/components/ui/card/CardBadge'
 import { Badge } from '@/components/ui/display/Badge'
 import { EmojiBtn } from '@/components/ui/button/EmojiBtn'
 import { useCarousel } from '@/hooks/useEmblaCarousel'
-import Indecator from '@/app/onboarding/_components/Indecator'
+import { Indecator } from '@/app/onboarding/_components/Indecator'
 
 interface FlowerTag {
   emoji: string

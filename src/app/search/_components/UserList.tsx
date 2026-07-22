@@ -1,4 +1,4 @@
-import Button from '@/components/ui/button/Button'
+import { Button } from '@/components/ui/button/Button'
 import { Avatar } from '@/components/ui/display/Avatar'
 import { UserProps } from './UserPanel'
 
@@ -6,7 +6,7 @@ interface Props {
   user: UserProps
 }
 
-export default function UserList({ user }: Props) {
+export function UserList({ user }: Props) {
   return (
     <li key={user.id} className="flex items-center gap-3 px-4 py-3">
       <Avatar size="md" />

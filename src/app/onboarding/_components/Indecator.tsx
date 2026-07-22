@@ -6,7 +6,7 @@ interface Props {
   scrollTo: (index: number) => void
 }
 
-export default function Indecator({ scrollSnaps, selectedIndex, scrollTo }: Props) {
+export function Indecator({ scrollSnaps, selectedIndex, scrollTo }: Props) {
   return (
     <div role="tablist" aria-label="온보딩 단계" className="flex items-center gap-2">
       {scrollSnaps.map((_, index) => (

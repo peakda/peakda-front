@@ -1,7 +1,7 @@
 import React from 'react'
 import { Asterisk, X } from 'lucide-react'
-import Input, { type BorderVariant } from './Input'
-import IconBtn from '@/components/ui/button/IconBtn'
+import { Input, type BorderVariant } from './Input'
+import { IconBtn } from '@/components/ui/button/IconBtn'
 import { cn } from '@/lib/utils/cn'
 
 interface InputFiledProps {
@@ -23,7 +23,7 @@ interface InputFiledProps {
   isError?: boolean
 }
 
-const InputFiled = ({
+export const InputFiled = ({
   title,
   description,
   showAsterisk = false,
@@ -107,4 +107,3 @@ const InputFiled = ({
   )
 }
 
-export default InputFiled

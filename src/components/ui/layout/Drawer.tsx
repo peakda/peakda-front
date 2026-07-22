@@ -3,13 +3,13 @@
 import { Drawer as VaulDrawer } from 'vaul'
 import { useState, useEffect } from 'react'
 import { useDrawerStore } from '@/stores/useDrawerStore'
-import Button from '../button/Button'
+import { Button } from '@/components/ui/button/Button'
 import { FilterDrawerContent } from './FilterDrawerContent'
 import { LogoutDrawerContent } from './LogoutDrawerContent'
 import { WithdrawDrawerContent } from './WithdrawDrawerContent'
 import { SaveSpotDrawerContent } from './SaveSpotDrawerContent'
 import { DateSelectDrawerContent } from './DateSelectDrawerContent'
-import PinList from '../display/PinList'
+import { PinList } from '@/components/ui/display/PinList'
 
 export function Drawer() {
   const { isOpen, type, pinListData, saveSpotData, dateSelectData, closeDrawer, setSnapHeight } =

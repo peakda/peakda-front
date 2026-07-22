@@ -1,9 +1,9 @@
 import type { Dispatch, SetStateAction } from 'react'
 import Image from 'next/image'
 import { cn } from '@/lib/utils/cn'
-import Header from '@/components/ui/layout/Header'
-import SearchInput from '@/app/search/_components/SearchInput'
-import Button from '@/components/ui/button/Button'
+import { Header } from '@/components/ui/layout/Header'
+import { SearchInput } from '@/app/search/_components/SearchInput'
+import { Button } from '@/components/ui/button/Button'
 import type { KakaoPlace } from '@/hooks/useKakaoPlaces'
 
 interface LocationSearchViewProps {

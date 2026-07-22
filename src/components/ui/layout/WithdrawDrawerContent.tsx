@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Check } from 'lucide-react'
-import Button from '@/components/ui/button/Button'
+import { Button } from '@/components/ui/button/Button'
 import { cn } from '@/lib/utils/cn'
 import { withdrawApi } from '@/api/facades/user'
 

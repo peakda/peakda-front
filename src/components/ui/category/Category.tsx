@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { cn } from '@/lib/utils/cn'
-import CategoryChip from './CategoryChip'
+import { CategoryChip } from './CategoryChip'
 
 const DEFAULT_CATEGORIES = ['전체', '명소', '동네']
 
@@ -12,7 +12,7 @@ interface CategoryProps {
   isMap?: boolean
 }
 
-export default function Category({
+export function Category({
   categories = DEFAULT_CATEGORIES,
   className,
   isMap,

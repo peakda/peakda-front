@@ -9,7 +9,7 @@ interface FlowerCardProps {
   onClick?: () => void
 }
 
-export default function FlowerCard({
+export function FlowerCard({
   label,
   date,
   image,

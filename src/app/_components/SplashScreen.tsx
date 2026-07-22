@@ -1,11 +1,11 @@
 'use client'
 
-import MainMessage from '@/components/ui/message/MainMessage'
+import { MainMessage } from '@/components/ui/message/MainMessage'
 import { cn } from '@/lib/utils/cn'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-export default function SplashScreen() {
+export function SplashScreen() {
   const router = useRouter()
   const [isExiting, setIsExiting] = useState(false)
 

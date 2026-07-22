@@ -1,6 +1,6 @@
 import { Heart, Plus } from 'lucide-react'
-import Button from '@/components/ui/button/Button'
-import IconBtn from '@/components/ui/button/IconBtn'
+import { Button } from '@/components/ui/button/Button'
+import { IconBtn } from '@/components/ui/button/IconBtn'
 
 export function SavedSpotEmpty() {
   return (

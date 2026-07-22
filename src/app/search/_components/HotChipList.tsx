@@ -6,7 +6,7 @@ interface Props {
   setQuery: Dispatch<SetStateAction<string>>
 }
 
-export default function HotChipList({ setQuery }: Props) {
+export function HotChipList({ setQuery }: Props) {
   const { data } = useTrendingSpots()
   const items = data?.items ?? []
 

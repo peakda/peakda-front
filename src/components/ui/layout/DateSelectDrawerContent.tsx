@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
-import Button from '@/components/ui/button/Button'
+import { Button } from '@/components/ui/button/Button'
 import type { DateSelectData } from '@/stores/useDrawerStore'
 
 interface Props extends DateSelectData {

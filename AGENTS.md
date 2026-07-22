@@ -31,10 +31,18 @@
 
 ## API 호출 규칙
 
-- 백엔드(Railway) API는 `src/api/mutator`의 `customInstance`를 통해 직접 호출한다 — 프런트(Vercel)와 도메인이 달라 크로스사이트 쿠키로 인증을 주고받기 때문에 Route Handler 프록시를 거치지 않는다 (`ARCHITECTURE.md`, `MEMORY.md` 참고)
+- 백엔드(Railway) API는 `src/api/mutator`의 `customInstance`를 통해 직접 호출한다.
+  Why: 프런트(Vercel)와 도메인이 달라 크로스사이트 쿠키로 인증을 주고받기 때문에 Route Handler 프록시를 거치지 않는다 ([ARCHITECTURE.md](ARCHITECTURE.md), [MEMORY.md](MEMORY.md) 참고)
 - `/app/api/` Route Handler는 백엔드 프록시 용도가 아니라 uploadthing 등 별도 목적으로만 사용
 - TanStack Query로 캐싱, staleTime 명시
 - 에러 처리는 try/catch + 타입 가드로 처리
+
+새 API 도메인을 추가할 때:
+
+```bash
+pnpm generate:api       # swagger 갱신 + orval 생성
+pnpm generate:facades   # 없는 도메인만 파사드 스텁 생성
+```
 
 ## 금지 사항
 

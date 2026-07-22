@@ -2,7 +2,7 @@
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 
-export default function LeftArrow() {
+export function LeftArrow() {
   const router = useRouter()
   return (
     <Image

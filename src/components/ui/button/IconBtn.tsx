@@ -16,6 +16,6 @@ const SIZE: Record<IconBtnSize, string> = {
   md: 'h-8 w-8  p-1 ',
   sm: 'h-6 w-6 p-1',
 }
-export default function IconBtn({ size = 'lg', className = '', children }: IconBtnProps) {
+export function IconBtn({ size = 'lg', className = '', children }: IconBtnProps) {
   return <div className={cn(BASE, SIZE[size], className)}>{children}</div>
 }

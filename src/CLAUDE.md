@@ -1,5 +1,9 @@
 # src/
 
+## Overview
+
+이 디렉터리가 Peakda 프런트엔드의 전체 소스코드를 owns한다 — App Router 페이지, API 파사드, 공용 컴포넌트/훅/스토어.
+
 ## 디렉터리
 
 | 경로 | 용도 |
@@ -21,9 +25,20 @@
 
 ## Cross-module dependency
 
-`app/**` (Server/Client Component) → `api/facades/*.ts` (TanStack Query 훅) → `api/facades/generated/**` → `api/mutator` 순으로 호출된다. 새 API 도메인 추가 시 swagger 갱신 → `pnpm generate:api` → `pnpm generate:facades`로 파사드 스텁 생성 → 파사드 내부 TODO 채우기 순서를 따른다.
+`app/**` (Server/Client Component) → `api/facades/*.ts` (TanStack Query 훅) → `api/facades/generated/**` → `api/mutator` 순으로 호출된다.
+
+## Common patterns
+
+새 API 도메인 추가:
+
+```bash
+pnpm generate:api       # swagger 갱신 + orval 생성
+pnpm generate:facades   # 없는 도메인만 파사드 스텁 생성
+```
+
+이후 파사드(`api/facades/*.ts`) 내부 TODO를 채운다.
 
 ## 규칙
 
-- `api/facades/generated/peakdaApi.schemas.ts`(2000+ 줄)는 orval `tags-split` 모드에서도 공통 스키마이므로 태그별로 분할되지 않는다 (orval 8.10 확인). 수동으로 쪼개면 `pnpm generate:api` 재실행 시 원상복구되므로 분할하지 않는다 — 큰 파일이지만 항상 자동 생성본이라 수동 편집 대상이 아니므로 크기 자체는 문제가 아니다.
-- 나머지 규칙(Import, 컴포넌트, 상태 관리 등)은 루트 `CLAUDE.md`/`AGENTS.md` 참고.
+- Note: `api/facades/generated/peakdaApi.schemas.ts`(2000+ 줄)는 orval `tags-split` 모드에서도 공통 스키마이므로 태그별로 분할되지 않는다 (orval 8.10 확인). 수동으로 쪼개면 `pnpm generate:api` 재실행 시 원상복구되므로 분할하지 않는다 — 큰 파일이지만 항상 자동 생성본이라 수동 편집 대상이 아니므로 크기 자체는 문제가 아니다.
+- 나머지 규칙(Import, 컴포넌트, 상태 관리 등)은 루트 [CLAUDE.md](../CLAUDE.md)/[AGENTS.md](../AGENTS.md) 참고.

@@ -1,9 +1,9 @@
 'use client'
 
 import { ChevronRight } from 'lucide-react'
-import Header from '@/components/ui/layout/Header'
-import LeftArrow from '@/components/ui/button/LeftArrow'
-import Toggle from '@/components/ui/display/Toggle'
+import { Header } from '@/components/ui/layout/Header'
+import { LeftArrow } from '@/components/ui/button/LeftArrow'
+import { Toggle } from '@/components/ui/display/Toggle'
 import { Drawer } from '@/components/ui/layout/Drawer'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Button from '@/components/ui/button/Button'
+import { Button } from '@/components/ui/button/Button'
 import { useFollow, useUnfollow } from '@/api/facades/user-follow'
 
 interface Props {

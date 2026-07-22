@@ -5,7 +5,7 @@ interface FilterProps {
   onClick?: () => void
 }
 
-export default function FilterCard({ title, subTitle, isActive = false, onClick }: FilterProps) {
+export function FilterCard({ title, subTitle, isActive = false, onClick }: FilterProps) {
   return (
     <button
       onClick={onClick}
