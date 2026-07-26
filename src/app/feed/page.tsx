@@ -30,7 +30,9 @@ export default function FeedPage() {
           left={<div className="text-text-primary text-xl font-semibold">피드</div>}
           right={
             <div className="flex items-center gap-3">
-              <Image src="/icons/search.svg" alt="검색" width={22} height={22} />
+              <button type="button" aria-label="검색" className="cursor-pointer" onClick={() => router.push('/search')}>
+                <Image src="/icons/search.svg" alt="검색" width={22} height={22} />
+              </button>
             </div>
           }
         />

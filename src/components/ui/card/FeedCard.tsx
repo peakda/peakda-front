@@ -28,6 +28,7 @@ const REACTIONS: { type: FeedReactionSummaryResponseMyReactionsItem; emoji: stri
 export interface FeedCardProps {
   recordId: number
   authorName: string
+  authorImageUrl?: string | null
   location: string
   timeAgo: string
   visitDate: string
@@ -46,6 +47,7 @@ export interface FeedCardProps {
 export function FeedCard({
   recordId,
   authorName,
+  authorImageUrl,
   location,
   timeAgo,
   visitDate,
@@ -101,8 +103,12 @@ export function FeedCard({
     <div className="bg-bg-primary flex flex-col gap-3 px-4 py-4">
       {/* 헤더 */}
       <div className="flex items-center gap-2">
-        <IconBtn size="md">
-          <Image src="/icons/person.svg" alt="프로필" width={16} height={16} />
+        <IconBtn size="md" className="relative overflow-hidden">
+          {authorImageUrl ? (
+            <Image src={authorImageUrl} alt="프로필" fill className="object-cover" sizes="32px" />
+          ) : (
+            <Image src="/icons/person.svg" alt="프로필" width={16} height={16} />
+          )}
         </IconBtn>
         {onOpen ? (
           <button type="button" onClick={onOpen} className="flex flex-1 flex-col text-left">
