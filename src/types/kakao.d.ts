@@ -7,6 +7,13 @@ declare namespace kakao.maps {
     setLevel(level: number, options?: { anchor?: LatLng; animate?: boolean }): void
     getLevel(): number
     getBounds(): LatLngBounds
+    setBounds(
+      bounds: LatLngBounds,
+      paddingTop?: number,
+      paddingRight?: number,
+      paddingBottom?: number,
+      paddingLeft?: number
+    ): void
   }
 
   class LatLng {
@@ -16,8 +23,11 @@ declare namespace kakao.maps {
   }
 
   class LatLngBounds {
+    constructor(sw?: LatLng, ne?: LatLng)
     getSouthWest(): LatLng
     getNorthEast(): LatLng
+    /** 주어진 좌표를 포함하도록 영역을 넓힌다 */
+    extend(latlng: LatLng): void
   }
 
   class Marker {
