@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
+import { ChevronRight } from 'lucide-react'
 import { IconBtn } from '@/components/ui/button/IconBtn'
 import { MoreMenu } from '@/components/ui/button/MoreMenu'
 import { CardBadge } from '@/components/ui/card/CardBadge'
@@ -24,6 +26,13 @@ interface FlowerTag {
   label: string
 }
 
+export interface SpotSummaryInfo {
+  name: string
+  recordCount: number
+  address: string
+  onClick: () => void
+}
+
 // 목록 DTO 에는 리액션 집계가 없어 처음엔 버튼만 노출하고, 반응 mutation 응답의 counts 로 갱신한다.
 const REACTIONS: { type: FeedReactionSummaryResponseMyReactionsItem; emoji: string }[] = [
   { type: 'HEART', emoji: '❤️' },
@@ -32,6 +41,7 @@ const REACTIONS: { type: FeedReactionSummaryResponseMyReactionsItem; emoji: stri
 
 export interface FeedCardProps {
   recordId: number
+  authorId: number
   authorName: string
   authorImageUrl?: string | null
   location: string
@@ -47,10 +57,13 @@ export interface FeedCardProps {
   onDelete?: () => void
   onReport?: () => void
   onOpen?: () => void
+  showMoreMenu?: boolean
+  spotSummary?: SpotSummaryInfo
 }
 
 export function FeedCard({
   recordId,
+  authorId,
   authorName,
   authorImageUrl,
   location,
@@ -66,6 +79,8 @@ export function FeedCard({
   onDelete,
   onReport,
   onOpen,
+  showMoreMenu = true,
+  spotSummary,
 }: FeedCardProps) {
   const { emblaRef, selectedIndex, scrollSnaps, scrollTo } = useCarousel({ loop: true })
 
@@ -119,27 +134,33 @@ export function FeedCard({
     <div className="bg-bg-primary flex flex-col gap-3 px-4 py-4">
       {/* 헤더 */}
       <div className="flex items-center gap-2">
-        <IconBtn size="md" className="relative overflow-hidden">
-          {authorImageUrl ? (
-            <Image src={authorImageUrl} alt="프로필" fill className="object-cover" sizes="32px" />
-          ) : (
-            <Image src="/icons/person.svg" alt="프로필" width={16} height={16} />
-          )}
-        </IconBtn>
+        <Link href={`/users/${authorId}`}>
+          <IconBtn size="md" className="relative overflow-hidden">
+            {authorImageUrl ? (
+              <Image src={authorImageUrl} alt="프로필" fill className="object-cover" sizes="32px" />
+            ) : (
+              <Image src="/icons/person.svg" alt="프로필" width={16} height={16} />
+            )}
+          </IconBtn>
+        </Link>
         {onOpen ? (
           <button type="button" onClick={onOpen} className="flex flex-1 flex-col text-left">
             {authorInfo}
           </button>
         ) : (
-          <div className="flex flex-1 flex-col">{authorInfo}</div>
+          <Link href={`/users/${authorId}`} className="flex flex-1 flex-col text-left">
+            {authorInfo}
+          </Link>
         )}
 
-        <MoreMenu
-          isOwner={isOwner}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          onReport={onReport ?? (() => setReportModalOpen(true))}
-        />
+        {showMoreMenu && (
+          <MoreMenu
+            isOwner={isOwner}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onReport={onReport ?? (() => setReportModalOpen(true))}
+          />
+        )}
       </div>
 
       {/* 이미지 캐러셀 */}
@@ -184,6 +205,23 @@ export function FeedCard({
           </div>
         )}
       </div>
+
+      {/* 스팟 요약 */}
+      {spotSummary && (
+        <button
+          type="button"
+          onClick={spotSummary.onClick}
+          className="bg-bg-secondary flex items-center justify-between rounded-xl px-3.5 py-3 text-left"
+        >
+          <div className="flex flex-col gap-0.5">
+            <span className="text-text-primary text-sm font-semibold">{spotSummary.name}</span>
+            <span className="text-text-tertiary text-xs">
+              방문 기록 {spotSummary.recordCount} · {spotSummary.address}
+            </span>
+          </div>
+          <ChevronRight className="text-icon-quaternary h-4 w-4 shrink-0" />
+        </button>
+      )}
 
       {/* 꽃 태그 */}
       {flowers.length > 0 && (

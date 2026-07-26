@@ -10,11 +10,20 @@ import { LogoutDrawerContent } from './LogoutDrawerContent'
 import { WithdrawDrawerContent } from './WithdrawDrawerContent'
 import { SaveSpotDrawerContent } from './SaveSpotDrawerContent'
 import { DateSelectDrawerContent } from './DateSelectDrawerContent'
+import { DeleteConfirmDrawerContent } from './DeleteConfirmDrawerContent'
 import { PinList } from '@/components/ui/display/PinList'
 
 export function Drawer() {
-  const { isOpen, type, pinListData, saveSpotData, dateSelectData, closeDrawer, setSnapHeight } =
-    useDrawerStore()
+  const {
+    isOpen,
+    type,
+    pinListData,
+    saveSpotData,
+    dateSelectData,
+    deleteConfirmData,
+    closeDrawer,
+    setSnapHeight,
+  } = useDrawerStore()
   const router = useRouter()
   const [snap, setSnap] = useState<string | number | null>('400px')
 
@@ -45,8 +54,14 @@ export function Drawer() {
           ? snap
           : 400
 
-  // 로그아웃 / 회원탈퇴 / 찜 확인 / 촬영일자 선택 시트: snap 없이 콘텐츠 높이에 맞춰 올라오는 바텀시트
-  if (type === 'logout' || type === 'withdraw' || type === 'save-spot' || type === 'date-select') {
+  // 로그아웃 / 회원탈퇴 / 찜 확인 / 촬영일자 선택 / 삭제 확인 시트: snap 없이 콘텐츠 높이에 맞춰 올라오는 바텀시트
+  if (
+    type === 'logout' ||
+    type === 'withdraw' ||
+    type === 'save-spot' ||
+    type === 'date-select' ||
+    type === 'delete-confirm'
+  ) {
     const title =
       type === 'logout'
         ? '로그아웃'
@@ -54,7 +69,9 @@ export function Drawer() {
           ? '계정 탈퇴'
           : type === 'date-select'
             ? '촬영일자 선택'
-            : '찜 추가'
+            : type === 'delete-confirm'
+              ? '삭제 확인'
+              : '찜 추가'
     return (
       <VaulDrawer.Root open={isOpen} onOpenChange={(open) => !open && closeDrawer()}>
         <VaulDrawer.Portal>
@@ -70,6 +87,11 @@ export function Drawer() {
               <DateSelectDrawerContent
                 value={dateSelectData.value}
                 onSelect={dateSelectData.onSelect}
+                onClose={closeDrawer}
+              />
+            ) : type === 'delete-confirm' && deleteConfirmData ? (
+              <DeleteConfirmDrawerContent
+                onConfirm={deleteConfirmData.onConfirm}
                 onClose={closeDrawer}
               />
             ) : saveSpotData ? (
