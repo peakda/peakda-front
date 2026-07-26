@@ -7,6 +7,8 @@ export interface MapSpot {
   lng: number
   flowers: FlowerItem[]
   maxStage: Stage
+  title?: string
+  attractionId?: number
 }
 
 interface ClusterGroup {

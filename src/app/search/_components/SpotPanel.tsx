@@ -1,6 +1,6 @@
 import { Search } from 'lucide-react'
-import IconBtn from '@/components/ui/button/IconBtn'
-import SpotCard from '@/components/ui/card/SpotCard'
+import { IconBtn } from '@/components/ui/button/IconBtn'
+import { SpotCard } from '@/components/ui/card/SpotCard'
 
 export interface SPOTProps {
   id: number

@@ -1,12 +1,12 @@
 import Image from 'next/image'
-import IconBtn from './IconBtn'
+import { IconBtn } from './IconBtn'
 
 interface LocationBtnProps {
   onLocate?: () => void
   style?: React.CSSProperties
 }
 
-export default function LocationBtn({ onLocate, style }: LocationBtnProps) {
+export function LocationBtn({ onLocate, style }: LocationBtnProps) {
   return (
     <button
       type="button"

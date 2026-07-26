@@ -6,12 +6,18 @@ declare namespace kakao.maps {
     getCenter(): LatLng
     setLevel(level: number, options?: { anchor?: LatLng; animate?: boolean }): void
     getLevel(): number
+    getBounds(): LatLngBounds
   }
 
   class LatLng {
     constructor(lat: number, lng: number)
     getLat(): number
     getLng(): number
+  }
+
+  class LatLngBounds {
+    getSouthWest(): LatLng
+    getNorthEast(): LatLng
   }
 
   class Marker {

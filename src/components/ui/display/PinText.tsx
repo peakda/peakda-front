@@ -1,8 +1,8 @@
 import Image from 'next/image'
-import HeartBtn from '../button/HeartBtn'
+import { HeartBtn } from '@/components/ui/button/HeartBtn'
 import { Badge } from './Badge'
-import Tag from './Tag'
-import IconBtn from '../button/IconBtn'
+import { Tag } from './Tag'
+import { IconBtn } from '@/components/ui/button/IconBtn'
 import { CardBadge } from '../card/CardBadge'
 
 interface PinTextProps {
@@ -15,7 +15,7 @@ interface PinTextProps {
   variant?: 'card' | 'list'
 }
 
-export default function PinText({
+export function PinText({
   title,
   location,
   description,

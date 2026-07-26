@@ -1,10 +1,10 @@
 import React from 'react'
-import Tag from '../display/Tag'
-import PinText from '../display/PinText'
+import { Tag } from '@/components/ui/display/Tag'
+import { PinText } from '@/components/ui/display/PinText'
 import { SingleImageProps } from '@/types/types'
 import Image from 'next/image'
 
-export default function PinCard({
+export function PinCard({
   imageUrl,
   tagText,
   title,

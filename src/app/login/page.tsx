@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
-import MainMessage from '@/components/ui/message/MainMessage'
-import SocialLoginBtns from './_components/SocialLoginBtns'
+import { MainMessage } from '@/components/ui/message/MainMessage'
+import { SocialLoginBtns } from './_components/SocialLoginBtns'
 
 export const metadata: Metadata = {
   title: '로그인',

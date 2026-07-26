@@ -1,19 +1,19 @@
 'use client'
 
-import Button from '@/components/ui/button/Button'
-import Header from '@/components/ui/layout/Header'
+import { Button } from '@/components/ui/button/Button'
+import { Header } from '@/components/ui/layout/Header'
 import { useCarousel } from '@/hooks/useEmblaCarousel'
 import type { StepProps } from '@/types/types'
 import { useRouter } from 'next/navigation'
-import Indecator from './Indecator'
-import SkipButton from './SkipButton'
-import OnboardingMain from './OnboardingMain'
+import { Indecator } from './Indecator'
+import { SkipButton } from './SkipButton'
+import { OnboardingMain } from './OnboardingMain'
 
 interface Props {
   steps: readonly StepProps[]
 }
 
-export default function OnboardingCarousel({ steps }: Props) {
+export function OnboardingCarousel({ steps }: Props) {
   const router = useRouter()
   const { emblaRef, selectedIndex, scrollSnaps, scrollTo, scrollNext } = useCarousel(
     {

@@ -1,6 +1,6 @@
-import Button from '@/components/ui/button/Button'
+import { Button } from '@/components/ui/button/Button'
 import { cn } from '@/lib/utils/cn'
-import AlarmAvatar from './AlarmAvatar'
+import { AlarmAvatar } from './AlarmAvatar'
 
 export type AlarmType = 'timing' | 'reaction' | 'following' | 'notice'
 

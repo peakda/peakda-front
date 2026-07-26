@@ -1,4 +1,4 @@
-import { useQueryClient } from '@tanstack/react-query'
+﻿import { useQueryClient } from '@tanstack/react-query'
 import {
   create,
   get,
@@ -18,21 +18,21 @@ import {
   useUpdate as useUpdateGen,
   useUploadPhotos as useUploadPhotosGen,
   _delete,
-} from '@/api/generated/spot-record/spot-record'
+} from '@/api/facades/generated/spot-record/spot-record'
 import type {
   CreateSpotRecordRequest,
   ListBySpotParams,
   ListMineParams,
   SpotRecordPhotoUploadForm,
   UpdateSpotRecordRequest,
-} from '@/api/generated/peakdaApi.schemas'
+} from '@/api/facades/generated/peakdaApi.schemas'
 
-// 언래핑 규칙: res.data (Orval 래퍼) → res.data.data (백엔드 실제 payload)
+// ?몃옒??洹쒖튃: res.data (Orval ?섑띁) ??res.data.data (諛깆뿏???ㅼ젣 payload)
 
-// 기록 리스트 캐시 키 (스팟별 / 본인) — mutation 성공 시 무효화 대상
+// 湲곕줉 由ъ뒪??罹먯떆 ??(?ㅽ뙚蹂?/ 蹂몄씤) ??mutation ?깃났 ??臾댄슚?????
 const recordListKeys = [['/api/spots/records'], ['/api/spots/records/me']] as const
 
-// ─── plain async (이벤트 기반 호출) ───────────────────────────────────────────
+// ??? plain async (?대깽??湲곕컲 ?몄텧) ???????????????????????????????????????????
 
 export async function getSpotRecordApi(id: number) {
   const res = await get(id)
@@ -73,7 +73,7 @@ export async function uploadSpotRecordPhotosApi(form: SpotRecordPhotoUploadForm)
   return res.data.data ?? null
 }
 
-// ─── React Query hooks (캐싱 / 상태 관리) ────────────────────────────────────
+// ??? React Query hooks (罹먯떛 / ?곹깭 愿由? ????????????????????????????????????
 
 export const useSpotRecord = (id: number) =>
   useGet(id, { query: { select: (res) => res.data.data ?? null } })
@@ -84,7 +84,7 @@ export const useSpotRecordsBySpot = (params: ListBySpotParams) =>
 export const useMySpotRecords = (params: ListMineParams) =>
   useListMine(params, { query: { select: (res) => res.data.data ?? null } })
 
-// 기록 변경 mutation — 성공 시 스팟별/본인 기록 리스트 캐시 무효화
+// 湲곕줉 蹂寃?mutation ???깃났 ???ㅽ뙚蹂?蹂몄씤 湲곕줉 由ъ뒪??罹먯떆 臾댄슚??
 
 export const useCreateSpotRecord = () => {
   const queryClient = useQueryClient()
@@ -132,5 +132,5 @@ export const useDeleteSpotRecord = () => {
   })
 }
 
-// mutate({ data: form }) 형태로 호출
+// mutate({ data: form }) ?뺥깭濡??몄텧
 export const useUploadSpotRecordPhotos = () => useUploadPhotosGen()

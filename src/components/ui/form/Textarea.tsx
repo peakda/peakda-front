@@ -15,7 +15,7 @@ export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextArea
   error?: boolean
 }
 
-const Textarea = ({
+export const Textarea = ({
   variant = 'warning',
   error,
   className,
@@ -47,4 +47,3 @@ const Textarea = ({
   )
 }
 
-export default Textarea

@@ -1,28 +1,49 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
-import IconBtn from '@/components/ui/button/IconBtn'
+import Link from 'next/link'
+import { ChevronRight } from 'lucide-react'
+import { IconBtn } from '@/components/ui/button/IconBtn'
 import { MoreMenu } from '@/components/ui/button/MoreMenu'
 import { CardBadge } from '@/components/ui/card/CardBadge'
 import { Badge } from '@/components/ui/display/Badge'
 import { EmojiBtn } from '@/components/ui/button/EmojiBtn'
 import { useCarousel } from '@/hooks/useEmblaCarousel'
-import Indecator from '@/app/onboarding/_components/Indecator'
+import { Indecator } from '@/app/onboarding/_components/Indecator'
+import { useAddReaction, useRemoveReaction } from '@/api/facades/feed'
+import { useReport } from '@/api/facades/report'
+import { reactionToggleAction, buildReportRequest } from '@/lib/utils/feed'
+import { ReportModal } from '@/components/ui/card/ReportModal'
+import type {
+  CreateReportRequestReason,
+  FeedReactionSummaryResponseMyReactionsItem,
+  ReactionCount,
+} from '@/api/facades/generated/peakdaApi.schemas'
 
 interface FlowerTag {
   emoji: string
   label: string
 }
 
-interface Reaction {
-  emoji: string
-  count: number
-  selected?: boolean
-  onClick?: () => void
+export interface SpotSummaryInfo {
+  name: string
+  recordCount: number
+  address: string
+  onClick: () => void
 }
 
+// 목록 DTO 에는 리액션 집계가 없어 처음엔 버튼만 노출하고, 반응 mutation 응답의 counts 로 갱신한다.
+const REACTIONS: { type: FeedReactionSummaryResponseMyReactionsItem; emoji: string }[] = [
+  { type: 'HEART', emoji: '❤️' },
+  { type: 'SMILE', emoji: '😀' },
+]
+
 export interface FeedCardProps {
+  recordId: number
+  authorId: number
   authorName: string
+  authorImageUrl?: string | null
   location: string
   timeAgo: string
   visitDate: string
@@ -31,15 +52,20 @@ export interface FeedCardProps {
   images: string[]
   flowers: FlowerTag[]
   content: string
-  reactions: Reaction[]
   isOwner?: boolean
   onEdit?: () => void
   onDelete?: () => void
   onReport?: () => void
+  onOpen?: () => void
+  showMoreMenu?: boolean
+  spotSummary?: SpotSummaryInfo
 }
 
 export function FeedCard({
+  recordId,
+  authorId,
   authorName,
+  authorImageUrl,
   location,
   timeAgo,
   visitDate,
@@ -48,33 +74,93 @@ export function FeedCard({
   images,
   flowers,
   content,
-  reactions,
   isOwner = false,
   onEdit,
   onDelete,
   onReport,
+  onOpen,
+  showMoreMenu = true,
+  spotSummary,
 }: FeedCardProps) {
   const { emblaRef, selectedIndex, scrollSnaps, scrollTo } = useCarousel({ loop: true })
+
+  // 내 리액션 상태·카운트: 목록 DTO 에 정보가 없어 빈 값으로 시작하고 mutation 응답으로만 갱신한다.
+  const [myReactions, setMyReactions] = useState<FeedReactionSummaryResponseMyReactionsItem[]>([])
+  const [reactionCounts, setReactionCounts] = useState<ReactionCount[]>([])
+  const [isReportModalOpen, setReportModalOpen] = useState(false)
+  const addReaction = useAddReaction()
+  const removeReaction = useRemoveReaction()
+  const report = useReport()
+
+  const handleReaction = (type: FeedReactionSummaryResponseMyReactionsItem) => {
+    const mutation = reactionToggleAction(myReactions, type) === 'add' ? addReaction : removeReaction
+    mutation.mutate(
+      { id: recordId, params: { reactionType: type } },
+      {
+        onSuccess: (res) => {
+          setMyReactions(res.data.data?.myReactions ?? [])
+          setReactionCounts(res.data.data?.counts ?? [])
+        },
+      }
+    )
+  }
+
+  const handleReportSubmit = (reason: CreateReportRequestReason, detail?: string) => {
+    report.mutate(
+      { data: buildReportRequest(recordId, reason, detail) },
+      {
+        onSuccess: () => {
+          setReportModalOpen(false)
+          window.alert('신고가 접수되었어요')
+        },
+      }
+    )
+  }
+
+  const authorInfo = (
+    <>
+      <div className="flex items-center gap-2">
+        <span className="text-text-primary text-sm font-semibold">{authorName}</span>
+        <span className="text-text-quaternary mt-1 text-xs">{timeAgo}</span>
+      </div>
+      <div className="flex items-center gap-1">
+        <Image src={'./icons/Pin.svg'} alt="지역" width={15} height={15} color="#8C95A4" />
+        <span className="text-text-tertiary mt-1 text-xs">{location}</span>
+      </div>
+    </>
+  )
 
   return (
     <div className="bg-bg-primary flex flex-col gap-3 px-4 py-4">
       {/* 헤더 */}
       <div className="flex items-center gap-2">
-        <IconBtn size="md">
-          <Image src="/icons/person.svg" alt="프로필" width={16} height={16} />
-        </IconBtn>
-        <div className="flex flex-1 flex-col">
-          <div className="flex items-center gap-2">
-            <span className="text-text-primary text-sm font-semibold">{authorName}</span>
-            <span className="text-text-quaternary mt-1 text-xs">{timeAgo}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Image src={'./icons/Pin.svg'} alt="지역" width={15} height={15} color="#8C95A4" />
-            <span className="text-text-tertiary mt-1 text-xs">{location}</span>
-          </div>
-        </div>
+        <Link href={`/users/${authorId}`}>
+          <IconBtn size="md" className="relative overflow-hidden">
+            {authorImageUrl ? (
+              <Image src={authorImageUrl} alt="프로필" fill className="object-cover" sizes="32px" />
+            ) : (
+              <Image src="/icons/person.svg" alt="프로필" width={16} height={16} />
+            )}
+          </IconBtn>
+        </Link>
+        {onOpen ? (
+          <button type="button" onClick={onOpen} className="flex flex-1 flex-col text-left">
+            {authorInfo}
+          </button>
+        ) : (
+          <Link href={`/users/${authorId}`} className="flex flex-1 flex-col text-left">
+            {authorInfo}
+          </Link>
+        )}
 
-        <MoreMenu isOwner={isOwner} onEdit={onEdit} onDelete={onDelete} onReport={onReport} />
+        {showMoreMenu && (
+          <MoreMenu
+            isOwner={isOwner}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onReport={onReport ?? (() => setReportModalOpen(true))}
+          />
+        )}
       </div>
 
       {/* 이미지 캐러셀 */}
@@ -120,6 +206,23 @@ export function FeedCard({
         )}
       </div>
 
+      {/* 스팟 요약 */}
+      {spotSummary && (
+        <button
+          type="button"
+          onClick={spotSummary.onClick}
+          className="bg-bg-secondary flex items-center justify-between rounded-xl px-3.5 py-3 text-left"
+        >
+          <div className="flex flex-col gap-0.5">
+            <span className="text-text-primary text-sm font-semibold">{spotSummary.name}</span>
+            <span className="text-text-tertiary text-xs">
+              방문 기록 {spotSummary.recordCount} · {spotSummary.address}
+            </span>
+          </div>
+          <ChevronRight className="text-icon-quaternary h-4 w-4 shrink-0" />
+        </button>
+      )}
+
       {/* 꽃 태그 */}
       {flowers.length > 0 && (
         <div className="flex flex-wrap gap-2">
@@ -138,18 +241,29 @@ export function FeedCard({
       {/* 본문 */}
       <p className="text-text-primary text-sm leading-relaxed">{content}</p>
 
-      {/* 반응 버튼 */}
+      {/* 반응 버튼 (반응 전엔 카운트 없이 버튼만, 반응 후엔 응답 counts 로 표시) */}
       <div className="flex gap-2">
-        {reactions.map((reaction, i) => (
-          <EmojiBtn
-            key={i}
-            emoji={reaction.emoji}
-            label={`+${reaction.count}`}
-            selected={reaction.selected}
-            onClick={reaction.onClick}
-          />
-        ))}
+        {REACTIONS.map(({ type, emoji }) => {
+          const count = reactionCounts.find((c) => c.reactionType === type)?.count
+          return (
+            <EmojiBtn
+              key={type}
+              emoji={emoji}
+              label={count ? String(count) : undefined}
+              selected={myReactions.includes(type)}
+              onClick={() => handleReaction(type)}
+            />
+          )
+        })}
       </div>
+
+      {isReportModalOpen && (
+        <ReportModal
+          onSubmit={handleReportSubmit}
+          onCancel={() => setReportModalOpen(false)}
+          isSubmitting={report.isPending}
+        />
+      )}
     </div>
   )
 }

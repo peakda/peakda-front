@@ -1,48 +1,59 @@
 'use client'
 
 import { Badge } from '@/components/ui/display/Badge'
-import Button from '@/components/ui/button/Button'
-import Header from '@/components/ui/layout/Header'
-import InputFiled from '@/components/ui/form/InputFiled'
+import { Button } from '@/components/ui/button/Button'
+import { Header } from '@/components/ui/layout/Header'
+import { InputFiled } from '@/components/ui/form/InputFiled'
 import { useCheckNickname } from '@/hooks/useCheckNickname'
 import { cn } from '@/lib/utils/cn'
 import { useUploadSignupProfileImage } from '@/api/facades/auth'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { useCallback, useRef, useState } from 'react'
 import { useSignUpComplete } from '@/hooks/useSignUpComplete'
-import LeftArrow from '@/components/ui/button/LeftArrow'
+import { LeftArrow } from '@/components/ui/button/LeftArrow'
+import { toast } from 'sonner'
+import type { SignupCompleteRequestFavoriteCategoriesItem } from '@/api/facades/generated/peakdaApi.schemas'
 
-const FLOWER_LIST = [
-  '동백꽃',
-  '매화',
-  '개나리',
-  '벚꽃',
-  '진달래',
-  '철쭉',
-  '유채꽃',
-  '수국',
-  '연꽃',
-  '코스모스',
-  '단풍',
-  '핑크뮬리',
-  '억새',
+const FLOWER_LIST: { label: string; value: SignupCompleteRequestFavoriteCategoriesItem }[] = [
+  { label: '동백꽃', value: 'CAMELLIA' },
+  { label: '매화', value: 'PLUM' },
+  { label: '개나리', value: 'FORSYTHIA' },
+  { label: '벚꽃', value: 'CHERRY' },
+  { label: '진달래', value: 'AZALEA' },
+  { label: '철쭉', value: 'AZALEA_KR' },
+  { label: '유채꽃', value: 'CANOLA' },
+  { label: '수국', value: 'HYDRANGEA' },
+  { label: '연꽃', value: 'LOTUS' },
+  { label: '코스모스', value: 'COSMOS' },
+  { label: '단풍', value: 'MAPLE' },
+  { label: '핑크뮬리', value: 'PINK_MUHLY' },
+  { label: '억새', value: 'SILVERGRASS' },
 ]
 
 export default function ProfilePage() {
+  const router = useRouter()
   const [nickname, setNickname] = useState('')
-  const [selected, setSelected] = useState<string[]>([])
+  // 중복확인을 통과한 닉네임 — 현재 입력값과 일치할 때만 검증된 것으로 본다
+  const [checkedNickname, setCheckedNickname] = useState<string | null>(null)
+  const [selected, setSelected] = useState<SignupCompleteRequestFavoriteCategoriesItem[]>([])
   const [preview, setPreview] = useState<string | null>(null)
   // 회원가입 임시 업로드 응답의 profileImageKey — signup complete 로 그대로 전달
   const [profileImageKey, setProfileImageKey] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const { isAvailable, isPending, check, isError, message } = useCheckNickname(nickname)
+  const { isPending, check, isError, message } = useCheckNickname(nickname)
   const { mutate: uploadImage, isPending: isUploading } = useUploadSignupProfileImage()
-  const { isPending: signupPending, check: submit } = useSignUpComplete(nickname, profileImageKey)
+  const { isPending: signupPending, check: submit } = useSignUpComplete(nickname, profileImageKey, selected, {
+    onSuccess: () => router.replace('/map'),
+  })
 
-  const toggleBadge = useCallback((flower: string) => {
+  // 검증 통과 여부는 저장된 닉네임과 현재 입력의 일치로 파생 — 입력이 바뀌면 자동 무효화
+  const isNicknameVerified = checkedNickname !== null && checkedNickname === nickname
+
+  const toggleBadge = useCallback((value: SignupCompleteRequestFavoriteCategoriesItem) => {
     setSelected((prev) =>
-      prev.includes(flower) ? prev.filter((f) => f !== flower) : [...prev, flower]
+      prev.includes(value) ? prev.filter((f) => f !== value) : [...prev, value]
     )
   }, [])
 
@@ -58,6 +69,15 @@ export default function ProfilePage() {
           if (!data) return
           setPreview(data.profileImageUrl)
           setProfileImageKey(data.profileImageKey)
+          toast.success('프로필 이미지가 업로드되었어요.')
+        },
+        onError: (error) => {
+          // 업로드 실패 시 미리보기/키를 비워 업로드되지 않은 상태로 되돌리고, API 메시지를 토스트로 안내한다.
+          setPreview(null)
+          setProfileImageKey(null)
+          const message = (error as { response?: { data?: { message?: string } } })?.response?.data
+            ?.message
+          toast.error(message ?? '이미지 업로드에 실패했어요.')
         },
       }
     )
@@ -101,7 +121,7 @@ export default function ProfilePage() {
             alt="프로필 이미지"
             width={100}
             height={100}
-            className="object-cover"
+            className={cn('object-cover', preview && 'rounded-full')}
           />
           {isUploading && (
             <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/30">
@@ -131,14 +151,27 @@ export default function ProfilePage() {
           showAsterisk
           description="특수문자 제외 2~10자 이내로 작성해주세요."
           value={nickname}
-          onChange={(e) => setNickname(e.target.value)}
+          onChange={(e) => {
+            setNickname(e.target.value)
+            setCheckedNickname(null)
+          }}
+          onClear={() => {
+            setNickname('')
+            setCheckedNickname(null)
+          }}
           placeholder="닉네임을 작성해주세요"
           buttonText="중복확인"
-          onButtonClick={() => check()}
+          onButtonClick={async () => {
+            const res = await check()
+            if (res.data?.data?.available) {
+              setCheckedNickname(nickname)
+              toast.success('사용 가능한 닉네임이에요.')
+            }
+          }}
           disabled={nickname.length > 9 || isPending}
           message="닉네임을 작성해주세요"
           error={message}
-          isAvailable={isAvailable}
+          isAvailable={isNicknameVerified}
           isError={isError}
         />
       </div>
@@ -151,18 +184,18 @@ export default function ProfilePage() {
         </div>
         <div className="flex flex-wrap gap-2">
           {FLOWER_LIST.map((flower) => {
-            const isSelected = selected.includes(flower)
+            const isSelected = selected.includes(flower.value)
             return (
               <Badge
-                key={flower}
-                label={flower}
+                key={flower.value}
+                label={flower.label}
                 variant="ghost"
                 color="gray"
                 className={cn(
                   'cursor-pointer rounded-xl px-3.5 py-2',
                   isSelected && 'border-brand-secondary text-text-secondary bg-green-50'
                 )}
-                onClick={() => toggleBadge(flower)}
+                onClick={() => toggleBadge(flower.value)}
               />
             )
           })}
@@ -173,7 +206,7 @@ export default function ProfilePage() {
           variant="filled"
           size="lg"
           className="w-full cursor-pointer bg-[#98C96D] text-white hover:bg-[#98C96D]"
-          disabled={isUploading || signupPending}
+          disabled={isUploading || signupPending || !isNicknameVerified}
           onClick={() => submit()}
         >
           PEAKDA 시작하기

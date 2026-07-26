@@ -1,13 +1,20 @@
 'use client'
 
+import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
-import Header from '@/components/ui/layout/Header'
-import LeftArrow from '@/components/ui/button/LeftArrow'
-import Toggle from '@/components/ui/display/Toggle'
+import { Header } from '@/components/ui/layout/Header'
+import { LeftArrow } from '@/components/ui/button/LeftArrow'
+import { Toggle } from '@/components/ui/display/Toggle'
 import { Drawer } from '@/components/ui/layout/Drawer'
 import { useDrawerStore } from '@/stores/useDrawerStore'
+import { BlockedUsersSection } from '@/app/my/settings/_components/BlockedUsersSection'
+import type { LegalSlug } from '@/app/Terms/_data/legal-content'
 
-const INFO_LINKS = ['이용약관', '개인정보처리방침', '마케팅푸시알림', '오픈소스라이선스']
+const INFO_LINKS: { label: string; slug: LegalSlug }[] = [
+  { label: '이용약관', slug: 'terms-of-service' },
+  { label: '개인정보처리방침', slug: 'privacy-policy' },
+  { label: '마케팅푸시알림', slug: 'marketing-push-consent' },
+]
 
 function SectionTitle({ children }: { children: string }) {
   return <p className="text-text-tertiary px-4 pt-5 pb-1 text-sm">{children}</p>
@@ -50,16 +57,21 @@ export default function SettingsPage() {
         <span className="text-text-primary text-base">앱 버전</span>
         <span className="text-text-tertiary text-sm">1.0.0</span>
       </div>
-      {INFO_LINKS.map((label) => (
-        <button
-          key={label}
-          type="button"
+      {INFO_LINKS.map(({ label, slug }) => (
+        <Link
+          key={slug}
+          href={`/Terms/${slug}`}
           className="flex cursor-pointer items-center justify-between px-4 py-3.5"
         >
           <span className="text-text-primary text-base">{label}</span>
           <ChevronRight className="text-icon-quaternary h-5 w-5 scale-x-150 scale-y-150" />
-        </button>
+        </Link>
       ))}
+
+      <div className="bg-bg-secondary h-2" />
+
+      {/* 차단한 사용자 */}
+      <BlockedUsersSection />
 
       <div className="bg-bg-secondary h-2" />
 

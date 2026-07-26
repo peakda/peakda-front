@@ -5,7 +5,7 @@ interface Props {
   step: StepProps
 }
 
-export default function OnboardingMessage({ step }: Props) {
+export function OnboardingMessage({ step }: Props) {
   return (
     <>
       <div className="animate-drop-in">

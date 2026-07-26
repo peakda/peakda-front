@@ -8,7 +8,7 @@ interface NavProps {
   activeTab: 'map' | 'explore' | 'feed' | 'my' | 'none'
 }
 
-export default function Nav({ activeTab }: NavProps) {
+export function Nav({ activeTab }: NavProps) {
   const itemClass = 'flex cursor-pointer flex-col items-center gap-1 justify-center'
   const router = useRouter()
   return (

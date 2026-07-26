@@ -45,7 +45,7 @@ const VARIANT_COLOR: Record<ButtonVariant, Record<ButtonColor, string>> = {
   },
 }
 
-const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
       variant = 'outlined',
@@ -83,5 +83,4 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
 Button.displayName = 'Button'
 
-export default Button
 export type { ButtonProps, ButtonVariant, ButtonSize, ButtonColor }

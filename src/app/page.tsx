@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import SplashScreen from '@/app/_components/SplashScreen'
+import { SplashScreen } from '@/app/_components/SplashScreen'
 
 export const metadata: Metadata = {
   title: 'Peakda | 계절 여행 타이밍',

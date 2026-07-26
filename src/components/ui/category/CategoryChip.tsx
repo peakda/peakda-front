@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils/cn'
 
-export default function CategoryChip({
+export function CategoryChip({
   label,
   selected,
   onClick,

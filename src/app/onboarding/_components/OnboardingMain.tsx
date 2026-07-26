@@ -1,5 +1,5 @@
-import Card from '@/components/ui/card/Card'
-import OnboardingMessage from '@/components/ui/message/OnboardingMessage'
+import { Card } from '@/components/ui/card/Card'
+import { OnboardingMessage } from '@/components/ui/message/OnboardingMessage'
 import { cn } from '@/lib/utils/cn'
 import { StepProps } from '@/types/types'
 
@@ -8,7 +8,7 @@ interface OnboardingMainProps {
   selectedIndex: number
 }
 
-export default function OnboardingMain({ steps, selectedIndex }: OnboardingMainProps) {
+export function OnboardingMain({ steps, selectedIndex }: OnboardingMainProps) {
   return (
     <div className="flex h-full touch-pan-y">
       {steps.map((step, index) => (

@@ -29,7 +29,7 @@ const variantStyles = {
   },
 }
 
-export default function Banner({ title, description, variant = 'now' }: BannerProps) {
+export function Banner({ title, description, variant = 'now' }: BannerProps) {
   const styles = variantStyles[variant]
 
   return (

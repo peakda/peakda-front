@@ -1,10 +1,11 @@
+import Link from 'next/link'
 import { Images } from 'lucide-react'
-import Button from '@/components/ui/button/Button'
-import IconBtn from '@/components/ui/button/IconBtn'
+import { Button } from '@/components/ui/button/Button'
+import { IconBtn } from '@/components/ui/button/IconBtn'
 import { SectionHeader } from '@/app/my/_components/SectionHeader'
 import { MyFeed } from '@/app/my/_components/MyFeed'
 
-interface MyRecord {
+export interface MyRecord {
   image: string
   date: string
   isPopular?: boolean
@@ -12,13 +13,14 @@ interface MyRecord {
 
 interface Props {
   records: MyRecord[]
+  count?: number
   canRecord?: boolean
 }
 
-export function MyRecordSection({ records, canRecord = true }: Props) {
+export function MyRecordSection({ records, count, canRecord = true }: Props) {
   return (
     <section className="mt-4">
-      <SectionHeader title={`내 기록 (${records.length})`} action="전체" />
+      <SectionHeader title={`내 기록 (${count ?? records.length})`} action="전체" />
       {records.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-8 text-center">
           <IconBtn className="h-16 w-16">
@@ -28,9 +30,11 @@ export function MyRecordSection({ records, canRecord = true }: Props) {
           {canRecord && (
             <>
               <p className="text-text-tertiary text-sm">첫 스팟을 기록해보세요</p>
-              <Button variant="filled" color="primary" size="md" className="mt-2">
-                스팟 기록하기
-              </Button>
+              <Link href="/record">
+                <Button variant="filled" color="primary" size="md" className="mt-2">
+                  스팟 기록하기
+                </Button>
+              </Link>
             </>
           )}
         </div>

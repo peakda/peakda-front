@@ -16,7 +16,7 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   rightIcon?: React.ReactNode
 }
 
-const Input = ({ variant = 'none', error, leftIcon, rightIcon, className, ...props }: InputProps) => {
+export const Input = ({ variant = 'none', error, leftIcon, rightIcon, className, ...props }: InputProps) => {
   const hasValue = typeof props.value === 'string' && props.value.length > 0
 
   return (
@@ -45,4 +45,3 @@ const Input = ({ variant = 'none', error, leftIcon, rightIcon, className, ...pro
   )
 }
 
-export default Input

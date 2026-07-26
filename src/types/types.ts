@@ -21,6 +21,8 @@ interface BasePinProps {
   description: string
   Badges: string[]
   isFavorite: boolean
+  // 스팟 상세(/spot/[id]) 이동용. 좌표만 있는 핀 등 없을 수 있어 optional.
+  spotId?: number
 }
 
 export interface SingleImageProps extends BasePinProps {

@@ -1,5 +1,5 @@
-import LeftArrow from '@/components/ui/button/LeftArrow'
-import Header from '@/components/ui/layout/Header'
+import { LeftArrow } from '@/components/ui/button/LeftArrow'
+import { Header } from '@/components/ui/layout/Header'
 import { NotificationTabs } from '@/components/notification/NotificationTabs'
 import type { Metadata } from 'next'
 
