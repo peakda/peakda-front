@@ -2,17 +2,38 @@
 
 import { Drawer as VaulDrawer } from 'vaul'
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useDrawerStore } from '@/stores/useDrawerStore'
-import Button from '../button/Button'
+import { Button } from '@/components/ui/button/Button'
 import { FilterDrawerContent } from './FilterDrawerContent'
 import { LogoutDrawerContent } from './LogoutDrawerContent'
 import { WithdrawDrawerContent } from './WithdrawDrawerContent'
 import { SaveSpotDrawerContent } from './SaveSpotDrawerContent'
-import PinList from '../display/PinList'
+import { DateSelectDrawerContent } from './DateSelectDrawerContent'
+import { DeleteConfirmDrawerContent } from './DeleteConfirmDrawerContent'
+import { PinList } from '@/components/ui/display/PinList'
 
 export function Drawer() {
-  const { isOpen, type, pinListData, saveSpotData, closeDrawer, setSnapHeight } = useDrawerStore()
+  const {
+    isOpen,
+    type,
+    pinListData,
+    saveSpotData,
+    dateSelectData,
+    deleteConfirmData,
+    closeDrawer,
+    setSnapHeight,
+  } = useDrawerStore()
+  const router = useRouter()
   const [snap, setSnap] = useState<string | number | null>('400px')
+
+  // 핀 드로어의 '명소 보기' → 해당 스팟 상세로 이동(모든 핀 항목은 한 지도 핀=동일 spotId).
+  // spotId 가 없으면(좌표만 있는 핀) 닫기만 한다.
+  const handleViewSpot = () => {
+    const spotId = pinListData[0]?.spotId
+    closeDrawer()
+    if (spotId != null) router.push(`/spot/${spotId}`)
+  }
 
   useEffect(() => {
     if (isOpen) {
@@ -33,9 +54,24 @@ export function Drawer() {
           ? snap
           : 400
 
-  // 로그아웃 / 회원탈퇴 / 찜 확인 시트: snap 없이 콘텐츠 높이에 맞춰 올라오는 바텀시트
-  if (type === 'logout' || type === 'withdraw' || type === 'save-spot') {
-    const title = type === 'logout' ? '로그아웃' : type === 'withdraw' ? '계정 탈퇴' : '찜 추가'
+  // 로그아웃 / 회원탈퇴 / 찜 확인 / 촬영일자 선택 / 삭제 확인 시트: snap 없이 콘텐츠 높이에 맞춰 올라오는 바텀시트
+  if (
+    type === 'logout' ||
+    type === 'withdraw' ||
+    type === 'save-spot' ||
+    type === 'date-select' ||
+    type === 'delete-confirm'
+  ) {
+    const title =
+      type === 'logout'
+        ? '로그아웃'
+        : type === 'withdraw'
+          ? '계정 탈퇴'
+          : type === 'date-select'
+            ? '촬영일자 선택'
+            : type === 'delete-confirm'
+              ? '삭제 확인'
+              : '찜 추가'
     return (
       <VaulDrawer.Root open={isOpen} onOpenChange={(open) => !open && closeDrawer()}>
         <VaulDrawer.Portal>
@@ -47,6 +83,17 @@ export function Drawer() {
               <LogoutDrawerContent onClose={closeDrawer} />
             ) : type === 'withdraw' ? (
               <WithdrawDrawerContent onClose={closeDrawer} />
+            ) : type === 'date-select' && dateSelectData ? (
+              <DateSelectDrawerContent
+                value={dateSelectData.value}
+                onSelect={dateSelectData.onSelect}
+                onClose={closeDrawer}
+              />
+            ) : type === 'delete-confirm' && deleteConfirmData ? (
+              <DeleteConfirmDrawerContent
+                onConfirm={deleteConfirmData.onConfirm}
+                onClose={closeDrawer}
+              />
             ) : saveSpotData ? (
               <SaveSpotDrawerContent spot={saveSpotData} onClose={closeDrawer} />
             ) : null}
@@ -115,7 +162,7 @@ export function Drawer() {
               variant="filled"
               size="lg"
               className="bg-brand-secondary active:bg-brand-secondary hover:bg-brand-secondary w-full cursor-pointer text-white"
-              onClick={closeDrawer}
+              onClick={handleViewSpot}
             >
               명소 보기
             </Button>

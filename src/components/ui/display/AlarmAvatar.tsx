@@ -2,7 +2,7 @@ import Image from 'next/image'
 import { AlarmItemData } from './Alarm'
 import { Avatar } from './Avatar'
 
-export default function AlarmAvatar({
+export function AlarmAvatar({
   type,
   imageUrl,
   reactionEmoji,

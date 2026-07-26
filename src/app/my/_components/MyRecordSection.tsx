@@ -1,6 +1,7 @@
+import Link from 'next/link'
 import { Images } from 'lucide-react'
-import Button from '@/components/ui/button/Button'
-import IconBtn from '@/components/ui/button/IconBtn'
+import { Button } from '@/components/ui/button/Button'
+import { IconBtn } from '@/components/ui/button/IconBtn'
 import { SectionHeader } from '@/app/my/_components/SectionHeader'
 import { MyFeed } from '@/app/my/_components/MyFeed'
 
@@ -29,9 +30,11 @@ export function MyRecordSection({ records, count, canRecord = true }: Props) {
           {canRecord && (
             <>
               <p className="text-text-tertiary text-sm">첫 스팟을 기록해보세요</p>
-              <Button variant="filled" color="primary" size="md" className="mt-2">
-                스팟 기록하기
-              </Button>
+              <Link href="/record">
+                <Button variant="filled" color="primary" size="md" className="mt-2">
+                  스팟 기록하기
+                </Button>
+              </Link>
             </>
           )}
         </div>

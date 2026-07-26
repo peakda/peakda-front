@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { STEPS } from '@/constants'
-import OnboardingCarousel from './_components/OnboardingCarousel'
+import { OnboardingCarousel } from './_components/OnboardingCarousel'
 
 export const metadata: Metadata = {
   title: '온보딩',

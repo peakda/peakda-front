@@ -3,7 +3,7 @@ interface Props {
   handleSkip: () => void
 }
 
-export default function SkipButton({ isLast, handleSkip }: Props) {
+export function SkipButton({ isLast, handleSkip }: Props) {
   return (
     <div className="z-10 h-9 px-4 pt-1.5">
       {!isLast && (

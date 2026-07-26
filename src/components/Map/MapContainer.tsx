@@ -3,20 +3,27 @@
 import { useLazyMapLoad } from '@/hooks/useLazyMapLoad'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
-import MainMessage from '../ui/message/MainMessage'
-import Header from '../ui/layout/Header'
+import { MainMessage } from '@/components/ui/message/MainMessage'
+import { Header } from '@/components/ui/layout/Header'
 import Image from 'next/image'
 import { prefetchInitialTiles } from '@/lib/kakao/tilePrefetch'
-import Nav from '../ui/layout/Nav'
-import LocationBtn from '../ui/button/LocationBtn'
-import { SearchBar } from '../ui/form/SearchBar'
-import Category from '../ui/category/Category'
+import { Nav } from '@/components/ui/layout/Nav'
+import { LocationBtn } from '@/components/ui/button/LocationBtn'
+import { SearchBar } from '@/components/ui/form/SearchBar'
+import { Category } from '@/components/ui/category/Category'
 import { toast } from 'sonner'
 import { useMapCluster, type MapSpot } from '@/hooks/useMapPins'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import { useBloomMap } from '@/api/facades/seasonal-bloom'
+import { useHomeSuggestion } from '@/api/facades/home'
+import { useUnreadNotificationCount } from '@/api/facades/notification'
+import { spotPreviewApi } from '@/api/facades/spot'
 import { bloomToMapSpots } from '@/lib/utils/bloomToMapSpots'
-import type { MapParams } from '@/api/facades/generated/peakdaApi.schemas'
+import type {
+  BloomBadgeStatus,
+  MapParams,
+  SpotPreviewItem,
+} from '@/api/facades/generated/peakdaApi.schemas'
 import { useRouter } from 'next/navigation'
 
 const Drawer = dynamic(
@@ -30,6 +37,22 @@ const DEFAULT_CENTER = {
 }
 
 const NETWORK_TOAST_ID = 'map-network-error'
+
+// bbox를 격자에 스냅해 미세 이동 시 동일 쿼리 키로 수렴시킨다(캐시 히트 + staleTime 작동).
+// 소수점 2자리(≈ 1km) 격자. 뷰를 항상 덮도록 min은 내림, max는 올림.
+const BBOX_GRID = 100
+const snapDown = (v: number) => Math.floor(v * BBOX_GRID) / BBOX_GRID
+const snapUp = (v: number) => Math.ceil(v * BBOX_GRID) / BBOX_GRID
+
+// 지도 정착 후 실제 조회까지의 지연. 연속 이동 중엔 마지막 정착만 조회한다.
+const BBOX_DEBOUNCE_MS = 1000
+
+const BADGE_STATUS_LABEL: Record<BloomBadgeStatus, string> = {
+  PREPARING: '개화 전',
+  STARTED: '개화 시작',
+  PEAK: '만개',
+  ENDED: '개화 종료',
+}
 
 function panToCurrentLocation(map: kakao.maps.Map, onPermissionDenied?: () => void) {
   navigator.geolocation.getCurrentPosition(
@@ -66,8 +89,46 @@ export const MapContainer = () => {
   const { data: bloomData } = useBloomMap(bbox)
   const spots = useMemo(() => (bloomData ? bloomToMapSpots(bloomData) : []), [bloomData])
 
+  // 시즌 추천어(홈 검색바 보조 카피). 절정 데이터 없으면(available=false) 기본 문구로 폴백.
+  const { data: suggestion } = useHomeSuggestion()
+  const searchDescription =
+    suggestion?.available && suggestion.message ? suggestion.message : '벚꽃 만개 지역'
+
+  // 안 읽은 알림이 있을 때만 헤더 알림 버튼에 점 표시
+  const { data: unread } = useUnreadNotificationCount()
+  const hasUnreadNotification = (unread?.unreadCount ?? 0) > 0
+
   const handlePinClick = useCallback(
-    (spot: MapSpot) => {
+    async (spot: MapSpot) => {
+      let items: SpotPreviewItem[] = []
+      try {
+        const previewData =
+          spot.attractionId != null ? await spotPreviewApi([spot.attractionId]) : null
+        items = previewData?.items ?? []
+      } catch (e) {
+        console.error(e)
+      }
+
+      // 프리뷰가 있으면 썸네일·상태 뱃지로 드로어를 채운다.
+      if (items.length > 0) {
+        openPinDrawer(
+          items.map((item) => ({
+            type: 'list' as const,
+            title: item.name,
+            location: spot.title ?? '위치 정보 없음',
+            description: item.badge
+              ? `현재 ${BADGE_STATUS_LABEL[item.badge.status]} 상태입니다.`
+              : '',
+            Badges: item.badge ? [item.badge.displayName] : [],
+            isFavorite: false,
+            images: item.thumbnailUrl ? [item.thumbnailUrl] : [],
+            spotId: item.spotId,
+          }))
+        )
+        return
+      }
+
+      // 프리뷰가 없으면(좌표만 있는 핀·조회 실패) 기존 개화 데이터로 폴백한다.
       openPinDrawer(
         spot.flowers.map((f) => ({
           type: 'list' as const,
@@ -77,6 +138,7 @@ export const MapContainer = () => {
           Badges: f.alt ? [f.alt] : [],
           isFavorite: false,
           images: [f.src],
+          spotId: spot.attractionId,
         }))
       )
     },
@@ -85,7 +147,8 @@ export const MapContainer = () => {
 
   useMapCluster(mapInstance, spots, handlePinClick)
 
-  // 지도 이동/줌이 멈출 때(idle)마다 현재 영역(bbox)으로 개화현황을 다시 조회한다.
+  // 지도 이동/줌이 멈출 때(idle) 현재 영역(bbox)으로 개화현황을 조회한다.
+  // 좌표를 격자에 스냅해 캐시가 작동하게 하고, 연속 이동은 debounce로 마지막 정착만 조회한다.
   useEffect(() => {
     if (!mapInstance) return
 
@@ -94,16 +157,25 @@ export const MapContainer = () => {
       const sw = bounds.getSouthWest()
       const ne = bounds.getNorthEast()
       setBbox({
-        minLat: sw.getLat(),
-        minLng: sw.getLng(),
-        maxLat: ne.getLat(),
-        maxLng: ne.getLng(),
+        minLat: snapDown(sw.getLat()),
+        minLng: snapDown(sw.getLng()),
+        maxLat: snapUp(ne.getLat()),
+        maxLng: snapUp(ne.getLng()),
       })
     }
 
-    updateBbox()
-    kakao.maps.event.addListener(mapInstance, 'idle', updateBbox)
-    return () => kakao.maps.event.removeListener(mapInstance, 'idle', updateBbox)
+    let timer: ReturnType<typeof setTimeout>
+    const onIdle = () => {
+      clearTimeout(timer)
+      timer = setTimeout(updateBbox, BBOX_DEBOUNCE_MS)
+    }
+
+    updateBbox() // 첫 진입은 즉시 조회
+    kakao.maps.event.addListener(mapInstance, 'idle', onIdle)
+    return () => {
+      clearTimeout(timer)
+      kakao.maps.event.removeListener(mapInstance, 'idle', onIdle)
+    }
   }, [mapInstance])
 
   useEffect(() => {
@@ -184,7 +256,9 @@ export const MapContainer = () => {
                 height={20}
                 className="h-6 w-6"
               />
-              <div className="absolute top-2.5 right-2.5 h-1 w-1 rounded-full bg-pink-500"></div>
+              {hasUnreadNotification && (
+                <div className="absolute top-2.5 right-2.5 h-1 w-1 rounded-full bg-pink-500"></div>
+              )}
             </div>
           }
         />
@@ -196,22 +270,26 @@ export const MapContainer = () => {
         </div>
       )}
 
-      <Category isMap />
+      {isReady && (
+        <>
+          <Category isMap />
 
-      <SearchBar
-        placeholder="지금 피크인 곳을 검색해보세요."
-        description="벚꽃 만개 지역"
-        onFilterClick={openFilterDrawer}
-      />
-      <LocationBtn
-        onLocate={handleLocate}
-        style={{
-          bottom: snapHeight > 0 ? `${snapHeight + 16}px` : '96px',
-          transition: 'bottom 0.5s cubic-bezier(0.32,0.72,0,1)',
-        }}
-      />
-      <Nav activeTab="map" />
-      <Drawer />
+          <SearchBar
+            placeholder="지금 피크인 곳을 검색해보세요."
+            description={searchDescription}
+            onFilterClick={openFilterDrawer}
+          />
+          <LocationBtn
+            onLocate={handleLocate}
+            style={{
+              bottom: snapHeight > 0 ? `${snapHeight + 16}px` : '96px',
+              transition: 'bottom 0.5s cubic-bezier(0.32,0.72,0,1)',
+            }}
+          />
+          <Nav activeTab="map" />
+          <Drawer />
+        </>
+      )}
     </div>
   )
 }

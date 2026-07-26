@@ -4,12 +4,17 @@ import { useState } from 'react'
 
 interface Props {
   initialStatus: boolean
+  onChange?: (isOn: boolean) => void
 }
 
-export default function Toggle({ initialStatus }: Props) {
+export function Toggle({ initialStatus, onChange }: Props) {
   const [isOn, setIsOn] = useState(initialStatus)
   const onToggle = () => {
-    setIsOn((prev) => !prev)
+    setIsOn((prev) => {
+      const next = !prev
+      onChange?.(next)
+      return next
+    })
   }
   return (
     <button

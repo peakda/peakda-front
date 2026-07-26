@@ -1,10 +1,10 @@
 ﻿import { useQueryClient } from '@tanstack/react-query'
 import {
-  getList1QueryKey,
-  list1,
+  getList2QueryKey,
+  list2,
   search,
   suggest,
-  useList1,
+  useList2,
   useSearch,
   useSuggest as useSuggestGen,
 } from '@/api/facades/generated/plant/plant'
@@ -15,7 +15,7 @@ import type { SuggestPlantRequest } from '@/api/facades/generated/peakdaApi.sche
 // ??? plain async (?대깽??湲곕컲 ?몄텧) ???????????????????????????????????????????
 
 export async function listPlantsApi() {
-  const res = await list1()
+  const res = await list2()
   return res.data.data ?? null
 }
 
@@ -32,7 +32,7 @@ export async function suggestPlantApi(payload: SuggestPlantRequest) {
 // ??? React Query hooks (罹먯떛 / ?곹깭 愿由? ????????????????????????????????????
 
 export const usePlants = () =>
-  useList1({ query: { select: (res) => res.data.data ?? null } })
+  useList2({ query: { select: (res) => res.data.data ?? null } })
 
 export const useSearchPlants = (keyword: string) =>
   useSearch(
@@ -46,7 +46,7 @@ export const useSuggestPlant = () => {
   const queryClient = useQueryClient()
   return useSuggestGen({
     mutation: {
-      onSuccess: () => queryClient.invalidateQueries({ queryKey: getList1QueryKey() }),
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: getList2QueryKey() }),
     },
   })
 }

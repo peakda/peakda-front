@@ -1,7 +1,7 @@
 'use client'
 
-import Header from '@/components/ui/layout/Header'
-import LeftArrow from '@/components/ui/button/LeftArrow'
+import { Header } from '@/components/ui/layout/Header'
+import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { UserRow } from '@/components/ui/list/UserRow'
 import { useCurrentUser } from '@/api/facades/auth'
 import { useFollowerList } from '@/api/facades/user-follow'

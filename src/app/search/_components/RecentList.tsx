@@ -1,4 +1,4 @@
-import IconBtn from '@/components/ui/button/IconBtn'
+import { IconBtn } from '@/components/ui/button/IconBtn'
 import { Clock, X } from 'lucide-react'
 import { Dispatch, SetStateAction } from 'react'
 
@@ -9,7 +9,7 @@ interface Props {
   removeRecent: (item: string) => void
 }
 
-export default function RecentList({
+export function RecentList({
   setQuery,
   setRecentSearches,
   recentSearches,

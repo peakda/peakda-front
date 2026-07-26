@@ -595,6 +595,48 @@ export interface ApiResponseSpotFavoriteResponse {
 }
 
 /**
+ * 신고 대상 종류 (V1 은 SPOT_RECORD 만 지원)
+ */
+export type CreateReportRequestTargetType = typeof CreateReportRequestTargetType[keyof typeof CreateReportRequestTargetType];
+
+
+export const CreateReportRequestTargetType = {
+  SPOT_RECORD: 'SPOT_RECORD',
+} as const;
+
+/**
+ * 신고 사유
+ */
+export type CreateReportRequestReason = typeof CreateReportRequestReason[keyof typeof CreateReportRequestReason];
+
+
+export const CreateReportRequestReason = {
+  SPAM: 'SPAM',
+  INAPPROPRIATE: 'INAPPROPRIATE',
+  HARASSMENT: 'HARASSMENT',
+  ETC: 'ETC',
+} as const;
+
+/**
+ * UGC 신고 생성 요청
+ */
+export interface CreateReportRequest {
+  /** 신고 대상 종류 (V1 은 SPOT_RECORD 만 지원) */
+  targetType: CreateReportRequestTargetType;
+  /** 신고 대상 id (targetType=SPOT_RECORD 면 스팟 기록 id) */
+  targetId: number;
+  /** 신고 사유 */
+  reason: CreateReportRequestReason;
+  /**
+     * 상세 사유 (선택, 최대 500자)
+     * @minLength 0
+     * @maxLength 500
+     * @nullable
+     */
+  detail?: string | null;
+}
+
+/**
  * 검색에서 찾지 못한 식물을 사용자가 추가 제안
  */
 export interface SuggestPlantRequest {
@@ -652,6 +694,86 @@ export interface ApiResponsePlantResponse {
   /** 사람이 읽는 메시지 */
   message: string;
   data?: PlantResponse | null;
+}
+
+/**
+ * 리액션 타입
+ */
+export type ReactionCountReactionType = typeof ReactionCountReactionType[keyof typeof ReactionCountReactionType];
+
+
+export const ReactionCountReactionType = {
+  HEART: 'HEART',
+  SMILE: 'SMILE',
+} as const;
+
+/**
+ * 리액션 타입별 집계 1건
+ */
+export interface ReactionCount {
+  /** 리액션 타입 */
+  reactionType: ReactionCountReactionType;
+  /** 개수 */
+  count: number;
+}
+
+export type FeedReactionSummaryResponseMyReactionsItem = typeof FeedReactionSummaryResponseMyReactionsItem[keyof typeof FeedReactionSummaryResponseMyReactionsItem];
+
+
+export const FeedReactionSummaryResponseMyReactionsItem = {
+  HEART: 'HEART',
+  SMILE: 'SMILE',
+} as const;
+
+/**
+ * 피드 기록의 리액션 요약
+ */
+export interface FeedReactionSummaryResponse {
+  /** 스팟 기록 id */
+  recordId: number;
+  /** 리액션 타입별 집계 */
+  counts: ReactionCount[];
+  /** 현재 로그인 사용자가 남긴 리액션 타입들 (없으면 빈 배열) */
+  myReactions: FeedReactionSummaryResponseMyReactionsItem[];
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseFeedReactionSummaryResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: FeedReactionSummaryResponse | null;
+}
+
+/**
+ * 디바이스 플랫폼
+ */
+export type RegisterDeviceRequestPlatform = typeof RegisterDeviceRequestPlatform[keyof typeof RegisterDeviceRequestPlatform];
+
+
+export const RegisterDeviceRequestPlatform = {
+  IOS: 'IOS',
+  ANDROID: 'ANDROID',
+} as const;
+
+/**
+ * 디바이스 토큰 등록 요청
+ */
+export interface RegisterDeviceRequest {
+  /**
+     * 푸시 알림 디바이스 토큰 (ASCII, 최대 1024자)
+     * @minLength 0
+     * @maxLength 1024
+     * @pattern ^[!-~]+$
+     */
+  token: string;
+  /** 디바이스 플랫폼 */
+  platform: RegisterDeviceRequestPlatform;
 }
 
 /**
@@ -858,6 +980,180 @@ export interface ApiResponseFollowSummaryResponse {
 }
 
 /**
+ * 프로필 통계
+ */
+export interface Stats {
+  /** 게시된 기록 수 */
+  recordCount: number;
+  /** 팔로워 수 */
+  followerCount: number;
+  /** 팔로잉 수 */
+  followingCount: number;
+}
+
+/**
+ * @nullable
+ */
+export type SpotRecordSummaryResponseBloomStage = typeof SpotRecordSummaryResponseBloomStage[keyof typeof SpotRecordSummaryResponseBloomStage] | null;
+
+
+export const SpotRecordSummaryResponseBloomStage = {
+  EARLY: 'EARLY',
+  STARTING: 'STARTING',
+  PEAK: 'PEAK',
+  LATE: 'LATE',
+} as const;
+
+export type SpotRecordSummaryResponseStatus = typeof SpotRecordSummaryResponseStatus[keyof typeof SpotRecordSummaryResponseStatus];
+
+
+export const SpotRecordSummaryResponseStatus = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+} as const;
+
+/**
+ * 스팟 기록 목록용 요약 — 대표 사진 1장만 포함
+ */
+export interface SpotRecordSummaryResponse {
+  id: number;
+  spotId: number;
+  spotName: string;
+  user: UserSummary;
+  /** @nullable */
+  visitedDate?: string | null;
+  /** @nullable */
+  bloomStage?: SpotRecordSummaryResponseBloomStage;
+  /** @nullable */
+  memo?: string | null;
+  plants: PlantSummary[];
+  coverPhoto?: PhotoEntry | null;
+  status: SpotRecordSummaryResponseStatus;
+  /** @nullable */
+  publishedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * 타인 프로필 조회 (SCR-024h/i)
+ */
+export interface UserProfileResponse {
+  /** 사용자 PK */
+  userId: number;
+  /** 닉네임 */
+  nickname: string;
+  /**
+     * 프로필 이미지 URL (없으면 null)
+     * @nullable
+     */
+  profileImageUrl?: string | null;
+  /** 통계 */
+  stats: Stats;
+  /** 관심 꽃 카테고리 (읽기전용) */
+  favoriteCategories: FavoriteCategoryResponse;
+  /** 최근 게시 기록 그리드 미리보기 (상위 6건, 더보기는 스팟 기록 리스트 API로) */
+  recordPreview: SpotRecordSummaryResponse[];
+  /** 현재 로그인 사용자가 이 사용자를 팔로우 중인지 여부. 본인 프로필이면 항상 false. */
+  following: boolean;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseUserProfileResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: UserProfileResponse | null;
+}
+
+/**
+ * 마이페이지 집계 (SCR-024)
+ */
+export interface MyPageResponse {
+  /** 사용자 PK */
+  userId: number;
+  /** 닉네임 */
+  nickname: string;
+  /**
+     * 프로필 이미지 URL (없으면 null)
+     * @nullable
+     */
+  profileImageUrl?: string | null;
+  /** 통계 */
+  stats: Stats;
+  /** 관심 꽃 카테고리 */
+  favoriteCategories: FavoriteCategoryResponse;
+  /** 내 게시 기록 그리드 미리보기 (상위 6건, 더보기는 스팟 기록 리스트 API로) */
+  recordPreview: SpotRecordSummaryResponse[];
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseMyPageResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: MyPageResponse | null;
+}
+
+/**
+ * 차단한 사용자 (차단 목록 항목)
+ */
+export interface BlockedUserResponse {
+  /** 사용자 PK */
+  userId: number;
+  /** 닉네임 */
+  nickname: string;
+  /**
+     * 프로필 이미지 URL (없으면 null)
+     * @nullable
+     */
+  profileImageUrl?: string | null;
+  /** 차단한 시각 */
+  blockedAt: string;
+}
+
+/**
+ * 공통 페이지 응답 (0-based)
+ */
+export interface PageResponseBlockedUserResponse {
+  /** 현재 페이지의 항목 리스트 */
+  content: BlockedUserResponse[];
+  /** 0-based 현재 페이지 */
+  page: number;
+  /** 페이지 크기 */
+  size: number;
+  /** 전체 항목 수 */
+  totalElements: number;
+  /** 전체 페이지 수 */
+  totalPages: number;
+  /** 다음 페이지 존재 여부 */
+  hasNext: boolean;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponsePageResponseBlockedUserResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: PageResponseBlockedUserResponse | null;
+}
+
+/**
  * 스팟 유형
  */
 export type SpotDetailResponseType = typeof SpotDetailResponseType[keyof typeof SpotDetailResponseType];
@@ -932,50 +1228,6 @@ export interface BloomBanner {
   peakDurationDays?: number | null;
   /** 상태 산출 기준일 */
   baseDate: string;
-}
-
-/**
- * @nullable
- */
-export type SpotRecordSummaryResponseBloomStage = typeof SpotRecordSummaryResponseBloomStage[keyof typeof SpotRecordSummaryResponseBloomStage] | null;
-
-
-export const SpotRecordSummaryResponseBloomStage = {
-  EARLY: 'EARLY',
-  STARTING: 'STARTING',
-  PEAK: 'PEAK',
-  LATE: 'LATE',
-} as const;
-
-export type SpotRecordSummaryResponseStatus = typeof SpotRecordSummaryResponseStatus[keyof typeof SpotRecordSummaryResponseStatus];
-
-
-export const SpotRecordSummaryResponseStatus = {
-  DRAFT: 'DRAFT',
-  PUBLISHED: 'PUBLISHED',
-} as const;
-
-/**
- * 스팟 기록 목록용 요약 — 대표 사진 1장만 포함
- */
-export interface SpotRecordSummaryResponse {
-  id: number;
-  spotId: number;
-  spotName: string;
-  user: UserSummary;
-  /** @nullable */
-  visitedDate?: string | null;
-  /** @nullable */
-  bloomStage?: SpotRecordSummaryResponseBloomStage;
-  /** @nullable */
-  memo?: string | null;
-  plants: PlantSummary[];
-  coverPhoto?: PhotoEntry | null;
-  status: SpotRecordSummaryResponseStatus;
-  /** @nullable */
-  publishedAt?: string | null;
-  createdAt: string;
-  updatedAt: string;
 }
 
 /**
@@ -1068,6 +1320,108 @@ export interface ApiResponsePageResponseSpotRecordSummaryResponse {
   /** 사람이 읽는 메시지 */
   message: string;
   data?: PageResponseSpotRecordSummaryResponse | null;
+}
+
+/**
+ * 핀 유형
+ */
+export type SpotPreviewItemType = typeof SpotPreviewItemType[keyof typeof SpotPreviewItemType];
+
+
+export const SpotPreviewItemType = {
+  ATTRACTION: 'ATTRACTION',
+  LOCAL: 'LOCAL',
+} as const;
+
+/**
+ * 꽃 카테고리
+ */
+export type BloomBadgeCategory = typeof BloomBadgeCategory[keyof typeof BloomBadgeCategory];
+
+
+export const BloomBadgeCategory = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  COSMOS: 'COSMOS',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
+} as const;
+
+/**
+ * 현재 상태 (PREPARING/STARTED/PEAK)
+ */
+export type BloomBadgeStatus = typeof BloomBadgeStatus[keyof typeof BloomBadgeStatus];
+
+
+export const BloomBadgeStatus = {
+  PREPARING: 'PREPARING',
+  STARTED: 'STARTED',
+  PEAK: 'PEAK',
+  ENDED: 'ENDED',
+} as const;
+
+/**
+ * 대표 개화 단계 뱃지
+ */
+export interface BloomBadge {
+  /** 꽃 카테고리 */
+  category: BloomBadgeCategory;
+  /** 카테고리 표시명 */
+  displayName: string;
+  /** 현재 상태 (PREPARING/STARTED/PEAK) */
+  status: BloomBadgeStatus;
+}
+
+/**
+ * 핀 프리뷰 카드 1건
+ */
+export interface SpotPreviewItem {
+  /** 스팟 id */
+  spotId: number;
+  /** 핀 유형 */
+  type: SpotPreviewItemType;
+  /** 핀 이름 */
+  name: string;
+  /**
+     * 썸네일 이미지 URL (없으면 null)
+     * @nullable
+     */
+  thumbnailUrl?: string | null;
+  badge?: BloomBadge | null;
+  /**
+     * 요청 좌표(lat/lng)로부터의 거리(m). 좌표 미전달 시 null
+     * @nullable
+     */
+  distanceMeters?: number | null;
+}
+
+/**
+ * 핀 클릭 프리뷰 카드 목록 (단일 핀=SCR-011e, 클러스터=SCR-011d 양쪽에서 사용)
+ */
+export interface SpotPreviewResponse {
+  /** 요청한 spotIds 순서를 보존한 프리뷰 카드 목록 (존재하지 않거나 비공개인 id는 제외) */
+  items: SpotPreviewItem[];
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseSpotPreviewResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: SpotPreviewResponse | null;
 }
 
 /**
@@ -1419,6 +1773,165 @@ export interface ApiResponseBloomCalendarResponse {
 }
 
 /**
+ * 사용자 검색 결과 1건
+ */
+export interface UserSearchItem {
+  /** 사용자 id */
+  userId: number;
+  /** 닉네임 */
+  nickname: string;
+  /**
+     * 프로필 이미지 URL (없으면 null)
+     * @nullable
+     */
+  profileImageUrl?: string | null;
+}
+
+/**
+ * 공통 페이지 응답 (0-based)
+ */
+export interface PageResponseUserSearchItem {
+  /** 현재 페이지의 항목 리스트 */
+  content: UserSearchItem[];
+  /** 0-based 현재 페이지 */
+  page: number;
+  /** 페이지 크기 */
+  size: number;
+  /** 전체 항목 수 */
+  totalElements: number;
+  /** 전체 페이지 수 */
+  totalPages: number;
+  /** 다음 페이지 존재 여부 */
+  hasNext: boolean;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponsePageResponseUserSearchItem {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: PageResponseUserSearchItem | null;
+}
+
+/**
+ * 스팟 유형
+ */
+export type TrendingSpotItemType = typeof TrendingSpotItemType[keyof typeof TrendingSpotItemType];
+
+
+export const TrendingSpotItemType = {
+  ATTRACTION: 'ATTRACTION',
+  LOCAL: 'LOCAL',
+} as const;
+
+/**
+ * 인기 스팟 1건
+ */
+export interface TrendingSpotItem {
+  /** 스팟 id */
+  spotId: number;
+  /** 스팟 유형 */
+  type: TrendingSpotItemType;
+  /** 스팟명 */
+  name: string;
+  /** 위도 */
+  latitude: number;
+  /** 경도 */
+  longitude: number;
+  /** 찜 수 */
+  favoriteCount: number;
+}
+
+/**
+ * 찜이 많은 순 인기 스팟 목록 (검색 화면 트렌딩)
+ */
+export interface TrendingSpotsResponse {
+  /** 인기 스팟 목록 (찜 많은 순) */
+  items: TrendingSpotItem[];
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseTrendingSpotsResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: TrendingSpotsResponse | null;
+}
+
+/**
+ * 스팟 유형
+ */
+export type SpotSearchItemType = typeof SpotSearchItemType[keyof typeof SpotSearchItemType];
+
+
+export const SpotSearchItemType = {
+  ATTRACTION: 'ATTRACTION',
+  LOCAL: 'LOCAL',
+} as const;
+
+/**
+ * 스팟 검색 결과 1건
+ */
+export interface SpotSearchItem {
+  /** 스팟 id */
+  spotId: number;
+  /** 스팟 유형 */
+  type: SpotSearchItemType;
+  /** 스팟명 */
+  name: string;
+  /**
+     * 주소 (없으면 null)
+     * @nullable
+     */
+  address?: string | null;
+  /** 위도 */
+  latitude: number;
+  /** 경도 */
+  longitude: number;
+}
+
+/**
+ * 공통 페이지 응답 (0-based)
+ */
+export interface PageResponseSpotSearchItem {
+  /** 현재 페이지의 항목 리스트 */
+  content: SpotSearchItem[];
+  /** 0-based 현재 페이지 */
+  page: number;
+  /** 페이지 크기 */
+  size: number;
+  /** 전체 항목 수 */
+  totalElements: number;
+  /** 전체 페이지 수 */
+  totalPages: number;
+  /** 다음 페이지 존재 여부 */
+  hasNext: boolean;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponsePageResponseSpotSearchItem {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: PageResponseSpotSearchItem | null;
+}
+
+/**
  * 공통 응답 envelope
  */
 export interface ApiResponseListPlantResponse {
@@ -1433,6 +1946,186 @@ export interface ApiResponseListPlantResponse {
      * @nullable
      */
   data?: PlantResponse[] | null;
+}
+
+/**
+ * 알림 종류
+ */
+export type NotificationResponseType = typeof NotificationResponseType[keyof typeof NotificationResponseType];
+
+
+export const NotificationResponseType = {
+  TIMING: 'TIMING',
+  FOLLOW: 'FOLLOW',
+  REACTION: 'REACTION',
+  NOTICE: 'NOTICE',
+} as const;
+
+/**
+ * 탭 시 이동 방식
+ */
+export type NotificationResponseLinkType = typeof NotificationResponseLinkType[keyof typeof NotificationResponseLinkType];
+
+
+export const NotificationResponseLinkType = {
+  INTERNAL: 'INTERNAL',
+  EXTERNAL: 'EXTERNAL',
+} as const;
+
+/**
+ * 알림 1건 (SCR-012~012c)
+ */
+export interface NotificationResponse {
+  /** 알림 PK */
+  id: number;
+  /** 알림 종류 */
+  type: NotificationResponseType;
+  /** 제목 */
+  title: string;
+  /** 본문 */
+  body: string;
+  /** 탭 시 이동 방식 */
+  linkType: NotificationResponseLinkType;
+  /**
+     * EXTERNAL 일 때 이동할 외부 링크
+     * @nullable
+     */
+  linkUrl?: string | null;
+  /**
+     * INTERNAL 일 때 이동 대상 id (팔로워 id·기록 id·스팟 id 등)
+     * @nullable
+     */
+  targetId?: number | null;
+  /** 읽음 여부 */
+  read: boolean;
+  /** 생성 시각 */
+  createdAt: string;
+}
+
+/**
+ * 공통 페이지 응답 (0-based)
+ */
+export interface PageResponseNotificationResponse {
+  /** 현재 페이지의 항목 리스트 */
+  content: NotificationResponse[];
+  /** 0-based 현재 페이지 */
+  page: number;
+  /** 페이지 크기 */
+  size: number;
+  /** 전체 항목 수 */
+  totalElements: number;
+  /** 전체 페이지 수 */
+  totalPages: number;
+  /** 다음 페이지 존재 여부 */
+  hasNext: boolean;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponsePageResponseNotificationResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: PageResponseNotificationResponse | null;
+}
+
+/**
+ * 안 읽은 알림 개수 (뱃지용)
+ */
+export interface UnreadCountResponse {
+  /** 안 읽은 알림 개수 */
+  unreadCount: number;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseUnreadCountResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: UnreadCountResponse | null;
+}
+
+/**
+ * 꽃 카테고리
+ * @nullable
+ */
+export type HomeSuggestionResponseCategory = typeof HomeSuggestionResponseCategory[keyof typeof HomeSuggestionResponseCategory] | null;
+
+
+export const HomeSuggestionResponseCategory = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  COSMOS: 'COSMOS',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
+} as const;
+
+/**
+ * 홈 검색바 보조 카피 (시즌 추천어)
+ */
+export interface HomeSuggestionResponse {
+  /** 추천할 절정 시즌 데이터가 있는지 여부 */
+  available: boolean;
+  /**
+     * 검색바에 노출할 카피 (없으면 null)
+     * @nullable
+     */
+  message?: string | null;
+  /**
+     * 꽃 카테고리
+     * @nullable
+     */
+  category?: HomeSuggestionResponseCategory;
+  /**
+     * 카테고리 표시명
+     * @nullable
+     */
+  displayName?: string | null;
+  /**
+     * 명소 id
+     * @nullable
+     */
+  attractionId?: number | null;
+  /**
+     * 명소명
+     * @nullable
+     */
+  attractionTitle?: string | null;
+  /**
+     * 상태 산출 기준일
+     * @nullable
+     */
+  baseDate?: string | null;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseHomeSuggestionResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: HomeSuggestionResponse | null;
 }
 
 /**
@@ -1531,11 +2224,45 @@ spotId: number;
 pageRequest: PageRequest;
 };
 
+export type AddReactionParams = {
+/**
+ * 리액션 타입
+ */
+reactionType: AddReactionReactionType;
+};
+
+export type AddReactionReactionType = typeof AddReactionReactionType[keyof typeof AddReactionReactionType];
+
+
+export const AddReactionReactionType = {
+  HEART: 'HEART',
+  SMILE: 'SMILE',
+} as const;
+
+export type RemoveReactionParams = {
+/**
+ * 리액션 타입
+ */
+reactionType: RemoveReactionReactionType;
+};
+
+export type RemoveReactionReactionType = typeof RemoveReactionReactionType[keyof typeof RemoveReactionReactionType];
+
+
+export const RemoveReactionReactionType = {
+  HEART: 'HEART',
+  SMILE: 'SMILE',
+} as const;
+
 export type FollowingsParams = {
 pageRequest: PageRequest;
 };
 
 export type FollowersParams = {
+pageRequest: PageRequest;
+};
+
+export type ListParams = {
 pageRequest: PageRequest;
 };
 
@@ -1550,6 +2277,44 @@ export type ListMineStatus = typeof ListMineStatus[keyof typeof ListMineStatus];
 export const ListMineStatus = {
   DRAFT: 'DRAFT',
   PUBLISHED: 'PUBLISHED',
+} as const;
+
+export type PreviewParams = {
+/**
+ * 프리뷰할 스팟 id 목록
+ */
+spotIds: number[];
+/**
+ * 꽃 카테고리 필터 (생략 시 각 스팟의 대표 단계)
+ */
+category?: PreviewCategory;
+/**
+ * 거리 계산 기준 위도 (lng 과 함께 생략 가능)
+ */
+lat?: number;
+/**
+ * 거리 계산 기준 경도 (lat 과 함께 생략 가능)
+ */
+lng?: number;
+};
+
+export type PreviewCategory = typeof PreviewCategory[keyof typeof PreviewCategory];
+
+
+export const PreviewCategory = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  COSMOS: 'COSMOS',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
 } as const;
 
 export type MapParams = {
@@ -1654,9 +2419,60 @@ export const CalendarCategory = {
   CAMELLIA: 'CAMELLIA',
 } as const;
 
+export type SearchUsersParams = {
+/**
+ * 검색어 (닉네임)
+ */
+q: string;
+pageRequest: PageRequest;
+};
+
+export type SearchSpotsParams = {
+/**
+ * 검색어
+ */
+q: string;
+pageRequest: PageRequest;
+};
+
 export type SearchParams = {
 keyword: string;
 };
+
+export type List3Params = {
+/**
+ * 알림 세그먼트
+ */
+segment?: List3Segment;
+pageRequest: PageRequest;
+};
+
+export type List3Segment = typeof List3Segment[keyof typeof List3Segment];
+
+
+export const List3Segment = {
+  ALL: 'ALL',
+  TIMING: 'TIMING',
+  ACTIVITY: 'ACTIVITY',
+  NOTICE: 'NOTICE',
+} as const;
+
+export type List4Params = {
+/**
+ * 피드 필터
+ */
+filter: List4Filter;
+pageRequest: PageRequest;
+};
+
+export type List4Filter = typeof List4Filter[keyof typeof List4Filter];
+
+
+export const List4Filter = {
+  ALL: 'ALL',
+  INTEREST: 'INTEREST',
+  FOLLOWING: 'FOLLOWING',
+} as const;
 
 export type CheckNicknameParams = {
 /**

@@ -33,6 +33,13 @@ export function TermsForm({ onRequiredChange }: TermsFormProps) {
       required: false,
       slug: 'marketing-push-consent',
     },
+    {
+      id: 'location',
+      label: '[필수] 위치정보 동의',
+      checked: false,
+      required: true,
+      slug: 'location-policy',
+    },
   ])
 
   const updateItems = (next: typeof items) => {

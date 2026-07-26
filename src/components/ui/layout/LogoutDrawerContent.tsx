@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import Button from '@/components/ui/button/Button'
+import { Button } from '@/components/ui/button/Button'
 import { logoutApi } from '@/api/facades/auth'
 
 interface Props {

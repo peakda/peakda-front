@@ -8,7 +8,7 @@ interface HeaderProps {
   className?: string
 }
 
-const Header = ({ left, center, right, className }: HeaderProps) => {
+export const Header = ({ left, center, right, className }: HeaderProps) => {
   return (
     <header className={cn('absolute top-0 z-50 flex h-[36px] w-full items-center px-4', className)}>
       {/* Left */}
@@ -23,4 +23,3 @@ const Header = ({ left, center, right, className }: HeaderProps) => {
   )
 }
 
-export default Header

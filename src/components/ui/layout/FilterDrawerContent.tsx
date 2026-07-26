@@ -1,10 +1,10 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { Tabs } from '../Tab/Tab'
-import { TabPanels } from '../Tab/TabPanel'
-import FilterCard from '../card/FilterCard'
-import FlowerCard from '../card/FlowerCard'
+import { Tabs } from '@/components/ui/Tab/Tab'
+import { TabPanels } from '@/components/ui/Tab/TabPanel'
+import { FilterCard } from '@/components/ui/card/FilterCard'
+import { FlowerCard } from '@/components/ui/card/FlowerCard'
 import { TabItem, useTabsContext } from '@/context/TabContext'
 
 const TABS: TabItem[] = [

@@ -39,7 +39,10 @@ function formatTimeAgo(iso: string): string {
 // 대표 사진이 없으면 placeholder 이미지를 사용한다.
 export function toFeedCardProps(record: SpotRecordSummaryResponse): FeedCardProps {
   return {
+    recordId: record.id,
+    authorId: record.user.id,
     authorName: record.user.nickname,
+    authorImageUrl: record.user.profileImageUrl,
     location: record.spotName,
     timeAgo: formatTimeAgo(record.publishedAt ?? record.createdAt),
     visitDate: toDot(record.visitedDate ?? record.createdAt),
@@ -48,7 +51,6 @@ export function toFeedCardProps(record: SpotRecordSummaryResponse): FeedCardProp
     images: record.coverPhoto?.url ? [record.coverPhoto.url] : ['/images/explore.png'],
     flowers: record.plants.map((plant) => ({ emoji: '🌸', label: plant.name })),
     content: record.memo ?? '',
-    reactions: [],
   }
 }
 
@@ -59,7 +61,10 @@ export function detailToFeedCardProps(
   options?: Pick<FeedCardProps, 'isOwner' | 'onEdit' | 'onDelete' | 'onReport'>
 ): FeedCardProps {
   return {
+    recordId: record.id,
+    authorId: record.user.id,
     authorName: record.user.nickname,
+    authorImageUrl: record.user.profileImageUrl,
     location: record.spot.name,
     timeAgo: formatTimeAgo(record.publishedAt ?? record.createdAt),
     visitDate: toDot(record.visitedDate ?? record.createdAt),
@@ -68,7 +73,6 @@ export function detailToFeedCardProps(
     images: record.photos.length > 0 ? record.photos.map((p) => p.url) : ['/images/explore.png'],
     flowers: record.plants.map((plant) => ({ emoji: '🌸', label: plant.name })),
     content: record.memo ?? '',
-    reactions: [],
     ...options,
   }
 }

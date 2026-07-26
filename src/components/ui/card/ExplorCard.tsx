@@ -6,8 +6,8 @@ interface PeakCardProps {
   image: string
   name: string
   description: string
-  visitorCount: number
-  bloomPercent: number
+  visitorCount?: number
+  bloomPercent?: number
 }
 
 interface FestivalCardProps {
@@ -46,16 +46,20 @@ export function ExplorCard(props: ExplorCardProps) {
         {/* Peak 뱃지 */}
         {props.type === 'peak' && (
           <>
-            <CardBadge
-              variant="dark"
-              label={`${props.visitorCount}명 다녀옴`}
-              className="absolute top-2 left-2"
-            />
-            <CardBadge
-              variant="bloom"
-              label={`만개 ${props.bloomPercent}%`}
-              className="absolute top-2 right-2"
-            />
+            {props.visitorCount != null && (
+              <CardBadge
+                variant="dark"
+                label={`${props.visitorCount}명 다녀옴`}
+                className="absolute top-2 left-2"
+              />
+            )}
+            {props.bloomPercent != null && (
+              <CardBadge
+                variant="bloom"
+                label={`만개 ${props.bloomPercent}%`}
+                className="absolute top-2 right-2"
+              />
+            )}
           </>
         )}
 

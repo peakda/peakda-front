@@ -1,4 +1,4 @@
-import SpotCard from '@/components/ui/card/SpotCard'
+import { SpotCard } from '@/components/ui/card/SpotCard'
 import { SPOTProps } from '@/app/search/_components/SpotPanel'
 import { SectionHeader } from '@/app/my/_components/SectionHeader'
 import { SavedSpotEmpty } from '@/app/my/_components/SavedSpotEmpty'

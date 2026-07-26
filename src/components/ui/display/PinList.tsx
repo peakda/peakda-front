@@ -1,9 +1,9 @@
 import Image from 'next/image'
-import PinText from './PinText'
+import { PinText } from './PinText'
 import { MultiImageProps } from '@/types/types'
 import { cn } from '@/lib/utils/cn'
 
-export default function PinList(props: MultiImageProps) {
+export function PinList(props: MultiImageProps) {
   const { title, location, description, Badges, isFavorite, tagText, type } = props
 
   return (

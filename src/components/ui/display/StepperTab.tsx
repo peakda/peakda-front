@@ -5,7 +5,7 @@ interface Props {
   totalSteps: number
 }
 
-export default function StepperTab({ currentStep, totalSteps }: Props) {
+export function StepperTab({ currentStep, totalSteps }: Props) {
   return (
     <div className="flex h-1.5 w-full gap-1">
       {Array.from({ length: totalSteps }, (_, i) => (

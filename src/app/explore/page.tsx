@@ -1,54 +1,44 @@
 'use client'
 
 import { useState } from 'react'
-import Header from '@/components/ui/layout/Header'
-import SearchInput from '@/app/search/_components/SearchInput'
+import { Header } from '@/components/ui/layout/Header'
+import { SearchInput } from '@/app/search/_components/SearchInput'
 import { ExplorCard, ExplorCardProps } from '@/components/ui/card/ExplorCard'
-import SpotCard from '@/components/ui/card/SpotCard'
+import { SpotCard } from '@/components/ui/card/SpotCard'
 import { SPOTProps } from '@/app/search/_components/SpotPanel'
 import Image from 'next/image'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import { Drawer } from '@/components/ui/layout/Drawer'
-import Nav from '@/components/ui/layout/Nav'
+import { Nav } from '@/components/ui/layout/Nav'
+import { useHomeSuggestion } from '@/api/facades/home'
+import { useBloomPeak } from '@/api/facades/seasonal-bloom'
+import type { BloomPeakItem } from '@/api/facades/generated/peakdaApi.schemas'
 
 type PeakData = Extract<ExplorCardProps, { type: 'peak' }>
 type FestivalData = Extract<ExplorCardProps, { type: 'festival' }>
 type CourseData = Extract<ExplorCardProps, { type: 'course' }>
 
-const PEAK_SPOTS: PeakData[] = [
-  {
+// '2026-04-01' → '4.1'. 파싱 실패 시 원본 반환.
+const formatPeakDate = (iso: string) => {
+  const [, m, d] = iso.split('-')
+  return m && d ? `${Number(m)}.${Number(d)}` : iso
+}
+
+// 절정 API 는 명소명·꽃종류·절정기간만 준다(이미지·만개율·방문자수 없음).
+// 없는 값은 채우지 않고, 이미지는 공통 플레이스홀더를 쓴다.
+const toPeakCard = (item: BloomPeakItem): PeakData => {
+  const period =
+    item.peakStartDate && item.peakEndDate
+      ? `${formatPeakDate(item.peakStartDate)}~${formatPeakDate(item.peakEndDate)}`
+      : null
+  const description = [item.displayName, period].filter(Boolean).join(' · ')
+  return {
     type: 'peak',
     image: '/images/exploreEmpty.jpg',
-    name: '여의도 한강공원',
-    description: '서울 영등포구 · 2.4km',
-    visitorCount: 120,
-    bloomPercent: 89,
-  },
-  {
-    type: 'peak',
-    image: '/images/explore.png',
-    name: '남산 숲길',
-    description: '서울 용산구 · 1.8km',
-    visitorCount: 85,
-    bloomPercent: 75,
-  },
-  {
-    type: 'peak',
-    image: '/images/explore.png',
-    name: '경주 불국사',
-    description: '경북 경주시 · 324km',
-    visitorCount: 200,
-    bloomPercent: 95,
-  },
-  {
-    type: 'peak',
-    image: '/images/explore.png',
-    name: '서울숲 벚꽃길',
-    description: '서울 성동구 · 5.2km',
-    visitorCount: 150,
-    bloomPercent: 82,
-  },
-]
+    name: item.title,
+    description,
+  }
+}
 
 const UPCOMING_SPOTS: SPOTProps[] = [
   {
@@ -140,6 +130,13 @@ export default function ExplorePage() {
   const [query, setQuery] = useState('')
   const hasQuery = query.trim().length > 0
   const { openFlowerFilterDrawer } = useDrawerStore()
+  const { data: peak } = useBloomPeak()
+  const peakCards = (peak?.items ?? []).map(toPeakCard)
+  const { data: suggestion } = useHomeSuggestion()
+  const searchPlaceholder =
+    suggestion?.available && suggestion.message
+      ? suggestion.message
+      : '스팟, 지역, 식물을 검색해보세요.'
   return (
     <div className="relative flex min-h-screen w-full flex-col bg-white pb-24">
       <div className="h-14">
@@ -160,15 +157,15 @@ export default function ExplorePage() {
         query={query}
         hasQuery={hasQuery}
         setQuery={setQuery}
-        placeholder="스팟, 지역, 식물을 검색해보세요."
+        placeholder={searchPlaceholder}
       />
 
       {/* 지금이 딱 좋아에요 */}
       <section className="mt-2">
-        <SectionHeader title="지금이 절정이에요" count={PEAK_SPOTS.length} showAll />
+        <SectionHeader title="지금이 절정이에요" count={peakCards.length} showAll />
         <div className="flex gap-3 overflow-x-auto px-4 pb-4 [&::-webkit-scrollbar]:hidden">
-          {PEAK_SPOTS.map((card) => (
-            <ExplorCard key={card.name} {...card} />
+          {peakCards.map((card, i) => (
+            <ExplorCard key={`${card.name}-${i}`} {...card} />
           ))}
         </div>
       </section>

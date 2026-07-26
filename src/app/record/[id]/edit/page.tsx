@@ -4,11 +4,12 @@ import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils/cn'
-import Header from '@/components/ui/layout/Header'
-import LeftArrow from '@/components/ui/button/LeftArrow'
-import Button from '@/components/ui/button/Button'
-import DateSelect from '@/components/ui/form/DateSelect'
-import Textarea from '@/components/ui/form/Textarea'
+import { Header } from '@/components/ui/layout/Header'
+import { Drawer } from '@/components/ui/layout/Drawer'
+import { LeftArrow } from '@/components/ui/button/LeftArrow'
+import { Button } from '@/components/ui/button/Button'
+import { DateSelect } from '@/components/ui/form/DateSelect'
+import { Textarea } from '@/components/ui/form/Textarea'
 import { Badge } from '@/components/ui/display/Badge'
 import { PlantSelectDrawer } from '@/app/record/_components/PlantSelectDrawer'
 import { usePlants } from '@/api/facades/plant'
@@ -206,6 +207,8 @@ function RecordEditForm({ record }: { record: SpotRecordResponse }) {
         selectedIds={selectedPlantIds}
         onToggle={togglePlant}
       />
+
+      <Drawer />
     </div>
   )
 }

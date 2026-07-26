@@ -19,28 +19,24 @@ export const SearchBar = ({
   const router = useRouter()
 
   return (
-    <div
-      className={cn('absolute top-12 z-10 flex h-12 w-full flex-col gap-1 px-4 py-1', className)}
-    >
-      <div className="border-border-primary bg-bg-primary-80 relative flex flex-col rounded-4xl border px-4 py-3">
-        <div className="flex items-center gap-2">
-          <Image src="./icons/search.svg" alt="검색" width={24} height={24} />
+    <div className={cn('absolute top-12 z-10 w-full px-4 py-1', className)}>
+      <div className="border-border-primary bg-bg-primary-80 flex items-center gap-2 rounded-4xl border px-4 py-1.5 backdrop-blur-[8px]">
+        <Image src="./icons/search.svg" alt="검색" width={24} height={24} />
+        <div className="flex flex-1 flex-col gap-0.5">
           <input
             type="text"
             placeholder={placeholder}
             readOnly
             onClick={() => router.push('/search')}
-            className="placeholder:text-text-primary flex-1 cursor-pointer bg-transparent text-base font-medium text-slate-900 outline-none placeholder:-translate-y-1"
+            className="placeholder:text-text-primary w-full cursor-pointer bg-transparent text-base leading-tight font-medium text-text-primary outline-none "
           />
-          <button type="button" className="cursor-pointer" onClick={onFilterClick}>
-            <Image src="./icons/filter.svg" alt="필터" width={24} height={24} />
-          </button>
+          {description && (
+            <p className="text-xs leading-tight tracking-tight text-[#4E5666]">{description}</p>
+          )}
         </div>
-        {description && (
-          <p className="absolute bottom-1 pl-8 text-xs tracking-tight text-[#4E5666]">
-            {description}
-          </p>
-        )}
+        <button type="button" className="cursor-pointer" onClick={onFilterClick}>
+          <Image src="./icons/filter.svg" alt="필터" width={24} height={24} />
+        </button>
       </div>
     </div>
   )

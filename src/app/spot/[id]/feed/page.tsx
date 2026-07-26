@@ -1,16 +1,16 @@
 'use client'
 
 import { useParams } from 'next/navigation'
-import Header from '@/components/ui/layout/Header'
-import LeftArrow from '@/components/ui/button/LeftArrow'
+import { Header } from '@/components/ui/layout/Header'
+import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { FeedCard } from '@/components/ui/card/FeedCard'
 import { useSpotRecordsBySpot } from '@/api/facades/spot-record'
+import { useSpotDetail } from '@/api/facades/spot'
 import { toFeedCardProps } from '@/lib/utils/spotRecordToFeed'
-import { getMockSpot } from '@/app/spot/[id]/_data'
 
 export default function SpotFeedPage() {
   const { id } = useParams<{ id: string }>()
-  const spot = getMockSpot(id)
+  const { data: spot } = useSpotDetail(Number(id))
 
   const { data, isLoading } = useSpotRecordsBySpot({
     spotId: Number(id),
@@ -23,7 +23,11 @@ export default function SpotFeedPage() {
       <div className="h-14">
         <Header
           left={<LeftArrow />}
-          center={<div className="text-[15px] font-medium text-[#000000]">{spot.name} 피드</div>}
+          center={
+            <div className="text-[15px] font-medium text-[#000000]">
+              {spot?.name ? `${spot.name} 피드` : '피드'}
+            </div>
+          }
         />
       </div>
 
