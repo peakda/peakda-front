@@ -16,7 +16,7 @@ export function AlarmAvatar({
       ) : (
         <div className="flex h-8 w-8 items-center justify-center rounded-full">
           <Image
-            src={'./icons/favicon.svg'}
+            src={'/icons/favicon.svg'}
             alt="이미지"
             width={32}
             height={32}
