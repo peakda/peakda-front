@@ -124,7 +124,7 @@ export function FeedCard({
         <span className="text-text-quaternary mt-1 text-xs">{timeAgo}</span>
       </div>
       <div className="flex items-center gap-1">
-        <Image src={'./icons/Pin.svg'} alt="지역" width={15} height={15} color="#8C95A4" />
+        <Image src={'/icons/Pin.svg'} alt="지역" width={15} height={15} color="#8C95A4" />
         <span className="text-text-tertiary mt-1 text-xs">{location}</span>
       </div>
     </>

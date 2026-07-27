@@ -6,7 +6,7 @@ export function LeftArrow() {
   const router = useRouter()
   return (
     <Image
-      src={'../icons/LeftArrow.svg'}
+      src={'/icons/LeftArrow.svg'}
       alt="왼쪽 화살표"
       className="h-6 w-6 cursor-pointer"
       width={24}

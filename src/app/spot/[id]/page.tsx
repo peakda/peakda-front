@@ -29,6 +29,15 @@ const BLOOM_STATUS_VARIANT: Record<string, 'green' | 'bloom' | 'secondary'> = {
   ENDED: 'secondary',
 }
 
+const BLOOM_BANNER_MESSAGE: Record<string, string> = {
+  PREPARING: '곧 피기 시작해요',
+  STARTED: '이제 막 피기 시작했어요',
+  PEAK: '지금이 절정이에요',
+  ENDED: '올해 절정은 지났어요',
+}
+
+const WEEKDAY = ['일', '월', '화', '수', '목', '금', '토']
+
 const BLOOM_CATEGORY_EMOJI: Record<string, string> = {
   PLUM: '🌸',
   FORSYTHIA: '🌼',
@@ -54,12 +63,16 @@ export default function SpotDetailPage() {
 
   if (!spot) return null
 
-  const previewRecord = spot.recordPreview?.[0]
+  const previewRecords = spot.recordPreview ?? []
   const favorited = spot.favorite.favorited
   const bloomPeriod = (() => {
     if (!spot.bloom) return ''
     const { peakStartDate: s, peakEndDate: e } = spot.bloom
-    const fmt = (d: string) => d.slice(5, 10).replace('-', '.')
+    // 'YYYY-MM-DD' → 'M.D(요일)'
+    const fmt = (iso: string) => {
+      const [y, m, d] = iso.slice(0, 10).split('-').map(Number)
+      return `${m}.${d}(${WEEKDAY[new Date(y, m - 1, d).getDay()]})`
+    }
     if (s && e) return `${fmt(s)} ~ ${fmt(e)}`
     if (s) return `${fmt(s)} ~`
     if (e) return `~ ${fmt(e)}`
@@ -72,24 +85,7 @@ export default function SpotDetailPage() {
   return (
     <div className="bg-bg-primary relative flex min-h-screen flex-col pb-28">
       <div className="h-14">
-        <Header
-          left={<LeftArrow />}
-          right={
-            <div className="flex items-center gap-3">
-              <button type="button" aria-label="공유">
-                <Share2 className="h-5 w-5 cursor-pointer text-gray-600" />
-              </button>
-              <button type="button" aria-label="찜하기" onClick={handleSave}>
-                <Heart
-                  className={cn(
-                    'h-5 w-5 cursor-pointer',
-                    favorited ? 'fill-rose-500 text-rose-500' : 'text-gray-600',
-                  )}
-                />
-              </button>
-            </div>
-          }
-        />
+        <Header left={<LeftArrow />} />
       </div>
 
       {/* 대표 이미지 */}
@@ -110,16 +106,31 @@ export default function SpotDetailPage() {
       <div className="flex flex-col gap-5 px-4 py-4">
         {/* 타이틀 + 위치 */}
         <div className="flex flex-col gap-1.5">
-          <div className="flex items-center gap-2">
-            <h1 className="text-text-primary text-xl font-bold">{spot.name}</h1>
-            {spot.bloom && (
-              <Badge
-                label={spot.bloom.displayName}
-                leftIcon={<span>{BLOOM_CATEGORY_EMOJI[spot.bloom.category] ?? '🌸'}</span>}
-                variant="filled"
-                color="pink"
-              />
-            )}
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-text-primary text-xl font-bold">{spot.name}</h1>
+              {spot.bloom && (
+                <Badge
+                  label={spot.bloom.displayName}
+                  leftIcon={<span>{BLOOM_CATEGORY_EMOJI[spot.bloom.category] ?? '🌸'}</span>}
+                  variant="filled"
+                  color="pink"
+                />
+              )}
+            </div>
+            <div className="flex shrink-0 items-center gap-3 pt-1">
+              <button type="button" aria-label="찜하기" onClick={handleSave}>
+                <Heart
+                  className={cn(
+                    'h-5 w-5 cursor-pointer',
+                    favorited ? 'fill-rose-500 text-rose-500' : 'text-gray-600'
+                  )}
+                />
+              </button>
+              <button type="button" aria-label="공유">
+                <Share2 className="h-5 w-5 cursor-pointer text-gray-600" />
+              </button>
+            </div>
           </div>
           <span className="text-text-secondary flex items-center gap-1 text-sm">
             <MapPin className="h-4 w-4 shrink-0" />
@@ -127,18 +138,25 @@ export default function SpotDetailPage() {
           </span>
         </div>
 
-        {/* 개화 예상 시기 */}
-        {bloomPeriod && (
-          <Section title="개화 예상 시기">
-            <Badge label={bloomPeriod} variant="filled" color="green" className="w-fit" />
+        {/* 올해 만개 시기 */}
+        {spot.bloom && (
+          <Section title="올해 만개 시기">
+            <div className="flex items-center justify-between gap-2 rounded-xl bg-green-50 px-4 py-3">
+              <span className="text-sm font-semibold text-green-600">
+                {BLOOM_BANNER_MESSAGE[spot.bloom.status] ?? spot.bloom.displayName}
+              </span>
+              {bloomPeriod && (
+                <span className="text-sm font-medium text-green-500">{bloomPeriod}</span>
+              )}
+            </div>
           </Section>
         )}
       </div>
 
-      {/* Contents (스팟 피드 미리보기) */}
+      {/* 최신 방문 기록 (최대 3건) */}
       <div className="border-border-primary border-t">
         <div className="flex items-center justify-between px-4 pt-4">
-          <h2 className="text-text-primary text-base font-semibold">Contents</h2>
+          <h2 className="text-text-primary text-base font-semibold">최신 방문 기록</h2>
           <button
             type="button"
             className="text-text-tertiary cursor-pointer text-sm"
@@ -147,7 +165,15 @@ export default function SpotDetailPage() {
             더보기
           </button>
         </div>
-        {previewRecord && <FeedCard {...toFeedCardProps(previewRecord)} />}
+        {previewRecords.length === 0 ? (
+          <p className="text-text-tertiary py-10 text-center text-sm">아직 기록이 없어요</p>
+        ) : (
+          <div className="divide-border-primary divide-y">
+            {previewRecords.map((record) => (
+              <FeedCard key={record.id} {...toFeedCardProps(record)} />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* 하단 CTA */}

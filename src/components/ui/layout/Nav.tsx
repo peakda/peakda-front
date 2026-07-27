@@ -17,7 +17,7 @@ export function Nav({ activeTab }: NavProps) {
         {/* 지도 */}
         <div className={itemClass} onClick={() => router.push('/map')}>
           <Image
-            src={'./icons/explore.svg'}
+            src={'/icons/explore.svg'}
             alt="지도"
             width={20}
             height={20}
@@ -29,7 +29,7 @@ export function Nav({ activeTab }: NavProps) {
         {/* 추천 */}
         <div className={itemClass} onClick={() => router.push('/explore')}>
           <Image
-            src={'./icons/mapSearch.svg'}
+            src={'/icons/mapSearch.svg'}
             alt="탐색"
             width={20}
             height={20}
@@ -49,7 +49,7 @@ export function Nav({ activeTab }: NavProps) {
         {/* 피드 */}
         <div className={itemClass} onClick={() => router.push('/feed')}>
           <Image
-            src={'./icons/feed.svg'}
+            src={'/icons/feed.svg'}
             alt="피드"
             width={20}
             height={20}
@@ -63,7 +63,7 @@ export function Nav({ activeTab }: NavProps) {
           <div
             className={`rounded-full bg-gray-200 p-1 ${activeTab === 'my' ? 'opacity-100' : 'opacity-50'}`}
           >
-            <Image src={'./icons/my.svg'} alt="My" width={18} height={18} />
+            <Image src={'/icons/my.svg'} alt="My" width={18} height={18} />
           </div>
           <p className={activeTab === 'my' ? 'text-black' : 'text-gray-400'}>My</p>
         </div>
