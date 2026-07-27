@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Header } from '@/components/ui/layout/Header'
 import { SearchInput } from '@/app/search/_components/SearchInput'
 import { ExplorCard, ExplorCardProps } from '@/components/ui/card/ExplorCard'
@@ -127,8 +127,7 @@ function SectionHeader({ title, showAll }: SectionHeaderProps) {
 }
 
 export default function ExplorePage() {
-  const [query, setQuery] = useState('')
-  const hasQuery = query.trim().length > 0
+  const router = useRouter()
   const { openFlowerFilterDrawer } = useDrawerStore()
   const { data: peak } = useBloomPeak()
   const peakCards = (peak?.items ?? []).map(toPeakCard)
@@ -146,7 +145,7 @@ export default function ExplorePage() {
             <div className="flex items-center gap-1">
               <p className="text-text-secondary text-sm">필터</p>
               <button type="button" className="cursor-pointer" onClick={openFlowerFilterDrawer}>
-                <Image src="./icons/filter.svg" alt="필터" width={24} height={24} />
+                <Image src="/icons/filter.svg" alt="필터" width={24} height={24} />
               </button>
             </div>
           }
@@ -154,9 +153,8 @@ export default function ExplorePage() {
       </div>
 
       <SearchInput
-        query={query}
-        hasQuery={hasQuery}
-        setQuery={setQuery}
+        readOnly
+        onClick={() => router.push('/search')}
         placeholder={searchPlaceholder}
       />
 

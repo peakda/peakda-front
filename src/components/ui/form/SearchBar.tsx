@@ -21,7 +21,7 @@ export const SearchBar = ({
   return (
     <div className={cn('absolute top-12 z-10 w-full px-4 py-1', className)}>
       <div className="border-border-primary bg-bg-primary-80 flex items-center gap-2 rounded-4xl border px-4 py-1.5 backdrop-blur-[8px]">
-        <Image src="./icons/search.svg" alt="검색" width={24} height={24} />
+        <Image src="/icons/search.svg" alt="검색" width={24} height={24} />
         <div className="flex flex-1 flex-col gap-0.5">
           <input
             type="text"
@@ -35,7 +35,7 @@ export const SearchBar = ({
           )}
         </div>
         <button type="button" className="cursor-pointer" onClick={onFilterClick}>
-          <Image src="./icons/filter.svg" alt="필터" width={24} height={24} />
+          <Image src="/icons/filter.svg" alt="필터" width={24} height={24} />
         </button>
       </div>
     </div>

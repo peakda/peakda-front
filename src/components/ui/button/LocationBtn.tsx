@@ -16,7 +16,7 @@ export function LocationBtn({ onLocate, style }: LocationBtnProps) {
       style={style}
     >
       <IconBtn>
-        <Image src={'./icons/location.svg'} alt="위치 초기화 버튼" width={24} height={24} />
+        <Image src={'/icons/location.svg'} alt="위치 초기화 버튼" width={24} height={24} />
       </IconBtn>
     </button>
   )
