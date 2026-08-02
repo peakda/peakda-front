@@ -6,7 +6,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button/Button'
 import { Toggle } from '@/components/ui/display/Toggle'
 import { useAddFavorite, useUpdateFavoriteNotify } from '@/api/facades/spot-favorite'
-import { getGetSpotDetailQueryKey } from '@/api/facades/generated/spot/spot'
+import { getGetSpotsByIdQueryKey } from '@/api/facades/generated/spot/spot'
 import type { SaveSpotData } from '@/stores/useDrawerStore'
 
 interface Props {
@@ -30,7 +30,7 @@ export function SaveSpotDrawerContent({ spot, onClose }: Props) {
             updateNotify.mutate({ spotId: spot.spotId, data: { enabled: false } })
           }
           // 상세 화면 하트 상태(favorited)를 즉시 반영하기 위해 상세 쿼리 무효화
-          queryClient.invalidateQueries({ queryKey: getGetSpotDetailQueryKey(spot.spotId) })
+          queryClient.invalidateQueries({ queryKey: getGetSpotsByIdQueryKey(spot.spotId) })
           onClose()
         },
       },

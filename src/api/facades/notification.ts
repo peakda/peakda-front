@@ -1,15 +1,15 @@
 import { useQueryClient } from '@tanstack/react-query'
 import {
-  list3,
-  markAllRead,
-  markRead,
-  unreadCount,
-  useList3,
-  useMarkAllRead as useMarkAllReadGen,
-  useMarkRead as useMarkReadGen,
-  useUnreadCount,
+  getNotifications,
+  patchNotificationsReadAll,
+  patchNotificationsByIdRead,
+  getNotificationsUnreadCount,
+  useGetNotifications,
+  usePatchNotificationsReadAll as useMarkAllReadGen,
+  usePatchNotificationsByIdRead as useMarkReadGen,
+  useGetNotificationsUnreadCount,
 } from '@/api/facades/generated/notification/notification'
-import type { List3Params } from '@/api/facades/generated/peakdaApi.schemas'
+import type { GetNotificationsParams } from '@/api/facades/generated/peakdaApi.schemas'
 
 // 트레이드 규칙: res.data (Orval 래퍼) → res.data.data (백엔드 실제 payload)
 
@@ -22,31 +22,31 @@ const invalidateNotifications = (queryClient: ReturnType<typeof useQueryClient>)
 
 // ▷ plain async (이벤트 기반 호출) ─────────────────────────────────────────
 
-export async function notificationListApi(params: List3Params) {
-  const res = await list3(params)
+export async function notificationListApi(params: GetNotificationsParams) {
+  const res = await getNotifications(params)
   return res.data.data ?? null
 }
 
 export async function unreadCountApi() {
-  const res = await unreadCount()
+  const res = await getNotificationsUnreadCount()
   return res.data.data ?? null
 }
 
 export async function markNotificationReadApi(id: number) {
-  await markRead(id)
+  await patchNotificationsByIdRead(id)
 }
 
 export async function markAllNotificationsReadApi() {
-  await markAllRead()
+  await patchNotificationsReadAll()
 }
 
 // ▷ React Query hooks (캐싱 / 상태 관리) ───────────────────────────────────
 
-export const useNotificationList = (params: List3Params) =>
-  useList3(params, { query: { select: (res) => res.data.data ?? null } })
+export const useNotificationList = (params: GetNotificationsParams) =>
+  useGetNotifications(params, { query: { select: (res) => res.data.data ?? null } })
 
 export const useUnreadNotificationCount = () =>
-  useUnreadCount({ query: { select: (res) => res.data.data ?? null } })
+  useGetNotificationsUnreadCount({ query: { select: (res) => res.data.data ?? null } })
 
 // mutate({ id }) 형태로 호출 → 성공 시 알림 캐시 무효화
 export const useMarkNotificationRead = () => {

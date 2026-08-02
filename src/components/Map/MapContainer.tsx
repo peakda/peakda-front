@@ -20,7 +20,7 @@ import { spotPreviewApi } from '@/api/facades/spot'
 import { bloomToMapSpots } from '@/lib/utils/bloomToMapSpots'
 import type {
   BloomBadgeStatus,
-  MapParams,
+  GetSeasonalBloomsParams,
   SpotPreviewItem,
 } from '@/api/facades/generated/peakdaApi.schemas'
 import { useRouter } from 'next/navigation'
@@ -81,7 +81,7 @@ export const MapContainer = () => {
   const router = useRouter()
   const mapRef = useRef<kakao.maps.Map | null>(null)
   const [mapInstance, setMapInstance] = useState<kakao.maps.Map | null>(null)
-  const [bbox, setBbox] = useState<MapParams | null>(null)
+  const [bbox, setBbox] = useState<GetSeasonalBloomsParams | null>(null)
   const { isReady, error, retry } = useLazyMapLoad(containerRef)
   const { snapHeight, openFilterDrawer, openPinDrawer } = useDrawerStore()
 

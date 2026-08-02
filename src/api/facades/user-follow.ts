@@ -1,17 +1,17 @@
 ﻿import { useQueryClient } from '@tanstack/react-query'
 import {
-  follow,
-  followers,
-  followings,
-  summary,
-  unfollow,
-  useFollow as useFollowGen,
-  useFollowers,
-  useFollowings,
-  useSummary,
-  useUnfollow as useUnfollowGen,
+  postUsersByUserIdFollow,
+  getUsersByUserIdFollowers,
+  getUsersByUserIdFollowings,
+  getUsersByUserIdFollowSummary,
+  deleteUsersByUserIdFollow,
+  usePostUsersByUserIdFollow as useFollowGen,
+  useGetUsersByUserIdFollowers,
+  useGetUsersByUserIdFollowings,
+  useGetUsersByUserIdFollowSummary,
+  useDeleteUsersByUserIdFollow as useUnfollowGen,
 } from '@/api/facades/generated/user-follow/user-follow'
-import type { FollowersParams, FollowingsParams } from '@/api/facades/generated/peakdaApi.schemas'
+import type { GetUsersByUserIdFollowersParams, GetUsersByUserIdFollowingsParams } from '@/api/facades/generated/peakdaApi.schemas'
 
 // ?몃옒??洹쒖튃: res.data (Orval ?섑띁) ??res.data.data (諛깆뿏???ㅼ젣 payload)
 
@@ -24,38 +24,38 @@ const invalidateFollow = (queryClient: ReturnType<typeof useQueryClient>) =>
 // ??? plain async (?대깽??湲곕컲 ?몄텧) ???????????????????????????????????????????
 
 export async function followApi(userId: number) {
-  await follow(userId)
+  await postUsersByUserIdFollow(userId)
 }
 
 export async function unfollowApi(userId: number) {
-  await unfollow(userId)
+  await deleteUsersByUserIdFollow(userId)
 }
 
-export async function followingsApi(userId: number, params: FollowingsParams) {
-  const res = await followings(userId, params)
+export async function followingsApi(userId: number, params: GetUsersByUserIdFollowingsParams) {
+  const res = await getUsersByUserIdFollowings(userId, params)
   return res.data.data ?? null
 }
 
-export async function followersApi(userId: number, params: FollowersParams) {
-  const res = await followers(userId, params)
+export async function followersApi(userId: number, params: GetUsersByUserIdFollowersParams) {
+  const res = await getUsersByUserIdFollowers(userId, params)
   return res.data.data ?? null
 }
 
 export async function followSummaryApi(userId: number) {
-  const res = await summary(userId)
+  const res = await getUsersByUserIdFollowSummary(userId)
   return res.data.data ?? null
 }
 
 // ??? React Query hooks (罹먯떛 / ?곹깭 愿由? ????????????????????????????????????
 
 export const useFollowSummary = (userId: number | undefined) =>
-  useSummary(userId ?? 0, { query: { enabled: !!userId, select: (res) => res.data.data ?? null } })
+  useGetUsersByUserIdFollowSummary(userId ?? 0, { query: { enabled: !!userId, select: (res) => res.data.data ?? null } })
 
-export const useFollowingList = (userId: number, params: FollowingsParams) =>
-  useFollowings(userId, params, { query: { select: (res) => res.data.data ?? null } })
+export const useFollowingList = (userId: number, params: GetUsersByUserIdFollowingsParams) =>
+  useGetUsersByUserIdFollowings(userId, params, { query: { select: (res) => res.data.data ?? null } })
 
-export const useFollowerList = (userId: number, params: FollowersParams) =>
-  useFollowers(userId, params, { query: { select: (res) => res.data.data ?? null } })
+export const useFollowerList = (userId: number, params: GetUsersByUserIdFollowersParams) =>
+  useGetUsersByUserIdFollowers(userId, params, { query: { select: (res) => res.data.data ?? null } })
 
 // mutate({ userId }) ?뺥깭濡??몄텧 ???깃났 ???붾줈??愿??罹먯떆 臾댄슚??
 

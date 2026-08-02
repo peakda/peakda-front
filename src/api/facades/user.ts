@@ -1,14 +1,14 @@
 ﻿import { useQueryClient } from '@tanstack/react-query'
-import { getGetCurrentUserQueryKey } from '@/api/facades/generated/auth/auth'
+import { getGetAuthMeQueryKey } from '@/api/facades/generated/auth/auth'
 import {
-  deleteProfileImage,
-  getMyPage,
-  uploadProfileImage,
-  useDeleteProfileImage as useDeleteProfileImageGen,
-  useGetMyPage,
-  useUpdateFavoriteCategories as useUpdateFavoriteCategoriesGen,
-  useUploadProfileImage as useUploadProfileImageGen,
-  withdraw,
+  deleteUsersMeProfileImage,
+  getUsersMe,
+  postUsersMeProfileImage,
+  useDeleteUsersMeProfileImage as useDeleteProfileImageGen,
+  useGetUsersMe,
+  usePutUsersMeFavoriteCategories as useUpdateFavoriteCategoriesGen,
+  usePostUsersMeProfileImage as useUploadProfileImageGen,
+  deleteUsersMe,
 } from '@/api/facades/generated/user/user'
 
 // ?몃옒??洹쒖튃: res.data (Orval ?섑띁) ??res.data.data (諛깆뿏???ㅼ젣 payload)
@@ -16,22 +16,22 @@ import {
 // ??? plain async (?대깽??湲곕컲 ?몄텧) ???????????????????????????????????????????
 
 export async function uploadProfileImageApi(image: Blob) {
-  const res = await uploadProfileImage({ image })
+  const res = await postUsersMeProfileImage({ image })
   return res.data.data ?? null
 }
 
 export async function deleteProfileImageApi() {
-  await deleteProfileImage()
+  await deleteUsersMeProfileImage()
 }
 
 // 계정 탈퇴. 서버가 인증 쿠키를 만료시키므로 호출 후 로그인 화면으로 보낸다(호출부 담당).
 export async function withdrawApi() {
-  await withdraw()
+  await deleteUsersMe()
 }
 
 // 마이페이지 집계(내 정보 + 통계)
 export async function myPageApi() {
-  const res = await getMyPage()
+  const res = await getUsersMe()
   return res.data.data ?? null
 }
 
@@ -41,13 +41,13 @@ export async function myPageApi() {
 // ?깃났 ???좎? ?뺣낫 罹먯떆 臾댄슚??
 // 마이페이지 집계 조회
 export const useMyPage = () =>
-  useGetMyPage({ query: { select: (res) => res.data.data ?? null } })
+  useGetUsersMe({ query: { select: (res) => res.data.data ?? null } })
 
 export const useUploadProfileImage = () => {
   const queryClient = useQueryClient()
   return useUploadProfileImageGen({
     mutation: {
-      onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() }),
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetAuthMeQueryKey() }),
     },
   })
 }
@@ -57,7 +57,7 @@ export const useDeleteProfileImage = () => {
   const queryClient = useQueryClient()
   return useDeleteProfileImageGen({
     mutation: {
-      onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() }),
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetAuthMeQueryKey() }),
     },
   })
 }
@@ -68,7 +68,7 @@ export const useUpdateFavoriteCategories = () => {
   const queryClient = useQueryClient()
   return useUpdateFavoriteCategoriesGen({
     mutation: {
-      onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() }),
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetAuthMeQueryKey() }),
     },
   })
 }
