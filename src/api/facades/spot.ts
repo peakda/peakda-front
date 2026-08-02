@@ -14,8 +14,9 @@ export async function matchSpotApi(payload: SpotMatchRequest) {
 
 export const useMatchSpot = () => useMatchGen()
 
-export const useSpotDetail = (id: number) =>
-  useGetSpotsById(id, { query: { select: (res) => res.data.data ?? null } })
+// id 가 아직 없으면(선행 조회 대기) 요청하지 않는다.
+export const useSpotDetail = (id: number | undefined) =>
+  useGetSpotsById(id ?? 0, { query: { enabled: !!id, select: (res) => res.data.data ?? null } })
 
 // 이벤트(핀 클릭 등)에서 프리뷰를 즉시 조회할 때 사용하는 plain async.
 // spotIds 가 비면 요청하지 않는다.
