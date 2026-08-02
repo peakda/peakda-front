@@ -28,7 +28,7 @@ import type {
   ApiResponseSpotDetailResponse,
   ApiResponseSpotMatchResponse,
   ApiResponseSpotPreviewResponse,
-  PreviewParams,
+  GetSpotsPreviewParams,
   SpotMatchRequest
 } from '../peakdaApi.schemas';
 
@@ -39,19 +39,19 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export type matchResponse200 = {
+export type postSpotsMatchResponse200 = {
   data: ApiResponseSpotMatchResponse
   status: 200
 }
 
-export type matchResponseSuccess = (matchResponse200) & {
+export type postSpotsMatchResponseSuccess = (postSpotsMatchResponse200) & {
   headers: Headers;
 };
 ;
 
-export type matchResponse = (matchResponseSuccess)
+export type postSpotsMatchResponse = (postSpotsMatchResponseSuccess)
 
-export const getMatchUrl = () => {
+export const getPostSpotsMatchUrl = () => {
 
 
 
@@ -63,9 +63,9 @@ export const getMatchUrl = () => {
  * 카카오 검색에서 받은 좌표/이름/(선택) placeId 로 기존 스팟을 매칭한다. kakaoPlaceId 가 일치하는 LOCAL 스팟이 있으면 그것이 우선, 없으면 반경 내 가장 가까운 ATTRACTION 을 찾아 매칭한다. ATTRACTION 매칭 시 spots 행이 없으면 생성하여 id 를 부여한다.
  * @summary 좌표 기반 스팟 매칭
  */
-export const match = async (spotMatchRequest: SpotMatchRequest, options?: RequestInit): Promise<matchResponse> => {
+export const postSpotsMatch = async (spotMatchRequest: SpotMatchRequest, options?: RequestInit): Promise<postSpotsMatchResponse> => {
 
-  return customInstance<matchResponse>(getMatchUrl(),
+  return customInstance<postSpotsMatchResponse>(getPostSpotsMatchUrl(),
   {
     ...options,
     method: 'POST',
@@ -77,11 +77,11 @@ export const match = async (spotMatchRequest: SpotMatchRequest, options?: Reques
 
 
 
-export const getMatchMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof match>>, TError,{data: SpotMatchRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof match>>, TError,{data: SpotMatchRequest}, TContext> => {
+export const getPostSpotsMatchMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postSpotsMatch>>, TError,{data: SpotMatchRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postSpotsMatch>>, TError,{data: SpotMatchRequest}, TContext> => {
 
-const mutationKey = ['match'];
+const mutationKey = ['postSpotsMatch'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -91,10 +91,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof match>>, {data: SpotMatchRequest}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postSpotsMatch>>, {data: SpotMatchRequest}> = (props) => {
           const {data} = props ?? {};
 
-          return  match(data,requestOptions)
+          return  postSpotsMatch(data,requestOptions)
         }
 
 
@@ -104,36 +104,36 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type MatchMutationResult = NonNullable<Awaited<ReturnType<typeof match>>>
-    export type MatchMutationBody = SpotMatchRequest
-    export type MatchMutationError = unknown
+    export type PostSpotsMatchMutationResult = NonNullable<Awaited<ReturnType<typeof postSpotsMatch>>>
+    export type PostSpotsMatchMutationBody = SpotMatchRequest
+    export type PostSpotsMatchMutationError = unknown
 
     /**
  * @summary 좌표 기반 스팟 매칭
  */
-export const useMatch = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof match>>, TError,{data: SpotMatchRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostSpotsMatch = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postSpotsMatch>>, TError,{data: SpotMatchRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof match>>,
+        Awaited<ReturnType<typeof postSpotsMatch>>,
         TError,
         {data: SpotMatchRequest},
         TContext
       > => {
-      return useMutation(getMatchMutationOptions(options), queryClient);
+      return useMutation(getPostSpotsMatchMutationOptions(options), queryClient);
     }
-    export type getSpotDetailResponse200 = {
+    export type getSpotsByIdResponse200 = {
   data: ApiResponseSpotDetailResponse
   status: 200
 }
 
-export type getSpotDetailResponseSuccess = (getSpotDetailResponse200) & {
+export type getSpotsByIdResponseSuccess = (getSpotsByIdResponse200) & {
   headers: Headers;
 };
 ;
 
-export type getSpotDetailResponse = (getSpotDetailResponseSuccess)
+export type getSpotsByIdResponse = (getSpotsByIdResponseSuccess)
 
-export const getGetSpotDetailUrl = (id: number,) => {
+export const getGetSpotsByIdUrl = (id: number,) => {
 
 
 
@@ -145,9 +145,9 @@ export const getGetSpotDetailUrl = (id: number,) => {
  * 스팟 단위 상세 화면 정보를 반환한다. 대표 사진, 올해 만개 시기 배너(개화 추정 연동), 게시된 방문 기록 수와 최신 프리뷰, 현재 사용자의 찜 상태를 포함한다.
  * @summary 스팟 상세 조회
  */
-export const getSpotDetail = async (id: number, options?: RequestInit): Promise<getSpotDetailResponse> => {
+export const getSpotsById = async (id: number, options?: RequestInit): Promise<getSpotsByIdResponse> => {
 
-  return customInstance<getSpotDetailResponse>(getGetSpotDetailUrl(id),
+  return customInstance<getSpotsByIdResponse>(getGetSpotsByIdUrl(id),
   {
     ...options,
     method: 'GET'
@@ -160,69 +160,69 @@ export const getSpotDetail = async (id: number, options?: RequestInit): Promise<
 
 
 
-export const getGetSpotDetailQueryKey = (id: number,) => {
+export const getGetSpotsByIdQueryKey = (id: number,) => {
     return [
     `/api/spots/${id}`
     ] as const;
     }
 
 
-export const getGetSpotDetailQueryOptions = <TData = Awaited<ReturnType<typeof getSpotDetail>>, TError = unknown>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotDetail>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetSpotsByIdQueryOptions = <TData = Awaited<ReturnType<typeof getSpotsById>>, TError = unknown>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsById>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetSpotDetailQueryKey(id);
+  const queryKey =  queryOptions?.queryKey ?? getGetSpotsByIdQueryKey(id);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSpotDetail>>> = ({ signal }) => getSpotDetail(id, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSpotsById>>> = ({ signal }) => getSpotsById(id, { signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSpotDetail>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSpotsById>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetSpotDetailQueryResult = NonNullable<Awaited<ReturnType<typeof getSpotDetail>>>
-export type GetSpotDetailQueryError = unknown
+export type GetSpotsByIdQueryResult = NonNullable<Awaited<ReturnType<typeof getSpotsById>>>
+export type GetSpotsByIdQueryError = unknown
 
 
-export function useGetSpotDetail<TData = Awaited<ReturnType<typeof getSpotDetail>>, TError = unknown>(
- id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotDetail>>, TError, TData>> & Pick<
+export function useGetSpotsById<TData = Awaited<ReturnType<typeof getSpotsById>>, TError = unknown>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsById>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getSpotDetail>>,
+          Awaited<ReturnType<typeof getSpotsById>>,
           TError,
-          Awaited<ReturnType<typeof getSpotDetail>>
+          Awaited<ReturnType<typeof getSpotsById>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetSpotDetail<TData = Awaited<ReturnType<typeof getSpotDetail>>, TError = unknown>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotDetail>>, TError, TData>> & Pick<
+export function useGetSpotsById<TData = Awaited<ReturnType<typeof getSpotsById>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsById>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getSpotDetail>>,
+          Awaited<ReturnType<typeof getSpotsById>>,
           TError,
-          Awaited<ReturnType<typeof getSpotDetail>>
+          Awaited<ReturnType<typeof getSpotsById>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetSpotDetail<TData = Awaited<ReturnType<typeof getSpotDetail>>, TError = unknown>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotDetail>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetSpotsById<TData = Awaited<ReturnType<typeof getSpotsById>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsById>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 스팟 상세 조회
  */
 
-export function useGetSpotDetail<TData = Awaited<ReturnType<typeof getSpotDetail>>, TError = unknown>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotDetail>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetSpotsById<TData = Awaited<ReturnType<typeof getSpotsById>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsById>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetSpotDetailQueryOptions(id,options)
+  const queryOptions = getGetSpotsByIdQueryOptions(id,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -234,19 +234,19 @@ export function useGetSpotDetail<TData = Awaited<ReturnType<typeof getSpotDetail
 
 
 
-export type previewResponse200 = {
+export type getSpotsPreviewResponse200 = {
   data: ApiResponseSpotPreviewResponse
   status: 200
 }
 
-export type previewResponseSuccess = (previewResponse200) & {
+export type getSpotsPreviewResponseSuccess = (getSpotsPreviewResponse200) & {
   headers: Headers;
 };
 ;
 
-export type previewResponse = (previewResponseSuccess)
+export type getSpotsPreviewResponse = (getSpotsPreviewResponseSuccess)
 
-export const getPreviewUrl = (params: PreviewParams,) => {
+export const getGetSpotsPreviewUrl = (params: GetSpotsPreviewParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -265,9 +265,9 @@ export const getPreviewUrl = (params: PreviewParams,) => {
  * 지도 핀 탭 시 보여줄 카드(썸네일/개화 단계 뱃지/거리)를 조회한다. spotIds 1건이면 단일 프리뷰(SCR-011e), 여러 건이면 클러스터 리스트(SCR-011d)로 그대로 쓸 수 있다. lat/lng 을 함께 주면 각 스팟까지의 거리(m)를 계산해 채운다.
  * @summary 핀 클릭 프리뷰
  */
-export const preview = async (params: PreviewParams, options?: RequestInit): Promise<previewResponse> => {
+export const getSpotsPreview = async (params: GetSpotsPreviewParams, options?: RequestInit): Promise<getSpotsPreviewResponse> => {
 
-  return customInstance<previewResponse>(getPreviewUrl(params),
+  return customInstance<getSpotsPreviewResponse>(getGetSpotsPreviewUrl(params),
   {
     ...options,
     method: 'GET'
@@ -280,69 +280,69 @@ export const preview = async (params: PreviewParams, options?: RequestInit): Pro
 
 
 
-export const getPreviewQueryKey = (params?: PreviewParams,) => {
+export const getGetSpotsPreviewQueryKey = (params?: GetSpotsPreviewParams,) => {
     return [
     `/api/spots/preview`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getPreviewQueryOptions = <TData = Awaited<ReturnType<typeof preview>>, TError = unknown>(params: PreviewParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof preview>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetSpotsPreviewQueryOptions = <TData = Awaited<ReturnType<typeof getSpotsPreview>>, TError = unknown>(params: GetSpotsPreviewParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsPreview>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getPreviewQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetSpotsPreviewQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof preview>>> = ({ signal }) => preview(params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSpotsPreview>>> = ({ signal }) => getSpotsPreview(params, { signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof preview>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSpotsPreview>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type PreviewQueryResult = NonNullable<Awaited<ReturnType<typeof preview>>>
-export type PreviewQueryError = unknown
+export type GetSpotsPreviewQueryResult = NonNullable<Awaited<ReturnType<typeof getSpotsPreview>>>
+export type GetSpotsPreviewQueryError = unknown
 
 
-export function usePreview<TData = Awaited<ReturnType<typeof preview>>, TError = unknown>(
- params: PreviewParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof preview>>, TError, TData>> & Pick<
+export function useGetSpotsPreview<TData = Awaited<ReturnType<typeof getSpotsPreview>>, TError = unknown>(
+ params: GetSpotsPreviewParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsPreview>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof preview>>,
+          Awaited<ReturnType<typeof getSpotsPreview>>,
           TError,
-          Awaited<ReturnType<typeof preview>>
+          Awaited<ReturnType<typeof getSpotsPreview>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function usePreview<TData = Awaited<ReturnType<typeof preview>>, TError = unknown>(
- params: PreviewParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof preview>>, TError, TData>> & Pick<
+export function useGetSpotsPreview<TData = Awaited<ReturnType<typeof getSpotsPreview>>, TError = unknown>(
+ params: GetSpotsPreviewParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsPreview>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof preview>>,
+          Awaited<ReturnType<typeof getSpotsPreview>>,
           TError,
-          Awaited<ReturnType<typeof preview>>
+          Awaited<ReturnType<typeof getSpotsPreview>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function usePreview<TData = Awaited<ReturnType<typeof preview>>, TError = unknown>(
- params: PreviewParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof preview>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetSpotsPreview<TData = Awaited<ReturnType<typeof getSpotsPreview>>, TError = unknown>(
+ params: GetSpotsPreviewParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsPreview>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 핀 클릭 프리뷰
  */
 
-export function usePreview<TData = Awaited<ReturnType<typeof preview>>, TError = unknown>(
- params: PreviewParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof preview>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetSpotsPreview<TData = Awaited<ReturnType<typeof getSpotsPreview>>, TError = unknown>(
+ params: GetSpotsPreviewParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsPreview>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getPreviewQueryOptions(params,options)
+  const queryOptions = getGetSpotsPreviewQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

@@ -31,19 +31,19 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export type getProfileResponse200 = {
+export type getUsersByIdResponse200 = {
   data: ApiResponseUserProfileResponse
   status: 200
 }
 
-export type getProfileResponseSuccess = (getProfileResponse200) & {
+export type getUsersByIdResponseSuccess = (getUsersByIdResponse200) & {
   headers: Headers;
 };
 ;
 
-export type getProfileResponse = (getProfileResponseSuccess)
+export type getUsersByIdResponse = (getUsersByIdResponseSuccess)
 
-export const getGetProfileUrl = (id: number,) => {
+export const getGetUsersByIdUrl = (id: number,) => {
 
 
 
@@ -55,9 +55,9 @@ export const getGetProfileUrl = (id: number,) => {
  * 대상 사용자의 프로필(SCR-024h/i)을 조회한다. 통계(게시 기록 수·팔로워 수·팔로잉 수), 관심 꽃 카테고리(읽기전용), 최근 게시 기록 그리드 미리보기(상위 6건), 현재 로그인 사용자 기준 팔로우 상태를 함께 반환한다.
  * @summary 사용자 프로필 조회
  */
-export const getProfile = async (id: number, options?: RequestInit): Promise<getProfileResponse> => {
+export const getUsersById = async (id: number, options?: RequestInit): Promise<getUsersByIdResponse> => {
 
-  return customInstance<getProfileResponse>(getGetProfileUrl(id),
+  return customInstance<getUsersByIdResponse>(getGetUsersByIdUrl(id),
   {
     ...options,
     method: 'GET'
@@ -70,69 +70,69 @@ export const getProfile = async (id: number, options?: RequestInit): Promise<get
 
 
 
-export const getGetProfileQueryKey = (id: number,) => {
+export const getGetUsersByIdQueryKey = (id: number,) => {
     return [
     `/api/users/${id}`
     ] as const;
     }
 
 
-export const getGetProfileQueryOptions = <TData = Awaited<ReturnType<typeof getProfile>>, TError = unknown>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProfile>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetUsersByIdQueryOptions = <TData = Awaited<ReturnType<typeof getUsersById>>, TError = unknown>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersById>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetProfileQueryKey(id);
+  const queryKey =  queryOptions?.queryKey ?? getGetUsersByIdQueryKey(id);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getProfile>>> = ({ signal }) => getProfile(id, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersById>>> = ({ signal }) => getUsersById(id, { signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getProfile>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUsersById>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetProfileQueryResult = NonNullable<Awaited<ReturnType<typeof getProfile>>>
-export type GetProfileQueryError = unknown
+export type GetUsersByIdQueryResult = NonNullable<Awaited<ReturnType<typeof getUsersById>>>
+export type GetUsersByIdQueryError = unknown
 
 
-export function useGetProfile<TData = Awaited<ReturnType<typeof getProfile>>, TError = unknown>(
- id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProfile>>, TError, TData>> & Pick<
+export function useGetUsersById<TData = Awaited<ReturnType<typeof getUsersById>>, TError = unknown>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersById>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getProfile>>,
+          Awaited<ReturnType<typeof getUsersById>>,
           TError,
-          Awaited<ReturnType<typeof getProfile>>
+          Awaited<ReturnType<typeof getUsersById>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetProfile<TData = Awaited<ReturnType<typeof getProfile>>, TError = unknown>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProfile>>, TError, TData>> & Pick<
+export function useGetUsersById<TData = Awaited<ReturnType<typeof getUsersById>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersById>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getProfile>>,
+          Awaited<ReturnType<typeof getUsersById>>,
           TError,
-          Awaited<ReturnType<typeof getProfile>>
+          Awaited<ReturnType<typeof getUsersById>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetProfile<TData = Awaited<ReturnType<typeof getProfile>>, TError = unknown>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProfile>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetUsersById<TData = Awaited<ReturnType<typeof getUsersById>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersById>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 사용자 프로필 조회
  */
 
-export function useGetProfile<TData = Awaited<ReturnType<typeof getProfile>>, TError = unknown>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProfile>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetUsersById<TData = Awaited<ReturnType<typeof getUsersById>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersById>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetProfileQueryOptions(id,options)
+  const queryOptions = getGetUsersByIdQueryOptions(id,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

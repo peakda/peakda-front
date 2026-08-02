@@ -27,7 +27,7 @@ import type {
 import type {
   ApiResponseListPlantResponse,
   ApiResponsePlantResponse,
-  SearchParams,
+  GetPlantsSearchParams,
   SuggestPlantRequest
 } from '../peakdaApi.schemas';
 
@@ -38,19 +38,19 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export type suggestResponse200 = {
+export type postPlantsSuggestionsResponse200 = {
   data: ApiResponsePlantResponse
   status: 200
 }
 
-export type suggestResponseSuccess = (suggestResponse200) & {
+export type postPlantsSuggestionsResponseSuccess = (postPlantsSuggestionsResponse200) & {
   headers: Headers;
 };
 ;
 
-export type suggestResponse = (suggestResponseSuccess)
+export type postPlantsSuggestionsResponse = (postPlantsSuggestionsResponseSuccess)
 
-export const getSuggestUrl = () => {
+export const getPostPlantsSuggestionsUrl = () => {
 
 
 
@@ -62,9 +62,9 @@ export const getSuggestUrl = () => {
  * 검색에서 찾지 못한 식물 이름을 사용자가 추가한다. 추가 즉시 ACTIVE 상태로 저장되어 스팟 기록 등 후속 흐름에서 바로 사용할 수 있다. 동일 이름이 이미 있으면 409, 한 사용자가 최근 24시간 내 5건을 초과하면 429.
  * @summary 식물 제안
  */
-export const suggest = async (suggestPlantRequest: SuggestPlantRequest, options?: RequestInit): Promise<suggestResponse> => {
+export const postPlantsSuggestions = async (suggestPlantRequest: SuggestPlantRequest, options?: RequestInit): Promise<postPlantsSuggestionsResponse> => {
 
-  return customInstance<suggestResponse>(getSuggestUrl(),
+  return customInstance<postPlantsSuggestionsResponse>(getPostPlantsSuggestionsUrl(),
   {
     ...options,
     method: 'POST',
@@ -76,11 +76,11 @@ export const suggest = async (suggestPlantRequest: SuggestPlantRequest, options?
 
 
 
-export const getSuggestMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof suggest>>, TError,{data: SuggestPlantRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof suggest>>, TError,{data: SuggestPlantRequest}, TContext> => {
+export const getPostPlantsSuggestionsMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postPlantsSuggestions>>, TError,{data: SuggestPlantRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postPlantsSuggestions>>, TError,{data: SuggestPlantRequest}, TContext> => {
 
-const mutationKey = ['suggest'];
+const mutationKey = ['postPlantsSuggestions'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -90,10 +90,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof suggest>>, {data: SuggestPlantRequest}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postPlantsSuggestions>>, {data: SuggestPlantRequest}> = (props) => {
           const {data} = props ?? {};
 
-          return  suggest(data,requestOptions)
+          return  postPlantsSuggestions(data,requestOptions)
         }
 
 
@@ -103,36 +103,36 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type SuggestMutationResult = NonNullable<Awaited<ReturnType<typeof suggest>>>
-    export type SuggestMutationBody = SuggestPlantRequest
-    export type SuggestMutationError = unknown
+    export type PostPlantsSuggestionsMutationResult = NonNullable<Awaited<ReturnType<typeof postPlantsSuggestions>>>
+    export type PostPlantsSuggestionsMutationBody = SuggestPlantRequest
+    export type PostPlantsSuggestionsMutationError = unknown
 
     /**
  * @summary 식물 제안
  */
-export const useSuggest = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof suggest>>, TError,{data: SuggestPlantRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostPlantsSuggestions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postPlantsSuggestions>>, TError,{data: SuggestPlantRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof suggest>>,
+        Awaited<ReturnType<typeof postPlantsSuggestions>>,
         TError,
         {data: SuggestPlantRequest},
         TContext
       > => {
-      return useMutation(getSuggestMutationOptions(options), queryClient);
+      return useMutation(getPostPlantsSuggestionsMutationOptions(options), queryClient);
     }
-    export type list2Response200 = {
+    export type getPlantsResponse200 = {
   data: ApiResponseListPlantResponse
   status: 200
 }
 
-export type list2ResponseSuccess = (list2Response200) & {
+export type getPlantsResponseSuccess = (getPlantsResponse200) & {
   headers: Headers;
 };
 ;
 
-export type list2Response = (list2ResponseSuccess)
+export type getPlantsResponse = (getPlantsResponseSuccess)
 
-export const getList2Url = () => {
+export const getGetPlantsUrl = () => {
 
 
 
@@ -144,9 +144,9 @@ export const getList2Url = () => {
  * ACTIVE 상태의 식물을 sortOrder 오름차순으로 반환한다. (Step2 식물 칩용)
  * @summary 활성 식물 마스터 리스트
  */
-export const list2 = async ( options?: RequestInit): Promise<list2Response> => {
+export const getPlants = async ( options?: RequestInit): Promise<getPlantsResponse> => {
 
-  return customInstance<list2Response>(getList2Url(),
+  return customInstance<getPlantsResponse>(getGetPlantsUrl(),
   {
     ...options,
     method: 'GET'
@@ -159,69 +159,69 @@ export const list2 = async ( options?: RequestInit): Promise<list2Response> => {
 
 
 
-export const getList2QueryKey = () => {
+export const getGetPlantsQueryKey = () => {
     return [
     `/api/plants`
     ] as const;
     }
 
 
-export const getList2QueryOptions = <TData = Awaited<ReturnType<typeof list2>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list2>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetPlantsQueryOptions = <TData = Awaited<ReturnType<typeof getPlants>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlants>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getList2QueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetPlantsQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof list2>>> = ({ signal }) => list2({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPlants>>> = ({ signal }) => getPlants({ signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof list2>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPlants>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type List2QueryResult = NonNullable<Awaited<ReturnType<typeof list2>>>
-export type List2QueryError = unknown
+export type GetPlantsQueryResult = NonNullable<Awaited<ReturnType<typeof getPlants>>>
+export type GetPlantsQueryError = unknown
 
 
-export function useList2<TData = Awaited<ReturnType<typeof list2>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof list2>>, TError, TData>> & Pick<
+export function useGetPlants<TData = Awaited<ReturnType<typeof getPlants>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlants>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof list2>>,
+          Awaited<ReturnType<typeof getPlants>>,
           TError,
-          Awaited<ReturnType<typeof list2>>
+          Awaited<ReturnType<typeof getPlants>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useList2<TData = Awaited<ReturnType<typeof list2>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list2>>, TError, TData>> & Pick<
+export function useGetPlants<TData = Awaited<ReturnType<typeof getPlants>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlants>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof list2>>,
+          Awaited<ReturnType<typeof getPlants>>,
           TError,
-          Awaited<ReturnType<typeof list2>>
+          Awaited<ReturnType<typeof getPlants>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useList2<TData = Awaited<ReturnType<typeof list2>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list2>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetPlants<TData = Awaited<ReturnType<typeof getPlants>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlants>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 활성 식물 마스터 리스트
  */
 
-export function useList2<TData = Awaited<ReturnType<typeof list2>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list2>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetPlants<TData = Awaited<ReturnType<typeof getPlants>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlants>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getList2QueryOptions(options)
+  const queryOptions = getGetPlantsQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -233,19 +233,19 @@ export function useList2<TData = Awaited<ReturnType<typeof list2>>, TError = unk
 
 
 
-export type searchResponse200 = {
+export type getPlantsSearchResponse200 = {
   data: ApiResponseListPlantResponse
   status: 200
 }
 
-export type searchResponseSuccess = (searchResponse200) & {
+export type getPlantsSearchResponseSuccess = (getPlantsSearchResponse200) & {
   headers: Headers;
 };
 ;
 
-export type searchResponse = (searchResponseSuccess)
+export type getPlantsSearchResponse = (getPlantsSearchResponseSuccess)
 
-export const getSearchUrl = (params: SearchParams,) => {
+export const getGetPlantsSearchUrl = (params: GetPlantsSearchParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -264,9 +264,9 @@ export const getSearchUrl = (params: SearchParams,) => {
  * ACTIVE 식물을 이름 contains (대소문자 무시) 로 검색한다. 빈 키워드는 빈 결과를 반환.
  * @summary 식물 검색
  */
-export const search = async (params: SearchParams, options?: RequestInit): Promise<searchResponse> => {
+export const getPlantsSearch = async (params: GetPlantsSearchParams, options?: RequestInit): Promise<getPlantsSearchResponse> => {
 
-  return customInstance<searchResponse>(getSearchUrl(params),
+  return customInstance<getPlantsSearchResponse>(getGetPlantsSearchUrl(params),
   {
     ...options,
     method: 'GET'
@@ -279,69 +279,69 @@ export const search = async (params: SearchParams, options?: RequestInit): Promi
 
 
 
-export const getSearchQueryKey = (params?: SearchParams,) => {
+export const getGetPlantsSearchQueryKey = (params?: GetPlantsSearchParams,) => {
     return [
     `/api/plants/search`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getSearchQueryOptions = <TData = Awaited<ReturnType<typeof search>>, TError = unknown>(params: SearchParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof search>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetPlantsSearchQueryOptions = <TData = Awaited<ReturnType<typeof getPlantsSearch>>, TError = unknown>(params: GetPlantsSearchParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlantsSearch>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getSearchQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetPlantsSearchQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof search>>> = ({ signal }) => search(params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPlantsSearch>>> = ({ signal }) => getPlantsSearch(params, { signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof search>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPlantsSearch>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type SearchQueryResult = NonNullable<Awaited<ReturnType<typeof search>>>
-export type SearchQueryError = unknown
+export type GetPlantsSearchQueryResult = NonNullable<Awaited<ReturnType<typeof getPlantsSearch>>>
+export type GetPlantsSearchQueryError = unknown
 
 
-export function useSearch<TData = Awaited<ReturnType<typeof search>>, TError = unknown>(
- params: SearchParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof search>>, TError, TData>> & Pick<
+export function useGetPlantsSearch<TData = Awaited<ReturnType<typeof getPlantsSearch>>, TError = unknown>(
+ params: GetPlantsSearchParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlantsSearch>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof search>>,
+          Awaited<ReturnType<typeof getPlantsSearch>>,
           TError,
-          Awaited<ReturnType<typeof search>>
+          Awaited<ReturnType<typeof getPlantsSearch>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useSearch<TData = Awaited<ReturnType<typeof search>>, TError = unknown>(
- params: SearchParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof search>>, TError, TData>> & Pick<
+export function useGetPlantsSearch<TData = Awaited<ReturnType<typeof getPlantsSearch>>, TError = unknown>(
+ params: GetPlantsSearchParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlantsSearch>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof search>>,
+          Awaited<ReturnType<typeof getPlantsSearch>>,
           TError,
-          Awaited<ReturnType<typeof search>>
+          Awaited<ReturnType<typeof getPlantsSearch>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useSearch<TData = Awaited<ReturnType<typeof search>>, TError = unknown>(
- params: SearchParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof search>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetPlantsSearch<TData = Awaited<ReturnType<typeof getPlantsSearch>>, TError = unknown>(
+ params: GetPlantsSearchParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlantsSearch>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 식물 검색
  */
 
-export function useSearch<TData = Awaited<ReturnType<typeof search>>, TError = unknown>(
- params: SearchParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof search>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetPlantsSearch<TData = Awaited<ReturnType<typeof getPlantsSearch>>, TError = unknown>(
+ params: GetPlantsSearchParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlantsSearch>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getSearchQueryOptions(params,options)
+  const queryOptions = getGetPlantsSearchQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

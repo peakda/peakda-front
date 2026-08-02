@@ -30,8 +30,8 @@ import type {
   ApiResponseSpotRecordResponse,
   ApiResponseUnit,
   CreateSpotRecordRequest,
-  ListBySpotParams,
-  ListMineParams,
+  GetSpotsRecordsMeParams,
+  GetSpotsRecordsParams,
   SpotRecordPhotoUploadForm,
   UpdateSpotRecordRequest
 } from '../peakdaApi.schemas';
@@ -43,19 +43,19 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export type listBySpotResponse200 = {
+export type getSpotsRecordsResponse200 = {
   data: ApiResponsePageResponseSpotRecordSummaryResponse
   status: 200
 }
 
-export type listBySpotResponseSuccess = (listBySpotResponse200) & {
+export type getSpotsRecordsResponseSuccess = (getSpotsRecordsResponse200) & {
   headers: Headers;
 };
 ;
 
-export type listBySpotResponse = (listBySpotResponseSuccess)
+export type getSpotsRecordsResponse = (getSpotsRecordsResponseSuccess)
 
-export const getListBySpotUrl = (params: ListBySpotParams,) => {
+export const getGetSpotsRecordsUrl = (params: GetSpotsRecordsParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -74,9 +74,9 @@ export const getListBySpotUrl = (params: ListBySpotParams,) => {
  * 특정 스팟의 모든 기록(DRAFT 포함)을 페이지 단위로 조회한다.
  * @summary 스팟별 기록 리스트
  */
-export const listBySpot = async (params: ListBySpotParams, options?: RequestInit): Promise<listBySpotResponse> => {
+export const getSpotsRecords = async (params: GetSpotsRecordsParams, options?: RequestInit): Promise<getSpotsRecordsResponse> => {
 
-  return customInstance<listBySpotResponse>(getListBySpotUrl(params),
+  return customInstance<getSpotsRecordsResponse>(getGetSpotsRecordsUrl(params),
   {
     ...options,
     method: 'GET'
@@ -89,69 +89,69 @@ export const listBySpot = async (params: ListBySpotParams, options?: RequestInit
 
 
 
-export const getListBySpotQueryKey = (params?: ListBySpotParams,) => {
+export const getGetSpotsRecordsQueryKey = (params?: GetSpotsRecordsParams,) => {
     return [
     `/api/spots/records`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getListBySpotQueryOptions = <TData = Awaited<ReturnType<typeof listBySpot>>, TError = unknown>(params: ListBySpotParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listBySpot>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetSpotsRecordsQueryOptions = <TData = Awaited<ReturnType<typeof getSpotsRecords>>, TError = unknown>(params: GetSpotsRecordsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsRecords>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListBySpotQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetSpotsRecordsQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listBySpot>>> = ({ signal }) => listBySpot(params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSpotsRecords>>> = ({ signal }) => getSpotsRecords(params, { signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listBySpot>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSpotsRecords>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type ListBySpotQueryResult = NonNullable<Awaited<ReturnType<typeof listBySpot>>>
-export type ListBySpotQueryError = unknown
+export type GetSpotsRecordsQueryResult = NonNullable<Awaited<ReturnType<typeof getSpotsRecords>>>
+export type GetSpotsRecordsQueryError = unknown
 
 
-export function useListBySpot<TData = Awaited<ReturnType<typeof listBySpot>>, TError = unknown>(
- params: ListBySpotParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listBySpot>>, TError, TData>> & Pick<
+export function useGetSpotsRecords<TData = Awaited<ReturnType<typeof getSpotsRecords>>, TError = unknown>(
+ params: GetSpotsRecordsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsRecords>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof listBySpot>>,
+          Awaited<ReturnType<typeof getSpotsRecords>>,
           TError,
-          Awaited<ReturnType<typeof listBySpot>>
+          Awaited<ReturnType<typeof getSpotsRecords>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListBySpot<TData = Awaited<ReturnType<typeof listBySpot>>, TError = unknown>(
- params: ListBySpotParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listBySpot>>, TError, TData>> & Pick<
+export function useGetSpotsRecords<TData = Awaited<ReturnType<typeof getSpotsRecords>>, TError = unknown>(
+ params: GetSpotsRecordsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsRecords>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof listBySpot>>,
+          Awaited<ReturnType<typeof getSpotsRecords>>,
           TError,
-          Awaited<ReturnType<typeof listBySpot>>
+          Awaited<ReturnType<typeof getSpotsRecords>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListBySpot<TData = Awaited<ReturnType<typeof listBySpot>>, TError = unknown>(
- params: ListBySpotParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listBySpot>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetSpotsRecords<TData = Awaited<ReturnType<typeof getSpotsRecords>>, TError = unknown>(
+ params: GetSpotsRecordsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsRecords>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 스팟별 기록 리스트
  */
 
-export function useListBySpot<TData = Awaited<ReturnType<typeof listBySpot>>, TError = unknown>(
- params: ListBySpotParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listBySpot>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetSpotsRecords<TData = Awaited<ReturnType<typeof getSpotsRecords>>, TError = unknown>(
+ params: GetSpotsRecordsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsRecords>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getListBySpotQueryOptions(params,options)
+  const queryOptions = getGetSpotsRecordsQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -163,19 +163,19 @@ export function useListBySpot<TData = Awaited<ReturnType<typeof listBySpot>>, TE
 
 
 
-export type createResponse200 = {
+export type postSpotsRecordsResponse200 = {
   data: ApiResponseSpotRecordResponse
   status: 200
 }
 
-export type createResponseSuccess = (createResponse200) & {
+export type postSpotsRecordsResponseSuccess = (postSpotsRecordsResponse200) & {
   headers: Headers;
 };
 ;
 
-export type createResponse = (createResponseSuccess)
+export type postSpotsRecordsResponse = (postSpotsRecordsResponseSuccess)
 
-export const getCreateUrl = () => {
+export const getPostSpotsRecordsUrl = () => {
 
 
 
@@ -187,9 +187,9 @@ export const getCreateUrl = () => {
  * 사용자에게 이미 DRAFT 가 있으면 같은 행을 덮어쓰거나 promote 한다. PUBLISHED 상태로 생성하려면 visitedDate, bloomStage, plantIds(≥1), photoKeys(1~5) 가 모두 채워져 있어야 한다.
  * @summary 스팟 기록 생성 (DRAFT 또는 PUBLISHED)
  */
-export const create = async (createSpotRecordRequest: CreateSpotRecordRequest, options?: RequestInit): Promise<createResponse> => {
+export const postSpotsRecords = async (createSpotRecordRequest: CreateSpotRecordRequest, options?: RequestInit): Promise<postSpotsRecordsResponse> => {
 
-  return customInstance<createResponse>(getCreateUrl(),
+  return customInstance<postSpotsRecordsResponse>(getPostSpotsRecordsUrl(),
   {
     ...options,
     method: 'POST',
@@ -201,11 +201,11 @@ export const create = async (createSpotRecordRequest: CreateSpotRecordRequest, o
 
 
 
-export const getCreateMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof create>>, TError,{data: CreateSpotRecordRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof create>>, TError,{data: CreateSpotRecordRequest}, TContext> => {
+export const getPostSpotsRecordsMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postSpotsRecords>>, TError,{data: CreateSpotRecordRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postSpotsRecords>>, TError,{data: CreateSpotRecordRequest}, TContext> => {
 
-const mutationKey = ['create'];
+const mutationKey = ['postSpotsRecords'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -215,10 +215,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof create>>, {data: CreateSpotRecordRequest}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postSpotsRecords>>, {data: CreateSpotRecordRequest}> = (props) => {
           const {data} = props ?? {};
 
-          return  create(data,requestOptions)
+          return  postSpotsRecords(data,requestOptions)
         }
 
 
@@ -228,36 +228,36 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type CreateMutationResult = NonNullable<Awaited<ReturnType<typeof create>>>
-    export type CreateMutationBody = CreateSpotRecordRequest
-    export type CreateMutationError = unknown
+    export type PostSpotsRecordsMutationResult = NonNullable<Awaited<ReturnType<typeof postSpotsRecords>>>
+    export type PostSpotsRecordsMutationBody = CreateSpotRecordRequest
+    export type PostSpotsRecordsMutationError = unknown
 
     /**
  * @summary 스팟 기록 생성 (DRAFT 또는 PUBLISHED)
  */
-export const useCreate = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof create>>, TError,{data: CreateSpotRecordRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostSpotsRecords = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postSpotsRecords>>, TError,{data: CreateSpotRecordRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof create>>,
+        Awaited<ReturnType<typeof postSpotsRecords>>,
         TError,
         {data: CreateSpotRecordRequest},
         TContext
       > => {
-      return useMutation(getCreateMutationOptions(options), queryClient);
+      return useMutation(getPostSpotsRecordsMutationOptions(options), queryClient);
     }
-    export type publishResponse200 = {
+    export type postSpotsRecordsByIdPublishResponse200 = {
   data: ApiResponseSpotRecordResponse
   status: 200
 }
 
-export type publishResponseSuccess = (publishResponse200) & {
+export type postSpotsRecordsByIdPublishResponseSuccess = (postSpotsRecordsByIdPublishResponse200) & {
   headers: Headers;
 };
 ;
 
-export type publishResponse = (publishResponseSuccess)
+export type postSpotsRecordsByIdPublishResponse = (postSpotsRecordsByIdPublishResponseSuccess)
 
-export const getPublishUrl = (id: number,) => {
+export const getPostSpotsRecordsByIdPublishUrl = (id: number,) => {
 
 
 
@@ -269,9 +269,9 @@ export const getPublishUrl = (id: number,) => {
  * DRAFT 상태의 기록을 PUBLISHED 로 명시 전이한다. 필수 항목 미충족 시 400.
  * @summary 스팟 기록 게시 전이 (DRAFT → PUBLISHED)
  */
-export const publish = async (id: number, options?: RequestInit): Promise<publishResponse> => {
+export const postSpotsRecordsByIdPublish = async (id: number, options?: RequestInit): Promise<postSpotsRecordsByIdPublishResponse> => {
 
-  return customInstance<publishResponse>(getPublishUrl(id),
+  return customInstance<postSpotsRecordsByIdPublishResponse>(getPostSpotsRecordsByIdPublishUrl(id),
   {
     ...options,
     method: 'POST'
@@ -283,11 +283,11 @@ export const publish = async (id: number, options?: RequestInit): Promise<publis
 
 
 
-export const getPublishMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publish>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof publish>>, TError,{id: number}, TContext> => {
+export const getPostSpotsRecordsByIdPublishMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postSpotsRecordsByIdPublish>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postSpotsRecordsByIdPublish>>, TError,{id: number}, TContext> => {
 
-const mutationKey = ['publish'];
+const mutationKey = ['postSpotsRecordsByIdPublish'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -297,10 +297,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof publish>>, {id: number}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postSpotsRecordsByIdPublish>>, {id: number}> = (props) => {
           const {id} = props ?? {};
 
-          return  publish(id,requestOptions)
+          return  postSpotsRecordsByIdPublish(id,requestOptions)
         }
 
 
@@ -310,36 +310,36 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type PublishMutationResult = NonNullable<Awaited<ReturnType<typeof publish>>>
+    export type PostSpotsRecordsByIdPublishMutationResult = NonNullable<Awaited<ReturnType<typeof postSpotsRecordsByIdPublish>>>
 
-    export type PublishMutationError = unknown
+    export type PostSpotsRecordsByIdPublishMutationError = unknown
 
     /**
  * @summary 스팟 기록 게시 전이 (DRAFT → PUBLISHED)
  */
-export const usePublish = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publish>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostSpotsRecordsByIdPublish = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postSpotsRecordsByIdPublish>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof publish>>,
+        Awaited<ReturnType<typeof postSpotsRecordsByIdPublish>>,
         TError,
         {id: number},
         TContext
       > => {
-      return useMutation(getPublishMutationOptions(options), queryClient);
+      return useMutation(getPostSpotsRecordsByIdPublishMutationOptions(options), queryClient);
     }
-    export type uploadPhotosResponse200 = {
+    export type postSpotsRecordsPhotosResponse200 = {
   data: ApiResponseSpotRecordPhotoUploadResponse
   status: 200
 }
 
-export type uploadPhotosResponseSuccess = (uploadPhotosResponse200) & {
+export type postSpotsRecordsPhotosResponseSuccess = (postSpotsRecordsPhotosResponse200) & {
   headers: Headers;
 };
 ;
 
-export type uploadPhotosResponse = (uploadPhotosResponseSuccess)
+export type postSpotsRecordsPhotosResponse = (postSpotsRecordsPhotosResponseSuccess)
 
-export const getUploadPhotosUrl = () => {
+export const getPostSpotsRecordsPhotosUrl = () => {
 
 
 
@@ -351,11 +351,11 @@ export const getUploadPhotosUrl = () => {
  * 스팟 기록 생성 전에 사진을 미리 업로드한다. 응답으로 받은 objectKey 를 기록 생성/수정 API 의 photoKeys 로 전달하면 된다. 한 번에 1~5장, 단일 파일은 최대 10MB.
  * @summary 스팟 기록 사진 업로드
  */
-export const uploadPhotos = async (spotRecordPhotoUploadForm: SpotRecordPhotoUploadForm, options?: RequestInit): Promise<uploadPhotosResponse> => {
+export const postSpotsRecordsPhotos = async (spotRecordPhotoUploadForm: SpotRecordPhotoUploadForm, options?: RequestInit): Promise<postSpotsRecordsPhotosResponse> => {
     const formData = new FormData();
 formData.append(`images`, spotRecordPhotoUploadForm.images);
 
-  return customInstance<uploadPhotosResponse>(getUploadPhotosUrl(),
+  return customInstance<postSpotsRecordsPhotosResponse>(getPostSpotsRecordsPhotosUrl(),
   {
     ...options,
     method: 'POST'
@@ -367,11 +367,11 @@ formData.append(`images`, spotRecordPhotoUploadForm.images);
 
 
 
-export const getUploadPhotosMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadPhotos>>, TError,{data: SpotRecordPhotoUploadForm}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof uploadPhotos>>, TError,{data: SpotRecordPhotoUploadForm}, TContext> => {
+export const getPostSpotsRecordsPhotosMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postSpotsRecordsPhotos>>, TError,{data: SpotRecordPhotoUploadForm}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postSpotsRecordsPhotos>>, TError,{data: SpotRecordPhotoUploadForm}, TContext> => {
 
-const mutationKey = ['uploadPhotos'];
+const mutationKey = ['postSpotsRecordsPhotos'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -381,10 +381,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadPhotos>>, {data: SpotRecordPhotoUploadForm}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postSpotsRecordsPhotos>>, {data: SpotRecordPhotoUploadForm}> = (props) => {
           const {data} = props ?? {};
 
-          return  uploadPhotos(data,requestOptions)
+          return  postSpotsRecordsPhotos(data,requestOptions)
         }
 
 
@@ -394,36 +394,36 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type UploadPhotosMutationResult = NonNullable<Awaited<ReturnType<typeof uploadPhotos>>>
-    export type UploadPhotosMutationBody = SpotRecordPhotoUploadForm
-    export type UploadPhotosMutationError = unknown
+    export type PostSpotsRecordsPhotosMutationResult = NonNullable<Awaited<ReturnType<typeof postSpotsRecordsPhotos>>>
+    export type PostSpotsRecordsPhotosMutationBody = SpotRecordPhotoUploadForm
+    export type PostSpotsRecordsPhotosMutationError = unknown
 
     /**
  * @summary 스팟 기록 사진 업로드
  */
-export const useUploadPhotos = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadPhotos>>, TError,{data: SpotRecordPhotoUploadForm}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostSpotsRecordsPhotos = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postSpotsRecordsPhotos>>, TError,{data: SpotRecordPhotoUploadForm}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof uploadPhotos>>,
+        Awaited<ReturnType<typeof postSpotsRecordsPhotos>>,
         TError,
         {data: SpotRecordPhotoUploadForm},
         TContext
       > => {
-      return useMutation(getUploadPhotosMutationOptions(options), queryClient);
+      return useMutation(getPostSpotsRecordsPhotosMutationOptions(options), queryClient);
     }
-    export type getResponse200 = {
+    export type getSpotsRecordsByIdResponse200 = {
   data: ApiResponseSpotRecordResponse
   status: 200
 }
 
-export type getResponseSuccess = (getResponse200) & {
+export type getSpotsRecordsByIdResponseSuccess = (getSpotsRecordsByIdResponse200) & {
   headers: Headers;
 };
 ;
 
-export type getResponse = (getResponseSuccess)
+export type getSpotsRecordsByIdResponse = (getSpotsRecordsByIdResponseSuccess)
 
-export const getGetUrl = (id: number,) => {
+export const getGetSpotsRecordsByIdUrl = (id: number,) => {
 
 
 
@@ -434,9 +434,9 @@ export const getGetUrl = (id: number,) => {
 /**
  * @summary 스팟 기록 상세 조회
  */
-export const get = async (id: number, options?: RequestInit): Promise<getResponse> => {
+export const getSpotsRecordsById = async (id: number, options?: RequestInit): Promise<getSpotsRecordsByIdResponse> => {
 
-  return customInstance<getResponse>(getGetUrl(id),
+  return customInstance<getSpotsRecordsByIdResponse>(getGetSpotsRecordsByIdUrl(id),
   {
     ...options,
     method: 'GET'
@@ -449,69 +449,69 @@ export const get = async (id: number, options?: RequestInit): Promise<getRespons
 
 
 
-export const getGetQueryKey = (id: number,) => {
+export const getGetSpotsRecordsByIdQueryKey = (id: number,) => {
     return [
     `/api/spots/records/${id}`
     ] as const;
     }
 
 
-export const getGetQueryOptions = <TData = Awaited<ReturnType<typeof get>>, TError = unknown>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof get>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetSpotsRecordsByIdQueryOptions = <TData = Awaited<ReturnType<typeof getSpotsRecordsById>>, TError = unknown>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsRecordsById>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetQueryKey(id);
+  const queryKey =  queryOptions?.queryKey ?? getGetSpotsRecordsByIdQueryKey(id);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof get>>> = ({ signal }) => get(id, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSpotsRecordsById>>> = ({ signal }) => getSpotsRecordsById(id, { signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof get>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSpotsRecordsById>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetQueryResult = NonNullable<Awaited<ReturnType<typeof get>>>
-export type GetQueryError = unknown
+export type GetSpotsRecordsByIdQueryResult = NonNullable<Awaited<ReturnType<typeof getSpotsRecordsById>>>
+export type GetSpotsRecordsByIdQueryError = unknown
 
 
-export function useGet<TData = Awaited<ReturnType<typeof get>>, TError = unknown>(
- id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof get>>, TError, TData>> & Pick<
+export function useGetSpotsRecordsById<TData = Awaited<ReturnType<typeof getSpotsRecordsById>>, TError = unknown>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsRecordsById>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof get>>,
+          Awaited<ReturnType<typeof getSpotsRecordsById>>,
           TError,
-          Awaited<ReturnType<typeof get>>
+          Awaited<ReturnType<typeof getSpotsRecordsById>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGet<TData = Awaited<ReturnType<typeof get>>, TError = unknown>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof get>>, TError, TData>> & Pick<
+export function useGetSpotsRecordsById<TData = Awaited<ReturnType<typeof getSpotsRecordsById>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsRecordsById>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof get>>,
+          Awaited<ReturnType<typeof getSpotsRecordsById>>,
           TError,
-          Awaited<ReturnType<typeof get>>
+          Awaited<ReturnType<typeof getSpotsRecordsById>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGet<TData = Awaited<ReturnType<typeof get>>, TError = unknown>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof get>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetSpotsRecordsById<TData = Awaited<ReturnType<typeof getSpotsRecordsById>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsRecordsById>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 스팟 기록 상세 조회
  */
 
-export function useGet<TData = Awaited<ReturnType<typeof get>>, TError = unknown>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof get>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetSpotsRecordsById<TData = Awaited<ReturnType<typeof getSpotsRecordsById>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsRecordsById>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetQueryOptions(id,options)
+  const queryOptions = getGetSpotsRecordsByIdQueryOptions(id,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -523,19 +523,19 @@ export function useGet<TData = Awaited<ReturnType<typeof get>>, TError = unknown
 
 
 
-export type _deleteResponse200 = {
+export type deleteSpotsRecordsByIdResponse200 = {
   data: ApiResponseUnit
   status: 200
 }
 
-export type _deleteResponseSuccess = (_deleteResponse200) & {
+export type deleteSpotsRecordsByIdResponseSuccess = (deleteSpotsRecordsByIdResponse200) & {
   headers: Headers;
 };
 ;
 
-export type _deleteResponse = (_deleteResponseSuccess)
+export type deleteSpotsRecordsByIdResponse = (deleteSpotsRecordsByIdResponseSuccess)
 
-export const getDeleteUrl = (id: number,) => {
+export const getDeleteSpotsRecordsByIdUrl = (id: number,) => {
 
 
 
@@ -547,9 +547,9 @@ export const getDeleteUrl = (id: number,) => {
  * 본인 기록만 삭제 가능. 첨부 사진도 스토리지에서 함께 제거된다.
  * @summary 스팟 기록 삭제
  */
-export const _delete = async (id: number, options?: RequestInit): Promise<_deleteResponse> => {
+export const deleteSpotsRecordsById = async (id: number, options?: RequestInit): Promise<deleteSpotsRecordsByIdResponse> => {
 
-  return customInstance<_deleteResponse>(getDeleteUrl(id),
+  return customInstance<deleteSpotsRecordsByIdResponse>(getDeleteSpotsRecordsByIdUrl(id),
   {
     ...options,
     method: 'DELETE'
@@ -561,11 +561,11 @@ export const _delete = async (id: number, options?: RequestInit): Promise<_delet
 
 
 
-export const getDeleteMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof _delete>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof _delete>>, TError,{id: number}, TContext> => {
+export const getDeleteSpotsRecordsByIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSpotsRecordsById>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteSpotsRecordsById>>, TError,{id: number}, TContext> => {
 
-const mutationKey = ['_delete'];
+const mutationKey = ['deleteSpotsRecordsById'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -575,10 +575,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof _delete>>, {id: number}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteSpotsRecordsById>>, {id: number}> = (props) => {
           const {id} = props ?? {};
 
-          return  _delete(id,requestOptions)
+          return  deleteSpotsRecordsById(id,requestOptions)
         }
 
 
@@ -588,36 +588,36 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type _DeleteMutationResult = NonNullable<Awaited<ReturnType<typeof _delete>>>
+    export type DeleteSpotsRecordsByIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteSpotsRecordsById>>>
 
-    export type _DeleteMutationError = unknown
+    export type DeleteSpotsRecordsByIdMutationError = unknown
 
     /**
  * @summary 스팟 기록 삭제
  */
-export const useDelete = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof _delete>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const useDeleteSpotsRecordsById = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSpotsRecordsById>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof _delete>>,
+        Awaited<ReturnType<typeof deleteSpotsRecordsById>>,
         TError,
         {id: number},
         TContext
       > => {
-      return useMutation(getDeleteMutationOptions(options), queryClient);
+      return useMutation(getDeleteSpotsRecordsByIdMutationOptions(options), queryClient);
     }
-    export type updateResponse200 = {
+    export type patchSpotsRecordsByIdResponse200 = {
   data: ApiResponseSpotRecordResponse
   status: 200
 }
 
-export type updateResponseSuccess = (updateResponse200) & {
+export type patchSpotsRecordsByIdResponseSuccess = (patchSpotsRecordsByIdResponse200) & {
   headers: Headers;
 };
 ;
 
-export type updateResponse = (updateResponseSuccess)
+export type patchSpotsRecordsByIdResponse = (patchSpotsRecordsByIdResponseSuccess)
 
-export const getUpdateUrl = (id: number,) => {
+export const getPatchSpotsRecordsByIdUrl = (id: number,) => {
 
 
 
@@ -629,10 +629,10 @@ export const getUpdateUrl = (id: number,) => {
  * 본인 기록만 수정 가능. plantIds/photoKeys 는 제공 시 전체를 교체하며 빠진 사진 key 는 스토리지에서도 정리한다. PUBLISHED 기록도 수정할 수 있으나 게시 필수 항목을 비울 수는 없다.
  * @summary 스팟 기록 부분 수정
  */
-export const update = async (id: number,
-    updateSpotRecordRequest: UpdateSpotRecordRequest, options?: RequestInit): Promise<updateResponse> => {
+export const patchSpotsRecordsById = async (id: number,
+    updateSpotRecordRequest: UpdateSpotRecordRequest, options?: RequestInit): Promise<patchSpotsRecordsByIdResponse> => {
 
-  return customInstance<updateResponse>(getUpdateUrl(id),
+  return customInstance<patchSpotsRecordsByIdResponse>(getPatchSpotsRecordsByIdUrl(id),
   {
     ...options,
     method: 'PATCH',
@@ -644,11 +644,11 @@ export const update = async (id: number,
 
 
 
-export const getUpdateMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof update>>, TError,{id: number;data: UpdateSpotRecordRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof update>>, TError,{id: number;data: UpdateSpotRecordRequest}, TContext> => {
+export const getPatchSpotsRecordsByIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchSpotsRecordsById>>, TError,{id: number;data: UpdateSpotRecordRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof patchSpotsRecordsById>>, TError,{id: number;data: UpdateSpotRecordRequest}, TContext> => {
 
-const mutationKey = ['update'];
+const mutationKey = ['patchSpotsRecordsById'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -658,10 +658,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof update>>, {id: number;data: UpdateSpotRecordRequest}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchSpotsRecordsById>>, {id: number;data: UpdateSpotRecordRequest}> = (props) => {
           const {id,data} = props ?? {};
 
-          return  update(id,data,requestOptions)
+          return  patchSpotsRecordsById(id,data,requestOptions)
         }
 
 
@@ -671,36 +671,36 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type UpdateMutationResult = NonNullable<Awaited<ReturnType<typeof update>>>
-    export type UpdateMutationBody = UpdateSpotRecordRequest
-    export type UpdateMutationError = unknown
+    export type PatchSpotsRecordsByIdMutationResult = NonNullable<Awaited<ReturnType<typeof patchSpotsRecordsById>>>
+    export type PatchSpotsRecordsByIdMutationBody = UpdateSpotRecordRequest
+    export type PatchSpotsRecordsByIdMutationError = unknown
 
     /**
  * @summary 스팟 기록 부분 수정
  */
-export const useUpdate = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof update>>, TError,{id: number;data: UpdateSpotRecordRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePatchSpotsRecordsById = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchSpotsRecordsById>>, TError,{id: number;data: UpdateSpotRecordRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof update>>,
+        Awaited<ReturnType<typeof patchSpotsRecordsById>>,
         TError,
         {id: number;data: UpdateSpotRecordRequest},
         TContext
       > => {
-      return useMutation(getUpdateMutationOptions(options), queryClient);
+      return useMutation(getPatchSpotsRecordsByIdMutationOptions(options), queryClient);
     }
-    export type listMineResponse200 = {
+    export type getSpotsRecordsMeResponse200 = {
   data: ApiResponsePageResponseSpotRecordSummaryResponse
   status: 200
 }
 
-export type listMineResponseSuccess = (listMineResponse200) & {
+export type getSpotsRecordsMeResponseSuccess = (getSpotsRecordsMeResponse200) & {
   headers: Headers;
 };
 ;
 
-export type listMineResponse = (listMineResponseSuccess)
+export type getSpotsRecordsMeResponse = (getSpotsRecordsMeResponseSuccess)
 
-export const getListMineUrl = (params: ListMineParams,) => {
+export const getGetSpotsRecordsMeUrl = (params: GetSpotsRecordsMeParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -719,9 +719,9 @@ export const getListMineUrl = (params: ListMineParams,) => {
  * 본인 기록을 status 로 필터하여 페이지 단위로 조회한다 (DRAFT 는 사용자당 최대 1건).
  * @summary 본인 기록 리스트
  */
-export const listMine = async (params: ListMineParams, options?: RequestInit): Promise<listMineResponse> => {
+export const getSpotsRecordsMe = async (params: GetSpotsRecordsMeParams, options?: RequestInit): Promise<getSpotsRecordsMeResponse> => {
 
-  return customInstance<listMineResponse>(getListMineUrl(params),
+  return customInstance<getSpotsRecordsMeResponse>(getGetSpotsRecordsMeUrl(params),
   {
     ...options,
     method: 'GET'
@@ -734,69 +734,69 @@ export const listMine = async (params: ListMineParams, options?: RequestInit): P
 
 
 
-export const getListMineQueryKey = (params?: ListMineParams,) => {
+export const getGetSpotsRecordsMeQueryKey = (params?: GetSpotsRecordsMeParams,) => {
     return [
     `/api/spots/records/me`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getListMineQueryOptions = <TData = Awaited<ReturnType<typeof listMine>>, TError = unknown>(params: ListMineParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMine>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetSpotsRecordsMeQueryOptions = <TData = Awaited<ReturnType<typeof getSpotsRecordsMe>>, TError = unknown>(params: GetSpotsRecordsMeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsRecordsMe>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListMineQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetSpotsRecordsMeQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listMine>>> = ({ signal }) => listMine(params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSpotsRecordsMe>>> = ({ signal }) => getSpotsRecordsMe(params, { signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listMine>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSpotsRecordsMe>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type ListMineQueryResult = NonNullable<Awaited<ReturnType<typeof listMine>>>
-export type ListMineQueryError = unknown
+export type GetSpotsRecordsMeQueryResult = NonNullable<Awaited<ReturnType<typeof getSpotsRecordsMe>>>
+export type GetSpotsRecordsMeQueryError = unknown
 
 
-export function useListMine<TData = Awaited<ReturnType<typeof listMine>>, TError = unknown>(
- params: ListMineParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMine>>, TError, TData>> & Pick<
+export function useGetSpotsRecordsMe<TData = Awaited<ReturnType<typeof getSpotsRecordsMe>>, TError = unknown>(
+ params: GetSpotsRecordsMeParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsRecordsMe>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof listMine>>,
+          Awaited<ReturnType<typeof getSpotsRecordsMe>>,
           TError,
-          Awaited<ReturnType<typeof listMine>>
+          Awaited<ReturnType<typeof getSpotsRecordsMe>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListMine<TData = Awaited<ReturnType<typeof listMine>>, TError = unknown>(
- params: ListMineParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMine>>, TError, TData>> & Pick<
+export function useGetSpotsRecordsMe<TData = Awaited<ReturnType<typeof getSpotsRecordsMe>>, TError = unknown>(
+ params: GetSpotsRecordsMeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsRecordsMe>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof listMine>>,
+          Awaited<ReturnType<typeof getSpotsRecordsMe>>,
           TError,
-          Awaited<ReturnType<typeof listMine>>
+          Awaited<ReturnType<typeof getSpotsRecordsMe>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListMine<TData = Awaited<ReturnType<typeof listMine>>, TError = unknown>(
- params: ListMineParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMine>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetSpotsRecordsMe<TData = Awaited<ReturnType<typeof getSpotsRecordsMe>>, TError = unknown>(
+ params: GetSpotsRecordsMeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsRecordsMe>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 본인 기록 리스트
  */
 
-export function useListMine<TData = Awaited<ReturnType<typeof listMine>>, TError = unknown>(
- params: ListMineParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMine>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetSpotsRecordsMe<TData = Awaited<ReturnType<typeof getSpotsRecordsMe>>, TError = unknown>(
+ params: GetSpotsRecordsMeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsRecordsMe>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getListMineQueryOptions(params,options)
+  const queryOptions = getGetSpotsRecordsMeQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

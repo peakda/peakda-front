@@ -40,19 +40,19 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export type updateFavoriteCategoriesResponse200 = {
+export type putUsersMeFavoriteCategoriesResponse200 = {
   data: ApiResponseFavoriteCategoryResponse
   status: 200
 }
 
-export type updateFavoriteCategoriesResponseSuccess = (updateFavoriteCategoriesResponse200) & {
+export type putUsersMeFavoriteCategoriesResponseSuccess = (putUsersMeFavoriteCategoriesResponse200) & {
   headers: Headers;
 };
 ;
 
-export type updateFavoriteCategoriesResponse = (updateFavoriteCategoriesResponseSuccess)
+export type putUsersMeFavoriteCategoriesResponse = (putUsersMeFavoriteCategoriesResponseSuccess)
 
-export const getUpdateFavoriteCategoriesUrl = () => {
+export const getPutUsersMeFavoriteCategoriesUrl = () => {
 
 
 
@@ -64,9 +64,9 @@ export const getUpdateFavoriteCategoriesUrl = () => {
  * 현재 로그인한 사용자의 관심 꽃 카테고리를 전체 교체한다. 최소 1개 이상 선택해야 한다.
  * @summary 관심 꽃 카테고리 수정
  */
-export const updateFavoriteCategories = async (favoriteCategoryUpdateRequest: FavoriteCategoryUpdateRequest, options?: RequestInit): Promise<updateFavoriteCategoriesResponse> => {
+export const putUsersMeFavoriteCategories = async (favoriteCategoryUpdateRequest: FavoriteCategoryUpdateRequest, options?: RequestInit): Promise<putUsersMeFavoriteCategoriesResponse> => {
 
-  return customInstance<updateFavoriteCategoriesResponse>(getUpdateFavoriteCategoriesUrl(),
+  return customInstance<putUsersMeFavoriteCategoriesResponse>(getPutUsersMeFavoriteCategoriesUrl(),
   {
     ...options,
     method: 'PUT',
@@ -78,11 +78,11 @@ export const updateFavoriteCategories = async (favoriteCategoryUpdateRequest: Fa
 
 
 
-export const getUpdateFavoriteCategoriesMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateFavoriteCategories>>, TError,{data: FavoriteCategoryUpdateRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof updateFavoriteCategories>>, TError,{data: FavoriteCategoryUpdateRequest}, TContext> => {
+export const getPutUsersMeFavoriteCategoriesMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putUsersMeFavoriteCategories>>, TError,{data: FavoriteCategoryUpdateRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof putUsersMeFavoriteCategories>>, TError,{data: FavoriteCategoryUpdateRequest}, TContext> => {
 
-const mutationKey = ['updateFavoriteCategories'];
+const mutationKey = ['putUsersMeFavoriteCategories'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -92,10 +92,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateFavoriteCategories>>, {data: FavoriteCategoryUpdateRequest}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putUsersMeFavoriteCategories>>, {data: FavoriteCategoryUpdateRequest}> = (props) => {
           const {data} = props ?? {};
 
-          return  updateFavoriteCategories(data,requestOptions)
+          return  putUsersMeFavoriteCategories(data,requestOptions)
         }
 
 
@@ -105,36 +105,36 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type UpdateFavoriteCategoriesMutationResult = NonNullable<Awaited<ReturnType<typeof updateFavoriteCategories>>>
-    export type UpdateFavoriteCategoriesMutationBody = FavoriteCategoryUpdateRequest
-    export type UpdateFavoriteCategoriesMutationError = unknown
+    export type PutUsersMeFavoriteCategoriesMutationResult = NonNullable<Awaited<ReturnType<typeof putUsersMeFavoriteCategories>>>
+    export type PutUsersMeFavoriteCategoriesMutationBody = FavoriteCategoryUpdateRequest
+    export type PutUsersMeFavoriteCategoriesMutationError = unknown
 
     /**
  * @summary 관심 꽃 카테고리 수정
  */
-export const useUpdateFavoriteCategories = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateFavoriteCategories>>, TError,{data: FavoriteCategoryUpdateRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePutUsersMeFavoriteCategories = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putUsersMeFavoriteCategories>>, TError,{data: FavoriteCategoryUpdateRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof updateFavoriteCategories>>,
+        Awaited<ReturnType<typeof putUsersMeFavoriteCategories>>,
         TError,
         {data: FavoriteCategoryUpdateRequest},
         TContext
       > => {
-      return useMutation(getUpdateFavoriteCategoriesMutationOptions(options), queryClient);
+      return useMutation(getPutUsersMeFavoriteCategoriesMutationOptions(options), queryClient);
     }
-    export type uploadProfileImageResponse200 = {
+    export type postUsersMeProfileImageResponse200 = {
   data: ApiResponseProfileImageResponse
   status: 200
 }
 
-export type uploadProfileImageResponseSuccess = (uploadProfileImageResponse200) & {
+export type postUsersMeProfileImageResponseSuccess = (postUsersMeProfileImageResponse200) & {
   headers: Headers;
 };
 ;
 
-export type uploadProfileImageResponse = (uploadProfileImageResponseSuccess)
+export type postUsersMeProfileImageResponse = (postUsersMeProfileImageResponseSuccess)
 
-export const getUploadProfileImageUrl = () => {
+export const getPostUsersMeProfileImageUrl = () => {
 
 
 
@@ -146,11 +146,11 @@ export const getUploadProfileImageUrl = () => {
  * 현재 로그인한 사용자의 프로필 이미지를 업로드한다. 서버에서 thumbnail(128x128), main(512x512) 사이즈로 리사이즈 후 스토리지에 저장한다.
  * @summary 프로필 이미지 업로드
  */
-export const uploadProfileImage = async (profileImageUploadForm: ProfileImageUploadForm, options?: RequestInit): Promise<uploadProfileImageResponse> => {
+export const postUsersMeProfileImage = async (profileImageUploadForm: ProfileImageUploadForm, options?: RequestInit): Promise<postUsersMeProfileImageResponse> => {
     const formData = new FormData();
 formData.append(`image`, profileImageUploadForm.image);
 
-  return customInstance<uploadProfileImageResponse>(getUploadProfileImageUrl(),
+  return customInstance<postUsersMeProfileImageResponse>(getPostUsersMeProfileImageUrl(),
   {
     ...options,
     method: 'POST'
@@ -162,11 +162,11 @@ formData.append(`image`, profileImageUploadForm.image);
 
 
 
-export const getUploadProfileImageMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadProfileImage>>, TError,{data: ProfileImageUploadForm}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof uploadProfileImage>>, TError,{data: ProfileImageUploadForm}, TContext> => {
+export const getPostUsersMeProfileImageMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postUsersMeProfileImage>>, TError,{data: ProfileImageUploadForm}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postUsersMeProfileImage>>, TError,{data: ProfileImageUploadForm}, TContext> => {
 
-const mutationKey = ['uploadProfileImage'];
+const mutationKey = ['postUsersMeProfileImage'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -176,10 +176,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadProfileImage>>, {data: ProfileImageUploadForm}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postUsersMeProfileImage>>, {data: ProfileImageUploadForm}> = (props) => {
           const {data} = props ?? {};
 
-          return  uploadProfileImage(data,requestOptions)
+          return  postUsersMeProfileImage(data,requestOptions)
         }
 
 
@@ -189,36 +189,36 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type UploadProfileImageMutationResult = NonNullable<Awaited<ReturnType<typeof uploadProfileImage>>>
-    export type UploadProfileImageMutationBody = ProfileImageUploadForm
-    export type UploadProfileImageMutationError = unknown
+    export type PostUsersMeProfileImageMutationResult = NonNullable<Awaited<ReturnType<typeof postUsersMeProfileImage>>>
+    export type PostUsersMeProfileImageMutationBody = ProfileImageUploadForm
+    export type PostUsersMeProfileImageMutationError = unknown
 
     /**
  * @summary 프로필 이미지 업로드
  */
-export const useUploadProfileImage = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadProfileImage>>, TError,{data: ProfileImageUploadForm}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostUsersMeProfileImage = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postUsersMeProfileImage>>, TError,{data: ProfileImageUploadForm}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof uploadProfileImage>>,
+        Awaited<ReturnType<typeof postUsersMeProfileImage>>,
         TError,
         {data: ProfileImageUploadForm},
         TContext
       > => {
-      return useMutation(getUploadProfileImageMutationOptions(options), queryClient);
+      return useMutation(getPostUsersMeProfileImageMutationOptions(options), queryClient);
     }
-    export type deleteProfileImageResponse200 = {
+    export type deleteUsersMeProfileImageResponse200 = {
   data: ApiResponseUnit
   status: 200
 }
 
-export type deleteProfileImageResponseSuccess = (deleteProfileImageResponse200) & {
+export type deleteUsersMeProfileImageResponseSuccess = (deleteUsersMeProfileImageResponse200) & {
   headers: Headers;
 };
 ;
 
-export type deleteProfileImageResponse = (deleteProfileImageResponseSuccess)
+export type deleteUsersMeProfileImageResponse = (deleteUsersMeProfileImageResponseSuccess)
 
-export const getDeleteProfileImageUrl = () => {
+export const getDeleteUsersMeProfileImageUrl = () => {
 
 
 
@@ -230,9 +230,9 @@ export const getDeleteProfileImageUrl = () => {
  * 현재 로그인한 사용자의 프로필 이미지를 삭제한다.
  * @summary 프로필 이미지 삭제
  */
-export const deleteProfileImage = async ( options?: RequestInit): Promise<deleteProfileImageResponse> => {
+export const deleteUsersMeProfileImage = async ( options?: RequestInit): Promise<deleteUsersMeProfileImageResponse> => {
 
-  return customInstance<deleteProfileImageResponse>(getDeleteProfileImageUrl(),
+  return customInstance<deleteUsersMeProfileImageResponse>(getDeleteUsersMeProfileImageUrl(),
   {
     ...options,
     method: 'DELETE'
@@ -244,11 +244,11 @@ export const deleteProfileImage = async ( options?: RequestInit): Promise<delete
 
 
 
-export const getDeleteProfileImageMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteProfileImage>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteProfileImage>>, TError,void, TContext> => {
+export const getDeleteUsersMeProfileImageMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteUsersMeProfileImage>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteUsersMeProfileImage>>, TError,void, TContext> => {
 
-const mutationKey = ['deleteProfileImage'];
+const mutationKey = ['deleteUsersMeProfileImage'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -258,10 +258,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteProfileImage>>, void> = () => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteUsersMeProfileImage>>, void> = () => {
 
 
-          return  deleteProfileImage(requestOptions)
+          return  deleteUsersMeProfileImage(requestOptions)
         }
 
 
@@ -271,36 +271,36 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type DeleteProfileImageMutationResult = NonNullable<Awaited<ReturnType<typeof deleteProfileImage>>>
+    export type DeleteUsersMeProfileImageMutationResult = NonNullable<Awaited<ReturnType<typeof deleteUsersMeProfileImage>>>
 
-    export type DeleteProfileImageMutationError = unknown
+    export type DeleteUsersMeProfileImageMutationError = unknown
 
     /**
  * @summary 프로필 이미지 삭제
  */
-export const useDeleteProfileImage = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteProfileImage>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+export const useDeleteUsersMeProfileImage = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteUsersMeProfileImage>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof deleteProfileImage>>,
+        Awaited<ReturnType<typeof deleteUsersMeProfileImage>>,
         TError,
         void,
         TContext
       > => {
-      return useMutation(getDeleteProfileImageMutationOptions(options), queryClient);
+      return useMutation(getDeleteUsersMeProfileImageMutationOptions(options), queryClient);
     }
-    export type getMyPageResponse200 = {
+    export type getUsersMeResponse200 = {
   data: ApiResponseMyPageResponse
   status: 200
 }
 
-export type getMyPageResponseSuccess = (getMyPageResponse200) & {
+export type getUsersMeResponseSuccess = (getUsersMeResponse200) & {
   headers: Headers;
 };
 ;
 
-export type getMyPageResponse = (getMyPageResponseSuccess)
+export type getUsersMeResponse = (getUsersMeResponseSuccess)
 
-export const getGetMyPageUrl = () => {
+export const getGetUsersMeUrl = () => {
 
 
 
@@ -312,9 +312,9 @@ export const getGetMyPageUrl = () => {
  * 현재 로그인한 사용자의 마이페이지 정보를 조회한다. 통계(게시 기록 수·팔로워·팔로잉·찜한 스팟 수), 관심 꽃 카테고리, 내 게시 기록 그리드 미리보기(상위 6건)를 함께 반환한다.
  * @summary 마이페이지 집계
  */
-export const getMyPage = async ( options?: RequestInit): Promise<getMyPageResponse> => {
+export const getUsersMe = async ( options?: RequestInit): Promise<getUsersMeResponse> => {
 
-  return customInstance<getMyPageResponse>(getGetMyPageUrl(),
+  return customInstance<getUsersMeResponse>(getGetUsersMeUrl(),
   {
     ...options,
     method: 'GET'
@@ -327,69 +327,69 @@ export const getMyPage = async ( options?: RequestInit): Promise<getMyPageRespon
 
 
 
-export const getGetMyPageQueryKey = () => {
+export const getGetUsersMeQueryKey = () => {
     return [
     `/api/users/me`
     ] as const;
     }
 
 
-export const getGetMyPageQueryOptions = <TData = Awaited<ReturnType<typeof getMyPage>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyPage>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetUsersMeQueryOptions = <TData = Awaited<ReturnType<typeof getUsersMe>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersMe>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetMyPageQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetUsersMeQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyPage>>> = ({ signal }) => getMyPage({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersMe>>> = ({ signal }) => getUsersMe({ signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyPage>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUsersMe>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetMyPageQueryResult = NonNullable<Awaited<ReturnType<typeof getMyPage>>>
-export type GetMyPageQueryError = unknown
+export type GetUsersMeQueryResult = NonNullable<Awaited<ReturnType<typeof getUsersMe>>>
+export type GetUsersMeQueryError = unknown
 
 
-export function useGetMyPage<TData = Awaited<ReturnType<typeof getMyPage>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyPage>>, TError, TData>> & Pick<
+export function useGetUsersMe<TData = Awaited<ReturnType<typeof getUsersMe>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersMe>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getMyPage>>,
+          Awaited<ReturnType<typeof getUsersMe>>,
           TError,
-          Awaited<ReturnType<typeof getMyPage>>
+          Awaited<ReturnType<typeof getUsersMe>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetMyPage<TData = Awaited<ReturnType<typeof getMyPage>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyPage>>, TError, TData>> & Pick<
+export function useGetUsersMe<TData = Awaited<ReturnType<typeof getUsersMe>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersMe>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getMyPage>>,
+          Awaited<ReturnType<typeof getUsersMe>>,
           TError,
-          Awaited<ReturnType<typeof getMyPage>>
+          Awaited<ReturnType<typeof getUsersMe>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetMyPage<TData = Awaited<ReturnType<typeof getMyPage>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyPage>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetUsersMe<TData = Awaited<ReturnType<typeof getUsersMe>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersMe>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 마이페이지 집계
  */
 
-export function useGetMyPage<TData = Awaited<ReturnType<typeof getMyPage>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyPage>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetUsersMe<TData = Awaited<ReturnType<typeof getUsersMe>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersMe>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetMyPageQueryOptions(options)
+  const queryOptions = getGetUsersMeQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -401,19 +401,19 @@ export function useGetMyPage<TData = Awaited<ReturnType<typeof getMyPage>>, TErr
 
 
 
-export type withdrawResponse200 = {
+export type deleteUsersMeResponse200 = {
   data: ApiResponseUnit
   status: 200
 }
 
-export type withdrawResponseSuccess = (withdrawResponse200) & {
+export type deleteUsersMeResponseSuccess = (deleteUsersMeResponse200) & {
   headers: Headers;
 };
 ;
 
-export type withdrawResponse = (withdrawResponseSuccess)
+export type deleteUsersMeResponse = (deleteUsersMeResponseSuccess)
 
-export const getWithdrawUrl = () => {
+export const getDeleteUsersMeUrl = () => {
 
 
 
@@ -425,9 +425,9 @@ export const getWithdrawUrl = () => {
  * 현재 로그인한 사용자의 계정을 탈퇴한다. 본인의 기록·찜·팔로우가 모두 삭제되고 계정은 비활성화·익명화되며 복구할 수 없다. 처리 후 인증 쿠키가 만료된다.
  * @summary 계정 탈퇴
  */
-export const withdraw = async ( options?: RequestInit): Promise<withdrawResponse> => {
+export const deleteUsersMe = async ( options?: RequestInit): Promise<deleteUsersMeResponse> => {
 
-  return customInstance<withdrawResponse>(getWithdrawUrl(),
+  return customInstance<deleteUsersMeResponse>(getDeleteUsersMeUrl(),
   {
     ...options,
     method: 'DELETE'
@@ -439,11 +439,11 @@ export const withdraw = async ( options?: RequestInit): Promise<withdrawResponse
 
 
 
-export const getWithdrawMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof withdraw>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof withdraw>>, TError,void, TContext> => {
+export const getDeleteUsersMeMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteUsersMe>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteUsersMe>>, TError,void, TContext> => {
 
-const mutationKey = ['withdraw'];
+const mutationKey = ['deleteUsersMe'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -453,10 +453,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof withdraw>>, void> = () => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteUsersMe>>, void> = () => {
 
 
-          return  withdraw(requestOptions)
+          return  deleteUsersMe(requestOptions)
         }
 
 
@@ -466,20 +466,20 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type WithdrawMutationResult = NonNullable<Awaited<ReturnType<typeof withdraw>>>
+    export type DeleteUsersMeMutationResult = NonNullable<Awaited<ReturnType<typeof deleteUsersMe>>>
 
-    export type WithdrawMutationError = unknown
+    export type DeleteUsersMeMutationError = unknown
 
     /**
  * @summary 계정 탈퇴
  */
-export const useWithdraw = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof withdraw>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+export const useDeleteUsersMe = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteUsersMe>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof withdraw>>,
+        Awaited<ReturnType<typeof deleteUsersMe>>,
         TError,
         void,
         TContext
       > => {
-      return useMutation(getWithdrawMutationOptions(options), queryClient);
+      return useMutation(getDeleteUsersMeMutationOptions(options), queryClient);
     }

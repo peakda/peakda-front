@@ -29,7 +29,7 @@ import type {
   ApiResponseProfileImageResponse,
   ApiResponseUnit,
   ApiResponseUserInfoResponse,
-  CheckNicknameParams,
+  GetAuthSignupNicknameCheckParams,
   SignupCompleteRequest,
   SignupProfileImageUploadForm
 } from '../peakdaApi.schemas';
@@ -41,19 +41,19 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export type uploadSignupProfileImageResponse200 = {
+export type postAuthSignupProfileImageResponse200 = {
   data: ApiResponseProfileImageResponse
   status: 200
 }
 
-export type uploadSignupProfileImageResponseSuccess = (uploadSignupProfileImageResponse200) & {
+export type postAuthSignupProfileImageResponseSuccess = (postAuthSignupProfileImageResponse200) & {
   headers: Headers;
 };
 ;
 
-export type uploadSignupProfileImageResponse = (uploadSignupProfileImageResponseSuccess)
+export type postAuthSignupProfileImageResponse = (postAuthSignupProfileImageResponseSuccess)
 
-export const getUploadSignupProfileImageUrl = () => {
+export const getPostAuthSignupProfileImageUrl = () => {
 
 
 
@@ -65,11 +65,11 @@ export const getUploadSignupProfileImageUrl = () => {
  * signup-token 쿠키로 인증된 사용자가 회원가입 완료 전에 프로필 이미지를 업로드한다. 이미지는 temp 영역에 저장되며, 가입 완료 시 정식 영역으로 이관된다. 응답으로 받은 profileImageKey 를 /signup/complete 의 profileImageUrl 로 전달해야 한다.
  * @summary 회원가입 임시 프로필 이미지 업로드
  */
-export const uploadSignupProfileImage = async (signupProfileImageUploadForm: SignupProfileImageUploadForm, options?: RequestInit): Promise<uploadSignupProfileImageResponse> => {
+export const postAuthSignupProfileImage = async (signupProfileImageUploadForm: SignupProfileImageUploadForm, options?: RequestInit): Promise<postAuthSignupProfileImageResponse> => {
     const formData = new FormData();
 formData.append(`image`, signupProfileImageUploadForm.image);
 
-  return customInstance<uploadSignupProfileImageResponse>(getUploadSignupProfileImageUrl(),
+  return customInstance<postAuthSignupProfileImageResponse>(getPostAuthSignupProfileImageUrl(),
   {
     ...options,
     method: 'POST'
@@ -81,11 +81,11 @@ formData.append(`image`, signupProfileImageUploadForm.image);
 
 
 
-export const getUploadSignupProfileImageMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadSignupProfileImage>>, TError,{data: SignupProfileImageUploadForm}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof uploadSignupProfileImage>>, TError,{data: SignupProfileImageUploadForm}, TContext> => {
+export const getPostAuthSignupProfileImageMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAuthSignupProfileImage>>, TError,{data: SignupProfileImageUploadForm}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postAuthSignupProfileImage>>, TError,{data: SignupProfileImageUploadForm}, TContext> => {
 
-const mutationKey = ['uploadSignupProfileImage'];
+const mutationKey = ['postAuthSignupProfileImage'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -95,10 +95,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadSignupProfileImage>>, {data: SignupProfileImageUploadForm}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAuthSignupProfileImage>>, {data: SignupProfileImageUploadForm}> = (props) => {
           const {data} = props ?? {};
 
-          return  uploadSignupProfileImage(data,requestOptions)
+          return  postAuthSignupProfileImage(data,requestOptions)
         }
 
 
@@ -108,36 +108,36 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type UploadSignupProfileImageMutationResult = NonNullable<Awaited<ReturnType<typeof uploadSignupProfileImage>>>
-    export type UploadSignupProfileImageMutationBody = SignupProfileImageUploadForm
-    export type UploadSignupProfileImageMutationError = unknown
+    export type PostAuthSignupProfileImageMutationResult = NonNullable<Awaited<ReturnType<typeof postAuthSignupProfileImage>>>
+    export type PostAuthSignupProfileImageMutationBody = SignupProfileImageUploadForm
+    export type PostAuthSignupProfileImageMutationError = unknown
 
     /**
  * @summary 회원가입 임시 프로필 이미지 업로드
  */
-export const useUploadSignupProfileImage = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadSignupProfileImage>>, TError,{data: SignupProfileImageUploadForm}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostAuthSignupProfileImage = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAuthSignupProfileImage>>, TError,{data: SignupProfileImageUploadForm}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof uploadSignupProfileImage>>,
+        Awaited<ReturnType<typeof postAuthSignupProfileImage>>,
         TError,
         {data: SignupProfileImageUploadForm},
         TContext
       > => {
-      return useMutation(getUploadSignupProfileImageMutationOptions(options), queryClient);
+      return useMutation(getPostAuthSignupProfileImageMutationOptions(options), queryClient);
     }
-    export type completeSignupResponse200 = {
+    export type postAuthSignupCompleteResponse200 = {
   data: ApiResponseUnit
   status: 200
 }
 
-export type completeSignupResponseSuccess = (completeSignupResponse200) & {
+export type postAuthSignupCompleteResponseSuccess = (postAuthSignupCompleteResponse200) & {
   headers: Headers;
 };
 ;
 
-export type completeSignupResponse = (completeSignupResponseSuccess)
+export type postAuthSignupCompleteResponse = (postAuthSignupCompleteResponseSuccess)
 
-export const getCompleteSignupUrl = () => {
+export const getPostAuthSignupCompleteUrl = () => {
 
 
 
@@ -149,9 +149,9 @@ export const getCompleteSignupUrl = () => {
  * signup-token 쿠키와 닉네임으로 회원가입을 완료하고 access-token, refresh-token 쿠키를 발급합니다.
  * @summary 소셜 회원가입 완료
  */
-export const completeSignup = async (signupCompleteRequest: SignupCompleteRequest, options?: RequestInit): Promise<completeSignupResponse> => {
+export const postAuthSignupComplete = async (signupCompleteRequest: SignupCompleteRequest, options?: RequestInit): Promise<postAuthSignupCompleteResponse> => {
 
-  return customInstance<completeSignupResponse>(getCompleteSignupUrl(),
+  return customInstance<postAuthSignupCompleteResponse>(getPostAuthSignupCompleteUrl(),
   {
     ...options,
     method: 'POST',
@@ -163,11 +163,11 @@ export const completeSignup = async (signupCompleteRequest: SignupCompleteReques
 
 
 
-export const getCompleteSignupMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof completeSignup>>, TError,{data: SignupCompleteRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof completeSignup>>, TError,{data: SignupCompleteRequest}, TContext> => {
+export const getPostAuthSignupCompleteMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAuthSignupComplete>>, TError,{data: SignupCompleteRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postAuthSignupComplete>>, TError,{data: SignupCompleteRequest}, TContext> => {
 
-const mutationKey = ['completeSignup'];
+const mutationKey = ['postAuthSignupComplete'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -177,10 +177,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof completeSignup>>, {data: SignupCompleteRequest}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAuthSignupComplete>>, {data: SignupCompleteRequest}> = (props) => {
           const {data} = props ?? {};
 
-          return  completeSignup(data,requestOptions)
+          return  postAuthSignupComplete(data,requestOptions)
         }
 
 
@@ -190,36 +190,36 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type CompleteSignupMutationResult = NonNullable<Awaited<ReturnType<typeof completeSignup>>>
-    export type CompleteSignupMutationBody = SignupCompleteRequest
-    export type CompleteSignupMutationError = unknown
+    export type PostAuthSignupCompleteMutationResult = NonNullable<Awaited<ReturnType<typeof postAuthSignupComplete>>>
+    export type PostAuthSignupCompleteMutationBody = SignupCompleteRequest
+    export type PostAuthSignupCompleteMutationError = unknown
 
     /**
  * @summary 소셜 회원가입 완료
  */
-export const useCompleteSignup = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof completeSignup>>, TError,{data: SignupCompleteRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostAuthSignupComplete = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAuthSignupComplete>>, TError,{data: SignupCompleteRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof completeSignup>>,
+        Awaited<ReturnType<typeof postAuthSignupComplete>>,
         TError,
         {data: SignupCompleteRequest},
         TContext
       > => {
-      return useMutation(getCompleteSignupMutationOptions(options), queryClient);
+      return useMutation(getPostAuthSignupCompleteMutationOptions(options), queryClient);
     }
-    export type refreshResponse200 = {
+    export type postAuthRefreshResponse200 = {
   data: ApiResponseUnit
   status: 200
 }
 
-export type refreshResponseSuccess = (refreshResponse200) & {
+export type postAuthRefreshResponseSuccess = (postAuthRefreshResponse200) & {
   headers: Headers;
 };
 ;
 
-export type refreshResponse = (refreshResponseSuccess)
+export type postAuthRefreshResponse = (postAuthRefreshResponseSuccess)
 
-export const getRefreshUrl = () => {
+export const getPostAuthRefreshUrl = () => {
 
 
 
@@ -231,9 +231,9 @@ export const getRefreshUrl = () => {
  * refresh-token 쿠키로 access-token, refresh-token 쿠키를 재발급합니다.
  * @summary 토큰 재발급
  */
-export const refresh = async ( options?: RequestInit): Promise<refreshResponse> => {
+export const postAuthRefresh = async ( options?: RequestInit): Promise<postAuthRefreshResponse> => {
 
-  return customInstance<refreshResponse>(getRefreshUrl(),
+  return customInstance<postAuthRefreshResponse>(getPostAuthRefreshUrl(),
   {
     ...options,
     method: 'POST'
@@ -245,11 +245,11 @@ export const refresh = async ( options?: RequestInit): Promise<refreshResponse> 
 
 
 
-export const getRefreshMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refresh>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof refresh>>, TError,void, TContext> => {
+export const getPostAuthRefreshMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAuthRefresh>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postAuthRefresh>>, TError,void, TContext> => {
 
-const mutationKey = ['refresh'];
+const mutationKey = ['postAuthRefresh'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -259,10 +259,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof refresh>>, void> = () => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAuthRefresh>>, void> = () => {
 
 
-          return  refresh(requestOptions)
+          return  postAuthRefresh(requestOptions)
         }
 
 
@@ -272,36 +272,36 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type RefreshMutationResult = NonNullable<Awaited<ReturnType<typeof refresh>>>
+    export type PostAuthRefreshMutationResult = NonNullable<Awaited<ReturnType<typeof postAuthRefresh>>>
 
-    export type RefreshMutationError = unknown
+    export type PostAuthRefreshMutationError = unknown
 
     /**
  * @summary 토큰 재발급
  */
-export const useRefresh = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refresh>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostAuthRefresh = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAuthRefresh>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof refresh>>,
+        Awaited<ReturnType<typeof postAuthRefresh>>,
         TError,
         void,
         TContext
       > => {
-      return useMutation(getRefreshMutationOptions(options), queryClient);
+      return useMutation(getPostAuthRefreshMutationOptions(options), queryClient);
     }
-    export type logoutResponse200 = {
+    export type postAuthLogoutResponse200 = {
   data: ApiResponseUnit
   status: 200
 }
 
-export type logoutResponseSuccess = (logoutResponse200) & {
+export type postAuthLogoutResponseSuccess = (postAuthLogoutResponse200) & {
   headers: Headers;
 };
 ;
 
-export type logoutResponse = (logoutResponseSuccess)
+export type postAuthLogoutResponse = (postAuthLogoutResponseSuccess)
 
-export const getLogoutUrl = () => {
+export const getPostAuthLogoutUrl = () => {
 
 
 
@@ -313,9 +313,9 @@ export const getLogoutUrl = () => {
  * 서버에 저장된 refresh token을 삭제하고 access-token, refresh-token 쿠키를 만료시킵니다.
  * @summary 로그아웃
  */
-export const logout = async ( options?: RequestInit): Promise<logoutResponse> => {
+export const postAuthLogout = async ( options?: RequestInit): Promise<postAuthLogoutResponse> => {
 
-  return customInstance<logoutResponse>(getLogoutUrl(),
+  return customInstance<postAuthLogoutResponse>(getPostAuthLogoutUrl(),
   {
     ...options,
     method: 'POST'
@@ -327,11 +327,11 @@ export const logout = async ( options?: RequestInit): Promise<logoutResponse> =>
 
 
 
-export const getLogoutMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError,void, TContext> => {
+export const getPostAuthLogoutMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAuthLogout>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postAuthLogout>>, TError,void, TContext> => {
 
-const mutationKey = ['logout'];
+const mutationKey = ['postAuthLogout'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -341,10 +341,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof logout>>, void> = () => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAuthLogout>>, void> = () => {
 
 
-          return  logout(requestOptions)
+          return  postAuthLogout(requestOptions)
         }
 
 
@@ -354,36 +354,36 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type LogoutMutationResult = NonNullable<Awaited<ReturnType<typeof logout>>>
+    export type PostAuthLogoutMutationResult = NonNullable<Awaited<ReturnType<typeof postAuthLogout>>>
 
-    export type LogoutMutationError = unknown
+    export type PostAuthLogoutMutationError = unknown
 
     /**
  * @summary 로그아웃
  */
-export const useLogout = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostAuthLogout = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAuthLogout>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof logout>>,
+        Awaited<ReturnType<typeof postAuthLogout>>,
         TError,
         void,
         TContext
       > => {
-      return useMutation(getLogoutMutationOptions(options), queryClient);
+      return useMutation(getPostAuthLogoutMutationOptions(options), queryClient);
     }
-    export type checkNicknameResponse200 = {
+    export type getAuthSignupNicknameCheckResponse200 = {
   data: ApiResponseNicknameCheckResponse
   status: 200
 }
 
-export type checkNicknameResponseSuccess = (checkNicknameResponse200) & {
+export type getAuthSignupNicknameCheckResponseSuccess = (getAuthSignupNicknameCheckResponse200) & {
   headers: Headers;
 };
 ;
 
-export type checkNicknameResponse = (checkNicknameResponseSuccess)
+export type getAuthSignupNicknameCheckResponse = (getAuthSignupNicknameCheckResponseSuccess)
 
-export const getCheckNicknameUrl = (params: CheckNicknameParams,) => {
+export const getGetAuthSignupNicknameCheckUrl = (params: GetAuthSignupNicknameCheckParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -402,9 +402,9 @@ export const getCheckNicknameUrl = (params: CheckNicknameParams,) => {
  * 소셜 로그인 후 발급된 signup-token 쿠키로 닉네임 사용 가능 여부를 확인합니다.
  * @summary 회원가입 닉네임 중복 확인
  */
-export const checkNickname = async (params: CheckNicknameParams, options?: RequestInit): Promise<checkNicknameResponse> => {
+export const getAuthSignupNicknameCheck = async (params: GetAuthSignupNicknameCheckParams, options?: RequestInit): Promise<getAuthSignupNicknameCheckResponse> => {
 
-  return customInstance<checkNicknameResponse>(getCheckNicknameUrl(params),
+  return customInstance<getAuthSignupNicknameCheckResponse>(getGetAuthSignupNicknameCheckUrl(params),
   {
     ...options,
     method: 'GET'
@@ -417,69 +417,69 @@ export const checkNickname = async (params: CheckNicknameParams, options?: Reque
 
 
 
-export const getCheckNicknameQueryKey = (params?: CheckNicknameParams,) => {
+export const getGetAuthSignupNicknameCheckQueryKey = (params?: GetAuthSignupNicknameCheckParams,) => {
     return [
     `/api/auth/signup/nickname/check`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getCheckNicknameQueryOptions = <TData = Awaited<ReturnType<typeof checkNickname>>, TError = unknown>(params: CheckNicknameParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof checkNickname>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetAuthSignupNicknameCheckQueryOptions = <TData = Awaited<ReturnType<typeof getAuthSignupNicknameCheck>>, TError = unknown>(params: GetAuthSignupNicknameCheckParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthSignupNicknameCheck>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getCheckNicknameQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetAuthSignupNicknameCheckQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof checkNickname>>> = ({ signal }) => checkNickname(params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthSignupNicknameCheck>>> = ({ signal }) => getAuthSignupNicknameCheck(params, { signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof checkNickname>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAuthSignupNicknameCheck>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type CheckNicknameQueryResult = NonNullable<Awaited<ReturnType<typeof checkNickname>>>
-export type CheckNicknameQueryError = unknown
+export type GetAuthSignupNicknameCheckQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthSignupNicknameCheck>>>
+export type GetAuthSignupNicknameCheckQueryError = unknown
 
 
-export function useCheckNickname<TData = Awaited<ReturnType<typeof checkNickname>>, TError = unknown>(
- params: CheckNicknameParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof checkNickname>>, TError, TData>> & Pick<
+export function useGetAuthSignupNicknameCheck<TData = Awaited<ReturnType<typeof getAuthSignupNicknameCheck>>, TError = unknown>(
+ params: GetAuthSignupNicknameCheckParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthSignupNicknameCheck>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof checkNickname>>,
+          Awaited<ReturnType<typeof getAuthSignupNicknameCheck>>,
           TError,
-          Awaited<ReturnType<typeof checkNickname>>
+          Awaited<ReturnType<typeof getAuthSignupNicknameCheck>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCheckNickname<TData = Awaited<ReturnType<typeof checkNickname>>, TError = unknown>(
- params: CheckNicknameParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof checkNickname>>, TError, TData>> & Pick<
+export function useGetAuthSignupNicknameCheck<TData = Awaited<ReturnType<typeof getAuthSignupNicknameCheck>>, TError = unknown>(
+ params: GetAuthSignupNicknameCheckParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthSignupNicknameCheck>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof checkNickname>>,
+          Awaited<ReturnType<typeof getAuthSignupNicknameCheck>>,
           TError,
-          Awaited<ReturnType<typeof checkNickname>>
+          Awaited<ReturnType<typeof getAuthSignupNicknameCheck>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCheckNickname<TData = Awaited<ReturnType<typeof checkNickname>>, TError = unknown>(
- params: CheckNicknameParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof checkNickname>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetAuthSignupNicknameCheck<TData = Awaited<ReturnType<typeof getAuthSignupNicknameCheck>>, TError = unknown>(
+ params: GetAuthSignupNicknameCheckParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthSignupNicknameCheck>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 회원가입 닉네임 중복 확인
  */
 
-export function useCheckNickname<TData = Awaited<ReturnType<typeof checkNickname>>, TError = unknown>(
- params: CheckNicknameParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof checkNickname>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetAuthSignupNicknameCheck<TData = Awaited<ReturnType<typeof getAuthSignupNicknameCheck>>, TError = unknown>(
+ params: GetAuthSignupNicknameCheckParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthSignupNicknameCheck>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getCheckNicknameQueryOptions(params,options)
+  const queryOptions = getGetAuthSignupNicknameCheckQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -491,19 +491,19 @@ export function useCheckNickname<TData = Awaited<ReturnType<typeof checkNickname
 
 
 
-export type getCurrentUserResponse200 = {
+export type getAuthMeResponse200 = {
   data: ApiResponseUserInfoResponse
   status: 200
 }
 
-export type getCurrentUserResponseSuccess = (getCurrentUserResponse200) & {
+export type getAuthMeResponseSuccess = (getAuthMeResponse200) & {
   headers: Headers;
 };
 ;
 
-export type getCurrentUserResponse = (getCurrentUserResponseSuccess)
+export type getAuthMeResponse = (getAuthMeResponseSuccess)
 
-export const getGetCurrentUserUrl = () => {
+export const getGetAuthMeUrl = () => {
 
 
 
@@ -515,9 +515,9 @@ export const getGetCurrentUserUrl = () => {
  * access-token 쿠키로 현재 로그인한 사용자의 정보를 조회합니다.
  * @summary 내 정보 조회
  */
-export const getCurrentUser = async ( options?: RequestInit): Promise<getCurrentUserResponse> => {
+export const getAuthMe = async ( options?: RequestInit): Promise<getAuthMeResponse> => {
 
-  return customInstance<getCurrentUserResponse>(getGetCurrentUserUrl(),
+  return customInstance<getAuthMeResponse>(getGetAuthMeUrl(),
   {
     ...options,
     method: 'GET'
@@ -530,69 +530,69 @@ export const getCurrentUser = async ( options?: RequestInit): Promise<getCurrent
 
 
 
-export const getGetCurrentUserQueryKey = () => {
+export const getGetAuthMeQueryKey = () => {
     return [
     `/api/auth/me`
     ] as const;
     }
 
 
-export const getGetCurrentUserQueryOptions = <TData = Awaited<ReturnType<typeof getCurrentUser>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetAuthMeQueryOptions = <TData = Awaited<ReturnType<typeof getAuthMe>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetCurrentUserQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetAuthMeQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCurrentUser>>> = ({ signal }) => getCurrentUser({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthMe>>> = ({ signal }) => getAuthMe({ signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetCurrentUserQueryResult = NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>
-export type GetCurrentUserQueryError = unknown
+export type GetAuthMeQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthMe>>>
+export type GetAuthMeQueryError = unknown
 
 
-export function useGetCurrentUser<TData = Awaited<ReturnType<typeof getCurrentUser>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>> & Pick<
+export function useGetAuthMe<TData = Awaited<ReturnType<typeof getAuthMe>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getCurrentUser>>,
+          Awaited<ReturnType<typeof getAuthMe>>,
           TError,
-          Awaited<ReturnType<typeof getCurrentUser>>
+          Awaited<ReturnType<typeof getAuthMe>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetCurrentUser<TData = Awaited<ReturnType<typeof getCurrentUser>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>> & Pick<
+export function useGetAuthMe<TData = Awaited<ReturnType<typeof getAuthMe>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getCurrentUser>>,
+          Awaited<ReturnType<typeof getAuthMe>>,
           TError,
-          Awaited<ReturnType<typeof getCurrentUser>>
+          Awaited<ReturnType<typeof getAuthMe>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetCurrentUser<TData = Awaited<ReturnType<typeof getCurrentUser>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetAuthMe<TData = Awaited<ReturnType<typeof getAuthMe>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 내 정보 조회
  */
 
-export function useGetCurrentUser<TData = Awaited<ReturnType<typeof getCurrentUser>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetAuthMe<TData = Awaited<ReturnType<typeof getAuthMe>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetCurrentUserQueryOptions(options)
+  const queryOptions = getGetAuthMeQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

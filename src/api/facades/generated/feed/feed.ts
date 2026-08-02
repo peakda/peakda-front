@@ -25,12 +25,12 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  AddReactionParams,
   ApiResponseFeedReactionSummaryResponse,
   ApiResponsePageResponseSpotRecordSummaryResponse,
   ApiResponseSpotRecordResponse,
-  List4Params,
-  RemoveReactionParams
+  DeleteFeedByIdReactionsParams,
+  GetFeedParams,
+  PostFeedByIdReactionsParams
 } from '../peakdaApi.schemas';
 
 import { customInstance } from '../../../mutator/index';
@@ -40,20 +40,20 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export type addReactionResponse200 = {
+export type postFeedByIdReactionsResponse200 = {
   data: ApiResponseFeedReactionSummaryResponse
   status: 200
 }
 
-export type addReactionResponseSuccess = (addReactionResponse200) & {
+export type postFeedByIdReactionsResponseSuccess = (postFeedByIdReactionsResponse200) & {
   headers: Headers;
 };
 ;
 
-export type addReactionResponse = (addReactionResponseSuccess)
+export type postFeedByIdReactionsResponse = (postFeedByIdReactionsResponseSuccess)
 
-export const getAddReactionUrl = (id: number,
-    params: AddReactionParams,) => {
+export const getPostFeedByIdReactionsUrl = (id: number,
+    params: PostFeedByIdReactionsParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -72,10 +72,10 @@ export const getAddReactionUrl = (id: number,
  * 게시된 기록에 리액션을 추가한다 (결정 F). 이미 남긴 리액션이면 그대로 반환한다 (멱등). DRAFT 이거나 존재하지 않으면 404.
  * @summary 리액션 추가
  */
-export const addReaction = async (id: number,
-    params: AddReactionParams, options?: RequestInit): Promise<addReactionResponse> => {
+export const postFeedByIdReactions = async (id: number,
+    params: PostFeedByIdReactionsParams, options?: RequestInit): Promise<postFeedByIdReactionsResponse> => {
 
-  return customInstance<addReactionResponse>(getAddReactionUrl(id,params),
+  return customInstance<postFeedByIdReactionsResponse>(getPostFeedByIdReactionsUrl(id,params),
   {
     ...options,
     method: 'POST'
@@ -87,11 +87,11 @@ export const addReaction = async (id: number,
 
 
 
-export const getAddReactionMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addReaction>>, TError,{id: number;params: AddReactionParams}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof addReaction>>, TError,{id: number;params: AddReactionParams}, TContext> => {
+export const getPostFeedByIdReactionsMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postFeedByIdReactions>>, TError,{id: number;params: PostFeedByIdReactionsParams}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postFeedByIdReactions>>, TError,{id: number;params: PostFeedByIdReactionsParams}, TContext> => {
 
-const mutationKey = ['addReaction'];
+const mutationKey = ['postFeedByIdReactions'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -101,10 +101,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addReaction>>, {id: number;params: AddReactionParams}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postFeedByIdReactions>>, {id: number;params: PostFeedByIdReactionsParams}> = (props) => {
           const {id,params} = props ?? {};
 
-          return  addReaction(id,params,requestOptions)
+          return  postFeedByIdReactions(id,params,requestOptions)
         }
 
 
@@ -114,37 +114,37 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type AddReactionMutationResult = NonNullable<Awaited<ReturnType<typeof addReaction>>>
+    export type PostFeedByIdReactionsMutationResult = NonNullable<Awaited<ReturnType<typeof postFeedByIdReactions>>>
 
-    export type AddReactionMutationError = unknown
+    export type PostFeedByIdReactionsMutationError = unknown
 
     /**
  * @summary 리액션 추가
  */
-export const useAddReaction = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addReaction>>, TError,{id: number;params: AddReactionParams}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostFeedByIdReactions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postFeedByIdReactions>>, TError,{id: number;params: PostFeedByIdReactionsParams}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof addReaction>>,
+        Awaited<ReturnType<typeof postFeedByIdReactions>>,
         TError,
-        {id: number;params: AddReactionParams},
+        {id: number;params: PostFeedByIdReactionsParams},
         TContext
       > => {
-      return useMutation(getAddReactionMutationOptions(options), queryClient);
+      return useMutation(getPostFeedByIdReactionsMutationOptions(options), queryClient);
     }
-    export type removeReactionResponse200 = {
+    export type deleteFeedByIdReactionsResponse200 = {
   data: ApiResponseFeedReactionSummaryResponse
   status: 200
 }
 
-export type removeReactionResponseSuccess = (removeReactionResponse200) & {
+export type deleteFeedByIdReactionsResponseSuccess = (deleteFeedByIdReactionsResponse200) & {
   headers: Headers;
 };
 ;
 
-export type removeReactionResponse = (removeReactionResponseSuccess)
+export type deleteFeedByIdReactionsResponse = (deleteFeedByIdReactionsResponseSuccess)
 
-export const getRemoveReactionUrl = (id: number,
-    params: RemoveReactionParams,) => {
+export const getDeleteFeedByIdReactionsUrl = (id: number,
+    params: DeleteFeedByIdReactionsParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -163,10 +163,10 @@ export const getRemoveReactionUrl = (id: number,
  * 남긴 리액션을 취소한다. 남기지 않은 리액션이어도 성공으로 응답한다 (멱등).
  * @summary 리액션 취소
  */
-export const removeReaction = async (id: number,
-    params: RemoveReactionParams, options?: RequestInit): Promise<removeReactionResponse> => {
+export const deleteFeedByIdReactions = async (id: number,
+    params: DeleteFeedByIdReactionsParams, options?: RequestInit): Promise<deleteFeedByIdReactionsResponse> => {
 
-  return customInstance<removeReactionResponse>(getRemoveReactionUrl(id,params),
+  return customInstance<deleteFeedByIdReactionsResponse>(getDeleteFeedByIdReactionsUrl(id,params),
   {
     ...options,
     method: 'DELETE'
@@ -178,11 +178,11 @@ export const removeReaction = async (id: number,
 
 
 
-export const getRemoveReactionMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeReaction>>, TError,{id: number;params: RemoveReactionParams}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof removeReaction>>, TError,{id: number;params: RemoveReactionParams}, TContext> => {
+export const getDeleteFeedByIdReactionsMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteFeedByIdReactions>>, TError,{id: number;params: DeleteFeedByIdReactionsParams}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteFeedByIdReactions>>, TError,{id: number;params: DeleteFeedByIdReactionsParams}, TContext> => {
 
-const mutationKey = ['removeReaction'];
+const mutationKey = ['deleteFeedByIdReactions'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -192,10 +192,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeReaction>>, {id: number;params: RemoveReactionParams}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteFeedByIdReactions>>, {id: number;params: DeleteFeedByIdReactionsParams}> = (props) => {
           const {id,params} = props ?? {};
 
-          return  removeReaction(id,params,requestOptions)
+          return  deleteFeedByIdReactions(id,params,requestOptions)
         }
 
 
@@ -205,36 +205,36 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type RemoveReactionMutationResult = NonNullable<Awaited<ReturnType<typeof removeReaction>>>
+    export type DeleteFeedByIdReactionsMutationResult = NonNullable<Awaited<ReturnType<typeof deleteFeedByIdReactions>>>
 
-    export type RemoveReactionMutationError = unknown
+    export type DeleteFeedByIdReactionsMutationError = unknown
 
     /**
  * @summary 리액션 취소
  */
-export const useRemoveReaction = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeReaction>>, TError,{id: number;params: RemoveReactionParams}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const useDeleteFeedByIdReactions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteFeedByIdReactions>>, TError,{id: number;params: DeleteFeedByIdReactionsParams}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof removeReaction>>,
+        Awaited<ReturnType<typeof deleteFeedByIdReactions>>,
         TError,
-        {id: number;params: RemoveReactionParams},
+        {id: number;params: DeleteFeedByIdReactionsParams},
         TContext
       > => {
-      return useMutation(getRemoveReactionMutationOptions(options), queryClient);
+      return useMutation(getDeleteFeedByIdReactionsMutationOptions(options), queryClient);
     }
-    export type list4Response200 = {
+    export type getFeedResponse200 = {
   data: ApiResponsePageResponseSpotRecordSummaryResponse
   status: 200
 }
 
-export type list4ResponseSuccess = (list4Response200) & {
+export type getFeedResponseSuccess = (getFeedResponse200) & {
   headers: Headers;
 };
 ;
 
-export type list4Response = (list4ResponseSuccess)
+export type getFeedResponse = (getFeedResponseSuccess)
 
-export const getList4Url = (params: List4Params,) => {
+export const getGetFeedUrl = (params: GetFeedParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -253,9 +253,9 @@ export const getList4Url = (params: List4Params,) => {
  * 게시된 스팟 기록을 filter 로 필터링해 최신순으로 조회한다. all=전체, interest=관심 꽃(사용자 관심 카테고리와 겹치는 식물이 태깅된 기록), following=팔로잉 중인 사용자의 기록.
  * @summary 피드 조회
  */
-export const list4 = async (params: List4Params, options?: RequestInit): Promise<list4Response> => {
+export const getFeed = async (params: GetFeedParams, options?: RequestInit): Promise<getFeedResponse> => {
 
-  return customInstance<list4Response>(getList4Url(params),
+  return customInstance<getFeedResponse>(getGetFeedUrl(params),
   {
     ...options,
     method: 'GET'
@@ -268,69 +268,69 @@ export const list4 = async (params: List4Params, options?: RequestInit): Promise
 
 
 
-export const getList4QueryKey = (params?: List4Params,) => {
+export const getGetFeedQueryKey = (params?: GetFeedParams,) => {
     return [
     `/api/feed`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getList4QueryOptions = <TData = Awaited<ReturnType<typeof list4>>, TError = unknown>(params: List4Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list4>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetFeedQueryOptions = <TData = Awaited<ReturnType<typeof getFeed>>, TError = unknown>(params: GetFeedParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeed>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getList4QueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetFeedQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof list4>>> = ({ signal }) => list4(params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getFeed>>> = ({ signal }) => getFeed(params, { signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof list4>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getFeed>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type List4QueryResult = NonNullable<Awaited<ReturnType<typeof list4>>>
-export type List4QueryError = unknown
+export type GetFeedQueryResult = NonNullable<Awaited<ReturnType<typeof getFeed>>>
+export type GetFeedQueryError = unknown
 
 
-export function useList4<TData = Awaited<ReturnType<typeof list4>>, TError = unknown>(
- params: List4Params, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof list4>>, TError, TData>> & Pick<
+export function useGetFeed<TData = Awaited<ReturnType<typeof getFeed>>, TError = unknown>(
+ params: GetFeedParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeed>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof list4>>,
+          Awaited<ReturnType<typeof getFeed>>,
           TError,
-          Awaited<ReturnType<typeof list4>>
+          Awaited<ReturnType<typeof getFeed>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useList4<TData = Awaited<ReturnType<typeof list4>>, TError = unknown>(
- params: List4Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list4>>, TError, TData>> & Pick<
+export function useGetFeed<TData = Awaited<ReturnType<typeof getFeed>>, TError = unknown>(
+ params: GetFeedParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeed>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof list4>>,
+          Awaited<ReturnType<typeof getFeed>>,
           TError,
-          Awaited<ReturnType<typeof list4>>
+          Awaited<ReturnType<typeof getFeed>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useList4<TData = Awaited<ReturnType<typeof list4>>, TError = unknown>(
- params: List4Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list4>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetFeed<TData = Awaited<ReturnType<typeof getFeed>>, TError = unknown>(
+ params: GetFeedParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeed>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 피드 조회
  */
 
-export function useList4<TData = Awaited<ReturnType<typeof list4>>, TError = unknown>(
- params: List4Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list4>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetFeed<TData = Awaited<ReturnType<typeof getFeed>>, TError = unknown>(
+ params: GetFeedParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeed>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getList4QueryOptions(params,options)
+  const queryOptions = getGetFeedQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -342,19 +342,19 @@ export function useList4<TData = Awaited<ReturnType<typeof list4>>, TError = unk
 
 
 
-export type get1Response200 = {
+export type getFeedByIdResponse200 = {
   data: ApiResponseSpotRecordResponse
   status: 200
 }
 
-export type get1ResponseSuccess = (get1Response200) & {
+export type getFeedByIdResponseSuccess = (getFeedByIdResponse200) & {
   headers: Headers;
 };
 ;
 
-export type get1Response = (get1ResponseSuccess)
+export type getFeedByIdResponse = (getFeedByIdResponseSuccess)
 
-export const getGet1Url = (id: number,) => {
+export const getGetFeedByIdUrl = (id: number,) => {
 
 
 
@@ -366,9 +366,9 @@ export const getGet1Url = (id: number,) => {
  * 게시된(PUBLISHED) 기록만 조회 가능. DRAFT 이거나 존재하지 않으면 404.
  * @summary 피드 상세 조회
  */
-export const get1 = async (id: number, options?: RequestInit): Promise<get1Response> => {
+export const getFeedById = async (id: number, options?: RequestInit): Promise<getFeedByIdResponse> => {
 
-  return customInstance<get1Response>(getGet1Url(id),
+  return customInstance<getFeedByIdResponse>(getGetFeedByIdUrl(id),
   {
     ...options,
     method: 'GET'
@@ -381,69 +381,69 @@ export const get1 = async (id: number, options?: RequestInit): Promise<get1Respo
 
 
 
-export const getGet1QueryKey = (id: number,) => {
+export const getGetFeedByIdQueryKey = (id: number,) => {
     return [
     `/api/feed/${id}`
     ] as const;
     }
 
 
-export const getGet1QueryOptions = <TData = Awaited<ReturnType<typeof get1>>, TError = unknown>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof get1>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetFeedByIdQueryOptions = <TData = Awaited<ReturnType<typeof getFeedById>>, TError = unknown>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeedById>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGet1QueryKey(id);
+  const queryKey =  queryOptions?.queryKey ?? getGetFeedByIdQueryKey(id);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof get1>>> = ({ signal }) => get1(id, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getFeedById>>> = ({ signal }) => getFeedById(id, { signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof get1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getFeedById>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type Get1QueryResult = NonNullable<Awaited<ReturnType<typeof get1>>>
-export type Get1QueryError = unknown
+export type GetFeedByIdQueryResult = NonNullable<Awaited<ReturnType<typeof getFeedById>>>
+export type GetFeedByIdQueryError = unknown
 
 
-export function useGet1<TData = Awaited<ReturnType<typeof get1>>, TError = unknown>(
- id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof get1>>, TError, TData>> & Pick<
+export function useGetFeedById<TData = Awaited<ReturnType<typeof getFeedById>>, TError = unknown>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeedById>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof get1>>,
+          Awaited<ReturnType<typeof getFeedById>>,
           TError,
-          Awaited<ReturnType<typeof get1>>
+          Awaited<ReturnType<typeof getFeedById>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGet1<TData = Awaited<ReturnType<typeof get1>>, TError = unknown>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof get1>>, TError, TData>> & Pick<
+export function useGetFeedById<TData = Awaited<ReturnType<typeof getFeedById>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeedById>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof get1>>,
+          Awaited<ReturnType<typeof getFeedById>>,
           TError,
-          Awaited<ReturnType<typeof get1>>
+          Awaited<ReturnType<typeof getFeedById>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGet1<TData = Awaited<ReturnType<typeof get1>>, TError = unknown>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof get1>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetFeedById<TData = Awaited<ReturnType<typeof getFeedById>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeedById>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 피드 상세 조회
  */
 
-export function useGet1<TData = Awaited<ReturnType<typeof get1>>, TError = unknown>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof get1>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetFeedById<TData = Awaited<ReturnType<typeof getFeedById>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeedById>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGet1QueryOptions(id,options)
+  const queryOptions = getGetFeedByIdQueryOptions(id,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

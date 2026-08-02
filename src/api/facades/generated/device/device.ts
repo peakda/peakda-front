@@ -27,19 +27,19 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export type registerResponse200 = {
+export type postDevicesResponse200 = {
   data: ApiResponseUnit
   status: 200
 }
 
-export type registerResponseSuccess = (registerResponse200) & {
+export type postDevicesResponseSuccess = (postDevicesResponse200) & {
   headers: Headers;
 };
 ;
 
-export type registerResponse = (registerResponseSuccess)
+export type postDevicesResponse = (postDevicesResponseSuccess)
 
-export const getRegisterUrl = () => {
+export const getPostDevicesUrl = () => {
 
 
 
@@ -51,9 +51,9 @@ export const getRegisterUrl = () => {
  * 푸시 알림용 디바이스 토큰을 멱등하게 등록한다. 이미 등록된 토큰이면 소유자와 플랫폼을 갱신한다.
  * @summary 디바이스 토큰 등록
  */
-export const register = async (registerDeviceRequest: RegisterDeviceRequest, options?: RequestInit): Promise<registerResponse> => {
+export const postDevices = async (registerDeviceRequest: RegisterDeviceRequest, options?: RequestInit): Promise<postDevicesResponse> => {
 
-  return customInstance<registerResponse>(getRegisterUrl(),
+  return customInstance<postDevicesResponse>(getPostDevicesUrl(),
   {
     ...options,
     method: 'POST',
@@ -65,11 +65,11 @@ export const register = async (registerDeviceRequest: RegisterDeviceRequest, opt
 
 
 
-export const getRegisterMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof register>>, TError,{data: RegisterDeviceRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof register>>, TError,{data: RegisterDeviceRequest}, TContext> => {
+export const getPostDevicesMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postDevices>>, TError,{data: RegisterDeviceRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postDevices>>, TError,{data: RegisterDeviceRequest}, TContext> => {
 
-const mutationKey = ['register'];
+const mutationKey = ['postDevices'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -79,10 +79,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof register>>, {data: RegisterDeviceRequest}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postDevices>>, {data: RegisterDeviceRequest}> = (props) => {
           const {data} = props ?? {};
 
-          return  register(data,requestOptions)
+          return  postDevices(data,requestOptions)
         }
 
 
@@ -92,36 +92,36 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type RegisterMutationResult = NonNullable<Awaited<ReturnType<typeof register>>>
-    export type RegisterMutationBody = RegisterDeviceRequest
-    export type RegisterMutationError = unknown
+    export type PostDevicesMutationResult = NonNullable<Awaited<ReturnType<typeof postDevices>>>
+    export type PostDevicesMutationBody = RegisterDeviceRequest
+    export type PostDevicesMutationError = unknown
 
     /**
  * @summary 디바이스 토큰 등록
  */
-export const useRegister = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof register>>, TError,{data: RegisterDeviceRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostDevices = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postDevices>>, TError,{data: RegisterDeviceRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof register>>,
+        Awaited<ReturnType<typeof postDevices>>,
         TError,
         {data: RegisterDeviceRequest},
         TContext
       > => {
-      return useMutation(getRegisterMutationOptions(options), queryClient);
+      return useMutation(getPostDevicesMutationOptions(options), queryClient);
     }
-    export type unregisterResponse200 = {
+    export type deleteDevicesByTokenResponse200 = {
   data: ApiResponseUnit
   status: 200
 }
 
-export type unregisterResponseSuccess = (unregisterResponse200) & {
+export type deleteDevicesByTokenResponseSuccess = (deleteDevicesByTokenResponse200) & {
   headers: Headers;
 };
 ;
 
-export type unregisterResponse = (unregisterResponseSuccess)
+export type deleteDevicesByTokenResponse = (deleteDevicesByTokenResponseSuccess)
 
-export const getUnregisterUrl = (token: string,) => {
+export const getDeleteDevicesByTokenUrl = (token: string,) => {
 
 
 
@@ -133,9 +133,9 @@ export const getUnregisterUrl = (token: string,) => {
  * 로그아웃 시 현재 사용자의 디바이스 토큰을 멱등하게 해제한다.
  * @summary 디바이스 토큰 해제
  */
-export const unregister = async (token: string, options?: RequestInit): Promise<unregisterResponse> => {
+export const deleteDevicesByToken = async (token: string, options?: RequestInit): Promise<deleteDevicesByTokenResponse> => {
 
-  return customInstance<unregisterResponse>(getUnregisterUrl(token),
+  return customInstance<deleteDevicesByTokenResponse>(getDeleteDevicesByTokenUrl(token),
   {
     ...options,
     method: 'DELETE'
@@ -147,11 +147,11 @@ export const unregister = async (token: string, options?: RequestInit): Promise<
 
 
 
-export const getUnregisterMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unregister>>, TError,{token: string}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof unregister>>, TError,{token: string}, TContext> => {
+export const getDeleteDevicesByTokenMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDevicesByToken>>, TError,{token: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteDevicesByToken>>, TError,{token: string}, TContext> => {
 
-const mutationKey = ['unregister'];
+const mutationKey = ['deleteDevicesByToken'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -161,10 +161,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof unregister>>, {token: string}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteDevicesByToken>>, {token: string}> = (props) => {
           const {token} = props ?? {};
 
-          return  unregister(token,requestOptions)
+          return  deleteDevicesByToken(token,requestOptions)
         }
 
 
@@ -174,20 +174,20 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type UnregisterMutationResult = NonNullable<Awaited<ReturnType<typeof unregister>>>
+    export type DeleteDevicesByTokenMutationResult = NonNullable<Awaited<ReturnType<typeof deleteDevicesByToken>>>
 
-    export type UnregisterMutationError = unknown
+    export type DeleteDevicesByTokenMutationError = unknown
 
     /**
  * @summary 디바이스 토큰 해제
  */
-export const useUnregister = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unregister>>, TError,{token: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const useDeleteDevicesByToken = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDevicesByToken>>, TError,{token: string}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof unregister>>,
+        Awaited<ReturnType<typeof deleteDevicesByToken>>,
         TError,
         {token: string},
         TContext
       > => {
-      return useMutation(getUnregisterMutationOptions(options), queryClient);
+      return useMutation(getDeleteDevicesByTokenMutationOptions(options), queryClient);
     }

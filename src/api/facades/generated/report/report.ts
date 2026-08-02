@@ -27,19 +27,19 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export type create1Response200 = {
+export type postReportsResponse200 = {
   data: ApiResponseUnit
   status: 200
 }
 
-export type create1ResponseSuccess = (create1Response200) & {
+export type postReportsResponseSuccess = (postReportsResponse200) & {
   headers: Headers;
 };
 ;
 
-export type create1Response = (create1ResponseSuccess)
+export type postReportsResponse = (postReportsResponseSuccess)
 
-export const getCreate1Url = () => {
+export const getPostReportsUrl = () => {
 
 
 
@@ -51,9 +51,9 @@ export const getCreate1Url = () => {
  * 게시된 스팟 기록을 신고한다. 같은 대상을 이미 신고했으면 그대로 성공으로 응답한다 (멱등). 본인 게시글은 신고할 수 없고, DRAFT 이거나 존재하지 않으면 404. 관리자 심사 처리는 별도 운영 도구에서 이뤄진다.
  * @summary 게시글 신고
  */
-export const create1 = async (createReportRequest: CreateReportRequest, options?: RequestInit): Promise<create1Response> => {
+export const postReports = async (createReportRequest: CreateReportRequest, options?: RequestInit): Promise<postReportsResponse> => {
 
-  return customInstance<create1Response>(getCreate1Url(),
+  return customInstance<postReportsResponse>(getPostReportsUrl(),
   {
     ...options,
     method: 'POST',
@@ -65,11 +65,11 @@ export const create1 = async (createReportRequest: CreateReportRequest, options?
 
 
 
-export const getCreate1MutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof create1>>, TError,{data: CreateReportRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof create1>>, TError,{data: CreateReportRequest}, TContext> => {
+export const getPostReportsMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postReports>>, TError,{data: CreateReportRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postReports>>, TError,{data: CreateReportRequest}, TContext> => {
 
-const mutationKey = ['create1'];
+const mutationKey = ['postReports'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -79,10 +79,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof create1>>, {data: CreateReportRequest}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postReports>>, {data: CreateReportRequest}> = (props) => {
           const {data} = props ?? {};
 
-          return  create1(data,requestOptions)
+          return  postReports(data,requestOptions)
         }
 
 
@@ -92,20 +92,20 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type Create1MutationResult = NonNullable<Awaited<ReturnType<typeof create1>>>
-    export type Create1MutationBody = CreateReportRequest
-    export type Create1MutationError = unknown
+    export type PostReportsMutationResult = NonNullable<Awaited<ReturnType<typeof postReports>>>
+    export type PostReportsMutationBody = CreateReportRequest
+    export type PostReportsMutationError = unknown
 
     /**
  * @summary 게시글 신고
  */
-export const useCreate1 = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof create1>>, TError,{data: CreateReportRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostReports = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postReports>>, TError,{data: CreateReportRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof create1>>,
+        Awaited<ReturnType<typeof postReports>>,
         TError,
         {data: CreateReportRequest},
         TContext
       > => {
-      return useMutation(getCreate1MutationOptions(options), queryClient);
+      return useMutation(getPostReportsMutationOptions(options), queryClient);
     }
