@@ -46,7 +46,7 @@ export default function MyPage() {
               <button
                 type="button"
                 aria-label="알림"
-                className="relative"
+                className="relative cursor-pointer"
                 onClick={() => router.push('/notification')}
               >
                 <Image src="/icons/alram.svg" alt="알림" width={22} height={22} />
@@ -66,8 +66,18 @@ export default function MyPage() {
 
       {/* 프로필 */}
       <div className="flex items-center gap-3 px-4 py-3">
-        <IconBtn size="md" className="bg-bg-tertiary">
-          <Image src="/icons/person.svg" alt="프로필" width={26} height={26} />
+        <IconBtn size="md" className="bg-bg-tertiary relative overflow-hidden">
+          {myPage?.profileImageUrl ? (
+            <Image
+              src={myPage.profileImageUrl}
+              alt="프로필"
+              fill
+              className="object-cover"
+              sizes="32px"
+            />
+          ) : (
+            <Image src="/icons/person.svg" alt="프로필" width={26} height={26} />
+          )}
         </IconBtn>
         <span className="text-text-primary flex-1 text-lg font-semibold">
           {myPage?.nickname ?? ''}

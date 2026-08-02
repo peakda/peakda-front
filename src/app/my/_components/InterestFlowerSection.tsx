@@ -9,7 +9,7 @@ interface Props {
 export function InterestFlowerSection({ flowers, action = '편집' }: Props) {
   return (
     <section className="mt-2">
-      <SectionHeader title="관심 식물" action={action} />
+      <SectionHeader title="관심 식물" action={action} href="/profile/edit" />
       <div className="flex flex-wrap gap-2 px-4">
         {flowers.map((flower) => (
           <Badge
