@@ -54,7 +54,7 @@ function SectionHeader({ title, href }: SectionHeaderProps) {
   )
 }
 
-// 개화 시즌이 아니면 섹션이 통째로 비는 게 정상이라, 섹션 자체는 남기고 안내만 보여준다.
+// 개화 시즌이 아니면 섹션이 통째로 비는 게 정상이라, 섹션 자체는 남기고 안내만 보여줌.
 function EmptySection({ text }: { text: string }) {
   return <p className="text-text-tertiary px-4 py-8 text-center text-sm">{text}</p>
 }
