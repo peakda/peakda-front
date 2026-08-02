@@ -59,7 +59,15 @@ export const getPostFeedByIdReactionsUrl = (id: number,
   Object.entries(params || {}).forEach(([key, value]) => {
 
     if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : value.toString())
+      if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+        Object.entries(value).forEach(([nestedKey, nestedValue]) => {
+          if (nestedValue !== undefined && nestedValue !== null) {
+            normalizedParams.append(nestedKey, nestedValue.toString())
+          }
+        })
+      } else {
+        normalizedParams.append(key, value === null ? 'null' : value.toString())
+      }
     }
   });
 
@@ -150,7 +158,15 @@ export const getDeleteFeedByIdReactionsUrl = (id: number,
   Object.entries(params || {}).forEach(([key, value]) => {
 
     if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : value.toString())
+      if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+        Object.entries(value).forEach(([nestedKey, nestedValue]) => {
+          if (nestedValue !== undefined && nestedValue !== null) {
+            normalizedParams.append(nestedKey, nestedValue.toString())
+          }
+        })
+      } else {
+        normalizedParams.append(key, value === null ? 'null' : value.toString())
+      }
     }
   });
 
@@ -240,7 +256,15 @@ export const getGetFeedUrl = (params: GetFeedParams,) => {
   Object.entries(params || {}).forEach(([key, value]) => {
 
     if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : value.toString())
+      if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+        Object.entries(value).forEach(([nestedKey, nestedValue]) => {
+          if (nestedValue !== undefined && nestedValue !== null) {
+            normalizedParams.append(nestedKey, nestedValue.toString())
+          }
+        })
+      } else {
+        normalizedParams.append(key, value === null ? 'null' : value.toString())
+      }
     }
   });
 

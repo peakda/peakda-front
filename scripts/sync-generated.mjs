@@ -11,6 +11,25 @@ if (!fs.existsSync(nextDir)) {
   process.exit(1)
 }
 
+// orval 의 쿼리 빌더는 모든 값을 value.toString() 으로 직렬화해서, 객체 파라미터가
+// `pageRequest=[object Object]` 로 나간다. 스웨거상 pageRequest 는 style=form/explode=true
+// (기본값)이라 page=0&size=20 처럼 평탄하게 나가야 하므로, 객체면 펼쳐서 붙이도록 바꾼다.
+// 배열은 기존 동작(쉼표 join)을 유지한다.
+const APPEND_LINE = `      normalizedParams.append(key, value === null ? 'null' : value.toString())`
+const APPEND_PATCHED = `      if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+        Object.entries(value).forEach(([nestedKey, nestedValue]) => {
+          if (nestedValue !== undefined && nestedValue !== null) {
+            normalizedParams.append(nestedKey, nestedValue.toString())
+          }
+        })
+      } else {
+        normalizedParams.append(key, value === null ? 'null' : value.toString())
+      }`
+
+function patch(content) {
+  return content.split(APPEND_LINE).join(APPEND_PATCHED)
+}
+
 function walk(dir, base = '') {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) =>
     entry.isDirectory()
@@ -30,10 +49,10 @@ let unchanged = 0
 
 for (const rel of nextFiles) {
   const to = path.join(targetDir, rel)
-  const content = fs.readFileSync(path.join(nextDir, rel))
+  const content = patch(fs.readFileSync(path.join(nextDir, rel), 'utf8'))
 
   if (fs.existsSync(to)) {
-    if (fs.readFileSync(to).equals(content)) {
+    if (fs.readFileSync(to, 'utf8') === content) {
       unchanged += 1
       continue
     }
