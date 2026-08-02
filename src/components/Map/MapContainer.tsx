@@ -19,6 +19,7 @@ import { useHomeSuggestion } from '@/api/facades/home'
 import { useUnreadNotificationCount } from '@/api/facades/notification'
 import { matchSpotApi, spotDetailApi } from '@/api/facades/spot'
 import { bloomToMapSpots } from '@/lib/utils/bloomToMapSpots'
+import { STAGE_LABEL } from '@/constants/map'
 import type {
   BloomBadgeStatus,
   GetSeasonalBloomsParams,
@@ -163,7 +164,7 @@ export const MapContainer = () => {
           type: 'list' as const,
           title: f.alt || '명소',
           location: spot.title ?? '위치 정보 없음',
-          description: `현재 ${spot.maxStage === 'Peak' ? '만개' : spot.maxStage === 'Start' ? '개화 시작' : '개화 전'} 상태입니다.`,
+          description: `현재 ${STAGE_LABEL[spot.maxStage]} 상태입니다.`,
           Badges: f.alt ? [f.alt] : [],
           isFavorite: false,
           images: [f.src],

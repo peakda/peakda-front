@@ -21,7 +21,8 @@ interface ClusterGroup {
 
 function createPinHTML(flowers: FlowerItem[], maxStage: Stage): string {
   const color = STAGE_COLOR[maxStage]
-  const grayscale = maxStage === 'Before' ? 'opacity:0.4;filter:grayscale(1);' : ''
+  const grayscale =
+    maxStage === 'Before' || maxStage === 'End' ? 'opacity:0.4;filter:grayscale(1);' : ''
   const imgs = flowers
     .slice(0, 3)
     .map(
