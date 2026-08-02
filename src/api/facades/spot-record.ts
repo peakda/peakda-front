@@ -126,8 +126,14 @@ export const useDeleteSpotRecord = () => {
   const queryClient = useQueryClient()
   return useDeleteGen({
     mutation: {
-      onSuccess: () =>
-        recordListKeys.forEach((queryKey) => queryClient.invalidateQueries({ queryKey })),
+      onSuccess: () => {
+        recordListKeys.forEach((queryKey) => queryClient.invalidateQueries({ queryKey }))
+        // 게시된 기록이면 피드에도 노출되므로 '/api/feed' 프리픽스 캐시를 함께 무효화한다.
+        queryClient.invalidateQueries({
+          predicate: (q) =>
+            typeof q.queryKey[0] === 'string' && q.queryKey[0].startsWith('/api/feed'),
+        })
+      },
     },
   })
 }
