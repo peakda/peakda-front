@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { Header } from '@/components/ui/layout/Header'
 import { SearchInput } from '@/app/search/_components/SearchInput'
 import { ExplorCard } from '@/components/ui/card/ExplorCard'
@@ -60,8 +61,7 @@ function EmptySection({ text }: { text: string }) {
 }
 
 export default function ExplorePage() {
-  const [query, setQuery] = useState('')
-  const hasQuery = query.trim().length > 0
+  const router = useRouter()
   const { openFlowerFilterDrawer } = useDrawerStore()
   const { data: suggestion } = useHomeSuggestion()
 
@@ -86,7 +86,7 @@ export default function ExplorePage() {
             <div className="flex items-center gap-1">
               <p className="text-text-secondary text-sm">필터</p>
               <button type="button" className="cursor-pointer" onClick={openFlowerFilterDrawer}>
-                <Image src="./icons/filter.svg" alt="필터" width={24} height={24} />
+                <Image src="/icons/filter.svg" alt="필터" width={24} height={24} />
               </button>
             </div>
           }
@@ -94,9 +94,8 @@ export default function ExplorePage() {
       </div>
 
       <SearchInput
-        query={query}
-        hasQuery={hasQuery}
-        setQuery={setQuery}
+        readOnly
+        onClick={() => router.push('/search')}
         placeholder={searchPlaceholder}
       />
 

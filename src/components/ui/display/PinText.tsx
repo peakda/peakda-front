@@ -47,7 +47,7 @@ export function PinText({
           </IconBtn>
           {variant === 'list' && (
             <IconBtn size="md">
-              <Image src={'./icons/alram.svg'} alt="알람" width={20} height={20} />
+              <Image src={'/icons/alram.svg'} alt="알람" width={20} height={20} />
             </IconBtn>
           )}
         </div>
@@ -64,7 +64,7 @@ export function PinText({
         {Badges.map((badge, index) => (
           <Badge
             leftIcon={
-              <Image src={'flowers/cherry-blossom.svg'} alt="벚꽃" width={20} height={20} />
+              <Image src={'/flowers/cherry-blossom.svg'} alt="벚꽃" width={20} height={20} />
             }
             key={index}
             label={badge}

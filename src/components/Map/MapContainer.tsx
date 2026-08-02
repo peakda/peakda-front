@@ -16,6 +16,7 @@ import { useMapCluster, type MapSpot } from '@/hooks/useMapPins'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import { useBloomMap } from '@/api/facades/seasonal-bloom'
 import { useHomeSuggestion } from '@/api/facades/home'
+import { useUnreadNotificationCount } from '@/api/facades/notification'
 import { spotPreviewApi } from '@/api/facades/spot'
 import { bloomToMapSpots } from '@/lib/utils/bloomToMapSpots'
 import type {
@@ -92,6 +93,10 @@ export const MapContainer = () => {
   const { data: suggestion } = useHomeSuggestion()
   const searchDescription =
     suggestion?.available && suggestion.message ? suggestion.message : '벚꽃 만개 지역'
+
+  // 안 읽은 알림이 있을 때만 헤더 알림 버튼에 점 표시
+  const { data: unread } = useUnreadNotificationCount()
+  const hasUnreadNotification = (unread?.unreadCount ?? 0) > 0
 
   const handlePinClick = useCallback(
     async (spot: MapSpot) => {
@@ -251,7 +256,9 @@ export const MapContainer = () => {
                 height={20}
                 className="h-6 w-6"
               />
-              <div className="absolute top-2.5 right-2.5 h-1 w-1 rounded-full bg-pink-500"></div>
+              {hasUnreadNotification && (
+                <div className="absolute top-2.5 right-2.5 h-1 w-1 rounded-full bg-pink-500"></div>
+              )}
             </div>
           }
         />
@@ -263,22 +270,26 @@ export const MapContainer = () => {
         </div>
       )}
 
-      <Category isMap />
+      {isReady && (
+        <>
+          <Category isMap />
 
-      <SearchBar
-        placeholder="지금 피크인 곳을 검색해보세요."
-        description={searchDescription}
-        onFilterClick={openFilterDrawer}
-      />
-      <LocationBtn
-        onLocate={handleLocate}
-        style={{
-          bottom: snapHeight > 0 ? `${snapHeight + 16}px` : '96px',
-          transition: 'bottom 0.5s cubic-bezier(0.32,0.72,0,1)',
-        }}
-      />
-      <Nav activeTab="map" />
-      <Drawer />
+          <SearchBar
+            placeholder="지금 피크인 곳을 검색해보세요."
+            description={searchDescription}
+            onFilterClick={openFilterDrawer}
+          />
+          <LocationBtn
+            onLocate={handleLocate}
+            style={{
+              bottom: snapHeight > 0 ? `${snapHeight + 16}px` : '96px',
+              transition: 'bottom 0.5s cubic-bezier(0.32,0.72,0,1)',
+            }}
+          />
+          <Nav activeTab="map" />
+          <Drawer />
+        </>
+      )}
     </div>
   )
 }

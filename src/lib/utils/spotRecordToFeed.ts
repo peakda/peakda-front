@@ -40,7 +40,9 @@ function formatTimeAgo(iso: string): string {
 export function toFeedCardProps(record: SpotRecordSummaryResponse): FeedCardProps {
   return {
     recordId: record.id,
+    authorId: record.user.id,
     authorName: record.user.nickname,
+    authorImageUrl: record.user.profileImageUrl,
     location: record.spotName,
     timeAgo: formatTimeAgo(record.publishedAt ?? record.createdAt),
     visitDate: toDot(record.visitedDate ?? record.createdAt),
@@ -60,7 +62,9 @@ export function detailToFeedCardProps(
 ): FeedCardProps {
   return {
     recordId: record.id,
+    authorId: record.user.id,
     authorName: record.user.nickname,
+    authorImageUrl: record.user.profileImageUrl,
     location: record.spot.name,
     timeAgo: formatTimeAgo(record.publishedAt ?? record.createdAt),
     visitDate: toDot(record.visitedDate ?? record.createdAt),

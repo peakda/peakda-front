@@ -18,7 +18,7 @@ export function UserPanel({ users }: Props) {
     return (
       <div className="flex h-96 flex-col items-center justify-center gap-2 py-6 text-center">
         <IconBtn className="h-18 w-18">
-          <Image src="./icons/person.svg" alt="사람 아이콘" width={40} height={40} />
+          <Image src="/icons/person.svg" alt="사람 아이콘" width={40} height={40} />
         </IconBtn>
         <p className="text-text-primary text-lg font-semibold">검색되는 유저가 없어요</p>
         <p className="text-text-tertiary text-base">

@@ -70,8 +70,12 @@ function createClusterHTML(spots: MapSpot[]): string {
   `
 }
 
-function clusterSpots(spots: MapSpot[], level: number): ClusterGroup[] {
-  const gridSize = 0.002 * Math.pow(2, level - 1)
+// 셀 크기는 level 에 비례하므로 화면상 크기가 일정하다(≈106px @ 모바일 390px 폭).
+// 이 상수가 크면(이전 0.002 ≈ 706px) 셀이 화면보다 넓어 확대해도 클러스터가 쪼개지지 않는다.
+const CLUSTER_GRID_UNIT = 0.0003
+
+export function clusterSpots(spots: MapSpot[], level: number): ClusterGroup[] {
+  const gridSize = CLUSTER_GRID_UNIT * Math.pow(2, level - 1)
   const grid = new Map<string, MapSpot[]>()
 
   for (const spot of spots) {
@@ -114,11 +118,13 @@ export function useMapCluster(map: kakao.maps.Map | null, spots: MapSpot[], onPi
         if (isCluster) {
           const container = document.createElement('div')
           container.innerHTML = createClusterHTML(cluster.spots)
+          // 평균 좌표로 2단계 확대하면 구성원이 화면 밖으로 흩어진다.
+          // 구성원 전체를 감싸는 영역에 맞춰 확대해 항상 화면 안에 들어오게 한다.
+          // padding 은 헤더·카테고리·검색바(위)와 Nav(아래)에 가리지 않을 만큼.
           container.addEventListener('click', () => {
-            map.setLevel(level - 2, {
-              anchor: new kakao.maps.LatLng(cluster.lat, cluster.lng),
-              animate: true,
-            })
+            const bounds = new kakao.maps.LatLngBounds()
+            cluster.spots.forEach((s) => bounds.extend(new kakao.maps.LatLng(s.lat, s.lng)))
+            map.setBounds(bounds, 180, 40, 140, 40)
           })
 
           const overlay = new kakao.maps.CustomOverlay({
