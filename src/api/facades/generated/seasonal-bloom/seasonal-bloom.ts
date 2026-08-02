@@ -24,9 +24,9 @@ import type {
   ApiResponseBloomCalendarResponse,
   ApiResponseBloomMapResponse,
   ApiResponseBloomPeakListResponse,
-  CalendarParams,
-  MapParams,
-  PeakParams
+  GetSeasonalBloomsCalendarParams,
+  GetSeasonalBloomsParams,
+  GetSeasonalBloomsPeakParams
 } from '../peakdaApi.schemas';
 
 import { customInstance } from '../../../mutator/index';
@@ -36,25 +36,33 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export type mapResponse200 = {
+export type getSeasonalBloomsResponse200 = {
   data: ApiResponseBloomMapResponse
   status: 200
 }
 
-export type mapResponseSuccess = (mapResponse200) & {
+export type getSeasonalBloomsResponseSuccess = (getSeasonalBloomsResponse200) & {
   headers: Headers;
 };
 ;
 
-export type mapResponse = (mapResponseSuccess)
+export type getSeasonalBloomsResponse = (getSeasonalBloomsResponseSuccess)
 
-export const getMapUrl = (params: MapParams,) => {
+export const getGetSeasonalBloomsUrl = (params: GetSeasonalBloomsParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
 
     if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : value.toString())
+      if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+        Object.entries(value).forEach(([nestedKey, nestedValue]) => {
+          if (nestedValue !== undefined && nestedValue !== null) {
+            normalizedParams.append(nestedKey, nestedValue.toString())
+          }
+        })
+      } else {
+        normalizedParams.append(key, value === null ? 'null' : value.toString())
+      }
     }
   });
 
@@ -67,9 +75,9 @@ export const getMapUrl = (params: MapParams,) => {
  * 지도 영역(bbox) 내 Spot 핀별 현재 개화 상태를 조회한다. 명소형(개화 추정 상속)과 동네형(사용자 기록 파생) 핀을 함께 반환하며, 핀 3단계(PREPARING/STARTED/PEAK)만 노출하고 ENDED 는 제외된다. category 로 특정 꽃만 필터하고, date(방문예정일)로 그날 기준 명소형 상태를 재계산할 수 있다.
  * @summary 지도 영역 개화 현황 (Spot 핀)
  */
-export const map = async (params: MapParams, options?: RequestInit): Promise<mapResponse> => {
+export const getSeasonalBlooms = async (params: GetSeasonalBloomsParams, options?: RequestInit): Promise<getSeasonalBloomsResponse> => {
 
-  return customInstance<mapResponse>(getMapUrl(params),
+  return customInstance<getSeasonalBloomsResponse>(getGetSeasonalBloomsUrl(params),
   {
     ...options,
     method: 'GET'
@@ -82,69 +90,69 @@ export const map = async (params: MapParams, options?: RequestInit): Promise<map
 
 
 
-export const getMapQueryKey = (params?: MapParams,) => {
+export const getGetSeasonalBloomsQueryKey = (params?: GetSeasonalBloomsParams,) => {
     return [
     `/api/seasonal/blooms`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getMapQueryOptions = <TData = Awaited<ReturnType<typeof map>>, TError = unknown>(params: MapParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof map>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetSeasonalBloomsQueryOptions = <TData = Awaited<ReturnType<typeof getSeasonalBlooms>>, TError = unknown>(params: GetSeasonalBloomsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSeasonalBlooms>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getMapQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetSeasonalBloomsQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof map>>> = ({ signal }) => map(params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSeasonalBlooms>>> = ({ signal }) => getSeasonalBlooms(params, { signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof map>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSeasonalBlooms>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type MapQueryResult = NonNullable<Awaited<ReturnType<typeof map>>>
-export type MapQueryError = unknown
+export type GetSeasonalBloomsQueryResult = NonNullable<Awaited<ReturnType<typeof getSeasonalBlooms>>>
+export type GetSeasonalBloomsQueryError = unknown
 
 
-export function useMap<TData = Awaited<ReturnType<typeof map>>, TError = unknown>(
- params: MapParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof map>>, TError, TData>> & Pick<
+export function useGetSeasonalBlooms<TData = Awaited<ReturnType<typeof getSeasonalBlooms>>, TError = unknown>(
+ params: GetSeasonalBloomsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSeasonalBlooms>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof map>>,
+          Awaited<ReturnType<typeof getSeasonalBlooms>>,
           TError,
-          Awaited<ReturnType<typeof map>>
+          Awaited<ReturnType<typeof getSeasonalBlooms>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useMap<TData = Awaited<ReturnType<typeof map>>, TError = unknown>(
- params: MapParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof map>>, TError, TData>> & Pick<
+export function useGetSeasonalBlooms<TData = Awaited<ReturnType<typeof getSeasonalBlooms>>, TError = unknown>(
+ params: GetSeasonalBloomsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSeasonalBlooms>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof map>>,
+          Awaited<ReturnType<typeof getSeasonalBlooms>>,
           TError,
-          Awaited<ReturnType<typeof map>>
+          Awaited<ReturnType<typeof getSeasonalBlooms>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useMap<TData = Awaited<ReturnType<typeof map>>, TError = unknown>(
- params: MapParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof map>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetSeasonalBlooms<TData = Awaited<ReturnType<typeof getSeasonalBlooms>>, TError = unknown>(
+ params: GetSeasonalBloomsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSeasonalBlooms>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 지도 영역 개화 현황 (Spot 핀)
  */
 
-export function useMap<TData = Awaited<ReturnType<typeof map>>, TError = unknown>(
- params: MapParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof map>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetSeasonalBlooms<TData = Awaited<ReturnType<typeof getSeasonalBlooms>>, TError = unknown>(
+ params: GetSeasonalBloomsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSeasonalBlooms>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getMapQueryOptions(params,options)
+  const queryOptions = getGetSeasonalBloomsQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -156,25 +164,33 @@ export function useMap<TData = Awaited<ReturnType<typeof map>>, TError = unknown
 
 
 
-export type peakResponse200 = {
+export type getSeasonalBloomsPeakResponse200 = {
   data: ApiResponseBloomPeakListResponse
   status: 200
 }
 
-export type peakResponseSuccess = (peakResponse200) & {
+export type getSeasonalBloomsPeakResponseSuccess = (getSeasonalBloomsPeakResponse200) & {
   headers: Headers;
 };
 ;
 
-export type peakResponse = (peakResponseSuccess)
+export type getSeasonalBloomsPeakResponse = (getSeasonalBloomsPeakResponseSuccess)
 
-export const getPeakUrl = (params?: PeakParams,) => {
+export const getGetSeasonalBloomsPeakUrl = (params?: GetSeasonalBloomsPeakParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
 
     if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : value.toString())
+      if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+        Object.entries(value).forEach(([nestedKey, nestedValue]) => {
+          if (nestedValue !== undefined && nestedValue !== null) {
+            normalizedParams.append(nestedKey, nestedValue.toString())
+          }
+        })
+      } else {
+        normalizedParams.append(key, value === null ? 'null' : value.toString())
+      }
     }
   });
 
@@ -187,9 +203,9 @@ export const getPeakUrl = (params?: PeakParams,) => {
  * 최신 산출일 기준 status=PEAK 명소를 조회한다. category 로 특정 꽃만 필터할 수 있다.
  * @summary 지금이 절정인 명소 리스트
  */
-export const peak = async (params?: PeakParams, options?: RequestInit): Promise<peakResponse> => {
+export const getSeasonalBloomsPeak = async (params?: GetSeasonalBloomsPeakParams, options?: RequestInit): Promise<getSeasonalBloomsPeakResponse> => {
 
-  return customInstance<peakResponse>(getPeakUrl(params),
+  return customInstance<getSeasonalBloomsPeakResponse>(getGetSeasonalBloomsPeakUrl(params),
   {
     ...options,
     method: 'GET'
@@ -202,69 +218,69 @@ export const peak = async (params?: PeakParams, options?: RequestInit): Promise<
 
 
 
-export const getPeakQueryKey = (params?: PeakParams,) => {
+export const getGetSeasonalBloomsPeakQueryKey = (params?: GetSeasonalBloomsPeakParams,) => {
     return [
     `/api/seasonal/blooms/peak`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getPeakQueryOptions = <TData = Awaited<ReturnType<typeof peak>>, TError = unknown>(params?: PeakParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof peak>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetSeasonalBloomsPeakQueryOptions = <TData = Awaited<ReturnType<typeof getSeasonalBloomsPeak>>, TError = unknown>(params?: GetSeasonalBloomsPeakParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSeasonalBloomsPeak>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getPeakQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetSeasonalBloomsPeakQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof peak>>> = ({ signal }) => peak(params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSeasonalBloomsPeak>>> = ({ signal }) => getSeasonalBloomsPeak(params, { signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof peak>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSeasonalBloomsPeak>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type PeakQueryResult = NonNullable<Awaited<ReturnType<typeof peak>>>
-export type PeakQueryError = unknown
+export type GetSeasonalBloomsPeakQueryResult = NonNullable<Awaited<ReturnType<typeof getSeasonalBloomsPeak>>>
+export type GetSeasonalBloomsPeakQueryError = unknown
 
 
-export function usePeak<TData = Awaited<ReturnType<typeof peak>>, TError = unknown>(
- params: undefined |  PeakParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof peak>>, TError, TData>> & Pick<
+export function useGetSeasonalBloomsPeak<TData = Awaited<ReturnType<typeof getSeasonalBloomsPeak>>, TError = unknown>(
+ params: undefined |  GetSeasonalBloomsPeakParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSeasonalBloomsPeak>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof peak>>,
+          Awaited<ReturnType<typeof getSeasonalBloomsPeak>>,
           TError,
-          Awaited<ReturnType<typeof peak>>
+          Awaited<ReturnType<typeof getSeasonalBloomsPeak>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function usePeak<TData = Awaited<ReturnType<typeof peak>>, TError = unknown>(
- params?: PeakParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof peak>>, TError, TData>> & Pick<
+export function useGetSeasonalBloomsPeak<TData = Awaited<ReturnType<typeof getSeasonalBloomsPeak>>, TError = unknown>(
+ params?: GetSeasonalBloomsPeakParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSeasonalBloomsPeak>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof peak>>,
+          Awaited<ReturnType<typeof getSeasonalBloomsPeak>>,
           TError,
-          Awaited<ReturnType<typeof peak>>
+          Awaited<ReturnType<typeof getSeasonalBloomsPeak>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function usePeak<TData = Awaited<ReturnType<typeof peak>>, TError = unknown>(
- params?: PeakParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof peak>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetSeasonalBloomsPeak<TData = Awaited<ReturnType<typeof getSeasonalBloomsPeak>>, TError = unknown>(
+ params?: GetSeasonalBloomsPeakParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSeasonalBloomsPeak>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 지금이 절정인 명소 리스트
  */
 
-export function usePeak<TData = Awaited<ReturnType<typeof peak>>, TError = unknown>(
- params?: PeakParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof peak>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetSeasonalBloomsPeak<TData = Awaited<ReturnType<typeof getSeasonalBloomsPeak>>, TError = unknown>(
+ params?: GetSeasonalBloomsPeakParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSeasonalBloomsPeak>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getPeakQueryOptions(params,options)
+  const queryOptions = getGetSeasonalBloomsPeakQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -276,25 +292,33 @@ export function usePeak<TData = Awaited<ReturnType<typeof peak>>, TError = unkno
 
 
 
-export type calendarResponse200 = {
+export type getSeasonalBloomsCalendarResponse200 = {
   data: ApiResponseBloomCalendarResponse
   status: 200
 }
 
-export type calendarResponseSuccess = (calendarResponse200) & {
+export type getSeasonalBloomsCalendarResponseSuccess = (getSeasonalBloomsCalendarResponse200) & {
   headers: Headers;
 };
 ;
 
-export type calendarResponse = (calendarResponseSuccess)
+export type getSeasonalBloomsCalendarResponse = (getSeasonalBloomsCalendarResponseSuccess)
 
-export const getCalendarUrl = (params: CalendarParams,) => {
+export const getGetSeasonalBloomsCalendarUrl = (params: GetSeasonalBloomsCalendarParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
 
     if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : value.toString())
+      if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+        Object.entries(value).forEach(([nestedKey, nestedValue]) => {
+          if (nestedValue !== undefined && nestedValue !== null) {
+            normalizedParams.append(nestedKey, nestedValue.toString())
+          }
+        })
+      } else {
+        normalizedParams.append(key, value === null ? 'null' : value.toString())
+      }
     }
   });
 
@@ -307,9 +331,9 @@ export const getCalendarUrl = (params: CalendarParams,) => {
  * 단일 명소×카테고리의 향후 일별 예상 상태 타임라인과 대표 절정 구간(올해 만개 시기/지속일)을 온디맨드로 계산한다.
  * @summary 예상 만개 캘린더
  */
-export const calendar = async (params: CalendarParams, options?: RequestInit): Promise<calendarResponse> => {
+export const getSeasonalBloomsCalendar = async (params: GetSeasonalBloomsCalendarParams, options?: RequestInit): Promise<getSeasonalBloomsCalendarResponse> => {
 
-  return customInstance<calendarResponse>(getCalendarUrl(params),
+  return customInstance<getSeasonalBloomsCalendarResponse>(getGetSeasonalBloomsCalendarUrl(params),
   {
     ...options,
     method: 'GET'
@@ -322,69 +346,69 @@ export const calendar = async (params: CalendarParams, options?: RequestInit): P
 
 
 
-export const getCalendarQueryKey = (params?: CalendarParams,) => {
+export const getGetSeasonalBloomsCalendarQueryKey = (params?: GetSeasonalBloomsCalendarParams,) => {
     return [
     `/api/seasonal/blooms/calendar`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getCalendarQueryOptions = <TData = Awaited<ReturnType<typeof calendar>>, TError = unknown>(params: CalendarParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof calendar>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetSeasonalBloomsCalendarQueryOptions = <TData = Awaited<ReturnType<typeof getSeasonalBloomsCalendar>>, TError = unknown>(params: GetSeasonalBloomsCalendarParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSeasonalBloomsCalendar>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getCalendarQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetSeasonalBloomsCalendarQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof calendar>>> = ({ signal }) => calendar(params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSeasonalBloomsCalendar>>> = ({ signal }) => getSeasonalBloomsCalendar(params, { signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof calendar>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSeasonalBloomsCalendar>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type CalendarQueryResult = NonNullable<Awaited<ReturnType<typeof calendar>>>
-export type CalendarQueryError = unknown
+export type GetSeasonalBloomsCalendarQueryResult = NonNullable<Awaited<ReturnType<typeof getSeasonalBloomsCalendar>>>
+export type GetSeasonalBloomsCalendarQueryError = unknown
 
 
-export function useCalendar<TData = Awaited<ReturnType<typeof calendar>>, TError = unknown>(
- params: CalendarParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof calendar>>, TError, TData>> & Pick<
+export function useGetSeasonalBloomsCalendar<TData = Awaited<ReturnType<typeof getSeasonalBloomsCalendar>>, TError = unknown>(
+ params: GetSeasonalBloomsCalendarParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSeasonalBloomsCalendar>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof calendar>>,
+          Awaited<ReturnType<typeof getSeasonalBloomsCalendar>>,
           TError,
-          Awaited<ReturnType<typeof calendar>>
+          Awaited<ReturnType<typeof getSeasonalBloomsCalendar>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCalendar<TData = Awaited<ReturnType<typeof calendar>>, TError = unknown>(
- params: CalendarParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof calendar>>, TError, TData>> & Pick<
+export function useGetSeasonalBloomsCalendar<TData = Awaited<ReturnType<typeof getSeasonalBloomsCalendar>>, TError = unknown>(
+ params: GetSeasonalBloomsCalendarParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSeasonalBloomsCalendar>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof calendar>>,
+          Awaited<ReturnType<typeof getSeasonalBloomsCalendar>>,
           TError,
-          Awaited<ReturnType<typeof calendar>>
+          Awaited<ReturnType<typeof getSeasonalBloomsCalendar>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCalendar<TData = Awaited<ReturnType<typeof calendar>>, TError = unknown>(
- params: CalendarParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof calendar>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetSeasonalBloomsCalendar<TData = Awaited<ReturnType<typeof getSeasonalBloomsCalendar>>, TError = unknown>(
+ params: GetSeasonalBloomsCalendarParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSeasonalBloomsCalendar>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 예상 만개 캘린더
  */
 
-export function useCalendar<TData = Awaited<ReturnType<typeof calendar>>, TError = unknown>(
- params: CalendarParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof calendar>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetSeasonalBloomsCalendar<TData = Awaited<ReturnType<typeof getSeasonalBloomsCalendar>>, TError = unknown>(
+ params: GetSeasonalBloomsCalendarParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSeasonalBloomsCalendar>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getCalendarQueryOptions(params,options)
+  const queryOptions = getGetSeasonalBloomsCalendarQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

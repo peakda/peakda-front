@@ -1,15 +1,15 @@
 ﻿import { useQueryClient } from '@tanstack/react-query'
 import {
-  checkNickname,
-  completeSignup,
-  getCurrentUser,
-  getGetCurrentUserQueryKey,
-  logout,
-  refresh,
-  uploadSignupProfileImage,
-  useCompleteSignup as useCompleteSignupGen,
-  useGetCurrentUser,
-  useUploadSignupProfileImage as useUploadSignupProfileImageGen,
+  getAuthSignupNicknameCheck,
+  postAuthSignupComplete,
+  getAuthMe,
+  getGetAuthMeQueryKey,
+  postAuthLogout,
+  postAuthRefresh,
+  postAuthSignupProfileImage,
+  usePostAuthSignupComplete as useCompleteSignupGen,
+  useGetAuthMe,
+  usePostAuthSignupProfileImage as useUploadSignupProfileImageGen,
 } from '@/api/facades/generated/auth/auth'
 import type { SignupCompleteRequest } from '@/api/facades/generated/peakdaApi.schemas'
 
@@ -18,12 +18,12 @@ import type { SignupCompleteRequest } from '@/api/facades/generated/peakdaApi.sc
 // ??? plain async (?대깽??湲곕컲 ?몄텧) ???????????????????????????????????????????
 
 export async function getCurrentUserApi() {
-  const res = await getCurrentUser()
+  const res = await getAuthMe()
   return res.data.data ?? null
 }
 
 export async function checkNicknameApi(nickname: string) {
-  const res = await checkNickname({ value: nickname })
+  const res = await getAuthSignupNicknameCheck({ value: nickname })
   // res.data = Orval ?섑띁??body. ?낆뿉??data.data.available 濡??묎렐?섎?濡?body 瑜?諛섑솚?쒕떎.
   return res.data as unknown as {
     status: string
@@ -34,27 +34,27 @@ export async function checkNicknameApi(nickname: string) {
 }
 
 export async function completeSignupApi(payload: SignupCompleteRequest) {
-  const res = await completeSignup(payload)
+  const res = await postAuthSignupComplete(payload)
   return res
 }
 
 export async function uploadSignupProfileImageApi(image: Blob) {
-  const res = await uploadSignupProfileImage({ image })
+  const res = await postAuthSignupProfileImage({ image })
   return res.data.data ?? null
 }
 
 export async function refreshApi() {
-  await refresh()
+  await postAuthRefresh()
 }
 
 export async function logoutApi() {
-  await logout()
+  await postAuthLogout()
 }
 
 // ??? React Query hooks (罹먯떛 / ?곹깭 愿由? ????????????????????????????????????
 
 export const useCurrentUser = () =>
-  useGetCurrentUser({
+  useGetAuthMe({
     query: { select: (res) => res.data.data ?? null },
   })
 
@@ -68,7 +68,7 @@ export const useCompleteSignup = () => {
   const queryClient = useQueryClient()
   return useCompleteSignupGen({
     mutation: {
-      onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() }),
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetAuthMeQueryKey() }),
     },
   })
 }

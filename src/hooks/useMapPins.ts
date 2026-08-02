@@ -9,6 +9,8 @@ export interface MapSpot {
   maxStage: Stage
   title?: string
   attractionId?: number
+  // 스팟 API(상세·기록)의 id. 명소형은 Spot 행이 아직 없으면 없다(탭 시 match 로 materialize).
+  spotId?: number
 }
 
 interface ClusterGroup {
@@ -19,7 +21,8 @@ interface ClusterGroup {
 
 function createPinHTML(flowers: FlowerItem[], maxStage: Stage): string {
   const color = STAGE_COLOR[maxStage]
-  const grayscale = maxStage === 'Before' ? 'opacity:0.4;filter:grayscale(1);' : ''
+  const grayscale =
+    maxStage === 'Before' || maxStage === 'End' ? 'opacity:0.4;filter:grayscale(1);' : ''
   const imgs = flowers
     .slice(0, 3)
     .map(

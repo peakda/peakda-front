@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { NotificationResponse } from '@/api/facades/generated/peakdaApi.schemas'
-import { List3Segment } from '@/api/facades/generated/peakdaApi.schemas'
+import { GetNotificationsSegment } from '@/api/facades/generated/peakdaApi.schemas'
 import { formatUnreadBadge, segmentFromTab, toAlarmItem } from './notificationToAlarm'
 
 const baseNotification = (over: Partial<NotificationResponse> = {}): NotificationResponse => ({
@@ -60,13 +60,13 @@ describe('toAlarmItem', () => {
 
 describe('segmentFromTab', () => {
   it('탭 value 를 세그먼트로 매핑한다', () => {
-    expect(segmentFromTab('All')).toBe(List3Segment.ALL)
-    expect(segmentFromTab('Activity')).toBe(List3Segment.ACTIVITY)
-    expect(segmentFromTab('Announcement')).toBe(List3Segment.NOTICE)
+    expect(segmentFromTab('All')).toBe(GetNotificationsSegment.ALL)
+    expect(segmentFromTab('Activity')).toBe(GetNotificationsSegment.ACTIVITY)
+    expect(segmentFromTab('Announcement')).toBe(GetNotificationsSegment.NOTICE)
   })
 
   it('알 수 없는 값은 ALL 로 폴백한다', () => {
-    expect(segmentFromTab('unknown')).toBe(List3Segment.ALL)
+    expect(segmentFromTab('unknown')).toBe(GetNotificationsSegment.ALL)
   })
 })
 

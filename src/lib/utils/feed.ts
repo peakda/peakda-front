@@ -1,5 +1,5 @@
 import {
-  List4Filter,
+  GetFeedFilter,
   CreateReportRequestTargetType,
 } from '@/api/facades/generated/peakdaApi.schemas'
 import type {
@@ -9,14 +9,14 @@ import type {
 } from '@/api/facades/generated/peakdaApi.schemas'
 
 // 카테고리 탭 라벨 → 피드 필터
-export function filterFromTab(tabLabel: string): List4Filter {
+export function filterFromTab(tabLabel: string): GetFeedFilter {
   switch (tabLabel) {
     case '관심 식물':
-      return List4Filter.INTEREST
+      return GetFeedFilter.INTEREST
     case '팔로잉':
-      return List4Filter.FOLLOWING
+      return GetFeedFilter.FOLLOWING
     default:
-      return List4Filter.ALL
+      return GetFeedFilter.ALL
   }
 }
 

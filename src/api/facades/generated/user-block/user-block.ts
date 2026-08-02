@@ -27,7 +27,7 @@ import type {
 import type {
   ApiResponsePageResponseBlockedUserResponse,
   ApiResponseUnit,
-  ListParams
+  GetUsersMeBlocksParams
 } from '../peakdaApi.schemas';
 
 import { customInstance } from '../../../mutator/index';
@@ -37,19 +37,19 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export type blockResponse200 = {
+export type postUsersByUserIdBlockResponse200 = {
   data: ApiResponseUnit
   status: 200
 }
 
-export type blockResponseSuccess = (blockResponse200) & {
+export type postUsersByUserIdBlockResponseSuccess = (postUsersByUserIdBlockResponse200) & {
   headers: Headers;
 };
 ;
 
-export type blockResponse = (blockResponseSuccess)
+export type postUsersByUserIdBlockResponse = (postUsersByUserIdBlockResponseSuccess)
 
-export const getBlockUrl = (userId: number,) => {
+export const getPostUsersByUserIdBlockUrl = (userId: number,) => {
 
 
 
@@ -61,9 +61,9 @@ export const getBlockUrl = (userId: number,) => {
  * 대상 사용자를 차단한다. 이미 차단 중이면 그대로 성공으로 응답한다 (멱등). 자기 자신은 차단할 수 없다. 차단 시 서로의 팔로우 관계도 함께 해제된다.
  * @summary 사용자 차단
  */
-export const block = async (userId: number, options?: RequestInit): Promise<blockResponse> => {
+export const postUsersByUserIdBlock = async (userId: number, options?: RequestInit): Promise<postUsersByUserIdBlockResponse> => {
 
-  return customInstance<blockResponse>(getBlockUrl(userId),
+  return customInstance<postUsersByUserIdBlockResponse>(getPostUsersByUserIdBlockUrl(userId),
   {
     ...options,
     method: 'POST'
@@ -75,11 +75,11 @@ export const block = async (userId: number, options?: RequestInit): Promise<bloc
 
 
 
-export const getBlockMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof block>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof block>>, TError,{userId: number}, TContext> => {
+export const getPostUsersByUserIdBlockMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postUsersByUserIdBlock>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postUsersByUserIdBlock>>, TError,{userId: number}, TContext> => {
 
-const mutationKey = ['block'];
+const mutationKey = ['postUsersByUserIdBlock'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -89,10 +89,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof block>>, {userId: number}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postUsersByUserIdBlock>>, {userId: number}> = (props) => {
           const {userId} = props ?? {};
 
-          return  block(userId,requestOptions)
+          return  postUsersByUserIdBlock(userId,requestOptions)
         }
 
 
@@ -102,36 +102,36 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type BlockMutationResult = NonNullable<Awaited<ReturnType<typeof block>>>
+    export type PostUsersByUserIdBlockMutationResult = NonNullable<Awaited<ReturnType<typeof postUsersByUserIdBlock>>>
 
-    export type BlockMutationError = unknown
+    export type PostUsersByUserIdBlockMutationError = unknown
 
     /**
  * @summary 사용자 차단
  */
-export const useBlock = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof block>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostUsersByUserIdBlock = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postUsersByUserIdBlock>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof block>>,
+        Awaited<ReturnType<typeof postUsersByUserIdBlock>>,
         TError,
         {userId: number},
         TContext
       > => {
-      return useMutation(getBlockMutationOptions(options), queryClient);
+      return useMutation(getPostUsersByUserIdBlockMutationOptions(options), queryClient);
     }
-    export type unblockResponse200 = {
+    export type deleteUsersByUserIdBlockResponse200 = {
   data: ApiResponseUnit
   status: 200
 }
 
-export type unblockResponseSuccess = (unblockResponse200) & {
+export type deleteUsersByUserIdBlockResponseSuccess = (deleteUsersByUserIdBlockResponse200) & {
   headers: Headers;
 };
 ;
 
-export type unblockResponse = (unblockResponseSuccess)
+export type deleteUsersByUserIdBlockResponse = (deleteUsersByUserIdBlockResponseSuccess)
 
-export const getUnblockUrl = (userId: number,) => {
+export const getDeleteUsersByUserIdBlockUrl = (userId: number,) => {
 
 
 
@@ -143,9 +143,9 @@ export const getUnblockUrl = (userId: number,) => {
  * 대상 사용자 차단을 해제한다. 차단하지 않은 사용자여도 성공으로 응답한다 (멱등).
  * @summary 사용자 차단 해제
  */
-export const unblock = async (userId: number, options?: RequestInit): Promise<unblockResponse> => {
+export const deleteUsersByUserIdBlock = async (userId: number, options?: RequestInit): Promise<deleteUsersByUserIdBlockResponse> => {
 
-  return customInstance<unblockResponse>(getUnblockUrl(userId),
+  return customInstance<deleteUsersByUserIdBlockResponse>(getDeleteUsersByUserIdBlockUrl(userId),
   {
     ...options,
     method: 'DELETE'
@@ -157,11 +157,11 @@ export const unblock = async (userId: number, options?: RequestInit): Promise<un
 
 
 
-export const getUnblockMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unblock>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof unblock>>, TError,{userId: number}, TContext> => {
+export const getDeleteUsersByUserIdBlockMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteUsersByUserIdBlock>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteUsersByUserIdBlock>>, TError,{userId: number}, TContext> => {
 
-const mutationKey = ['unblock'];
+const mutationKey = ['deleteUsersByUserIdBlock'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -171,10 +171,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof unblock>>, {userId: number}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteUsersByUserIdBlock>>, {userId: number}> = (props) => {
           const {userId} = props ?? {};
 
-          return  unblock(userId,requestOptions)
+          return  deleteUsersByUserIdBlock(userId,requestOptions)
         }
 
 
@@ -184,42 +184,50 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type UnblockMutationResult = NonNullable<Awaited<ReturnType<typeof unblock>>>
+    export type DeleteUsersByUserIdBlockMutationResult = NonNullable<Awaited<ReturnType<typeof deleteUsersByUserIdBlock>>>
 
-    export type UnblockMutationError = unknown
+    export type DeleteUsersByUserIdBlockMutationError = unknown
 
     /**
  * @summary 사용자 차단 해제
  */
-export const useUnblock = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unblock>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const useDeleteUsersByUserIdBlock = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteUsersByUserIdBlock>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof unblock>>,
+        Awaited<ReturnType<typeof deleteUsersByUserIdBlock>>,
         TError,
         {userId: number},
         TContext
       > => {
-      return useMutation(getUnblockMutationOptions(options), queryClient);
+      return useMutation(getDeleteUsersByUserIdBlockMutationOptions(options), queryClient);
     }
-    export type listResponse200 = {
+    export type getUsersMeBlocksResponse200 = {
   data: ApiResponsePageResponseBlockedUserResponse
   status: 200
 }
 
-export type listResponseSuccess = (listResponse200) & {
+export type getUsersMeBlocksResponseSuccess = (getUsersMeBlocksResponse200) & {
   headers: Headers;
 };
 ;
 
-export type listResponse = (listResponseSuccess)
+export type getUsersMeBlocksResponse = (getUsersMeBlocksResponseSuccess)
 
-export const getListUrl = (params: ListParams,) => {
+export const getGetUsersMeBlocksUrl = (params: GetUsersMeBlocksParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
 
     if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : value.toString())
+      if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+        Object.entries(value).forEach(([nestedKey, nestedValue]) => {
+          if (nestedValue !== undefined && nestedValue !== null) {
+            normalizedParams.append(nestedKey, nestedValue.toString())
+          }
+        })
+      } else {
+        normalizedParams.append(key, value === null ? 'null' : value.toString())
+      }
     }
   });
 
@@ -232,9 +240,9 @@ export const getListUrl = (params: ListParams,) => {
  * 본인이 차단한 사용자를 최근 차단한 순으로 페이징 조회한다.
  * @summary 차단한 사용자 목록
  */
-export const list = async (params: ListParams, options?: RequestInit): Promise<listResponse> => {
+export const getUsersMeBlocks = async (params: GetUsersMeBlocksParams, options?: RequestInit): Promise<getUsersMeBlocksResponse> => {
 
-  return customInstance<listResponse>(getListUrl(params),
+  return customInstance<getUsersMeBlocksResponse>(getGetUsersMeBlocksUrl(params),
   {
     ...options,
     method: 'GET'
@@ -247,69 +255,69 @@ export const list = async (params: ListParams, options?: RequestInit): Promise<l
 
 
 
-export const getListQueryKey = (params?: ListParams,) => {
+export const getGetUsersMeBlocksQueryKey = (params?: GetUsersMeBlocksParams,) => {
     return [
     `/api/users/me/blocks`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getListQueryOptions = <TData = Awaited<ReturnType<typeof list>>, TError = unknown>(params: ListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetUsersMeBlocksQueryOptions = <TData = Awaited<ReturnType<typeof getUsersMeBlocks>>, TError = unknown>(params: GetUsersMeBlocksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersMeBlocks>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetUsersMeBlocksQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof list>>> = ({ signal }) => list(params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersMeBlocks>>> = ({ signal }) => getUsersMeBlocks(params, { signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof list>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUsersMeBlocks>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type ListQueryResult = NonNullable<Awaited<ReturnType<typeof list>>>
-export type ListQueryError = unknown
+export type GetUsersMeBlocksQueryResult = NonNullable<Awaited<ReturnType<typeof getUsersMeBlocks>>>
+export type GetUsersMeBlocksQueryError = unknown
 
 
-export function useList<TData = Awaited<ReturnType<typeof list>>, TError = unknown>(
- params: ListParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof list>>, TError, TData>> & Pick<
+export function useGetUsersMeBlocks<TData = Awaited<ReturnType<typeof getUsersMeBlocks>>, TError = unknown>(
+ params: GetUsersMeBlocksParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersMeBlocks>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof list>>,
+          Awaited<ReturnType<typeof getUsersMeBlocks>>,
           TError,
-          Awaited<ReturnType<typeof list>>
+          Awaited<ReturnType<typeof getUsersMeBlocks>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useList<TData = Awaited<ReturnType<typeof list>>, TError = unknown>(
- params: ListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list>>, TError, TData>> & Pick<
+export function useGetUsersMeBlocks<TData = Awaited<ReturnType<typeof getUsersMeBlocks>>, TError = unknown>(
+ params: GetUsersMeBlocksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersMeBlocks>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof list>>,
+          Awaited<ReturnType<typeof getUsersMeBlocks>>,
           TError,
-          Awaited<ReturnType<typeof list>>
+          Awaited<ReturnType<typeof getUsersMeBlocks>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useList<TData = Awaited<ReturnType<typeof list>>, TError = unknown>(
- params: ListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetUsersMeBlocks<TData = Awaited<ReturnType<typeof getUsersMeBlocks>>, TError = unknown>(
+ params: GetUsersMeBlocksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersMeBlocks>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 차단한 사용자 목록
  */
 
-export function useList<TData = Awaited<ReturnType<typeof list>>, TError = unknown>(
- params: ListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetUsersMeBlocks<TData = Awaited<ReturnType<typeof getUsersMeBlocks>>, TError = unknown>(
+ params: GetUsersMeBlocksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersMeBlocks>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getListQueryOptions(params,options)
+  const queryOptions = getGetUsersMeBlocksQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

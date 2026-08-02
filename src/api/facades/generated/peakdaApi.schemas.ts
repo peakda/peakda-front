@@ -89,6 +89,499 @@ export interface ApiResponseFavoriteCategoryResponse {
 }
 
 /**
+ * 알림 선택 시 이동 방식
+ */
+export type UpsertNoticeRequestLinkType = typeof UpsertNoticeRequestLinkType[keyof typeof UpsertNoticeRequestLinkType];
+
+
+export const UpsertNoticeRequestLinkType = {
+  INTERNAL: 'INTERNAL',
+  EXTERNAL: 'EXTERNAL',
+} as const;
+
+/**
+ * 공지 등록·수정 요청
+ */
+export interface UpsertNoticeRequest {
+  /**
+     * 푸시와 알림함에 표시할 공지 제목
+     * @minLength 0
+     * @maxLength 100
+     */
+  title: string;
+  /**
+     * 푸시와 알림함에 표시할 공지 본문
+     * @minLength 0
+     * @maxLength 2000
+     */
+  body: string;
+  /** 알림 선택 시 이동 방식 */
+  linkType: UpsertNoticeRequestLinkType;
+  /**
+     * EXTERNAL 이동 URL. 빈 문자열은 null로 정규화한다.
+     * @minLength 0
+     * @maxLength 2048
+     * @nullable
+     */
+  linkUrl?: string | null;
+  /**
+     * INTERNAL 이동 대상 id
+     * @nullable
+     */
+  targetId?: number | null;
+}
+
+/**
+ * 알림 선택 시 이동 방식
+ */
+export type NoticeResponseLinkType = typeof NoticeResponseLinkType[keyof typeof NoticeResponseLinkType];
+
+
+export const NoticeResponseLinkType = {
+  INTERNAL: 'INTERNAL',
+  EXTERNAL: 'EXTERNAL',
+} as const;
+
+/**
+ * 공지 발송 상태
+ */
+export type NoticeResponseStatus = typeof NoticeResponseStatus[keyof typeof NoticeResponseStatus];
+
+
+export const NoticeResponseStatus = {
+  DRAFT: 'DRAFT',
+  DISPATCHING: 'DISPATCHING',
+  DISPATCHED: 'DISPATCHED',
+  CANCELED: 'CANCELED',
+} as const;
+
+/**
+ * 관리자 공지 응답
+ */
+export interface NoticeResponse {
+  /** 공지 id */
+  id: number;
+  /** 공지 제목 */
+  title: string;
+  /** 공지 본문 */
+  body: string;
+  /** 알림 선택 시 이동 방식 */
+  linkType: NoticeResponseLinkType;
+  /**
+     * 외부 이동 URL
+     * @nullable
+     */
+  linkUrl?: string | null;
+  /**
+     * 내부 이동 대상 id
+     * @nullable
+     */
+  targetId?: number | null;
+  /** 공지 발송 상태 */
+  status: NoticeResponseStatus;
+  /** 작성 관리자 사용자 id */
+  createdBy: number;
+  /**
+     * 전체 팬아웃 완료 시각
+     * @nullable
+     */
+  dispatchedAt?: string | null;
+  /** 중복 방지 로그 기준 발송 사용자 수 */
+  sentCount: number;
+  /** 생성 시각 */
+  createdAt: string;
+  /** 최종 수정 시각 */
+  updatedAt: string;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseNoticeResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: NoticeResponse | null;
+}
+
+/**
+ * 축제 주요 볼거리 입력
+ */
+export interface Highlight {
+  /**
+     * 볼거리 타이틀
+     * @minLength 0
+     * @maxLength 200
+     */
+  title: string;
+  /**
+     * 볼거리 설명
+     * @minLength 0
+     * @maxLength 3000
+     */
+  body: string;
+}
+
+/**
+ * 축제 에디토리얼 상태
+ */
+export type UpsertFestivalEditorialRequestStatus = typeof UpsertFestivalEditorialRequestStatus[keyof typeof UpsertFestivalEditorialRequestStatus];
+
+
+export const UpsertFestivalEditorialRequestStatus = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+} as const;
+
+/**
+ * 축제 기준 에디토리얼 멱등 등록·수정 요청. 주요 볼거리는 요청 배열 전체로 교체
+ */
+export interface UpsertFestivalEditorialRequest {
+  /**
+     * 에디토리얼 훅. 없으면 null
+     * @minLength 0
+     * @maxLength 5000
+     * @nullable
+     */
+  hook?: string | null;
+  /**
+     * 축제 기간 블록 서브텍스트. 없으면 null
+     * @minLength 0
+     * @maxLength 1000
+     * @nullable
+     */
+  periodNote?: string | null;
+  /**
+     * 장소 블록 서브텍스트. 없으면 null
+     * @minLength 0
+     * @maxLength 1000
+     * @nullable
+     */
+  placeNote?: string | null;
+  /**
+     * 입장료 블록 값. 무료를 포함하며 없으면 null
+     * @minLength 0
+     * @maxLength 1000
+     * @nullable
+     */
+  admissionFee?: string | null;
+  /**
+     * 입장료 블록 서브텍스트. 없으면 null
+     * @minLength 0
+     * @maxLength 1000
+     * @nullable
+     */
+  admissionFeeNote?: string | null;
+  /**
+     * 운영 시간 블록 값. 없으면 null
+     * @minLength 0
+     * @maxLength 1000
+     * @nullable
+     */
+  operatingHours?: string | null;
+  /**
+     * 운영 시간 블록 서브텍스트. 없으면 null
+     * @minLength 0
+     * @maxLength 1000
+     * @nullable
+     */
+  operatingHoursNote?: string | null;
+  /**
+     * 주의사항 블록 값. 없으면 화면에서 블록을 제외
+     * @minLength 0
+     * @maxLength 1000
+     * @nullable
+     */
+  caution?: string | null;
+  /**
+     * 주의사항 블록 서브텍스트. 없으면 null
+     * @minLength 0
+     * @maxLength 1000
+     * @nullable
+     */
+  cautionNote?: string | null;
+  /**
+     * 개행으로 구분한 대중교통 안내. 없으면 null
+     * @minLength 0
+     * @maxLength 5000
+     * @nullable
+     */
+  directionsTransit?: string | null;
+  /**
+     * 개행으로 구분한 자가 차량 안내. 없으면 null
+     * @minLength 0
+     * @maxLength 5000
+     * @nullable
+     */
+  directionsCar?: string | null;
+  /**
+     * 히어로 이미지 object key 또는 외부 URL. 없으면 null
+     * @minLength 0
+     * @maxLength 2000
+     * @nullable
+     */
+  heroImageKey?: string | null;
+  /** 축제 에디토리얼 상태 */
+  status: UpsertFestivalEditorialRequestStatus;
+  /**
+     * 요청 배열 순서대로 1부터 번호를 부여할 주요 볼거리. 최대 3건
+     * @minItems 0
+     * @maxItems 3
+     */
+  highlights: Highlight[];
+}
+
+/**
+ * 축제 에디토리얼 등록·수정 결과
+ */
+export interface FestivalEditorialIdResponse {
+  /** 등록·수정된 축제 에디토리얼 id */
+  editorialId: number;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseFestivalEditorialIdResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: FestivalEditorialIdResponse | null;
+}
+
+/**
+ * 챕터 레이아웃
+ */
+export type ChapterLayout = typeof ChapterLayout[keyof typeof ChapterLayout];
+
+
+export const ChapterLayout = {
+  MAIN: 'MAIN',
+  RHYTHM_REVERSE: 'RHYTHM_REVERSE',
+  EDGE_BLEED: 'EDGE_BLEED',
+} as const;
+
+/**
+ * 큐레이션 챕터 입력
+ */
+export interface Chapter {
+  /** 챕터 레이아웃 */
+  layout: ChapterLayout;
+  /**
+     * 번호 뒤에 표시할 자유 레이블
+     * @minLength 0
+     * @maxLength 100
+     */
+  heading: string;
+  /**
+     * 개화 뱃지·거리·상세 링크를 보강할 스팟 id. 없으면 null
+     * @nullable
+     */
+  spotId?: number | null;
+  /**
+     * 저장할 장소명
+     * @minLength 0
+     * @maxLength 200
+     */
+  placeName: string;
+  /**
+     * 저장할 장소 위도. 없으면 null
+     * @nullable
+     */
+  latitude?: number | null;
+  /**
+     * 저장할 장소 경도. 없으면 null
+     * @nullable
+     */
+  longitude?: number | null;
+  /**
+     * 챕터 사진 URL. 없으면 스팟 프리뷰 썸네일로 대체
+     * @minLength 0
+     * @maxLength 2000
+     * @nullable
+     */
+  photoUrl?: string | null;
+  /**
+     * 풀쿼트. 없으면 null
+     * @minLength 0
+     * @maxLength 500
+     * @nullable
+     */
+  pullQuote?: string | null;
+  /**
+     * 레이아웃별 리드 텍스트. 없으면 null
+     * @minLength 0
+     * @maxLength 1000
+     * @nullable
+     */
+  leadText?: string | null;
+  /**
+     * 개행을 포함한 최대 세 단락 본문
+     * @minLength 0
+     * @maxLength 5000
+     */
+  body: string;
+  /**
+     * 운영기간·입장료·주의사항을 합친 단일 자유 텍스트. 없으면 null
+     * @minLength 0
+     * @maxLength 1000
+     * @nullable
+     */
+  factNote?: string | null;
+}
+
+/**
+ * 큐레이션 당일치기 추천 카드 입력
+ */
+export interface Recommendation {
+  /**
+     * 추천 카드 타이틀
+     * @minLength 0
+     * @maxLength 200
+     */
+  title: string;
+  /**
+     * 거리·상세 링크를 보강할 스팟 id. 없으면 null
+     * @nullable
+     */
+  spotId?: number | null;
+  /**
+     * 저장할 장소명
+     * @minLength 0
+     * @maxLength 200
+     */
+  placeName: string;
+  /**
+     * 저장할 장소 위도. 없으면 null
+     * @nullable
+     */
+  latitude?: number | null;
+  /**
+     * 저장할 장소 경도. 없으면 null
+     * @nullable
+     */
+  longitude?: number | null;
+  /**
+     * 추천 사진 URL. 없으면 스팟 프리뷰 썸네일로 대체
+     * @minLength 0
+     * @maxLength 2000
+     * @nullable
+     */
+  photoUrl?: string | null;
+  /**
+     * 추천 카드 설명
+     * @minLength 0
+     * @maxLength 3000
+     */
+  body: string;
+}
+
+/**
+ * 큐레이션 상태
+ */
+export type UpsertCurationRequestStatus = typeof UpsertCurationRequestStatus[keyof typeof UpsertCurationRequestStatus];
+
+
+export const UpsertCurationRequestStatus = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+} as const;
+
+/**
+ * 주차 기준 큐레이션 멱등 등록·수정 요청. 챕터·추천은 요청 배열 전체로 교체
+ */
+export interface UpsertCurationRequest {
+  /** 주차 시작일. 큐레이션 멱등 갱신 키 */
+  weekStartDate: string;
+  /** 주차 종료일 */
+  weekEndDate: string;
+  /**
+     * 에디터가 작성한 주차 뱃지
+     * @minLength 0
+     * @maxLength 100
+     */
+  weekLabel: string;
+  /**
+     * 히어로 이미지 URL. 없으면 null
+     * @minLength 0
+     * @maxLength 2000
+     * @nullable
+     */
+  heroImageUrl?: string | null;
+  /**
+     * 큐레이션 타이틀
+     * @minLength 0
+     * @maxLength 200
+     */
+  title: string;
+  /**
+     * 큐레이션 부제. 없으면 null
+     * @minLength 0
+     * @maxLength 300
+     * @nullable
+     */
+  subtitle?: string | null;
+  /**
+     * 개행을 포함한 최대 세 단락 도입글. 없으면 null
+     * @minLength 0
+     * @maxLength 5000
+     * @nullable
+     */
+  intro?: string | null;
+  /**
+     * 다음 주 예고 오버라인. 없으면 null
+     * @minLength 0
+     * @maxLength 100
+     * @nullable
+     */
+  nextTeaserOverline?: string | null;
+  /**
+     * 다음 주 예고 본문. 없으면 null
+     * @minLength 0
+     * @maxLength 1000
+     * @nullable
+     */
+  nextTeaserBody?: string | null;
+  /** 큐레이션 상태 */
+  status: UpsertCurationRequestStatus;
+  /**
+     * 요청 배열 순서대로 1부터 번호를 부여할 챕터
+     * @minItems 0
+     * @maxItems 3
+     */
+  chapters: Chapter[];
+  /** 요청 배열 순서대로 1부터 번호를 부여할 당일치기 추천 카드 */
+  recommendations: Recommendation[];
+}
+
+/**
+ * 큐레이션 등록·수정 결과
+ */
+export interface CurationIdResponse {
+  /** 등록·수정된 큐레이션 id */
+  curationId: number;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseCurationIdResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: CurationIdResponse | null;
+}
+
+/**
  * 공통 응답 envelope
  */
 export interface ApiResponseUnit {
@@ -166,6 +659,7 @@ export type CreateSpotRecordRequestStatus = typeof CreateSpotRecordRequestStatus
 export const CreateSpotRecordRequestStatus = {
   DRAFT: 'DRAFT',
   PUBLISHED: 'PUBLISHED',
+  HIDDEN: 'HIDDEN',
 } as const;
 
 /**
@@ -342,6 +836,7 @@ export type SpotRecordResponseStatus = typeof SpotRecordResponseStatus[keyof typ
 export const SpotRecordResponseStatus = {
   DRAFT: 'DRAFT',
   PUBLISHED: 'PUBLISHED',
+  HIDDEN: 'HIDDEN',
 } as const;
 
 /**
@@ -556,6 +1051,109 @@ export const SpotFavoriteResponseType = {
 } as const;
 
 /**
+ * 대표 꽃 카테고리
+ */
+export type BloomCategory = typeof BloomCategory[keyof typeof BloomCategory];
+
+
+export const BloomCategory = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  COSMOS: 'COSMOS',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
+} as const;
+
+/**
+ * 대표 개화 상태
+ */
+export type BloomStatus = typeof BloomStatus[keyof typeof BloomStatus];
+
+
+export const BloomStatus = {
+  PREPARING: 'PREPARING',
+  STARTED: 'STARTED',
+  PEAK: 'PEAK',
+  ENDED: 'ENDED',
+} as const;
+
+/**
+ * 찜한 스팟의 대표 개화 정보
+ */
+export interface Bloom {
+  /** 대표 꽃 카테고리 */
+  category: BloomCategory;
+  /** 대표 꽃 카테고리 표시명 */
+  displayName: string;
+  /** 대표 개화 상태 */
+  status: BloomStatus;
+  /**
+     * 만개 시작일. 추정이 없으면 null
+     * @nullable
+     */
+  peakStartDate?: string | null;
+  /**
+     * 만개 종료일. 추정이 없으면 null
+     * @nullable
+     */
+  peakEndDate?: string | null;
+  /**
+     * 만개 지속일. 추정이 없으면 null
+     * @nullable
+     */
+  peakDurationDays?: number | null;
+  /**
+     * 오늘부터 만개 시작일까지 남은 일수. 시작일이 없으면 null
+     * @nullable
+     */
+  daysUntilPeak?: number | null;
+  /** 오늘 다음 날부터 설정된 임박 기간 안에 만개가 시작하는지 */
+  imminent: boolean;
+  /** 개화 추정 산출 기준일 */
+  baseDate: string;
+}
+
+/**
+ * 꽃 카테고리
+ */
+export type CategoryChipCategory = typeof CategoryChipCategory[keyof typeof CategoryChipCategory];
+
+
+export const CategoryChipCategory = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  COSMOS: 'COSMOS',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
+} as const;
+
+/**
+ * 꽃 카테고리 칩
+ */
+export interface CategoryChip {
+  /** 꽃 카테고리 */
+  category: CategoryChipCategory;
+  /** 꽃 카테고리 표시명 */
+  displayName: string;
+}
+
+/**
  * 찜한 스팟
  */
 export interface SpotFavoriteResponse {
@@ -579,6 +1177,13 @@ export interface SpotFavoriteResponse {
   notifyEnabled: boolean;
   /** 찜한 시각 */
   favoritedAt: string;
+  bloom?: Bloom | null;
+  /** 이 스팟의 꽃 카테고리 칩. 명소형만 채워지고 그 외에는 빈 목록 */
+  categories: CategoryChip[];
+  /** 게시된 방문 기록 수 */
+  recordCount: number;
+  /** 카드 사진 URL. 최근 게시 기록 사진 최대 4장 */
+  photoUrls: string[];
 }
 
 /**
@@ -827,6 +1432,37 @@ export interface SignupCompleteRequest {
 }
 
 /**
+ * 큐레이션 이미지 업로드 multipart form
+ */
+export interface CurationImageUploadForm {
+  /** 업로드할 이미지 파일(jpeg/png/webp, 최대 10MB) */
+  file: Blob;
+}
+
+/**
+ * 큐레이션 이미지 업로드 결과
+ */
+export interface UploadedImageResponse {
+  /** main 이미지 object key. 큐레이션 또는 축제 에디토리얼 저장 요청에 그대로 전달한다. */
+  objectKey: string;
+  /** 화면 미리보기용 presigned URL. 만료되므로 DB에 저장하지 않는다. */
+  previewUrl: string;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseUploadedImageResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: UploadedImageResponse | null;
+}
+
+/**
  * 개화/단풍 상태 교체
  * @nullable
  */
@@ -883,6 +1519,327 @@ export interface UpdateSpotRecordRequest {
 export interface UpdateFavoriteNotifyRequest {
   /** 만개 알림 수신 여부 */
   enabled: boolean;
+}
+
+/**
+ * 변경할 상태. ACTIVE 또는 SUSPENDED
+ */
+export type ChangeUserStatusRequestStatus = typeof ChangeUserStatusRequestStatus[keyof typeof ChangeUserStatusRequestStatus];
+
+
+export const ChangeUserStatusRequestStatus = {
+  ACTIVE: 'ACTIVE',
+  SUSPENDED: 'SUSPENDED',
+  DEACTIVATED: 'DEACTIVATED',
+} as const;
+
+/**
+ * 관리자 사용자 상태 변경 요청
+ */
+export interface ChangeUserStatusRequest {
+  /** 변경할 상태. ACTIVE 또는 SUSPENDED */
+  status: ChangeUserStatusRequestStatus;
+  /**
+     * 제재 또는 해제 사유
+     * @minLength 0
+     * @maxLength 500
+     * @nullable
+     */
+  memo?: string | null;
+}
+
+/**
+ * OAuth2 제공자
+ */
+export type UserAdminResponseProvider = typeof UserAdminResponseProvider[keyof typeof UserAdminResponseProvider];
+
+
+export const UserAdminResponseProvider = {
+  KAKAO: 'KAKAO',
+  NAVER: 'NAVER',
+  APPLE: 'APPLE',
+} as const;
+
+/**
+ * 사용자 상태
+ */
+export type UserAdminResponseStatus = typeof UserAdminResponseStatus[keyof typeof UserAdminResponseStatus];
+
+
+export const UserAdminResponseStatus = {
+  ACTIVE: 'ACTIVE',
+  SUSPENDED: 'SUSPENDED',
+  DEACTIVATED: 'DEACTIVATED',
+} as const;
+
+/**
+ * 사용자 역할
+ */
+export type UserAdminResponseRole = typeof UserAdminResponseRole[keyof typeof UserAdminResponseRole];
+
+
+export const UserAdminResponseRole = {
+  USER: 'USER',
+  ADMIN: 'ADMIN',
+} as const;
+
+/**
+ * 관리자 사용자 조회 응답
+ */
+export interface UserAdminResponse {
+  /** 사용자 id */
+  id: number;
+  /** 닉네임 */
+  nickname: string;
+  /**
+     * 이메일
+     * @nullable
+     */
+  email?: string | null;
+  /** OAuth2 제공자 */
+  provider: UserAdminResponseProvider;
+  /** 사용자 상태 */
+  status: UserAdminResponseStatus;
+  /** 사용자 역할 */
+  role: UserAdminResponseRole;
+  /** 가입 시각 */
+  createdAt: string;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseUserAdminResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: UserAdminResponse | null;
+}
+
+/**
+ * 변경할 노출 상태 (PUBLISHED 또는 HIDDEN)
+ */
+export type UpdateSpotRecordStatusRequestStatus = typeof UpdateSpotRecordStatusRequestStatus[keyof typeof UpdateSpotRecordStatusRequestStatus];
+
+
+export const UpdateSpotRecordStatusRequestStatus = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+  HIDDEN: 'HIDDEN',
+} as const;
+
+/**
+ * 관리자 스팟 기록 노출 상태 변경 요청
+ */
+export interface UpdateSpotRecordStatusRequest {
+  /** 변경할 노출 상태 (PUBLISHED 또는 HIDDEN) */
+  status: UpdateSpotRecordStatusRequestStatus;
+}
+
+/**
+ * 심사 조치
+ */
+export type ReviewReportTargetRequestAction = typeof ReviewReportTargetRequestAction[keyof typeof ReviewReportTargetRequestAction];
+
+
+export const ReviewReportTargetRequestAction = {
+  RESOLVE_HIDE: 'RESOLVE_HIDE',
+  RESOLVE_KEEP: 'RESOLVE_KEEP',
+  DISMISS: 'DISMISS',
+} as const;
+
+/**
+ * 신고 대상 심사 요청
+ */
+export interface ReviewReportTargetRequest {
+  /** 심사 조치 */
+  action: ReviewReportTargetRequestAction;
+  /**
+     * 심사 메모 (선택, 최대 500자)
+     * @minLength 0
+     * @maxLength 500
+     * @nullable
+     */
+  memo?: string | null;
+}
+
+/**
+ * 식물 상태
+ * @nullable
+ */
+export type UpdatePlantRequestStatus = typeof UpdatePlantRequestStatus[keyof typeof UpdatePlantRequestStatus] | null;
+
+
+export const UpdatePlantRequestStatus = {
+  ACTIVE: 'ACTIVE',
+  PENDING: 'PENDING',
+  REJECTED: 'REJECTED',
+} as const;
+
+/**
+ * 개화 카테고리
+ * @nullable
+ */
+export type UpdatePlantRequestBloomCategory = typeof UpdatePlantRequestBloomCategory[keyof typeof UpdatePlantRequestBloomCategory] | null;
+
+
+export const UpdatePlantRequestBloomCategory = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  COSMOS: 'COSMOS',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
+} as const;
+
+export type UpdatePlantRequestSeasonsItem = typeof UpdatePlantRequestSeasonsItem[keyof typeof UpdatePlantRequestSeasonsItem];
+
+
+export const UpdatePlantRequestSeasonsItem = {
+  SPRING: 'SPRING',
+  SUMMER: 'SUMMER',
+  AUTUMN_WINTER: 'AUTUMN_WINTER',
+} as const;
+
+/**
+ * 식물 검수 수정 요청
+ */
+export interface UpdatePlantRequest {
+  /**
+     * 정규화해 저장할 식물 이름
+     * @minLength 0
+     * @maxLength 30
+     * @nullable
+     */
+  name: string | null;
+  /**
+     * 노출 정렬 순서
+     * @minimum 0
+     * @nullable
+     */
+  sortOrder?: number | null;
+  /**
+     * 식물 상태
+     * @nullable
+     */
+  status?: UpdatePlantRequestStatus;
+  /**
+     * 개화 카테고리
+     * @nullable
+     */
+  bloomCategory?: UpdatePlantRequestBloomCategory;
+  /**
+     * 주개화 계절 전체 배열. 빈 배열이면 모두 제거한다.
+     * @nullable
+     */
+  seasons?: UpdatePlantRequestSeasonsItem[] | null;
+}
+
+/**
+ * 식물 상태
+ */
+export type PlantAdminResponseStatus = typeof PlantAdminResponseStatus[keyof typeof PlantAdminResponseStatus];
+
+
+export const PlantAdminResponseStatus = {
+  ACTIVE: 'ACTIVE',
+  PENDING: 'PENDING',
+  REJECTED: 'REJECTED',
+} as const;
+
+/**
+ * 개화 카테고리
+ * @nullable
+ */
+export type PlantAdminResponseBloomCategory = typeof PlantAdminResponseBloomCategory[keyof typeof PlantAdminResponseBloomCategory] | null;
+
+
+export const PlantAdminResponseBloomCategory = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  COSMOS: 'COSMOS',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
+} as const;
+
+export type PlantAdminResponseSeasonsItem = typeof PlantAdminResponseSeasonsItem[keyof typeof PlantAdminResponseSeasonsItem];
+
+
+export const PlantAdminResponseSeasonsItem = {
+  SPRING: 'SPRING',
+  SUMMER: 'SUMMER',
+  AUTUMN_WINTER: 'AUTUMN_WINTER',
+} as const;
+
+/**
+ * 관리자 식물 검수 응답
+ */
+export interface PlantAdminResponse {
+  /** 식물 id */
+  id: number;
+  /** 식물 이름 */
+  name: string;
+  /** 노출 정렬 순서 */
+  sortOrder: number;
+  /** 식물 상태 */
+  status: PlantAdminResponseStatus;
+  /**
+     * 제안한 사용자 id
+     * @nullable
+     */
+  suggestedByUserId?: number | null;
+  /**
+     * 제안한 사용자 닉네임
+     * @nullable
+     */
+  suggestedByNickname?: string | null;
+  /**
+     * 승인 시각
+     * @nullable
+     */
+  approvedAt?: string | null;
+  /**
+     * 개화 카테고리
+     * @nullable
+     */
+  bloomCategory?: PlantAdminResponseBloomCategory;
+  /** 주개화 계절 전체 */
+  seasons: PlantAdminResponseSeasonsItem[];
+  /** 등록 시각 */
+  createdAt: string;
+  /** 수정 시각 */
+  updatedAt: string;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponsePlantAdminResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: PlantAdminResponse | null;
 }
 
 /**
@@ -1010,6 +1967,7 @@ export type SpotRecordSummaryResponseStatus = typeof SpotRecordSummaryResponseSt
 export const SpotRecordSummaryResponseStatus = {
   DRAFT: 'DRAFT',
   PUBLISHED: 'PUBLISHED',
+  HIDDEN: 'HIDDEN',
 } as const;
 
 /**
@@ -1425,11 +2383,12 @@ export interface ApiResponseSpotPreviewResponse {
 }
 
 /**
- * 찜한 스팟 목록
+ * 찜한 스팟 목록(SCR-024c)
  */
 export interface SpotFavoriteListResponse {
   /** 찜한 스팟 총 개수 */
   count: number;
+  banner?: BloomBanner | null;
   /** 찜한 스팟 목록 (최근 찜한 순) */
   favorites: SpotFavoriteResponse[];
 }
@@ -2129,6 +3088,678 @@ export interface ApiResponseHomeSuggestionResponse {
 }
 
 /**
+ * 축제명으로 판정한 꽃 카테고리. 매칭되지 않으면 null
+ * @nullable
+ */
+export type FestivalDetailResponseCategory = typeof FestivalDetailResponseCategory[keyof typeof FestivalDetailResponseCategory] | null;
+
+
+export const FestivalDetailResponseCategory = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  COSMOS: 'COSMOS',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
+} as const;
+
+/**
+ * 서버가 판정한 축제 상태. 시작일을 판정할 수 없으면 null
+ * @nullable
+ */
+export type FestivalDetailResponsePhase = typeof FestivalDetailResponsePhase[keyof typeof FestivalDetailResponsePhase] | null;
+
+
+export const FestivalDetailResponsePhase = {
+  UPCOMING: 'UPCOMING',
+  ONGOING: 'ONGOING',
+  ENDING_SOON: 'ENDING_SOON',
+  ENDED: 'ENDED',
+} as const;
+
+/**
+ * 축제 주요 볼거리
+ */
+export interface FestivalHighlightResponse {
+  /** 표시 순서 */
+  sortOrder: number;
+  /** 볼거리 타이틀 */
+  title: string;
+  /** 볼거리 설명 */
+  body: string;
+}
+
+/**
+ * 사람이 작성한 축제 운영·에디토리얼 정보
+ */
+export interface FestivalEditorialResponse {
+  /**
+     * 에디토리얼 훅. 없으면 null
+     * @nullable
+     */
+  hook?: string | null;
+  /**
+     * 히어로 이미지 URL. 없으면 null
+     * @nullable
+     */
+  heroImageUrl?: string | null;
+  /**
+     * 축제 기간 블록 서브텍스트. 없으면 null
+     * @nullable
+     */
+  periodNote?: string | null;
+  /**
+     * 장소 블록 서브텍스트. 없으면 null
+     * @nullable
+     */
+  placeNote?: string | null;
+  /**
+     * 입장료 블록 값. 없으면 null
+     * @nullable
+     */
+  admissionFee?: string | null;
+  /**
+     * 입장료 블록 서브텍스트. 없으면 null
+     * @nullable
+     */
+  admissionFeeNote?: string | null;
+  /**
+     * 운영 시간 블록 값. 없으면 null
+     * @nullable
+     */
+  operatingHours?: string | null;
+  /**
+     * 운영 시간 블록 서브텍스트. 없으면 null
+     * @nullable
+     */
+  operatingHoursNote?: string | null;
+  /**
+     * 주의사항 블록 값. 없으면 화면에서 블록을 제외
+     * @nullable
+     */
+  caution?: string | null;
+  /**
+     * 주의사항 블록 서브텍스트. 없으면 null
+     * @nullable
+     */
+  cautionNote?: string | null;
+  /**
+     * 개행으로 구분한 대중교통 안내. 없으면 null
+     * @nullable
+     */
+  directionsTransit?: string | null;
+  /**
+     * 개행으로 구분한 자가 차량 안내. 없으면 null
+     * @nullable
+     */
+  directionsCar?: string | null;
+  /** 정렬된 주요 볼거리 */
+  highlights: FestivalHighlightResponse[];
+}
+
+/**
+ * 축제 상세
+ */
+export interface FestivalDetailResponse {
+  /** 축제 id */
+  festivalId: number;
+  /** 축제명 */
+  name: string;
+  /** 원천 행사 장소명 */
+  venue: string;
+  /**
+     * 원천 도로명 주소. 없으면 null
+     * @nullable
+     */
+  roadAddress?: string | null;
+  /**
+     * 지도 CTA에 사용할 위도. 없으면 null
+     * @nullable
+     */
+  latitude?: number | null;
+  /**
+     * 지도 CTA에 사용할 경도. 없으면 null
+     * @nullable
+     */
+  longitude?: number | null;
+  /**
+     * 축제 홈페이지 URL. 없으면 null
+     * @nullable
+     */
+  homepageUrl?: string | null;
+  /**
+     * 축제명으로 판정한 꽃 카테고리. 매칭되지 않으면 null
+     * @nullable
+     */
+  category?: FestivalDetailResponseCategory;
+  /**
+     * 꽃 카테고리 표시명. 카테고리가 없으면 null
+     * @nullable
+     */
+  displayName?: string | null;
+  /**
+     * 정규화된 축제 시작일. 파싱할 수 없으면 null
+     * @nullable
+     */
+  startsOn?: string | null;
+  /**
+     * 정규화된 축제 종료일. 없거나 파싱할 수 없으면 null
+     * @nullable
+     */
+  endsOn?: string | null;
+  /**
+     * 시작일부터 종료일까지 양 끝 날짜를 포함한 기간 일수. 판정할 수 없으면 null
+     * @nullable
+     */
+  durationDays?: number | null;
+  /**
+     * 서버가 판정한 축제 상태. 시작일을 판정할 수 없으면 null
+     * @nullable
+     */
+  phase?: FestivalDetailResponsePhase;
+  /** @nullable */
+  dDay?: number | null;
+  /**
+     * 진행 중일 때 종료까지 남은 일수. 그 외에는 null
+     * @nullable
+     */
+  endsInDays?: number | null;
+  editorial?: FestivalEditorialResponse | null;
+  dday?: number;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseFestivalDetailResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: FestivalDetailResponse | null;
+}
+
+/**
+ * 꽃 카테고리
+ */
+export type ExploreSpotItemCategory = typeof ExploreSpotItemCategory[keyof typeof ExploreSpotItemCategory];
+
+
+export const ExploreSpotItemCategory = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  COSMOS: 'COSMOS',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
+} as const;
+
+/**
+ * 산출일 기준 개화 상태
+ */
+export type ExploreSpotItemStatus = typeof ExploreSpotItemStatus[keyof typeof ExploreSpotItemStatus];
+
+
+export const ExploreSpotItemStatus = {
+  PREPARING: 'PREPARING',
+  STARTED: 'STARTED',
+  PEAK: 'PEAK',
+  ENDED: 'ENDED',
+} as const;
+
+/**
+ * 탐색 큐레이션 명소 카드
+ */
+export interface ExploreSpotItem {
+  /**
+     * 명소형 스팟 id. 아직 생성되지 않았거나 비노출이면 null
+     * @nullable
+     */
+  spotId?: number | null;
+  /** 명소 id */
+  attractionId: number;
+  /** 명소명 */
+  name: string;
+  /**
+     * 명소 주소의 지역 표시값. 없으면 null
+     * @nullable
+     */
+  address?: string | null;
+  /**
+     * 대표 이미지 URL. 없으면 null
+     * @nullable
+     */
+  thumbnailUrl?: string | null;
+  /** 꽃 카테고리 */
+  category: ExploreSpotItemCategory;
+  /** 꽃 카테고리 표시명 */
+  displayName: string;
+  /** 산출일 기준 개화 상태 */
+  status: ExploreSpotItemStatus;
+  /** 추정 신뢰도 */
+  confidence: number;
+  /**
+     * 만개 시작 예상일. 미정이면 null
+     * @nullable
+     */
+  peakStartDate?: string | null;
+  /**
+     * 만개 종료 예상일. 미정이면 null
+     * @nullable
+     */
+  peakEndDate?: string | null;
+  /** 현재 사용자가 찜한 스팟인지 여부. spotId가 null이면 항상 false */
+  favorited: boolean;
+  /** 찜 알림 활성화 여부. spotId가 null이면 항상 false */
+  notifyEnabled: boolean;
+  /**
+     * 명소 위도
+     * @nullable
+     */
+  latitude?: number | null;
+  /**
+     * 명소 경도
+     * @nullable
+     */
+  longitude?: number | null;
+}
+
+/**
+ * 축제명으로 매칭된 꽃 카테고리
+ */
+export type ExploreFestivalItemCategory = typeof ExploreFestivalItemCategory[keyof typeof ExploreFestivalItemCategory];
+
+
+export const ExploreFestivalItemCategory = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  COSMOS: 'COSMOS',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
+} as const;
+
+/**
+ * 탐색 큐레이션 진행 중 꽃축제 카드
+ */
+export interface ExploreFestivalItem {
+  /** 축제 id */
+  festivalId: number;
+  /** 축제명 */
+  name: string;
+  /** 개최 장소 */
+  venue: string;
+  /**
+     * 주소 앞 두 토큰으로 만든 지역. 주소가 없으면 null
+     * @nullable
+     */
+  region?: string | null;
+  /** 축제 시작일(정규화 값) */
+  startsOn: string;
+  /**
+     * 축제 종료일(정규화 값). 없으면 null
+     * @nullable
+     */
+  endsOn?: string | null;
+  /**
+     * 오늘부터 종료일까지 남은 일수. 종료일이 없으면 null
+     * @nullable
+     */
+  endsInDays?: number | null;
+  /** 축제명으로 매칭된 꽃 카테고리 */
+  category: ExploreFestivalItemCategory;
+  /** 꽃 카테고리 표시명 */
+  displayName: string;
+  /**
+     * 축제 위도
+     * @nullable
+     */
+  latitude?: number | null;
+  /**
+     * 축제 경도
+     * @nullable
+     */
+  longitude?: number | null;
+  /**
+     * 축제 홈페이지. 없으면 null
+     * @nullable
+     */
+  homepageUrl?: string | null;
+}
+
+/**
+ * 탐색 카드와 큐레이션 목록에서 공용으로 사용하는 발행 큐레이션 요약
+ */
+export interface CurationCardResponse {
+  /** 큐레이션 id */
+  id: number;
+  /** 에디터가 작성한 주차 뱃지 */
+  weekLabel: string;
+  /** 대상 주차 시작일 */
+  weekStartDate: string;
+  /** 대상 주차 종료일 */
+  weekEndDate: string;
+  /** 큐레이션 타이틀 */
+  title: string;
+  /**
+     * 큐레이션 부제. 없으면 null
+     * @nullable
+     */
+  subtitle?: string | null;
+  /**
+     * 히어로 이미지 URL. 없으면 null
+     * @nullable
+     */
+  heroImageUrl?: string | null;
+}
+
+/**
+ * 탐색 큐레이션(SCR-022) — 절정·피기 시작·진행 중 꽃축제·에디터 큐레이션
+ */
+export interface ExploreResponse {
+  /**
+     * 개화 추정 산출 기준일. null이면 두 스팟 섹션은 빈 목록
+     * @nullable
+     */
+  baseDate?: string | null;
+  /** 탐색 기준일(KST) */
+  today: string;
+  /** 최신 산출일 기준 status=PEAK인 명소 카드 */
+  peakNow: ExploreSpotItem[];
+  /** 최신 산출일 기준 status=STARTED인 명소 카드. 기본 5건 */
+  nextWeek: ExploreSpotItem[];
+  /** 오늘 진행 중인 꽃축제를 종료 임박순으로 정렬한 카드 */
+  festivals: ExploreFestivalItem[];
+  /** 발행된 에디터 큐레이션을 최신 주차순으로 정렬한 카드 */
+  curations: CurationCardResponse[];
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseExploreResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: ExploreResponse | null;
+}
+
+/**
+ * 공통 페이지 응답 (0-based)
+ */
+export interface PageResponseExploreSpotItem {
+  /** 현재 페이지의 항목 리스트 */
+  content: ExploreSpotItem[];
+  /** 0-based 현재 페이지 */
+  page: number;
+  /** 페이지 크기 */
+  size: number;
+  /** 전체 항목 수 */
+  totalElements: number;
+  /** 전체 페이지 수 */
+  totalPages: number;
+  /** 다음 페이지 존재 여부 */
+  hasNext: boolean;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponsePageResponseExploreSpotItem {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: PageResponseExploreSpotItem | null;
+}
+
+/**
+ * 오늘 진행 중인 꽃축제 전체 목록
+ */
+export interface ExploreFestivalListResponse {
+  /** 꽃축제만 남긴 종료 임박순 목록 */
+  items: ExploreFestivalItem[];
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseExploreFestivalListResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: ExploreFestivalListResponse | null;
+}
+
+/**
+ * 공통 페이지 응답 (0-based)
+ */
+export interface PageResponseCurationCardResponse {
+  /** 현재 페이지의 항목 리스트 */
+  content: CurationCardResponse[];
+  /** 0-based 현재 페이지 */
+  page: number;
+  /** 페이지 크기 */
+  size: number;
+  /** 전체 항목 수 */
+  totalElements: number;
+  /** 전체 페이지 수 */
+  totalPages: number;
+  /** 다음 페이지 존재 여부 */
+  hasNext: boolean;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponsePageResponseCurationCardResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: PageResponseCurationCardResponse | null;
+}
+
+/**
+ * 챕터 레이아웃
+ */
+export type CurationChapterResponseLayout = typeof CurationChapterResponseLayout[keyof typeof CurationChapterResponseLayout];
+
+
+export const CurationChapterResponseLayout = {
+  MAIN: 'MAIN',
+  RHYTHM_REVERSE: 'RHYTHM_REVERSE',
+  EDGE_BLEED: 'EDGE_BLEED',
+} as const;
+
+/**
+ * 큐레이션 장소 챕터
+ */
+export interface CurationChapterResponse {
+  /** 챕터 표시 순서. 프론트가 01, 02 형태로 렌더링 */
+  sortOrder: number;
+  /** 챕터 레이아웃 */
+  layout: CurationChapterResponseLayout;
+  /** 번호 뒤에 표시할 자유 레이블 */
+  heading: string;
+  /**
+     * 연결된 스팟 id. 연결하지 않았으면 null
+     * @nullable
+     */
+  spotId?: number | null;
+  /** 에디터가 작성한 장소명 */
+  placeName: string;
+  /**
+     * 저장된 장소 위도. 없으면 null
+     * @nullable
+     */
+  latitude?: number | null;
+  /**
+     * 저장된 장소 경도. 없으면 null
+     * @nullable
+     */
+  longitude?: number | null;
+  /**
+     * 챕터 사진 URL. 저장값이 없으면 스팟 프리뷰 썸네일로 대체
+     * @nullable
+     */
+  photoUrl?: string | null;
+  /**
+     * 풀쿼트. 없으면 null
+     * @nullable
+     */
+  pullQuote?: string | null;
+  /**
+     * 레이아웃별 리드 텍스트. 없으면 null
+     * @nullable
+     */
+  leadText?: string | null;
+  /** 개행을 포함한 챕터 본문 */
+  body: string;
+  /**
+     * 운영기간·입장료·주의사항을 보존한 단일 자유 텍스트. 없으면 null
+     * @nullable
+     */
+  factNote?: string | null;
+  badge?: BloomBadge | null;
+  /**
+     * 요청 좌표로부터 연결 스팟까지의 거리(m). 좌표나 연결 정보가 없으면 null
+     * @nullable
+     */
+  distanceMeters?: number | null;
+}
+
+/**
+ * 큐레이션 당일치기 추천 카드
+ */
+export interface CurationRecommendationResponse {
+  /** 추천 카드 표시 순서 */
+  sortOrder: number;
+  /** 추천 카드 타이틀 */
+  title: string;
+  /**
+     * 연결된 스팟 id. 연결하지 않았으면 null
+     * @nullable
+     */
+  spotId?: number | null;
+  /** 에디터가 작성한 장소명 */
+  placeName: string;
+  /**
+     * 저장된 장소 위도. 없으면 null
+     * @nullable
+     */
+  latitude?: number | null;
+  /**
+     * 저장된 장소 경도. 없으면 null
+     * @nullable
+     */
+  longitude?: number | null;
+  /**
+     * 추천 사진 URL. 저장값이 없으면 스팟 프리뷰 썸네일로 대체
+     * @nullable
+     */
+  photoUrl?: string | null;
+  /** 추천 카드 설명 */
+  body: string;
+  /**
+     * 요청 좌표로부터 연결 스팟까지의 거리(m). 좌표나 연결 정보가 없으면 null
+     * @nullable
+     */
+  distanceMeters?: number | null;
+}
+
+/**
+ * 주차 단위 에디토리얼 큐레이션 상세(SCR-026)
+ */
+export interface CurationDetailResponse {
+  /** 큐레이션 id */
+  id: number;
+  /** 에디터가 작성한 주차 뱃지 */
+  weekLabel: string;
+  /** 대상 주차 시작일 */
+  weekStartDate: string;
+  /** 대상 주차 종료일 */
+  weekEndDate: string;
+  /** 큐레이션 타이틀 */
+  title: string;
+  /**
+     * 큐레이션 부제. 없으면 null
+     * @nullable
+     */
+  subtitle?: string | null;
+  /**
+     * 히어로 이미지 URL. 없으면 null
+     * @nullable
+     */
+  heroImageUrl?: string | null;
+  /**
+     * 개행을 포함한 도입글. 없으면 null
+     * @nullable
+     */
+  intro?: string | null;
+  /**
+     * 다음 주 예고 오버라인. 없으면 null
+     * @nullable
+     */
+  nextTeaserOverline?: string | null;
+  /**
+     * 다음 주 예고 본문. 없으면 null
+     * @nullable
+     */
+  nextTeaserBody?: string | null;
+  /** 정렬 순서대로 조립한 큐레이션 챕터 */
+  chapters: CurationChapterResponse[];
+  /** 정렬 순서대로 조립한 당일치기 추천 카드 */
+  recommendations: CurationRecommendationResponse[];
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseCurationDetailResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: CurationDetailResponse | null;
+}
+
+/**
  * 닉네임 사용 가능 여부 응답
  */
 export interface NicknameCheckResponse {
@@ -2157,6 +3788,7 @@ export type UserInfoResponseStatus = typeof UserInfoResponseStatus[keyof typeof 
 
 export const UserInfoResponseStatus = {
   ACTIVE: 'ACTIVE',
+  SUSPENDED: 'SUSPENDED',
   DEACTIVATED: 'DEACTIVATED',
 } as const;
 
@@ -2219,67 +3851,1153 @@ export interface ApiResponseUserInfoResponse {
   data?: UserInfoResponse | null;
 }
 
-export type ListBySpotParams = {
-spotId: number;
-pageRequest: PageRequest;
-};
-
-export type AddReactionParams = {
 /**
- * 리액션 타입
+ * 공통 페이지 응답 (0-based)
  */
-reactionType: AddReactionReactionType;
-};
+export interface PageResponseUserAdminResponse {
+  /** 현재 페이지의 항목 리스트 */
+  content: UserAdminResponse[];
+  /** 0-based 현재 페이지 */
+  page: number;
+  /** 페이지 크기 */
+  size: number;
+  /** 전체 항목 수 */
+  totalElements: number;
+  /** 전체 페이지 수 */
+  totalPages: number;
+  /** 다음 페이지 존재 여부 */
+  hasNext: boolean;
+}
 
-export type AddReactionReactionType = typeof AddReactionReactionType[keyof typeof AddReactionReactionType];
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponsePageResponseUserAdminResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: PageResponseUserAdminResponse | null;
+}
+
+/**
+ * 사용자 역할
+ */
+export type AdminSessionResponseRole = typeof AdminSessionResponseRole[keyof typeof AdminSessionResponseRole];
 
 
-export const AddReactionReactionType = {
-  HEART: 'HEART',
-  SMILE: 'SMILE',
+export const AdminSessionResponseRole = {
+  USER: 'USER',
+  ADMIN: 'ADMIN',
 } as const;
 
-export type RemoveReactionParams = {
 /**
- * 리액션 타입
+ * 현재 관리자 세션
  */
-reactionType: RemoveReactionReactionType;
-};
+export interface AdminSessionResponse {
+  /** 관리자 사용자 id */
+  userId: number;
+  /** 관리자 닉네임 */
+  nickname: string;
+  /** 사용자 역할 */
+  role: AdminSessionResponseRole;
+}
 
-export type RemoveReactionReactionType = typeof RemoveReactionReactionType[keyof typeof RemoveReactionReactionType];
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseAdminSessionResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: AdminSessionResponse | null;
+}
+
+/**
+ * 신고 대상 종류
+ */
+export type ReportTargetSummaryResponseTargetType = typeof ReportTargetSummaryResponseTargetType[keyof typeof ReportTargetSummaryResponseTargetType];
 
 
-export const RemoveReactionReactionType = {
-  HEART: 'HEART',
-  SMILE: 'SMILE',
+export const ReportTargetSummaryResponseTargetType = {
+  SPOT_RECORD: 'SPOT_RECORD',
 } as const;
 
-export type FollowingsParams = {
-pageRequest: PageRequest;
-};
+/**
+ * 신고 대상별 집계
+ */
+export interface ReportTargetSummaryResponse {
+  /** 신고 대상 종류 */
+  targetType: ReportTargetSummaryResponseTargetType;
+  /** 신고 대상 id */
+  targetId: number;
+  /** 신고 건수 */
+  reportCount: number;
+  /** 최초 신고 시각 */
+  firstReportedAt: string;
+  /** 최근 신고 시각 */
+  lastReportedAt: string;
+  /**
+     * 대상 콘텐츠 요약
+     * @nullable
+     */
+  targetSummary?: string | null;
+  /**
+     * 대상 콘텐츠 작성자 닉네임
+     * @nullable
+     */
+  targetAuthorNickname?: string | null;
+  /** 대상 존재 여부 */
+  targetExists: boolean;
+}
 
-export type FollowersParams = {
-pageRequest: PageRequest;
-};
+/**
+ * 공통 페이지 응답 (0-based)
+ */
+export interface PageResponseReportTargetSummaryResponse {
+  /** 현재 페이지의 항목 리스트 */
+  content: ReportTargetSummaryResponse[];
+  /** 0-based 현재 페이지 */
+  page: number;
+  /** 페이지 크기 */
+  size: number;
+  /** 전체 항목 수 */
+  totalElements: number;
+  /** 전체 페이지 수 */
+  totalPages: number;
+  /** 다음 페이지 존재 여부 */
+  hasNext: boolean;
+}
 
-export type ListParams = {
-pageRequest: PageRequest;
-};
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponsePageResponseReportTargetSummaryResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: PageResponseReportTargetSummaryResponse | null;
+}
 
-export type ListMineParams = {
-status: ListMineStatus;
-pageRequest: PageRequest;
-};
-
-export type ListMineStatus = typeof ListMineStatus[keyof typeof ListMineStatus];
+/**
+ * 신고 대상 종류
+ */
+export type ReportTargetDetailResponseTargetType = typeof ReportTargetDetailResponseTargetType[keyof typeof ReportTargetDetailResponseTargetType];
 
 
-export const ListMineStatus = {
+export const ReportTargetDetailResponseTargetType = {
+  SPOT_RECORD: 'SPOT_RECORD',
+} as const;
+
+/**
+ * 신고 사유
+ */
+export type ReportReviewItemResponseReason = typeof ReportReviewItemResponseReason[keyof typeof ReportReviewItemResponseReason];
+
+
+export const ReportReviewItemResponseReason = {
+  SPAM: 'SPAM',
+  INAPPROPRIATE: 'INAPPROPRIATE',
+  HARASSMENT: 'HARASSMENT',
+  ETC: 'ETC',
+} as const;
+
+/**
+ * 신고 심사 상태
+ */
+export type ReportReviewItemResponseStatus = typeof ReportReviewItemResponseStatus[keyof typeof ReportReviewItemResponseStatus];
+
+
+export const ReportReviewItemResponseStatus = {
+  PENDING: 'PENDING',
+  RESOLVED: 'RESOLVED',
+  DISMISSED: 'DISMISSED',
+} as const;
+
+/**
+ * 신고 심사 상세의 개별 신고
+ */
+export interface ReportReviewItemResponse {
+  /** 신고 id */
+  id: number;
+  /** 신고자 사용자 id */
+  reporterId: number;
+  /**
+     * 신고자 닉네임
+     * @nullable
+     */
+  reporterNickname?: string | null;
+  /** 신고 사유 */
+  reason: ReportReviewItemResponseReason;
+  /**
+     * 상세 신고 사유
+     * @nullable
+     */
+  detail?: string | null;
+  /** 신고 심사 상태 */
+  status: ReportReviewItemResponseStatus;
+  /** 신고 접수 시각 */
+  createdAt: string;
+  /**
+     * 심사한 관리자 사용자 id
+     * @nullable
+     */
+  reviewedBy?: number | null;
+  /**
+     * 심사 완료 시각
+     * @nullable
+     */
+  reviewedAt?: string | null;
+  /**
+     * 심사 메모
+     * @nullable
+     */
+  reviewMemo?: string | null;
+}
+
+/**
+ * 사유별 신고 건수
+ */
+export type ReportTargetDetailResponseReasonDistribution = {[key: string]: number};
+
+/**
+ * 신고 대상 심사 상세
+ */
+export interface ReportTargetDetailResponse {
+  /** 신고 대상 종류 */
+  targetType: ReportTargetDetailResponseTargetType;
+  /** 신고 대상 id */
+  targetId: number;
+  /** 신고 건수 */
+  reportCount: number;
+  /** 사유별 신고 건수 */
+  reasonDistribution: ReportTargetDetailResponseReasonDistribution;
+  /** 개별 신고 목록 */
+  reports: ReportReviewItemResponse[];
+  /**
+     * 대상 콘텐츠 요약
+     * @nullable
+     */
+  targetSummary?: string | null;
+  /**
+     * 대상 콘텐츠 작성자 닉네임
+     * @nullable
+     */
+  targetAuthorNickname?: string | null;
+  /** 대상 존재 여부 */
+  targetExists: boolean;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseReportTargetDetailResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: ReportTargetDetailResponse | null;
+}
+
+/**
+ * 공통 페이지 응답 (0-based)
+ */
+export interface PageResponsePlantAdminResponse {
+  /** 현재 페이지의 항목 리스트 */
+  content: PlantAdminResponse[];
+  /** 0-based 현재 페이지 */
+  page: number;
+  /** 페이지 크기 */
+  size: number;
+  /** 전체 항목 수 */
+  totalElements: number;
+  /** 전체 페이지 수 */
+  totalPages: number;
+  /** 다음 페이지 존재 여부 */
+  hasNext: boolean;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponsePageResponsePlantAdminResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: PageResponsePlantAdminResponse | null;
+}
+
+/**
+ * 공통 페이지 응답 (0-based)
+ */
+export interface PageResponseNoticeResponse {
+  /** 현재 페이지의 항목 리스트 */
+  content: NoticeResponse[];
+  /** 0-based 현재 페이지 */
+  page: number;
+  /** 페이지 크기 */
+  size: number;
+  /** 전체 항목 수 */
+  totalElements: number;
+  /** 전체 페이지 수 */
+  totalPages: number;
+  /** 다음 페이지 존재 여부 */
+  hasNext: boolean;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponsePageResponseNoticeResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: PageResponseNoticeResponse | null;
+}
+
+/**
+ * 실행 상태
+ */
+export type SchedulerJobRunResponseStatus = typeof SchedulerJobRunResponseStatus[keyof typeof SchedulerJobRunResponseStatus];
+
+
+export const SchedulerJobRunResponseStatus = {
+  RUNNING: 'RUNNING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED',
+  SKIPPED: 'SKIPPED',
+} as const;
+
+/**
+ * 스케줄러 잡 실행 이력
+ */
+export interface SchedulerJobRunResponse {
+  /** 실행 이력 id */
+  id: number;
+  /** 잡 이름 */
+  jobName: string;
+  /** 실행 시작 시각 */
+  startedAt: string;
+  /**
+     * 실행 종료 시각
+     * @nullable
+     */
+  finishedAt?: string | null;
+  /** 실행 상태 */
+  status: SchedulerJobRunResponseStatus;
+  /**
+     * 처리 건수
+     * @nullable
+     */
+  processedCount?: number | null;
+  /**
+     * 전체 건수
+     * @nullable
+     */
+  totalCount?: number | null;
+  /**
+     * 실패 메시지
+     * @nullable
+     */
+  errorMessage?: string | null;
+  /**
+     * 건너뛴 사유
+     * @nullable
+     */
+  skipReason?: string | null;
+}
+
+/**
+ * 스케줄러 잡과 최근 실행 요약
+ */
+export interface SchedulerJobResponse {
+  /** 잡 이름 */
+  jobName: string;
+  latestRun?: SchedulerJobRunResponse | null;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseListSchedulerJobResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  /**
+     * 응답 본문 (성공 시 채워지고, 에러 시 생략됨)
+     * @nullable
+     */
+  data?: SchedulerJobResponse[] | null;
+}
+
+/**
+ * 공통 페이지 응답 (0-based)
+ */
+export interface PageResponseSchedulerJobRunResponse {
+  /** 현재 페이지의 항목 리스트 */
+  content: SchedulerJobRunResponse[];
+  /** 0-based 현재 페이지 */
+  page: number;
+  /** 페이지 크기 */
+  size: number;
+  /** 전체 항목 수 */
+  totalElements: number;
+  /** 전체 페이지 수 */
+  totalPages: number;
+  /** 다음 페이지 존재 여부 */
+  hasNext: boolean;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponsePageResponseSchedulerJobRunResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: PageResponseSchedulerJobRunResponse | null;
+}
+
+/**
+ * 실행 상태
+ */
+export type SchedulerJobRunDetailResponseStatus = typeof SchedulerJobRunDetailResponseStatus[keyof typeof SchedulerJobRunDetailResponseStatus];
+
+
+export const SchedulerJobRunDetailResponseStatus = {
+  RUNNING: 'RUNNING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED',
+  SKIPPED: 'SKIPPED',
+} as const;
+
+/**
+ * 스케줄러 잡 실행 상세
+ */
+export interface SchedulerJobRunDetailResponse {
+  /** 실행 이력 id */
+  id: number;
+  /** 잡 이름 */
+  jobName: string;
+  /** 실행 시작 시각 */
+  startedAt: string;
+  /**
+     * 실행 종료 시각
+     * @nullable
+     */
+  finishedAt?: string | null;
+  /** 실행 상태 */
+  status: SchedulerJobRunDetailResponseStatus;
+  /**
+     * 처리 건수
+     * @nullable
+     */
+  processedCount?: number | null;
+  /**
+     * 전체 건수
+     * @nullable
+     */
+  totalCount?: number | null;
+  /**
+     * 실패 메시지
+     * @nullable
+     */
+  errorMessage?: string | null;
+  /**
+     * 실패 스택. 상세 응답에서만 제공한다.
+     * @nullable
+     */
+  errorStack?: string | null;
+  /**
+     * 건너뛴 사유
+     * @nullable
+     */
+  skipReason?: string | null;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseSchedulerJobRunDetailResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: SchedulerJobRunDetailResponse | null;
+}
+
+/**
+ * 에디토리얼 상태. 에디토리얼이 없으면 null
+ * @nullable
+ */
+export type FestivalAdminSummaryResponseEditorialStatus = typeof FestivalAdminSummaryResponseEditorialStatus[keyof typeof FestivalAdminSummaryResponseEditorialStatus] | null;
+
+
+export const FestivalAdminSummaryResponseEditorialStatus = {
   DRAFT: 'DRAFT',
   PUBLISHED: 'PUBLISHED',
 } as const;
 
-export type PreviewParams = {
+/**
+ * 관리자 축제 목록 요약
+ */
+export interface FestivalAdminSummaryResponse {
+  /** 축제 id */
+  id: number;
+  /** 축제명 */
+  name: string;
+  /** 원천 행사 장소명 */
+  venue: string;
+  /**
+     * 정규화된 축제 시작일. 파싱할 수 없으면 null
+     * @nullable
+     */
+  startsOn?: string | null;
+  /**
+     * 정규화된 축제 종료일. 없거나 파싱할 수 없으면 null
+     * @nullable
+     */
+  endsOn?: string | null;
+  /** 에디토리얼 존재 여부 */
+  hasEditorial: boolean;
+  /**
+     * 에디토리얼 상태. 에디토리얼이 없으면 null
+     * @nullable
+     */
+  editorialStatus?: FestivalAdminSummaryResponseEditorialStatus;
+}
+
+/**
+ * 공통 페이지 응답 (0-based)
+ */
+export interface PageResponseFestivalAdminSummaryResponse {
+  /** 현재 페이지의 항목 리스트 */
+  content: FestivalAdminSummaryResponse[];
+  /** 0-based 현재 페이지 */
+  page: number;
+  /** 페이지 크기 */
+  size: number;
+  /** 전체 항목 수 */
+  totalElements: number;
+  /** 전체 페이지 수 */
+  totalPages: number;
+  /** 다음 페이지 존재 여부 */
+  hasNext: boolean;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponsePageResponseFestivalAdminSummaryResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: PageResponseFestivalAdminSummaryResponse | null;
+}
+
+/**
+ * 축제 에디토리얼 상태
+ */
+export type FestivalEditorialAdminResponseStatus = typeof FestivalEditorialAdminResponseStatus[keyof typeof FestivalEditorialAdminResponseStatus];
+
+
+export const FestivalEditorialAdminResponseStatus = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+} as const;
+
+/**
+ * 관리자 축제 주요 볼거리 편집 응답
+ */
+export interface FestivalHighlightAdminResponse {
+  /** 표시 순서 */
+  sortOrder: number;
+  /** 볼거리 타이틀 */
+  title: string;
+  /** 볼거리 설명 */
+  body: string;
+}
+
+/**
+ * 관리자 축제 에디토리얼 편집 응답
+ */
+export interface FestivalEditorialAdminResponse {
+  /** 축제 에디토리얼 id */
+  editorialId: number;
+  /** 축제 id */
+  festivalId: number;
+  /**
+     * 에디토리얼 훅. 없으면 null
+     * @nullable
+     */
+  hook?: string | null;
+  /**
+     * 축제 기간 블록 서브텍스트. 없으면 null
+     * @nullable
+     */
+  periodNote?: string | null;
+  /**
+     * 장소 블록 서브텍스트. 없으면 null
+     * @nullable
+     */
+  placeNote?: string | null;
+  /**
+     * 입장료 블록 값. 없으면 null
+     * @nullable
+     */
+  admissionFee?: string | null;
+  /**
+     * 입장료 블록 서브텍스트. 없으면 null
+     * @nullable
+     */
+  admissionFeeNote?: string | null;
+  /**
+     * 운영 시간 블록 값. 없으면 null
+     * @nullable
+     */
+  operatingHours?: string | null;
+  /**
+     * 운영 시간 블록 서브텍스트. 없으면 null
+     * @nullable
+     */
+  operatingHoursNote?: string | null;
+  /**
+     * 주의사항 블록 값. 없으면 null
+     * @nullable
+     */
+  caution?: string | null;
+  /**
+     * 주의사항 블록 서브텍스트. 없으면 null
+     * @nullable
+     */
+  cautionNote?: string | null;
+  /**
+     * 개행으로 구분한 대중교통 안내. 없으면 null
+     * @nullable
+     */
+  directionsTransit?: string | null;
+  /**
+     * 개행으로 구분한 자가 차량 안내. 없으면 null
+     * @nullable
+     */
+  directionsCar?: string | null;
+  /**
+     * DB에 저장된 원본 히어로 이미지 object key 또는 외부 URL. 저장 시 이 값을 다시 보낸다.
+     * @nullable
+     */
+  heroImageKey?: string | null;
+  /**
+     * 미리보기용 resolved URL. 저장 payload에 넣지 않는다.
+     * @nullable
+     */
+  heroImagePreviewUrl?: string | null;
+  /** 축제 에디토리얼 상태 */
+  status: FestivalEditorialAdminResponseStatus;
+  /**
+     * 발행 시각. DRAFT면 null
+     * @nullable
+     */
+  publishedAt?: string | null;
+  /** 정렬된 주요 볼거리 */
+  highlights: FestivalHighlightAdminResponse[];
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseFestivalEditorialAdminResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: FestivalEditorialAdminResponse | null;
+}
+
+/**
+ * 큐레이션 상태
+ */
+export type CurationAdminSummaryResponseStatus = typeof CurationAdminSummaryResponseStatus[keyof typeof CurationAdminSummaryResponseStatus];
+
+
+export const CurationAdminSummaryResponseStatus = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+} as const;
+
+/**
+ * 백오피스 큐레이션 목록 요약
+ */
+export interface CurationAdminSummaryResponse {
+  /** 큐레이션 id */
+  id: number;
+  /** 대상 주차 시작일 */
+  weekStartDate: string;
+  /** 대상 주차 종료일 */
+  weekEndDate: string;
+  /** 에디터가 작성한 주차 뱃지 */
+  weekLabel: string;
+  /** 큐레이션 타이틀 */
+  title: string;
+  /** 큐레이션 상태 */
+  status: CurationAdminSummaryResponseStatus;
+  /**
+     * 발행 시각. 임시저장이면 null
+     * @nullable
+     */
+  publishedAt?: string | null;
+  /** 챕터 수 */
+  chapterCount: number;
+  /** 추천 카드 수 */
+  recommendationCount: number;
+}
+
+/**
+ * 공통 페이지 응답 (0-based)
+ */
+export interface PageResponseCurationAdminSummaryResponse {
+  /** 현재 페이지의 항목 리스트 */
+  content: CurationAdminSummaryResponse[];
+  /** 0-based 현재 페이지 */
+  page: number;
+  /** 페이지 크기 */
+  size: number;
+  /** 전체 항목 수 */
+  totalElements: number;
+  /** 전체 페이지 수 */
+  totalPages: number;
+  /** 다음 페이지 존재 여부 */
+  hasNext: boolean;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponsePageResponseCurationAdminSummaryResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: PageResponseCurationAdminSummaryResponse | null;
+}
+
+/**
+ * 큐레이션 상태
+ */
+export type CurationAdminDetailResponseStatus = typeof CurationAdminDetailResponseStatus[keyof typeof CurationAdminDetailResponseStatus];
+
+
+export const CurationAdminDetailResponseStatus = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+} as const;
+
+/**
+ * 챕터 레이아웃
+ */
+export type CurationAdminChapterResponseLayout = typeof CurationAdminChapterResponseLayout[keyof typeof CurationAdminChapterResponseLayout];
+
+
+export const CurationAdminChapterResponseLayout = {
+  MAIN: 'MAIN',
+  RHYTHM_REVERSE: 'RHYTHM_REVERSE',
+  EDGE_BLEED: 'EDGE_BLEED',
+} as const;
+
+/**
+ * 백오피스 큐레이션 챕터
+ */
+export interface CurationAdminChapterResponse {
+  /** 챕터 표시 순서 */
+  sortOrder: number;
+  /** 챕터 레이아웃 */
+  layout: CurationAdminChapterResponseLayout;
+  /** 번호 뒤에 표시할 자유 레이블 */
+  heading: string;
+  /**
+     * 연결된 스팟 id. 연결하지 않았으면 null
+     * @nullable
+     */
+  spotId?: number | null;
+  /** 에디터가 작성한 장소명 */
+  placeName: string;
+  /**
+     * 저장된 장소 위도. 없으면 null
+     * @nullable
+     */
+  latitude?: number | null;
+  /**
+     * 저장된 장소 경도. 없으면 null
+     * @nullable
+     */
+  longitude?: number | null;
+  /**
+     * 저장된 사진 object key 또는 외부 URL
+     * @nullable
+     */
+  photoKey?: string | null;
+  /**
+     * 사진 미리보기 URL. 없으면 null
+     * @nullable
+     */
+  photoPreviewUrl?: string | null;
+  /**
+     * 풀쿼트. 없으면 null
+     * @nullable
+     */
+  pullQuote?: string | null;
+  /**
+     * 레이아웃별 리드 텍스트. 없으면 null
+     * @nullable
+     */
+  leadText?: string | null;
+  /** 개행을 포함한 챕터 본문 */
+  body: string;
+  /**
+     * 운영기간·입장료·주의사항을 보존한 단일 자유 텍스트. 없으면 null
+     * @nullable
+     */
+  factNote?: string | null;
+}
+
+/**
+ * 백오피스 큐레이션 당일치기 추천 카드
+ */
+export interface CurationAdminRecommendationResponse {
+  /** 추천 카드 표시 순서 */
+  sortOrder: number;
+  /** 추천 카드 타이틀 */
+  title: string;
+  /**
+     * 연결된 스팟 id. 연결하지 않았으면 null
+     * @nullable
+     */
+  spotId?: number | null;
+  /** 에디터가 작성한 장소명 */
+  placeName: string;
+  /**
+     * 저장된 장소 위도. 없으면 null
+     * @nullable
+     */
+  latitude?: number | null;
+  /**
+     * 저장된 장소 경도. 없으면 null
+     * @nullable
+     */
+  longitude?: number | null;
+  /**
+     * 저장된 사진 object key 또는 외부 URL
+     * @nullable
+     */
+  photoKey?: string | null;
+  /**
+     * 사진 미리보기 URL. 없으면 null
+     * @nullable
+     */
+  photoPreviewUrl?: string | null;
+  /** 추천 카드 설명 */
+  body: string;
+}
+
+/**
+ * 백오피스 큐레이션 상세
+ */
+export interface CurationAdminDetailResponse {
+  /** 큐레이션 id */
+  id: number;
+  /** 큐레이션 상태 */
+  status: CurationAdminDetailResponseStatus;
+  /** 에디터가 작성한 주차 뱃지 */
+  weekLabel: string;
+  /** 대상 주차 시작일 */
+  weekStartDate: string;
+  /** 대상 주차 종료일 */
+  weekEndDate: string;
+  /** 큐레이션 타이틀 */
+  title: string;
+  /**
+     * 큐레이션 부제. 없으면 null
+     * @nullable
+     */
+  subtitle?: string | null;
+  /**
+     * 저장된 히어로 이미지 object key 또는 외부 URL
+     * @nullable
+     */
+  heroImageKey?: string | null;
+  /**
+     * 히어로 이미지 미리보기 URL. 없으면 null
+     * @nullable
+     */
+  heroImagePreviewUrl?: string | null;
+  /**
+     * 개행을 포함한 도입글. 없으면 null
+     * @nullable
+     */
+  intro?: string | null;
+  /**
+     * 다음 주 예고 오버라인. 없으면 null
+     * @nullable
+     */
+  nextTeaserOverline?: string | null;
+  /**
+     * 다음 주 예고 본문. 없으면 null
+     * @nullable
+     */
+  nextTeaserBody?: string | null;
+  /**
+     * 발행 시각. 임시저장이면 null
+     * @nullable
+     */
+  publishedAt?: string | null;
+  /** 저장된 정렬 순서대로 반환한 큐레이션 챕터 */
+  chapters: CurationAdminChapterResponse[];
+  /** 저장된 정렬 순서대로 반환한 당일치기 추천 카드 */
+  recommendations: CurationAdminRecommendationResponse[];
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseCurationAdminDetailResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: CurationAdminDetailResponse | null;
+}
+
+/**
+ * 관리자 조치 종류
+ */
+export type AdminAuditLogResponseAction = typeof AdminAuditLogResponseAction[keyof typeof AdminAuditLogResponseAction];
+
+
+export const AdminAuditLogResponseAction = {
+  REPORT_RESOLVE_HIDE: 'REPORT_RESOLVE_HIDE',
+  REPORT_RESOLVE_KEEP: 'REPORT_RESOLVE_KEEP',
+  REPORT_DISMISS: 'REPORT_DISMISS',
+  SPOT_RECORD_HIDE: 'SPOT_RECORD_HIDE',
+  SPOT_RECORD_RESTORE: 'SPOT_RECORD_RESTORE',
+  PLANT_UPDATE: 'PLANT_UPDATE',
+  PLANT_REJECT: 'PLANT_REJECT',
+  PLANT_RESTORE: 'PLANT_RESTORE',
+  CURATION_UPSERT: 'CURATION_UPSERT',
+  CURATION_DELETE: 'CURATION_DELETE',
+  FESTIVAL_EDITORIAL_UPSERT: 'FESTIVAL_EDITORIAL_UPSERT',
+  FESTIVAL_EDITORIAL_DELETE: 'FESTIVAL_EDITORIAL_DELETE',
+  NOTICE_CREATE: 'NOTICE_CREATE',
+  NOTICE_UPDATE: 'NOTICE_UPDATE',
+  NOTICE_DISPATCH: 'NOTICE_DISPATCH',
+  NOTICE_CANCEL: 'NOTICE_CANCEL',
+  USER_SUSPEND: 'USER_SUSPEND',
+  USER_UNSUSPEND: 'USER_UNSUSPEND',
+  SCHEDULER_JOB_TRIGGER: 'SCHEDULER_JOB_TRIGGER',
+} as const;
+
+/**
+ * 조치 대상 종류
+ */
+export type AdminAuditLogResponseTargetType = typeof AdminAuditLogResponseTargetType[keyof typeof AdminAuditLogResponseTargetType];
+
+
+export const AdminAuditLogResponseTargetType = {
+  SPOT_RECORD: 'SPOT_RECORD',
+  USER: 'USER',
+  PLANT: 'PLANT',
+  CURATION: 'CURATION',
+  FESTIVAL: 'FESTIVAL',
+  NOTICE: 'NOTICE',
+  SCHEDULER_JOB: 'SCHEDULER_JOB',
+} as const;
+
+/**
+ * 관리자 조치 감사 로그
+ */
+export interface AdminAuditLogResponse {
+  /** 감사 로그 id */
+  id: number;
+  /** 조치를 수행한 관리자 사용자 id */
+  adminId: number;
+  /**
+     * 조치를 수행한 관리자 닉네임
+     * @nullable
+     */
+  adminNickname?: string | null;
+  /** 관리자 조치 종류 */
+  action: AdminAuditLogResponseAction;
+  /** 조치 대상 종류 */
+  targetType: AdminAuditLogResponseTargetType;
+  /** 조치 대상 id */
+  targetId: number;
+  /**
+     * 조치 사유 또는 부가 정보
+     * @nullable
+     */
+  memo?: string | null;
+  /** 조치 시각 */
+  createdAt: string;
+}
+
+/**
+ * 공통 페이지 응답 (0-based)
+ */
+export interface PageResponseAdminAuditLogResponse {
+  /** 현재 페이지의 항목 리스트 */
+  content: AdminAuditLogResponse[];
+  /** 0-based 현재 페이지 */
+  page: number;
+  /** 페이지 크기 */
+  size: number;
+  /** 전체 항목 수 */
+  totalElements: number;
+  /** 전체 페이지 수 */
+  totalPages: number;
+  /** 다음 페이지 존재 여부 */
+  hasNext: boolean;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponsePageResponseAdminAuditLogResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: PageResponseAdminAuditLogResponse | null;
+}
+
+export type GetAdminCurationsParams = {
+/**
+ * 큐레이션 상태. 생략하면 전체
+ */
+status?: GetAdminCurationsStatus;
+pageRequest: PageRequest;
+};
+
+export type GetAdminCurationsStatus = typeof GetAdminCurationsStatus[keyof typeof GetAdminCurationsStatus];
+
+
+export const GetAdminCurationsStatus = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+} as const;
+
+export type GetSpotsRecordsParams = {
+spotId: number;
+pageRequest: PageRequest;
+};
+
+export type PostFeedByIdReactionsParams = {
+/**
+ * 리액션 타입
+ */
+reactionType: PostFeedByIdReactionsReactionType;
+};
+
+export type PostFeedByIdReactionsReactionType = typeof PostFeedByIdReactionsReactionType[keyof typeof PostFeedByIdReactionsReactionType];
+
+
+export const PostFeedByIdReactionsReactionType = {
+  HEART: 'HEART',
+  SMILE: 'SMILE',
+} as const;
+
+export type DeleteFeedByIdReactionsParams = {
+/**
+ * 리액션 타입
+ */
+reactionType: DeleteFeedByIdReactionsReactionType;
+};
+
+export type DeleteFeedByIdReactionsReactionType = typeof DeleteFeedByIdReactionsReactionType[keyof typeof DeleteFeedByIdReactionsReactionType];
+
+
+export const DeleteFeedByIdReactionsReactionType = {
+  HEART: 'HEART',
+  SMILE: 'SMILE',
+} as const;
+
+export type GetAdminNoticesParams = {
+/**
+ * 공지 발송 상태
+ */
+status?: GetAdminNoticesStatus;
+pageRequest: PageRequest;
+};
+
+export type GetAdminNoticesStatus = typeof GetAdminNoticesStatus[keyof typeof GetAdminNoticesStatus];
+
+
+export const GetAdminNoticesStatus = {
+  DRAFT: 'DRAFT',
+  DISPATCHING: 'DISPATCHING',
+  DISPATCHED: 'DISPATCHED',
+  CANCELED: 'CANCELED',
+} as const;
+
+export type GetUsersByUserIdFollowingsParams = {
+pageRequest: PageRequest;
+};
+
+export type GetUsersByUserIdFollowersParams = {
+pageRequest: PageRequest;
+};
+
+export type GetUsersMeBlocksParams = {
+pageRequest: PageRequest;
+};
+
+export type GetSpotsRecordsMeParams = {
+status: GetSpotsRecordsMeStatus;
+pageRequest: PageRequest;
+};
+
+export type GetSpotsRecordsMeStatus = typeof GetSpotsRecordsMeStatus[keyof typeof GetSpotsRecordsMeStatus];
+
+
+export const GetSpotsRecordsMeStatus = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+  HIDDEN: 'HIDDEN',
+} as const;
+
+export type GetSpotsPreviewParams = {
 /**
  * 프리뷰할 스팟 id 목록
  */
@@ -2287,7 +5005,7 @@ spotIds: number[];
 /**
  * 꽃 카테고리 필터 (생략 시 각 스팟의 대표 단계)
  */
-category?: PreviewCategory;
+category?: GetSpotsPreviewCategory;
 /**
  * 거리 계산 기준 위도 (lng 과 함께 생략 가능)
  */
@@ -2298,10 +5016,10 @@ lat?: number;
 lng?: number;
 };
 
-export type PreviewCategory = typeof PreviewCategory[keyof typeof PreviewCategory];
+export type GetSpotsPreviewCategory = typeof GetSpotsPreviewCategory[keyof typeof GetSpotsPreviewCategory];
 
 
-export const PreviewCategory = {
+export const GetSpotsPreviewCategory = {
   PLUM: 'PLUM',
   FORSYTHIA: 'FORSYTHIA',
   AZALEA_KR: 'AZALEA_KR',
@@ -2317,7 +5035,7 @@ export const PreviewCategory = {
   CAMELLIA: 'CAMELLIA',
 } as const;
 
-export type MapParams = {
+export type GetSeasonalBloomsParams = {
 /**
  * 남서 위도
  */
@@ -2337,17 +5055,17 @@ maxLng: number;
 /**
  * 꽃 카테고리 필터 (생략 시 전체)
  */
-category?: MapCategory;
+category?: GetSeasonalBloomsCategory;
 /**
  * 방문예정일 (생략 시 오늘 기준). 명소형 핀 상태를 해당일 기준으로 재계산한다. 동네형은 최근 관측값 유지.
  */
 date?: string;
 };
 
-export type MapCategory = typeof MapCategory[keyof typeof MapCategory];
+export type GetSeasonalBloomsCategory = typeof GetSeasonalBloomsCategory[keyof typeof GetSeasonalBloomsCategory];
 
 
-export const MapCategory = {
+export const GetSeasonalBloomsCategory = {
   PLUM: 'PLUM',
   FORSYTHIA: 'FORSYTHIA',
   AZALEA_KR: 'AZALEA_KR',
@@ -2363,17 +5081,17 @@ export const MapCategory = {
   CAMELLIA: 'CAMELLIA',
 } as const;
 
-export type PeakParams = {
+export type GetSeasonalBloomsPeakParams = {
 /**
  * 꽃 카테고리 필터 (생략 시 전체)
  */
-category?: PeakCategory;
+category?: GetSeasonalBloomsPeakCategory;
 };
 
-export type PeakCategory = typeof PeakCategory[keyof typeof PeakCategory];
+export type GetSeasonalBloomsPeakCategory = typeof GetSeasonalBloomsPeakCategory[keyof typeof GetSeasonalBloomsPeakCategory];
 
 
-export const PeakCategory = {
+export const GetSeasonalBloomsPeakCategory = {
   PLUM: 'PLUM',
   FORSYTHIA: 'FORSYTHIA',
   AZALEA_KR: 'AZALEA_KR',
@@ -2389,7 +5107,7 @@ export const PeakCategory = {
   CAMELLIA: 'CAMELLIA',
 } as const;
 
-export type CalendarParams = {
+export type GetSeasonalBloomsCalendarParams = {
 /**
  * 명소 id
  */
@@ -2397,13 +5115,13 @@ attractionId: number;
 /**
  * 꽃 카테고리
  */
-category: CalendarCategory;
+category: GetSeasonalBloomsCalendarCategory;
 };
 
-export type CalendarCategory = typeof CalendarCategory[keyof typeof CalendarCategory];
+export type GetSeasonalBloomsCalendarCategory = typeof GetSeasonalBloomsCalendarCategory[keyof typeof GetSeasonalBloomsCalendarCategory];
 
 
-export const CalendarCategory = {
+export const GetSeasonalBloomsCalendarCategory = {
   PLUM: 'PLUM',
   FORSYTHIA: 'FORSYTHIA',
   AZALEA_KR: 'AZALEA_KR',
@@ -2419,7 +5137,7 @@ export const CalendarCategory = {
   CAMELLIA: 'CAMELLIA',
 } as const;
 
-export type SearchUsersParams = {
+export type GetSearchUsersParams = {
 /**
  * 검색어 (닉네임)
  */
@@ -2427,7 +5145,7 @@ q: string;
 pageRequest: PageRequest;
 };
 
-export type SearchSpotsParams = {
+export type GetSearchSpotsParams = {
 /**
  * 검색어
  */
@@ -2435,49 +5153,289 @@ q: string;
 pageRequest: PageRequest;
 };
 
-export type SearchParams = {
+export type GetPlantsSearchParams = {
 keyword: string;
 };
 
-export type List3Params = {
+export type GetNotificationsParams = {
 /**
  * 알림 세그먼트
  */
-segment?: List3Segment;
+segment?: GetNotificationsSegment;
 pageRequest: PageRequest;
 };
 
-export type List3Segment = typeof List3Segment[keyof typeof List3Segment];
+export type GetNotificationsSegment = typeof GetNotificationsSegment[keyof typeof GetNotificationsSegment];
 
 
-export const List3Segment = {
+export const GetNotificationsSegment = {
   ALL: 'ALL',
   TIMING: 'TIMING',
   ACTIVITY: 'ACTIVITY',
   NOTICE: 'NOTICE',
 } as const;
 
-export type List4Params = {
+export type GetFeedParams = {
 /**
  * 피드 필터
  */
-filter: List4Filter;
+filter: GetFeedFilter;
 pageRequest: PageRequest;
 };
 
-export type List4Filter = typeof List4Filter[keyof typeof List4Filter];
+export type GetFeedFilter = typeof GetFeedFilter[keyof typeof GetFeedFilter];
 
 
-export const List4Filter = {
+export const GetFeedFilter = {
   ALL: 'ALL',
   INTEREST: 'INTEREST',
   FOLLOWING: 'FOLLOWING',
 } as const;
 
-export type CheckNicknameParams = {
+export type GetExploreParams = {
+/**
+ * 꽃 카테고리 필터
+ */
+category?: GetExploreCategory;
+};
+
+export type GetExploreCategory = typeof GetExploreCategory[keyof typeof GetExploreCategory];
+
+
+export const GetExploreCategory = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  COSMOS: 'COSMOS',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
+} as const;
+
+export type GetExploreSpotsParams = {
+/**
+ * 탐색 스팟 섹션
+ */
+section: GetExploreSpotsSection;
+/**
+ * 꽃 카테고리 필터
+ */
+category?: GetExploreSpotsCategory;
+pageRequest: PageRequest;
+};
+
+export type GetExploreSpotsSection = typeof GetExploreSpotsSection[keyof typeof GetExploreSpotsSection];
+
+
+export const GetExploreSpotsSection = {
+  PEAK_NOW: 'PEAK_NOW',
+  NEXT_WEEK: 'NEXT_WEEK',
+} as const;
+
+export type GetExploreSpotsCategory = typeof GetExploreSpotsCategory[keyof typeof GetExploreSpotsCategory];
+
+
+export const GetExploreSpotsCategory = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  COSMOS: 'COSMOS',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
+} as const;
+
+export type GetExploreFestivalsParams = {
+/**
+ * 꽃 카테고리 필터
+ */
+category?: GetExploreFestivalsCategory;
+};
+
+export type GetExploreFestivalsCategory = typeof GetExploreFestivalsCategory[keyof typeof GetExploreFestivalsCategory];
+
+
+export const GetExploreFestivalsCategory = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  COSMOS: 'COSMOS',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
+} as const;
+
+export type GetCurationsParams = {
+pageRequest: PageRequest;
+};
+
+export type GetCurationsByIdParams = {
+/**
+ * 거리 계산 기준 위도
+ */
+lat?: number;
+/**
+ * 거리 계산 기준 경도
+ */
+lng?: number;
+};
+
+export type GetAuthSignupNicknameCheckParams = {
 /**
  * 2~10자의 한글, 영문, 숫자 닉네임
  */
 value: string;
 };
+
+export type GetAdminUsersParams = {
+/**
+ * 닉네임 부분일치 검색어
+ */
+q?: string;
+/**
+ * 사용자 상태
+ */
+status?: GetAdminUsersStatus;
+/**
+ * 사용자 역할. 조회 필터 전용
+ */
+role?: GetAdminUsersRole;
+pageRequest: PageRequest;
+};
+
+export type GetAdminUsersStatus = typeof GetAdminUsersStatus[keyof typeof GetAdminUsersStatus];
+
+
+export const GetAdminUsersStatus = {
+  ACTIVE: 'ACTIVE',
+  SUSPENDED: 'SUSPENDED',
+  DEACTIVATED: 'DEACTIVATED',
+} as const;
+
+export type GetAdminUsersRole = typeof GetAdminUsersRole[keyof typeof GetAdminUsersRole];
+
+
+export const GetAdminUsersRole = {
+  USER: 'USER',
+  ADMIN: 'ADMIN',
+} as const;
+
+export type GetAdminReportsParams = {
+/**
+ * 신고 심사 상태
+ */
+status?: GetAdminReportsStatus;
+pageRequest: PageRequest;
+};
+
+export type GetAdminReportsStatus = typeof GetAdminReportsStatus[keyof typeof GetAdminReportsStatus];
+
+
+export const GetAdminReportsStatus = {
+  PENDING: 'PENDING',
+  RESOLVED: 'RESOLVED',
+  DISMISSED: 'DISMISSED',
+} as const;
+
+export type GetAdminPlantsParams = {
+/**
+ * 식물 상태
+ */
+status?: GetAdminPlantsStatus;
+/**
+ * 사용자가 제안한 식물만 조회
+ */
+suggestedOnly?: boolean;
+pageRequest: PageRequest;
+};
+
+export type GetAdminPlantsStatus = typeof GetAdminPlantsStatus[keyof typeof GetAdminPlantsStatus];
+
+
+export const GetAdminPlantsStatus = {
+  ACTIVE: 'ACTIVE',
+  PENDING: 'PENDING',
+  REJECTED: 'REJECTED',
+} as const;
+
+export type GetAdminJobsRunsParams = {
+/**
+ * 잡 이름
+ */
+jobName?: string;
+/**
+ * 실행 상태
+ */
+status?: GetAdminJobsRunsStatus;
+/**
+ * 시작 시각 하한
+ */
+since?: string;
+pageRequest: PageRequest;
+};
+
+export type GetAdminJobsRunsStatus = typeof GetAdminJobsRunsStatus[keyof typeof GetAdminJobsRunsStatus];
+
+
+export const GetAdminJobsRunsStatus = {
+  RUNNING: 'RUNNING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED',
+  SKIPPED: 'SKIPPED',
+} as const;
+
+export type GetAdminFestivalsParams = {
+/**
+ * 축제명 부분 검색어
+ */
+q?: string;
+pageRequest: PageRequest;
+};
+
+export type GetAdminAuditLogsParams = {
+/**
+ * 조치 대상 종류
+ */
+targetType?: GetAdminAuditLogsTargetType;
+/**
+ * 조치 대상 id
+ */
+targetId?: number;
+/**
+ * 조치를 수행한 관리자 사용자 id
+ */
+adminId?: number;
+pageRequest: PageRequest;
+};
+
+export type GetAdminAuditLogsTargetType = typeof GetAdminAuditLogsTargetType[keyof typeof GetAdminAuditLogsTargetType];
+
+
+export const GetAdminAuditLogsTargetType = {
+  SPOT_RECORD: 'SPOT_RECORD',
+  USER: 'USER',
+  PLANT: 'PLANT',
+  CURATION: 'CURATION',
+  FESTIVAL: 'FESTIVAL',
+  NOTICE: 'NOTICE',
+  SCHEDULER_JOB: 'SCHEDULER_JOB',
+} as const;
 

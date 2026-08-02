@@ -16,6 +16,7 @@ const BORDER_CLASS: Record<Stage, string> = {
   Before: 'border-border-tertiary',
   Start: 'border-pink-300',
   Peak: 'border-pink-400',
+  End: 'border-border-tertiary',
 }
 
 export function Pin({ flowers, maxStage }: PinProps) {
@@ -43,7 +44,7 @@ export function Pin({ flowers, maxStage }: PinProps) {
             height={24}
             className={cn(
               'object-contain',
-              maxStage === 'Before' && 'opacity-40 grayscale',
+              (maxStage === 'Before' || maxStage === 'End') && 'opacity-40 grayscale',
             )}
           />
         ))}
