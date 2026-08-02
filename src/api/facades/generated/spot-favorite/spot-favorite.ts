@@ -38,19 +38,19 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export type addResponse200 = {
+export type postSpotsFavoritesBySpotIdResponse200 = {
   data: ApiResponseSpotFavoriteResponse
   status: 200
 }
 
-export type addResponseSuccess = (addResponse200) & {
+export type postSpotsFavoritesBySpotIdResponseSuccess = (postSpotsFavoritesBySpotIdResponse200) & {
   headers: Headers;
 };
 ;
 
-export type addResponse = (addResponseSuccess)
+export type postSpotsFavoritesBySpotIdResponse = (postSpotsFavoritesBySpotIdResponseSuccess)
 
-export const getAddUrl = (spotId: number,) => {
+export const getPostSpotsFavoritesBySpotIdUrl = (spotId: number,) => {
 
 
 
@@ -59,12 +59,12 @@ export const getAddUrl = (spotId: number,) => {
 }
 
 /**
- * 스팟을 찜한다. 이미 찜한 스팟이면 기존 찜을 그대로 반환한다 (멱등). 찜 시 만개 알림이 기본 활성화된다.
+ * 스팟을 찜한다. 이미 찜한 스팟이면 기존 찜을 그대로 반환한다 (멱등). 찜 시 만개 알림이 기본 활성화된다. 응답은 찜 목록 카드와 같은 개화·사진·기록 정보를 포함한다.
  * @summary 스팟 찜 추가
  */
-export const add = async (spotId: number, options?: RequestInit): Promise<addResponse> => {
+export const postSpotsFavoritesBySpotId = async (spotId: number, options?: RequestInit): Promise<postSpotsFavoritesBySpotIdResponse> => {
 
-  return customInstance<addResponse>(getAddUrl(spotId),
+  return customInstance<postSpotsFavoritesBySpotIdResponse>(getPostSpotsFavoritesBySpotIdUrl(spotId),
   {
     ...options,
     method: 'POST'
@@ -76,11 +76,11 @@ export const add = async (spotId: number, options?: RequestInit): Promise<addRes
 
 
 
-export const getAddMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof add>>, TError,{spotId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof add>>, TError,{spotId: number}, TContext> => {
+export const getPostSpotsFavoritesBySpotIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postSpotsFavoritesBySpotId>>, TError,{spotId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postSpotsFavoritesBySpotId>>, TError,{spotId: number}, TContext> => {
 
-const mutationKey = ['add'];
+const mutationKey = ['postSpotsFavoritesBySpotId'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -90,10 +90,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof add>>, {spotId: number}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postSpotsFavoritesBySpotId>>, {spotId: number}> = (props) => {
           const {spotId} = props ?? {};
 
-          return  add(spotId,requestOptions)
+          return  postSpotsFavoritesBySpotId(spotId,requestOptions)
         }
 
 
@@ -103,36 +103,36 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type AddMutationResult = NonNullable<Awaited<ReturnType<typeof add>>>
+    export type PostSpotsFavoritesBySpotIdMutationResult = NonNullable<Awaited<ReturnType<typeof postSpotsFavoritesBySpotId>>>
 
-    export type AddMutationError = unknown
+    export type PostSpotsFavoritesBySpotIdMutationError = unknown
 
     /**
  * @summary 스팟 찜 추가
  */
-export const useAdd = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof add>>, TError,{spotId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostSpotsFavoritesBySpotId = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postSpotsFavoritesBySpotId>>, TError,{spotId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof add>>,
+        Awaited<ReturnType<typeof postSpotsFavoritesBySpotId>>,
         TError,
         {spotId: number},
         TContext
       > => {
-      return useMutation(getAddMutationOptions(options), queryClient);
+      return useMutation(getPostSpotsFavoritesBySpotIdMutationOptions(options), queryClient);
     }
-    export type removeResponse200 = {
+    export type deleteSpotsFavoritesBySpotIdResponse200 = {
   data: ApiResponseUnit
   status: 200
 }
 
-export type removeResponseSuccess = (removeResponse200) & {
+export type deleteSpotsFavoritesBySpotIdResponseSuccess = (deleteSpotsFavoritesBySpotIdResponse200) & {
   headers: Headers;
 };
 ;
 
-export type removeResponse = (removeResponseSuccess)
+export type deleteSpotsFavoritesBySpotIdResponse = (deleteSpotsFavoritesBySpotIdResponseSuccess)
 
-export const getRemoveUrl = (spotId: number,) => {
+export const getDeleteSpotsFavoritesBySpotIdUrl = (spotId: number,) => {
 
 
 
@@ -144,9 +144,9 @@ export const getRemoveUrl = (spotId: number,) => {
  * 찜을 해제한다. 찜하지 않은 스팟이어도 성공으로 응답한다 (멱등).
  * @summary 스팟 찜 취소
  */
-export const remove = async (spotId: number, options?: RequestInit): Promise<removeResponse> => {
+export const deleteSpotsFavoritesBySpotId = async (spotId: number, options?: RequestInit): Promise<deleteSpotsFavoritesBySpotIdResponse> => {
 
-  return customInstance<removeResponse>(getRemoveUrl(spotId),
+  return customInstance<deleteSpotsFavoritesBySpotIdResponse>(getDeleteSpotsFavoritesBySpotIdUrl(spotId),
   {
     ...options,
     method: 'DELETE'
@@ -158,11 +158,11 @@ export const remove = async (spotId: number, options?: RequestInit): Promise<rem
 
 
 
-export const getRemoveMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof remove>>, TError,{spotId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof remove>>, TError,{spotId: number}, TContext> => {
+export const getDeleteSpotsFavoritesBySpotIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSpotsFavoritesBySpotId>>, TError,{spotId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteSpotsFavoritesBySpotId>>, TError,{spotId: number}, TContext> => {
 
-const mutationKey = ['remove'];
+const mutationKey = ['deleteSpotsFavoritesBySpotId'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -172,10 +172,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof remove>>, {spotId: number}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteSpotsFavoritesBySpotId>>, {spotId: number}> = (props) => {
           const {spotId} = props ?? {};
 
-          return  remove(spotId,requestOptions)
+          return  deleteSpotsFavoritesBySpotId(spotId,requestOptions)
         }
 
 
@@ -185,36 +185,36 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type RemoveMutationResult = NonNullable<Awaited<ReturnType<typeof remove>>>
+    export type DeleteSpotsFavoritesBySpotIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteSpotsFavoritesBySpotId>>>
 
-    export type RemoveMutationError = unknown
+    export type DeleteSpotsFavoritesBySpotIdMutationError = unknown
 
     /**
  * @summary 스팟 찜 취소
  */
-export const useRemove = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof remove>>, TError,{spotId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const useDeleteSpotsFavoritesBySpotId = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSpotsFavoritesBySpotId>>, TError,{spotId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof remove>>,
+        Awaited<ReturnType<typeof deleteSpotsFavoritesBySpotId>>,
         TError,
         {spotId: number},
         TContext
       > => {
-      return useMutation(getRemoveMutationOptions(options), queryClient);
+      return useMutation(getDeleteSpotsFavoritesBySpotIdMutationOptions(options), queryClient);
     }
-    export type updateNotifyResponse200 = {
+    export type patchSpotsFavoritesBySpotIdNotifyResponse200 = {
   data: ApiResponseSpotFavoriteResponse
   status: 200
 }
 
-export type updateNotifyResponseSuccess = (updateNotifyResponse200) & {
+export type patchSpotsFavoritesBySpotIdNotifyResponseSuccess = (patchSpotsFavoritesBySpotIdNotifyResponse200) & {
   headers: Headers;
 };
 ;
 
-export type updateNotifyResponse = (updateNotifyResponseSuccess)
+export type patchSpotsFavoritesBySpotIdNotifyResponse = (patchSpotsFavoritesBySpotIdNotifyResponseSuccess)
 
-export const getUpdateNotifyUrl = (spotId: number,) => {
+export const getPatchSpotsFavoritesBySpotIdNotifyUrl = (spotId: number,) => {
 
 
 
@@ -223,13 +223,13 @@ export const getUpdateNotifyUrl = (spotId: number,) => {
 }
 
 /**
- * 찜한 스팟의 만개 알림 수신 여부를 변경한다. 찜하지 않은 스팟이면 404.
+ * 찜한 스팟의 만개 알림 수신 여부를 변경한다. 찜하지 않은 스팟이면 404. 응답은 찜 목록 카드와 같은 개화·사진·기록 정보를 포함한다.
  * @summary 찜한 스팟 만개 알림 설정 변경
  */
-export const updateNotify = async (spotId: number,
-    updateFavoriteNotifyRequest: UpdateFavoriteNotifyRequest, options?: RequestInit): Promise<updateNotifyResponse> => {
+export const patchSpotsFavoritesBySpotIdNotify = async (spotId: number,
+    updateFavoriteNotifyRequest: UpdateFavoriteNotifyRequest, options?: RequestInit): Promise<patchSpotsFavoritesBySpotIdNotifyResponse> => {
 
-  return customInstance<updateNotifyResponse>(getUpdateNotifyUrl(spotId),
+  return customInstance<patchSpotsFavoritesBySpotIdNotifyResponse>(getPatchSpotsFavoritesBySpotIdNotifyUrl(spotId),
   {
     ...options,
     method: 'PATCH',
@@ -241,11 +241,11 @@ export const updateNotify = async (spotId: number,
 
 
 
-export const getUpdateNotifyMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateNotify>>, TError,{spotId: number;data: UpdateFavoriteNotifyRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof updateNotify>>, TError,{spotId: number;data: UpdateFavoriteNotifyRequest}, TContext> => {
+export const getPatchSpotsFavoritesBySpotIdNotifyMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchSpotsFavoritesBySpotIdNotify>>, TError,{spotId: number;data: UpdateFavoriteNotifyRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof patchSpotsFavoritesBySpotIdNotify>>, TError,{spotId: number;data: UpdateFavoriteNotifyRequest}, TContext> => {
 
-const mutationKey = ['updateNotify'];
+const mutationKey = ['patchSpotsFavoritesBySpotIdNotify'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -255,10 +255,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateNotify>>, {spotId: number;data: UpdateFavoriteNotifyRequest}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchSpotsFavoritesBySpotIdNotify>>, {spotId: number;data: UpdateFavoriteNotifyRequest}> = (props) => {
           const {spotId,data} = props ?? {};
 
-          return  updateNotify(spotId,data,requestOptions)
+          return  patchSpotsFavoritesBySpotIdNotify(spotId,data,requestOptions)
         }
 
 
@@ -268,36 +268,36 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type UpdateNotifyMutationResult = NonNullable<Awaited<ReturnType<typeof updateNotify>>>
-    export type UpdateNotifyMutationBody = UpdateFavoriteNotifyRequest
-    export type UpdateNotifyMutationError = unknown
+    export type PatchSpotsFavoritesBySpotIdNotifyMutationResult = NonNullable<Awaited<ReturnType<typeof patchSpotsFavoritesBySpotIdNotify>>>
+    export type PatchSpotsFavoritesBySpotIdNotifyMutationBody = UpdateFavoriteNotifyRequest
+    export type PatchSpotsFavoritesBySpotIdNotifyMutationError = unknown
 
     /**
  * @summary 찜한 스팟 만개 알림 설정 변경
  */
-export const useUpdateNotify = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateNotify>>, TError,{spotId: number;data: UpdateFavoriteNotifyRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePatchSpotsFavoritesBySpotIdNotify = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchSpotsFavoritesBySpotIdNotify>>, TError,{spotId: number;data: UpdateFavoriteNotifyRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof updateNotify>>,
+        Awaited<ReturnType<typeof patchSpotsFavoritesBySpotIdNotify>>,
         TError,
         {spotId: number;data: UpdateFavoriteNotifyRequest},
         TContext
       > => {
-      return useMutation(getUpdateNotifyMutationOptions(options), queryClient);
+      return useMutation(getPatchSpotsFavoritesBySpotIdNotifyMutationOptions(options), queryClient);
     }
-    export type list1Response200 = {
+    export type getSpotsFavoritesResponse200 = {
   data: ApiResponseSpotFavoriteListResponse
   status: 200
 }
 
-export type list1ResponseSuccess = (list1Response200) & {
+export type getSpotsFavoritesResponseSuccess = (getSpotsFavoritesResponse200) & {
   headers: Headers;
 };
 ;
 
-export type list1Response = (list1ResponseSuccess)
+export type getSpotsFavoritesResponse = (getSpotsFavoritesResponseSuccess)
 
-export const getList1Url = () => {
+export const getGetSpotsFavoritesUrl = () => {
 
 
 
@@ -306,12 +306,12 @@ export const getList1Url = () => {
 }
 
 /**
- * 본인이 찜한 스팟을 최근 찜한 순으로 조회한다.
+ * 본인이 찜한 스팟을 최근 찜한 순으로 조회한다. 목록 상단 만개 임박·절정 배너는 최대 1건이며, 각 카드는 대표 개화 상태, 꽃 카테고리 칩, 게시된 방문 기록 수, 최근 사진 최대 4장을 포함한다. 동네형 스팟은 개화 정보와 꽃 카테고리 칩이 없다.
  * @summary 찜한 스팟 목록
  */
-export const list1 = async ( options?: RequestInit): Promise<list1Response> => {
+export const getSpotsFavorites = async ( options?: RequestInit): Promise<getSpotsFavoritesResponse> => {
 
-  return customInstance<list1Response>(getList1Url(),
+  return customInstance<getSpotsFavoritesResponse>(getGetSpotsFavoritesUrl(),
   {
     ...options,
     method: 'GET'
@@ -324,69 +324,69 @@ export const list1 = async ( options?: RequestInit): Promise<list1Response> => {
 
 
 
-export const getList1QueryKey = () => {
+export const getGetSpotsFavoritesQueryKey = () => {
     return [
     `/api/spots/favorites`
     ] as const;
     }
 
 
-export const getList1QueryOptions = <TData = Awaited<ReturnType<typeof list1>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list1>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetSpotsFavoritesQueryOptions = <TData = Awaited<ReturnType<typeof getSpotsFavorites>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsFavorites>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getList1QueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetSpotsFavoritesQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof list1>>> = ({ signal }) => list1({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSpotsFavorites>>> = ({ signal }) => getSpotsFavorites({ signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof list1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSpotsFavorites>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type List1QueryResult = NonNullable<Awaited<ReturnType<typeof list1>>>
-export type List1QueryError = unknown
+export type GetSpotsFavoritesQueryResult = NonNullable<Awaited<ReturnType<typeof getSpotsFavorites>>>
+export type GetSpotsFavoritesQueryError = unknown
 
 
-export function useList1<TData = Awaited<ReturnType<typeof list1>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof list1>>, TError, TData>> & Pick<
+export function useGetSpotsFavorites<TData = Awaited<ReturnType<typeof getSpotsFavorites>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsFavorites>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof list1>>,
+          Awaited<ReturnType<typeof getSpotsFavorites>>,
           TError,
-          Awaited<ReturnType<typeof list1>>
+          Awaited<ReturnType<typeof getSpotsFavorites>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useList1<TData = Awaited<ReturnType<typeof list1>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list1>>, TError, TData>> & Pick<
+export function useGetSpotsFavorites<TData = Awaited<ReturnType<typeof getSpotsFavorites>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsFavorites>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof list1>>,
+          Awaited<ReturnType<typeof getSpotsFavorites>>,
           TError,
-          Awaited<ReturnType<typeof list1>>
+          Awaited<ReturnType<typeof getSpotsFavorites>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useList1<TData = Awaited<ReturnType<typeof list1>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list1>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetSpotsFavorites<TData = Awaited<ReturnType<typeof getSpotsFavorites>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsFavorites>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 찜한 스팟 목록
  */
 
-export function useList1<TData = Awaited<ReturnType<typeof list1>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list1>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetSpotsFavorites<TData = Awaited<ReturnType<typeof getSpotsFavorites>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSpotsFavorites>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getList1QueryOptions(options)
+  const queryOptions = getGetSpotsFavoritesQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

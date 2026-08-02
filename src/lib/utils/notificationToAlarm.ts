@@ -1,8 +1,8 @@
 import type {
-  List3Segment as List3SegmentType,
+  GetNotificationsSegment as List3SegmentType,
   NotificationResponse,
 } from '@/api/facades/generated/peakdaApi.schemas'
-import { List3Segment } from '@/api/facades/generated/peakdaApi.schemas'
+import { GetNotificationsSegment } from '@/api/facades/generated/peakdaApi.schemas'
 import type { AlarmItemData, AlarmType } from '@/components/ui/display/Alarm'
 
 // NotificationResponse.type → Alarm UI type
@@ -43,13 +43,13 @@ export function toAlarmItem(n: NotificationResponse): AlarmItemData {
 
 // 탭 value → 알림 세그먼트
 const SEGMENT_MAP: Record<string, List3SegmentType> = {
-  All: List3Segment.ALL,
-  Activity: List3Segment.ACTIVITY,
-  Announcement: List3Segment.NOTICE,
+  All: GetNotificationsSegment.ALL,
+  Activity: GetNotificationsSegment.ACTIVITY,
+  Announcement: GetNotificationsSegment.NOTICE,
 }
 
 export function segmentFromTab(tabValue: string): List3SegmentType {
-  return SEGMENT_MAP[tabValue] ?? List3Segment.ALL
+  return SEGMENT_MAP[tabValue] ?? GetNotificationsSegment.ALL
 }
 
 // 안 읽은 알림 개수 → 뱃지 라벨. 0 이하는 null(뱃지 숨김), 99 초과는 '99+'.

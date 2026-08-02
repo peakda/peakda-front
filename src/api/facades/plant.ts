@@ -1,12 +1,12 @@
 ﻿import { useQueryClient } from '@tanstack/react-query'
 import {
-  getList2QueryKey,
-  list2,
-  search,
-  suggest,
-  useList2,
-  useSearch,
-  useSuggest as useSuggestGen,
+  getGetPlantsQueryKey,
+  getPlants,
+  getPlantsSearch,
+  postPlantsSuggestions,
+  useGetPlants,
+  useGetPlantsSearch,
+  usePostPlantsSuggestions as useSuggestGen,
 } from '@/api/facades/generated/plant/plant'
 import type { SuggestPlantRequest } from '@/api/facades/generated/peakdaApi.schemas'
 
@@ -15,27 +15,27 @@ import type { SuggestPlantRequest } from '@/api/facades/generated/peakdaApi.sche
 // ??? plain async (?대깽??湲곕컲 ?몄텧) ???????????????????????????????????????????
 
 export async function listPlantsApi() {
-  const res = await list2()
+  const res = await getPlants()
   return res.data.data ?? null
 }
 
 export async function searchPlantsApi(keyword: string) {
-  const res = await search({ keyword })
+  const res = await getPlantsSearch({ keyword })
   return res.data.data ?? null
 }
 
 export async function suggestPlantApi(payload: SuggestPlantRequest) {
-  const res = await suggest(payload)
+  const res = await postPlantsSuggestions(payload)
   return res.data.data ?? null
 }
 
 // ??? React Query hooks (罹먯떛 / ?곹깭 愿由? ????????????????????????????????????
 
 export const usePlants = () =>
-  useList2({ query: { select: (res) => res.data.data ?? null } })
+  useGetPlants({ query: { select: (res) => res.data.data ?? null } })
 
 export const useSearchPlants = (keyword: string) =>
-  useSearch(
+  useGetPlantsSearch(
     { keyword },
     { query: { enabled: keyword.length > 0, select: (res) => res.data.data ?? null } }
   )
@@ -46,7 +46,7 @@ export const useSuggestPlant = () => {
   const queryClient = useQueryClient()
   return useSuggestGen({
     mutation: {
-      onSuccess: () => queryClient.invalidateQueries({ queryKey: getList2QueryKey() }),
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetPlantsQueryKey() }),
     },
   })
 }

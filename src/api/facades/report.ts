@@ -1,10 +1,10 @@
-import { create1, useCreate1 as useReportGen } from '@/api/facades/generated/report/report'
+import { postReports, usePostReports as useReportGen } from '@/api/facades/generated/report/report'
 import type { CreateReportRequest } from '@/api/facades/generated/peakdaApi.schemas'
 
 // ▷ plain async (이벤트 기반 호출) ─────────────────────────────────────────
 
 export async function reportApi(payload: CreateReportRequest) {
-  await create1(payload)
+  await postReports(payload)
 }
 
 // ▷ React Query hooks (캐싱 / 상태 관리) ───────────────────────────────────

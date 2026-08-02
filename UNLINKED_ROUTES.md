@@ -63,9 +63,9 @@
 ## 4. 애매한 경우
 
 - **`/auth/callback`**: 내부 `Link`/`router.push`로 연결되는 곳은 없지만, 카카오 OAuth 로그인 후 백엔드/카카오가 브라우저를 리다이렉트시키는 외부 진입점이므로 orphan 아님.
-- **`src/api/facades/spot.ts` — `useSpotPreview`**: 훅 자체는 미사용이지만, 같은 파일의 `spotPreviewApi`(원시 비동기 함수)는 `MapContainer.tsx`에서 직접 호출됨. 엔드포인트는 연동되어 있고 훅 래퍼만 중복.
+- **`src/api/facades/spot.ts` — `useSpotPreview` / `spotPreviewApi`**: 둘 다 현재 미사용. 이전에는 `spotPreviewApi`를 `MapContainer.tsx` 핀 클릭에서 호출했으나, 프리뷰 응답의 `thumbnailUrl`이 단일 필드라 "유저 사진 리스트"를 만들 수 없어 `spotDetailApi`(`recordPreview`)로 교체함. `/api/spots/preview` 는 spotIds 복수를 받는 배치 API 라 클러스터 리스트(SCR-011d) 구현 시 다시 쓸 여지가 있어 facade 는 남겨둠.
 - **`src/api/facades/auth.ts` — `refreshApi`**: axios 401 인터셉터(`src/api/mutator/index.ts`) 내부에서 자동 토큰 갱신 로직으로 쓰일 가능성이 있어 정적 grep만으로는 완전한 미사용이라 단정하기 어려움 (인터셉터 코드 직접 확인 필요).
-- **`bloomMapApi`, `bloomPeakApi`, `matchSpotApi` 등**: 프론트에서 직접 호출되는 곳은 없지만 같은 파일의 `useBloomMap`/`useBloomPeak`/`useMatchSpot` 훅으로 래핑되어 실제 사용 중. "미사용"이 아니라 imperative 호출용으로 병행 제공되는 설계로 판단해 미사용 목록에서 제외.
+- **`bloomMapApi`, `bloomPeakApi` 등**: 프론트에서 직접 호출되는 곳은 없지만 같은 파일의 `useBloomMap`/`useBloomPeak` 훅으로 래핑되어 실제 사용 중. "미사용"이 아니라 imperative 호출용으로 병행 제공되는 설계로 판단해 미사용 목록에서 제외. (`matchSpotApi` 는 `MapContainer.tsx` 핀 클릭에서 직접 호출되어 이 범주에서 빠짐.)
 
 ---
 

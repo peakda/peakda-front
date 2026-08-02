@@ -31,19 +31,19 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export type suggestionResponse200 = {
+export type getHomeSuggestionResponse200 = {
   data: ApiResponseHomeSuggestionResponse
   status: 200
 }
 
-export type suggestionResponseSuccess = (suggestionResponse200) & {
+export type getHomeSuggestionResponseSuccess = (getHomeSuggestionResponse200) & {
   headers: Headers;
 };
 ;
 
-export type suggestionResponse = (suggestionResponseSuccess)
+export type getHomeSuggestionResponse = (getHomeSuggestionResponseSuccess)
 
-export const getSuggestionUrl = () => {
+export const getGetHomeSuggestionUrl = () => {
 
 
 
@@ -55,9 +55,9 @@ export const getSuggestionUrl = () => {
  * 홈 검색바 보조 카피 1건. 최신 산출일 기준 신뢰도가 가장 높은 절정(PEAK) 명소×카테고리로 "요즘 절정인 {꽃}, {명소}에서 만나보세요" 카피를 만든다. 절정 데이터가 없으면 available=false.
  * @summary 시즌 추천어
  */
-export const suggestion = async ( options?: RequestInit): Promise<suggestionResponse> => {
+export const getHomeSuggestion = async ( options?: RequestInit): Promise<getHomeSuggestionResponse> => {
 
-  return customInstance<suggestionResponse>(getSuggestionUrl(),
+  return customInstance<getHomeSuggestionResponse>(getGetHomeSuggestionUrl(),
   {
     ...options,
     method: 'GET'
@@ -70,69 +70,69 @@ export const suggestion = async ( options?: RequestInit): Promise<suggestionResp
 
 
 
-export const getSuggestionQueryKey = () => {
+export const getGetHomeSuggestionQueryKey = () => {
     return [
     `/api/home/suggestion`
     ] as const;
     }
 
 
-export const getSuggestionQueryOptions = <TData = Awaited<ReturnType<typeof suggestion>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof suggestion>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetHomeSuggestionQueryOptions = <TData = Awaited<ReturnType<typeof getHomeSuggestion>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHomeSuggestion>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getSuggestionQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetHomeSuggestionQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof suggestion>>> = ({ signal }) => suggestion({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getHomeSuggestion>>> = ({ signal }) => getHomeSuggestion({ signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof suggestion>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getHomeSuggestion>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type SuggestionQueryResult = NonNullable<Awaited<ReturnType<typeof suggestion>>>
-export type SuggestionQueryError = unknown
+export type GetHomeSuggestionQueryResult = NonNullable<Awaited<ReturnType<typeof getHomeSuggestion>>>
+export type GetHomeSuggestionQueryError = unknown
 
 
-export function useSuggestion<TData = Awaited<ReturnType<typeof suggestion>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof suggestion>>, TError, TData>> & Pick<
+export function useGetHomeSuggestion<TData = Awaited<ReturnType<typeof getHomeSuggestion>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHomeSuggestion>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof suggestion>>,
+          Awaited<ReturnType<typeof getHomeSuggestion>>,
           TError,
-          Awaited<ReturnType<typeof suggestion>>
+          Awaited<ReturnType<typeof getHomeSuggestion>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useSuggestion<TData = Awaited<ReturnType<typeof suggestion>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof suggestion>>, TError, TData>> & Pick<
+export function useGetHomeSuggestion<TData = Awaited<ReturnType<typeof getHomeSuggestion>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHomeSuggestion>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof suggestion>>,
+          Awaited<ReturnType<typeof getHomeSuggestion>>,
           TError,
-          Awaited<ReturnType<typeof suggestion>>
+          Awaited<ReturnType<typeof getHomeSuggestion>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useSuggestion<TData = Awaited<ReturnType<typeof suggestion>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof suggestion>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetHomeSuggestion<TData = Awaited<ReturnType<typeof getHomeSuggestion>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHomeSuggestion>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 시즌 추천어
  */
 
-export function useSuggestion<TData = Awaited<ReturnType<typeof suggestion>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof suggestion>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetHomeSuggestion<TData = Awaited<ReturnType<typeof getHomeSuggestion>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHomeSuggestion>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getSuggestionQueryOptions(options)
+  const queryOptions = getGetHomeSuggestionQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

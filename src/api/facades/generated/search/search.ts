@@ -24,8 +24,8 @@ import type {
   ApiResponsePageResponseSpotSearchItem,
   ApiResponsePageResponseUserSearchItem,
   ApiResponseTrendingSpotsResponse,
-  SearchSpotsParams,
-  SearchUsersParams
+  GetSearchSpotsParams,
+  GetSearchUsersParams
 } from '../peakdaApi.schemas';
 
 import { customInstance } from '../../../mutator/index';
@@ -35,25 +35,33 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export type searchUsersResponse200 = {
+export type getSearchUsersResponse200 = {
   data: ApiResponsePageResponseUserSearchItem
   status: 200
 }
 
-export type searchUsersResponseSuccess = (searchUsersResponse200) & {
+export type getSearchUsersResponseSuccess = (getSearchUsersResponse200) & {
   headers: Headers;
 };
 ;
 
-export type searchUsersResponse = (searchUsersResponseSuccess)
+export type getSearchUsersResponse = (getSearchUsersResponseSuccess)
 
-export const getSearchUsersUrl = (params: SearchUsersParams,) => {
+export const getGetSearchUsersUrl = (params: GetSearchUsersParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
 
     if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : value.toString())
+      if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+        Object.entries(value).forEach(([nestedKey, nestedValue]) => {
+          if (nestedValue !== undefined && nestedValue !== null) {
+            normalizedParams.append(nestedKey, nestedValue.toString())
+          }
+        })
+      } else {
+        normalizedParams.append(key, value === null ? 'null' : value.toString())
+      }
     }
   });
 
@@ -66,9 +74,9 @@ export const getSearchUsersUrl = (params: SearchUsersParams,) => {
  * 닉네임 부분일치(대소문자 무시)로 검색한다. 탈퇴(익명화)한 사용자는 제외된다.
  * @summary 사용자 검색
  */
-export const searchUsers = async (params: SearchUsersParams, options?: RequestInit): Promise<searchUsersResponse> => {
+export const getSearchUsers = async (params: GetSearchUsersParams, options?: RequestInit): Promise<getSearchUsersResponse> => {
 
-  return customInstance<searchUsersResponse>(getSearchUsersUrl(params),
+  return customInstance<getSearchUsersResponse>(getGetSearchUsersUrl(params),
   {
     ...options,
     method: 'GET'
@@ -81,69 +89,69 @@ export const searchUsers = async (params: SearchUsersParams, options?: RequestIn
 
 
 
-export const getSearchUsersQueryKey = (params?: SearchUsersParams,) => {
+export const getGetSearchUsersQueryKey = (params?: GetSearchUsersParams,) => {
     return [
     `/api/search/users`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getSearchUsersQueryOptions = <TData = Awaited<ReturnType<typeof searchUsers>>, TError = unknown>(params: SearchUsersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchUsers>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetSearchUsersQueryOptions = <TData = Awaited<ReturnType<typeof getSearchUsers>>, TError = unknown>(params: GetSearchUsersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSearchUsers>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getSearchUsersQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetSearchUsersQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof searchUsers>>> = ({ signal }) => searchUsers(params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSearchUsers>>> = ({ signal }) => getSearchUsers(params, { signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof searchUsers>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSearchUsers>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type SearchUsersQueryResult = NonNullable<Awaited<ReturnType<typeof searchUsers>>>
-export type SearchUsersQueryError = unknown
+export type GetSearchUsersQueryResult = NonNullable<Awaited<ReturnType<typeof getSearchUsers>>>
+export type GetSearchUsersQueryError = unknown
 
 
-export function useSearchUsers<TData = Awaited<ReturnType<typeof searchUsers>>, TError = unknown>(
- params: SearchUsersParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchUsers>>, TError, TData>> & Pick<
+export function useGetSearchUsers<TData = Awaited<ReturnType<typeof getSearchUsers>>, TError = unknown>(
+ params: GetSearchUsersParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSearchUsers>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof searchUsers>>,
+          Awaited<ReturnType<typeof getSearchUsers>>,
           TError,
-          Awaited<ReturnType<typeof searchUsers>>
+          Awaited<ReturnType<typeof getSearchUsers>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useSearchUsers<TData = Awaited<ReturnType<typeof searchUsers>>, TError = unknown>(
- params: SearchUsersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchUsers>>, TError, TData>> & Pick<
+export function useGetSearchUsers<TData = Awaited<ReturnType<typeof getSearchUsers>>, TError = unknown>(
+ params: GetSearchUsersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSearchUsers>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof searchUsers>>,
+          Awaited<ReturnType<typeof getSearchUsers>>,
           TError,
-          Awaited<ReturnType<typeof searchUsers>>
+          Awaited<ReturnType<typeof getSearchUsers>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useSearchUsers<TData = Awaited<ReturnType<typeof searchUsers>>, TError = unknown>(
- params: SearchUsersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchUsers>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetSearchUsers<TData = Awaited<ReturnType<typeof getSearchUsers>>, TError = unknown>(
+ params: GetSearchUsersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSearchUsers>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 사용자 검색
  */
 
-export function useSearchUsers<TData = Awaited<ReturnType<typeof searchUsers>>, TError = unknown>(
- params: SearchUsersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchUsers>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetSearchUsers<TData = Awaited<ReturnType<typeof getSearchUsers>>, TError = unknown>(
+ params: GetSearchUsersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSearchUsers>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getSearchUsersQueryOptions(params,options)
+  const queryOptions = getGetSearchUsersQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -155,19 +163,19 @@ export function useSearchUsers<TData = Awaited<ReturnType<typeof searchUsers>>, 
 
 
 
-export type trendingResponse200 = {
+export type getSearchTrendingResponse200 = {
   data: ApiResponseTrendingSpotsResponse
   status: 200
 }
 
-export type trendingResponseSuccess = (trendingResponse200) & {
+export type getSearchTrendingResponseSuccess = (getSearchTrendingResponse200) & {
   headers: Headers;
 };
 ;
 
-export type trendingResponse = (trendingResponseSuccess)
+export type getSearchTrendingResponse = (getSearchTrendingResponseSuccess)
 
-export const getTrendingUrl = () => {
+export const getGetSearchTrendingUrl = () => {
 
 
 
@@ -179,9 +187,9 @@ export const getTrendingUrl = () => {
  * 찜이 많은 순 상위 스팟 목록. 최근 검색어는 서버에 저장하지 않으므로(결정 H) 찜 수를 대체 인기 신호로 쓴다.
  * @summary 인기 검색 (트렌딩 스팟)
  */
-export const trending = async ( options?: RequestInit): Promise<trendingResponse> => {
+export const getSearchTrending = async ( options?: RequestInit): Promise<getSearchTrendingResponse> => {
 
-  return customInstance<trendingResponse>(getTrendingUrl(),
+  return customInstance<getSearchTrendingResponse>(getGetSearchTrendingUrl(),
   {
     ...options,
     method: 'GET'
@@ -194,69 +202,69 @@ export const trending = async ( options?: RequestInit): Promise<trendingResponse
 
 
 
-export const getTrendingQueryKey = () => {
+export const getGetSearchTrendingQueryKey = () => {
     return [
     `/api/search/trending`
     ] as const;
     }
 
 
-export const getTrendingQueryOptions = <TData = Awaited<ReturnType<typeof trending>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof trending>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetSearchTrendingQueryOptions = <TData = Awaited<ReturnType<typeof getSearchTrending>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSearchTrending>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getTrendingQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetSearchTrendingQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof trending>>> = ({ signal }) => trending({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSearchTrending>>> = ({ signal }) => getSearchTrending({ signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof trending>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSearchTrending>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type TrendingQueryResult = NonNullable<Awaited<ReturnType<typeof trending>>>
-export type TrendingQueryError = unknown
+export type GetSearchTrendingQueryResult = NonNullable<Awaited<ReturnType<typeof getSearchTrending>>>
+export type GetSearchTrendingQueryError = unknown
 
 
-export function useTrending<TData = Awaited<ReturnType<typeof trending>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof trending>>, TError, TData>> & Pick<
+export function useGetSearchTrending<TData = Awaited<ReturnType<typeof getSearchTrending>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSearchTrending>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof trending>>,
+          Awaited<ReturnType<typeof getSearchTrending>>,
           TError,
-          Awaited<ReturnType<typeof trending>>
+          Awaited<ReturnType<typeof getSearchTrending>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useTrending<TData = Awaited<ReturnType<typeof trending>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof trending>>, TError, TData>> & Pick<
+export function useGetSearchTrending<TData = Awaited<ReturnType<typeof getSearchTrending>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSearchTrending>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof trending>>,
+          Awaited<ReturnType<typeof getSearchTrending>>,
           TError,
-          Awaited<ReturnType<typeof trending>>
+          Awaited<ReturnType<typeof getSearchTrending>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useTrending<TData = Awaited<ReturnType<typeof trending>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof trending>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetSearchTrending<TData = Awaited<ReturnType<typeof getSearchTrending>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSearchTrending>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 인기 검색 (트렌딩 스팟)
  */
 
-export function useTrending<TData = Awaited<ReturnType<typeof trending>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof trending>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetSearchTrending<TData = Awaited<ReturnType<typeof getSearchTrending>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSearchTrending>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getTrendingQueryOptions(options)
+  const queryOptions = getGetSearchTrendingQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -268,25 +276,33 @@ export function useTrending<TData = Awaited<ReturnType<typeof trending>>, TError
 
 
 
-export type searchSpotsResponse200 = {
+export type getSearchSpotsResponse200 = {
   data: ApiResponsePageResponseSpotSearchItem
   status: 200
 }
 
-export type searchSpotsResponseSuccess = (searchSpotsResponse200) & {
+export type getSearchSpotsResponseSuccess = (getSearchSpotsResponse200) & {
   headers: Headers;
 };
 ;
 
-export type searchSpotsResponse = (searchSpotsResponseSuccess)
+export type getSearchSpotsResponse = (getSearchSpotsResponseSuccess)
 
-export const getSearchSpotsUrl = (params: SearchSpotsParams,) => {
+export const getGetSearchSpotsUrl = (params: GetSearchSpotsParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
 
     if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : value.toString())
+      if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+        Object.entries(value).forEach(([nestedKey, nestedValue]) => {
+          if (nestedValue !== undefined && nestedValue !== null) {
+            normalizedParams.append(nestedKey, nestedValue.toString())
+          }
+        })
+      } else {
+        normalizedParams.append(key, value === null ? 'null' : value.toString())
+      }
     }
   });
 
@@ -299,9 +315,9 @@ export const getSearchSpotsUrl = (params: SearchSpotsParams,) => {
  * 스팟명 부분일치(대소문자 무시)로 검색한다. 비공개(visible=false) 스팟은 제외된다.
  * @summary 스팟 검색
  */
-export const searchSpots = async (params: SearchSpotsParams, options?: RequestInit): Promise<searchSpotsResponse> => {
+export const getSearchSpots = async (params: GetSearchSpotsParams, options?: RequestInit): Promise<getSearchSpotsResponse> => {
 
-  return customInstance<searchSpotsResponse>(getSearchSpotsUrl(params),
+  return customInstance<getSearchSpotsResponse>(getGetSearchSpotsUrl(params),
   {
     ...options,
     method: 'GET'
@@ -314,69 +330,69 @@ export const searchSpots = async (params: SearchSpotsParams, options?: RequestIn
 
 
 
-export const getSearchSpotsQueryKey = (params?: SearchSpotsParams,) => {
+export const getGetSearchSpotsQueryKey = (params?: GetSearchSpotsParams,) => {
     return [
     `/api/search/spots`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getSearchSpotsQueryOptions = <TData = Awaited<ReturnType<typeof searchSpots>>, TError = unknown>(params: SearchSpotsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchSpots>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetSearchSpotsQueryOptions = <TData = Awaited<ReturnType<typeof getSearchSpots>>, TError = unknown>(params: GetSearchSpotsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSearchSpots>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getSearchSpotsQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetSearchSpotsQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof searchSpots>>> = ({ signal }) => searchSpots(params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSearchSpots>>> = ({ signal }) => getSearchSpots(params, { signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof searchSpots>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSearchSpots>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type SearchSpotsQueryResult = NonNullable<Awaited<ReturnType<typeof searchSpots>>>
-export type SearchSpotsQueryError = unknown
+export type GetSearchSpotsQueryResult = NonNullable<Awaited<ReturnType<typeof getSearchSpots>>>
+export type GetSearchSpotsQueryError = unknown
 
 
-export function useSearchSpots<TData = Awaited<ReturnType<typeof searchSpots>>, TError = unknown>(
- params: SearchSpotsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchSpots>>, TError, TData>> & Pick<
+export function useGetSearchSpots<TData = Awaited<ReturnType<typeof getSearchSpots>>, TError = unknown>(
+ params: GetSearchSpotsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSearchSpots>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof searchSpots>>,
+          Awaited<ReturnType<typeof getSearchSpots>>,
           TError,
-          Awaited<ReturnType<typeof searchSpots>>
+          Awaited<ReturnType<typeof getSearchSpots>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useSearchSpots<TData = Awaited<ReturnType<typeof searchSpots>>, TError = unknown>(
- params: SearchSpotsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchSpots>>, TError, TData>> & Pick<
+export function useGetSearchSpots<TData = Awaited<ReturnType<typeof getSearchSpots>>, TError = unknown>(
+ params: GetSearchSpotsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSearchSpots>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof searchSpots>>,
+          Awaited<ReturnType<typeof getSearchSpots>>,
           TError,
-          Awaited<ReturnType<typeof searchSpots>>
+          Awaited<ReturnType<typeof getSearchSpots>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useSearchSpots<TData = Awaited<ReturnType<typeof searchSpots>>, TError = unknown>(
- params: SearchSpotsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchSpots>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetSearchSpots<TData = Awaited<ReturnType<typeof getSearchSpots>>, TError = unknown>(
+ params: GetSearchSpotsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSearchSpots>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 스팟 검색
  */
 
-export function useSearchSpots<TData = Awaited<ReturnType<typeof searchSpots>>, TError = unknown>(
- params: SearchSpotsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchSpots>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetSearchSpots<TData = Awaited<ReturnType<typeof getSearchSpots>>, TError = unknown>(
+ params: GetSearchSpotsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSearchSpots>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getSearchSpotsQueryOptions(params,options)
+  const queryOptions = getGetSearchSpotsQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

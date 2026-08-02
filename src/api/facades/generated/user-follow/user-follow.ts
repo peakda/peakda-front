@@ -28,8 +28,8 @@ import type {
   ApiResponseFollowSummaryResponse,
   ApiResponsePageResponseFollowUserResponse,
   ApiResponseUnit,
-  FollowersParams,
-  FollowingsParams
+  GetUsersByUserIdFollowersParams,
+  GetUsersByUserIdFollowingsParams
 } from '../peakdaApi.schemas';
 
 import { customInstance } from '../../../mutator/index';
@@ -39,19 +39,19 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export type followResponse200 = {
+export type postUsersByUserIdFollowResponse200 = {
   data: ApiResponseUnit
   status: 200
 }
 
-export type followResponseSuccess = (followResponse200) & {
+export type postUsersByUserIdFollowResponseSuccess = (postUsersByUserIdFollowResponse200) & {
   headers: Headers;
 };
 ;
 
-export type followResponse = (followResponseSuccess)
+export type postUsersByUserIdFollowResponse = (postUsersByUserIdFollowResponseSuccess)
 
-export const getFollowUrl = (userId: number,) => {
+export const getPostUsersByUserIdFollowUrl = (userId: number,) => {
 
 
 
@@ -63,9 +63,9 @@ export const getFollowUrl = (userId: number,) => {
  * 대상 사용자를 팔로우한다. 이미 팔로우 중이면 그대로 성공으로 응답한다 (멱등). 자기 자신은 팔로우할 수 없다.
  * @summary 사용자 팔로우
  */
-export const follow = async (userId: number, options?: RequestInit): Promise<followResponse> => {
+export const postUsersByUserIdFollow = async (userId: number, options?: RequestInit): Promise<postUsersByUserIdFollowResponse> => {
 
-  return customInstance<followResponse>(getFollowUrl(userId),
+  return customInstance<postUsersByUserIdFollowResponse>(getPostUsersByUserIdFollowUrl(userId),
   {
     ...options,
     method: 'POST'
@@ -77,11 +77,11 @@ export const follow = async (userId: number, options?: RequestInit): Promise<fol
 
 
 
-export const getFollowMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof follow>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof follow>>, TError,{userId: number}, TContext> => {
+export const getPostUsersByUserIdFollowMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postUsersByUserIdFollow>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postUsersByUserIdFollow>>, TError,{userId: number}, TContext> => {
 
-const mutationKey = ['follow'];
+const mutationKey = ['postUsersByUserIdFollow'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -91,10 +91,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof follow>>, {userId: number}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postUsersByUserIdFollow>>, {userId: number}> = (props) => {
           const {userId} = props ?? {};
 
-          return  follow(userId,requestOptions)
+          return  postUsersByUserIdFollow(userId,requestOptions)
         }
 
 
@@ -104,36 +104,36 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type FollowMutationResult = NonNullable<Awaited<ReturnType<typeof follow>>>
+    export type PostUsersByUserIdFollowMutationResult = NonNullable<Awaited<ReturnType<typeof postUsersByUserIdFollow>>>
 
-    export type FollowMutationError = unknown
+    export type PostUsersByUserIdFollowMutationError = unknown
 
     /**
  * @summary 사용자 팔로우
  */
-export const useFollow = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof follow>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostUsersByUserIdFollow = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postUsersByUserIdFollow>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof follow>>,
+        Awaited<ReturnType<typeof postUsersByUserIdFollow>>,
         TError,
         {userId: number},
         TContext
       > => {
-      return useMutation(getFollowMutationOptions(options), queryClient);
+      return useMutation(getPostUsersByUserIdFollowMutationOptions(options), queryClient);
     }
-    export type unfollowResponse200 = {
+    export type deleteUsersByUserIdFollowResponse200 = {
   data: ApiResponseUnit
   status: 200
 }
 
-export type unfollowResponseSuccess = (unfollowResponse200) & {
+export type deleteUsersByUserIdFollowResponseSuccess = (deleteUsersByUserIdFollowResponse200) & {
   headers: Headers;
 };
 ;
 
-export type unfollowResponse = (unfollowResponseSuccess)
+export type deleteUsersByUserIdFollowResponse = (deleteUsersByUserIdFollowResponseSuccess)
 
-export const getUnfollowUrl = (userId: number,) => {
+export const getDeleteUsersByUserIdFollowUrl = (userId: number,) => {
 
 
 
@@ -145,9 +145,9 @@ export const getUnfollowUrl = (userId: number,) => {
  * 대상 사용자 팔로우를 해제한다. 팔로우하지 않은 사용자여도 성공으로 응답한다 (멱등).
  * @summary 사용자 언팔로우
  */
-export const unfollow = async (userId: number, options?: RequestInit): Promise<unfollowResponse> => {
+export const deleteUsersByUserIdFollow = async (userId: number, options?: RequestInit): Promise<deleteUsersByUserIdFollowResponse> => {
 
-  return customInstance<unfollowResponse>(getUnfollowUrl(userId),
+  return customInstance<deleteUsersByUserIdFollowResponse>(getDeleteUsersByUserIdFollowUrl(userId),
   {
     ...options,
     method: 'DELETE'
@@ -159,11 +159,11 @@ export const unfollow = async (userId: number, options?: RequestInit): Promise<u
 
 
 
-export const getUnfollowMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unfollow>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof unfollow>>, TError,{userId: number}, TContext> => {
+export const getDeleteUsersByUserIdFollowMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteUsersByUserIdFollow>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteUsersByUserIdFollow>>, TError,{userId: number}, TContext> => {
 
-const mutationKey = ['unfollow'];
+const mutationKey = ['deleteUsersByUserIdFollow'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -173,10 +173,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof unfollow>>, {userId: number}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteUsersByUserIdFollow>>, {userId: number}> = (props) => {
           const {userId} = props ?? {};
 
-          return  unfollow(userId,requestOptions)
+          return  deleteUsersByUserIdFollow(userId,requestOptions)
         }
 
 
@@ -186,43 +186,51 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type UnfollowMutationResult = NonNullable<Awaited<ReturnType<typeof unfollow>>>
+    export type DeleteUsersByUserIdFollowMutationResult = NonNullable<Awaited<ReturnType<typeof deleteUsersByUserIdFollow>>>
 
-    export type UnfollowMutationError = unknown
+    export type DeleteUsersByUserIdFollowMutationError = unknown
 
     /**
  * @summary 사용자 언팔로우
  */
-export const useUnfollow = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unfollow>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const useDeleteUsersByUserIdFollow = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteUsersByUserIdFollow>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof unfollow>>,
+        Awaited<ReturnType<typeof deleteUsersByUserIdFollow>>,
         TError,
         {userId: number},
         TContext
       > => {
-      return useMutation(getUnfollowMutationOptions(options), queryClient);
+      return useMutation(getDeleteUsersByUserIdFollowMutationOptions(options), queryClient);
     }
-    export type followingsResponse200 = {
+    export type getUsersByUserIdFollowingsResponse200 = {
   data: ApiResponsePageResponseFollowUserResponse
   status: 200
 }
 
-export type followingsResponseSuccess = (followingsResponse200) & {
+export type getUsersByUserIdFollowingsResponseSuccess = (getUsersByUserIdFollowingsResponse200) & {
   headers: Headers;
 };
 ;
 
-export type followingsResponse = (followingsResponseSuccess)
+export type getUsersByUserIdFollowingsResponse = (getUsersByUserIdFollowingsResponseSuccess)
 
-export const getFollowingsUrl = (userId: number,
-    params: FollowingsParams,) => {
+export const getGetUsersByUserIdFollowingsUrl = (userId: number,
+    params: GetUsersByUserIdFollowingsParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
 
     if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : value.toString())
+      if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+        Object.entries(value).forEach(([nestedKey, nestedValue]) => {
+          if (nestedValue !== undefined && nestedValue !== null) {
+            normalizedParams.append(nestedKey, nestedValue.toString())
+          }
+        })
+      } else {
+        normalizedParams.append(key, value === null ? 'null' : value.toString())
+      }
     }
   });
 
@@ -235,10 +243,10 @@ export const getFollowingsUrl = (userId: number,
  * 대상 사용자가 팔로우하는 사람들을 최근 팔로우한 순으로 페이징 조회한다. 각 항목의 following 필드는 현재 로그인 사용자 기준의 팔로우 여부다.
  * @summary 팔로잉 목록 조회
  */
-export const followings = async (userId: number,
-    params: FollowingsParams, options?: RequestInit): Promise<followingsResponse> => {
+export const getUsersByUserIdFollowings = async (userId: number,
+    params: GetUsersByUserIdFollowingsParams, options?: RequestInit): Promise<getUsersByUserIdFollowingsResponse> => {
 
-  return customInstance<followingsResponse>(getFollowingsUrl(userId,params),
+  return customInstance<getUsersByUserIdFollowingsResponse>(getGetUsersByUserIdFollowingsUrl(userId,params),
   {
     ...options,
     method: 'GET'
@@ -251,75 +259,75 @@ export const followings = async (userId: number,
 
 
 
-export const getFollowingsQueryKey = (userId: number,
-    params?: FollowingsParams,) => {
+export const getGetUsersByUserIdFollowingsQueryKey = (userId: number,
+    params?: GetUsersByUserIdFollowingsParams,) => {
     return [
     `/api/users/${userId}/followings`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getFollowingsQueryOptions = <TData = Awaited<ReturnType<typeof followings>>, TError = unknown>(userId: number,
-    params: FollowingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof followings>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetUsersByUserIdFollowingsQueryOptions = <TData = Awaited<ReturnType<typeof getUsersByUserIdFollowings>>, TError = unknown>(userId: number,
+    params: GetUsersByUserIdFollowingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersByUserIdFollowings>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getFollowingsQueryKey(userId,params);
+  const queryKey =  queryOptions?.queryKey ?? getGetUsersByUserIdFollowingsQueryKey(userId,params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof followings>>> = ({ signal }) => followings(userId,params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersByUserIdFollowings>>> = ({ signal }) => getUsersByUserIdFollowings(userId,params, { signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: userId !== null && userId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof followings>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: userId !== null && userId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUsersByUserIdFollowings>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type FollowingsQueryResult = NonNullable<Awaited<ReturnType<typeof followings>>>
-export type FollowingsQueryError = unknown
+export type GetUsersByUserIdFollowingsQueryResult = NonNullable<Awaited<ReturnType<typeof getUsersByUserIdFollowings>>>
+export type GetUsersByUserIdFollowingsQueryError = unknown
 
 
-export function useFollowings<TData = Awaited<ReturnType<typeof followings>>, TError = unknown>(
+export function useGetUsersByUserIdFollowings<TData = Awaited<ReturnType<typeof getUsersByUserIdFollowings>>, TError = unknown>(
  userId: number,
-    params: FollowingsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof followings>>, TError, TData>> & Pick<
+    params: GetUsersByUserIdFollowingsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersByUserIdFollowings>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof followings>>,
+          Awaited<ReturnType<typeof getUsersByUserIdFollowings>>,
           TError,
-          Awaited<ReturnType<typeof followings>>
+          Awaited<ReturnType<typeof getUsersByUserIdFollowings>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useFollowings<TData = Awaited<ReturnType<typeof followings>>, TError = unknown>(
+export function useGetUsersByUserIdFollowings<TData = Awaited<ReturnType<typeof getUsersByUserIdFollowings>>, TError = unknown>(
  userId: number,
-    params: FollowingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof followings>>, TError, TData>> & Pick<
+    params: GetUsersByUserIdFollowingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersByUserIdFollowings>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof followings>>,
+          Awaited<ReturnType<typeof getUsersByUserIdFollowings>>,
           TError,
-          Awaited<ReturnType<typeof followings>>
+          Awaited<ReturnType<typeof getUsersByUserIdFollowings>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useFollowings<TData = Awaited<ReturnType<typeof followings>>, TError = unknown>(
+export function useGetUsersByUserIdFollowings<TData = Awaited<ReturnType<typeof getUsersByUserIdFollowings>>, TError = unknown>(
  userId: number,
-    params: FollowingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof followings>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+    params: GetUsersByUserIdFollowingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersByUserIdFollowings>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 팔로잉 목록 조회
  */
 
-export function useFollowings<TData = Awaited<ReturnType<typeof followings>>, TError = unknown>(
+export function useGetUsersByUserIdFollowings<TData = Awaited<ReturnType<typeof getUsersByUserIdFollowings>>, TError = unknown>(
  userId: number,
-    params: FollowingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof followings>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+    params: GetUsersByUserIdFollowingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersByUserIdFollowings>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getFollowingsQueryOptions(userId,params,options)
+  const queryOptions = getGetUsersByUserIdFollowingsQueryOptions(userId,params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -331,26 +339,34 @@ export function useFollowings<TData = Awaited<ReturnType<typeof followings>>, TE
 
 
 
-export type followersResponse200 = {
+export type getUsersByUserIdFollowersResponse200 = {
   data: ApiResponsePageResponseFollowUserResponse
   status: 200
 }
 
-export type followersResponseSuccess = (followersResponse200) & {
+export type getUsersByUserIdFollowersResponseSuccess = (getUsersByUserIdFollowersResponse200) & {
   headers: Headers;
 };
 ;
 
-export type followersResponse = (followersResponseSuccess)
+export type getUsersByUserIdFollowersResponse = (getUsersByUserIdFollowersResponseSuccess)
 
-export const getFollowersUrl = (userId: number,
-    params: FollowersParams,) => {
+export const getGetUsersByUserIdFollowersUrl = (userId: number,
+    params: GetUsersByUserIdFollowersParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
 
     if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : value.toString())
+      if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+        Object.entries(value).forEach(([nestedKey, nestedValue]) => {
+          if (nestedValue !== undefined && nestedValue !== null) {
+            normalizedParams.append(nestedKey, nestedValue.toString())
+          }
+        })
+      } else {
+        normalizedParams.append(key, value === null ? 'null' : value.toString())
+      }
     }
   });
 
@@ -363,10 +379,10 @@ export const getFollowersUrl = (userId: number,
  * 대상 사용자를 팔로우하는 사람들을 최근 팔로우한 순으로 페이징 조회한다. 각 항목의 following 필드는 현재 로그인 사용자 기준의 팔로우 여부다.
  * @summary 팔로워 목록 조회
  */
-export const followers = async (userId: number,
-    params: FollowersParams, options?: RequestInit): Promise<followersResponse> => {
+export const getUsersByUserIdFollowers = async (userId: number,
+    params: GetUsersByUserIdFollowersParams, options?: RequestInit): Promise<getUsersByUserIdFollowersResponse> => {
 
-  return customInstance<followersResponse>(getFollowersUrl(userId,params),
+  return customInstance<getUsersByUserIdFollowersResponse>(getGetUsersByUserIdFollowersUrl(userId,params),
   {
     ...options,
     method: 'GET'
@@ -379,75 +395,75 @@ export const followers = async (userId: number,
 
 
 
-export const getFollowersQueryKey = (userId: number,
-    params?: FollowersParams,) => {
+export const getGetUsersByUserIdFollowersQueryKey = (userId: number,
+    params?: GetUsersByUserIdFollowersParams,) => {
     return [
     `/api/users/${userId}/followers`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getFollowersQueryOptions = <TData = Awaited<ReturnType<typeof followers>>, TError = unknown>(userId: number,
-    params: FollowersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof followers>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetUsersByUserIdFollowersQueryOptions = <TData = Awaited<ReturnType<typeof getUsersByUserIdFollowers>>, TError = unknown>(userId: number,
+    params: GetUsersByUserIdFollowersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersByUserIdFollowers>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getFollowersQueryKey(userId,params);
+  const queryKey =  queryOptions?.queryKey ?? getGetUsersByUserIdFollowersQueryKey(userId,params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof followers>>> = ({ signal }) => followers(userId,params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersByUserIdFollowers>>> = ({ signal }) => getUsersByUserIdFollowers(userId,params, { signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: userId !== null && userId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof followers>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: userId !== null && userId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUsersByUserIdFollowers>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type FollowersQueryResult = NonNullable<Awaited<ReturnType<typeof followers>>>
-export type FollowersQueryError = unknown
+export type GetUsersByUserIdFollowersQueryResult = NonNullable<Awaited<ReturnType<typeof getUsersByUserIdFollowers>>>
+export type GetUsersByUserIdFollowersQueryError = unknown
 
 
-export function useFollowers<TData = Awaited<ReturnType<typeof followers>>, TError = unknown>(
+export function useGetUsersByUserIdFollowers<TData = Awaited<ReturnType<typeof getUsersByUserIdFollowers>>, TError = unknown>(
  userId: number,
-    params: FollowersParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof followers>>, TError, TData>> & Pick<
+    params: GetUsersByUserIdFollowersParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersByUserIdFollowers>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof followers>>,
+          Awaited<ReturnType<typeof getUsersByUserIdFollowers>>,
           TError,
-          Awaited<ReturnType<typeof followers>>
+          Awaited<ReturnType<typeof getUsersByUserIdFollowers>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useFollowers<TData = Awaited<ReturnType<typeof followers>>, TError = unknown>(
+export function useGetUsersByUserIdFollowers<TData = Awaited<ReturnType<typeof getUsersByUserIdFollowers>>, TError = unknown>(
  userId: number,
-    params: FollowersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof followers>>, TError, TData>> & Pick<
+    params: GetUsersByUserIdFollowersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersByUserIdFollowers>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof followers>>,
+          Awaited<ReturnType<typeof getUsersByUserIdFollowers>>,
           TError,
-          Awaited<ReturnType<typeof followers>>
+          Awaited<ReturnType<typeof getUsersByUserIdFollowers>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useFollowers<TData = Awaited<ReturnType<typeof followers>>, TError = unknown>(
+export function useGetUsersByUserIdFollowers<TData = Awaited<ReturnType<typeof getUsersByUserIdFollowers>>, TError = unknown>(
  userId: number,
-    params: FollowersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof followers>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+    params: GetUsersByUserIdFollowersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersByUserIdFollowers>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 팔로워 목록 조회
  */
 
-export function useFollowers<TData = Awaited<ReturnType<typeof followers>>, TError = unknown>(
+export function useGetUsersByUserIdFollowers<TData = Awaited<ReturnType<typeof getUsersByUserIdFollowers>>, TError = unknown>(
  userId: number,
-    params: FollowersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof followers>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+    params: GetUsersByUserIdFollowersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersByUserIdFollowers>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getFollowersQueryOptions(userId,params,options)
+  const queryOptions = getGetUsersByUserIdFollowersQueryOptions(userId,params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -459,19 +475,19 @@ export function useFollowers<TData = Awaited<ReturnType<typeof followers>>, TErr
 
 
 
-export type summaryResponse200 = {
+export type getUsersByUserIdFollowSummaryResponse200 = {
   data: ApiResponseFollowSummaryResponse
   status: 200
 }
 
-export type summaryResponseSuccess = (summaryResponse200) & {
+export type getUsersByUserIdFollowSummaryResponseSuccess = (getUsersByUserIdFollowSummaryResponse200) & {
   headers: Headers;
 };
 ;
 
-export type summaryResponse = (summaryResponseSuccess)
+export type getUsersByUserIdFollowSummaryResponse = (getUsersByUserIdFollowSummaryResponseSuccess)
 
-export const getSummaryUrl = (userId: number,) => {
+export const getGetUsersByUserIdFollowSummaryUrl = (userId: number,) => {
 
 
 
@@ -483,9 +499,9 @@ export const getSummaryUrl = (userId: number,) => {
  * 대상 사용자의 팔로워 수·팔로잉 수와, 현재 로그인 사용자의 팔로우 여부를 조회한다. 유저 프로필 헤더 표시에 사용한다.
  * @summary 팔로우 통계 요약
  */
-export const summary = async (userId: number, options?: RequestInit): Promise<summaryResponse> => {
+export const getUsersByUserIdFollowSummary = async (userId: number, options?: RequestInit): Promise<getUsersByUserIdFollowSummaryResponse> => {
 
-  return customInstance<summaryResponse>(getSummaryUrl(userId),
+  return customInstance<getUsersByUserIdFollowSummaryResponse>(getGetUsersByUserIdFollowSummaryUrl(userId),
   {
     ...options,
     method: 'GET'
@@ -498,69 +514,69 @@ export const summary = async (userId: number, options?: RequestInit): Promise<su
 
 
 
-export const getSummaryQueryKey = (userId: number,) => {
+export const getGetUsersByUserIdFollowSummaryQueryKey = (userId: number,) => {
     return [
     `/api/users/${userId}/follow-summary`
     ] as const;
     }
 
 
-export const getSummaryQueryOptions = <TData = Awaited<ReturnType<typeof summary>>, TError = unknown>(userId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof summary>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetUsersByUserIdFollowSummaryQueryOptions = <TData = Awaited<ReturnType<typeof getUsersByUserIdFollowSummary>>, TError = unknown>(userId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersByUserIdFollowSummary>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getSummaryQueryKey(userId);
+  const queryKey =  queryOptions?.queryKey ?? getGetUsersByUserIdFollowSummaryQueryKey(userId);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof summary>>> = ({ signal }) => summary(userId, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersByUserIdFollowSummary>>> = ({ signal }) => getUsersByUserIdFollowSummary(userId, { signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: userId !== null && userId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof summary>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: userId !== null && userId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUsersByUserIdFollowSummary>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type SummaryQueryResult = NonNullable<Awaited<ReturnType<typeof summary>>>
-export type SummaryQueryError = unknown
+export type GetUsersByUserIdFollowSummaryQueryResult = NonNullable<Awaited<ReturnType<typeof getUsersByUserIdFollowSummary>>>
+export type GetUsersByUserIdFollowSummaryQueryError = unknown
 
 
-export function useSummary<TData = Awaited<ReturnType<typeof summary>>, TError = unknown>(
- userId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof summary>>, TError, TData>> & Pick<
+export function useGetUsersByUserIdFollowSummary<TData = Awaited<ReturnType<typeof getUsersByUserIdFollowSummary>>, TError = unknown>(
+ userId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersByUserIdFollowSummary>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof summary>>,
+          Awaited<ReturnType<typeof getUsersByUserIdFollowSummary>>,
           TError,
-          Awaited<ReturnType<typeof summary>>
+          Awaited<ReturnType<typeof getUsersByUserIdFollowSummary>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useSummary<TData = Awaited<ReturnType<typeof summary>>, TError = unknown>(
- userId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof summary>>, TError, TData>> & Pick<
+export function useGetUsersByUserIdFollowSummary<TData = Awaited<ReturnType<typeof getUsersByUserIdFollowSummary>>, TError = unknown>(
+ userId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersByUserIdFollowSummary>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof summary>>,
+          Awaited<ReturnType<typeof getUsersByUserIdFollowSummary>>,
           TError,
-          Awaited<ReturnType<typeof summary>>
+          Awaited<ReturnType<typeof getUsersByUserIdFollowSummary>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useSummary<TData = Awaited<ReturnType<typeof summary>>, TError = unknown>(
- userId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof summary>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetUsersByUserIdFollowSummary<TData = Awaited<ReturnType<typeof getUsersByUserIdFollowSummary>>, TError = unknown>(
+ userId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersByUserIdFollowSummary>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 팔로우 통계 요약
  */
 
-export function useSummary<TData = Awaited<ReturnType<typeof summary>>, TError = unknown>(
- userId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof summary>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetUsersByUserIdFollowSummary<TData = Awaited<ReturnType<typeof getUsersByUserIdFollowSummary>>, TError = unknown>(
+ userId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersByUserIdFollowSummary>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getSummaryQueryOptions(userId,options)
+  const queryOptions = getGetUsersByUserIdFollowSummaryQueryOptions(userId,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

@@ -21,6 +21,7 @@ export function bloomToMapSpots(data: BloomMapResponse): MapSpot[] {
         maxStage,
         title: a.name,
         attractionId: a.attractionId ?? undefined,
+        spotId: a.spotId ?? undefined,
       },
     ]
   })

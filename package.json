@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "generate:api": "node --env-file=.env.development scripts/fetch-swagger.mjs && orval",
+    "generate:api": "node --env-file=.env.development scripts/fetch-swagger.mjs && orval && node scripts/sync-generated.mjs",
     "generate:facades": "node scripts/generate-facades.mjs",
     "validate:context": "node scripts/validate-context-paths.mjs",
     "test": "vitest run"

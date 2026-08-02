@@ -1,34 +1,42 @@
 import {
-  match,
-  preview,
-  usePreview,
-  useMatch as useMatchGen,
-  useGetSpotDetail,
+  postSpotsMatch,
+  getSpotsPreview,
+  getSpotsById,
+  useGetSpotsPreview,
+  usePostSpotsMatch as useMatchGen,
+  useGetSpotsById,
 } from '@/api/facades/generated/spot/spot'
 import type { SpotMatchRequest } from '@/api/facades/generated/peakdaApi.schemas'
 
 export async function matchSpotApi(payload: SpotMatchRequest) {
-  const res = await match(payload)
+  const res = await postSpotsMatch(payload)
+  return res.data.data ?? null
+}
+
+// 이벤트(핀 클릭 등)에서 스팟 상세를 즉시 조회할 때 사용하는 plain async.
+export async function spotDetailApi(id: number) {
+  const res = await getSpotsById(id)
   return res.data.data ?? null
 }
 
 export const useMatchSpot = () => useMatchGen()
 
+// id 가 아직 없으면(선행 조회 대기) 요청하지 않는다.
 export const useSpotDetail = (id: number | undefined) =>
-  useGetSpotDetail(id ?? 0, { query: { enabled: !!id, select: (res) => res.data.data ?? null } })
+  useGetSpotsById(id ?? 0, { query: { enabled: !!id, select: (res) => res.data.data ?? null } })
 
 // 이벤트(핀 클릭 등)에서 프리뷰를 즉시 조회할 때 사용하는 plain async.
 // spotIds 가 비면 요청하지 않는다.
 export async function spotPreviewApi(spotIds: number[], coords?: { lat: number; lng: number }) {
   if (spotIds.length === 0) return null
-  const res = await preview({ spotIds, ...(coords ?? {}) })
+  const res = await getSpotsPreview({ spotIds, ...(coords ?? {}) })
   return res.data.data ?? null
 }
 
 // 스팟 id 목록으로 프리뷰 카드(썸네일·거리·뱃지) 조회. coords 전달 시 거리 계산.
 // spotIds 가 비면 요청하지 않는다.
 export const useSpotPreview = (spotIds: number[], coords?: { lat: number; lng: number }) =>
-  usePreview(
+  useGetSpotsPreview(
     { spotIds, ...(coords ?? {}) },
     { query: { enabled: spotIds.length > 0, select: (res) => res.data.data ?? null } }
   )

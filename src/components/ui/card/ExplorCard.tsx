@@ -1,7 +1,13 @@
 import Image from 'next/image'
 import { CardBadge } from '@/components/ui/card/CardBadge'
+import { cn } from '@/lib/utils/cn'
 
-interface PeakCardProps {
+// 카드 클릭 시 이동은 호출부에서 넘긴다(카드 내부에서 라우터를 쓰지 않는다).
+interface ExplorCardBaseProps {
+  onClick?: () => void
+}
+
+interface PeakCardProps extends ExplorCardBaseProps {
   type: 'peak'
   image: string
   name: string
@@ -10,7 +16,7 @@ interface PeakCardProps {
   bloomPercent?: number
 }
 
-interface FestivalCardProps {
+interface FestivalCardProps extends ExplorCardBaseProps {
   type: 'festival'
   image: string
   name: string
@@ -19,7 +25,7 @@ interface FestivalCardProps {
   status: string
 }
 
-interface CourseCardProps {
+interface CourseCardProps extends ExplorCardBaseProps {
   type: 'course'
   image: string
   title: string
@@ -32,7 +38,10 @@ export function ExplorCard(props: ExplorCardProps) {
   const isCourse = props.type === 'course'
 
   return (
-    <div className="w-60 shrink-0">
+    <div
+      className={cn('w-60 shrink-0', props.onClick && 'cursor-pointer')}
+      onClick={props.onClick}
+    >
       {/* 이미지 영역 */}
       <div className="relative overflow-hidden rounded-2xl">
         <Image
