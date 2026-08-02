@@ -17,12 +17,11 @@ import { useDrawerStore } from '@/stores/useDrawerStore'
 import { useBloomMap } from '@/api/facades/seasonal-bloom'
 import { useHomeSuggestion } from '@/api/facades/home'
 import { useUnreadNotificationCount } from '@/api/facades/notification'
-import { spotPreviewApi } from '@/api/facades/spot'
+import { matchSpotApi, spotDetailApi } from '@/api/facades/spot'
 import { bloomToMapSpots } from '@/lib/utils/bloomToMapSpots'
 import type {
   BloomBadgeStatus,
   GetSeasonalBloomsParams,
-  SpotPreviewItem,
 } from '@/api/facades/generated/peakdaApi.schemas'
 import { useRouter } from 'next/navigation'
 
@@ -98,37 +97,67 @@ export const MapContainer = () => {
   const { data: unread } = useUnreadNotificationCount()
   const hasUnreadNotification = (unread?.unreadCount ?? 0) > 0
 
+  // 명소형 핀은 Spot 행이 아직 없어 spotId 가 없을 수 있다. 이때만 match 로 materialize 하고,
+  // POST(생성 부작용)라 좌표 기준으로 캐시해 같은 핀을 다시 눌러도 재호출하지 않는다.
+  const matchedSpotIdRef = useRef(new Map<string, number>())
+
+  const resolveSpotId = useCallback(async (spot: MapSpot) => {
+    if (spot.spotId != null) return spot.spotId
+
+    const cacheKey = `${spot.lat},${spot.lng}`
+    const cached = matchedSpotIdRef.current.get(cacheKey)
+    if (cached != null) return cached
+
+    const matched = await matchSpotApi({
+      latitude: spot.lat,
+      longitude: spot.lng,
+      name: spot.title ?? '이름 없는 명소',
+    })
+    const matchedId = matched?.spot?.id
+    if (matchedId != null) matchedSpotIdRef.current.set(cacheKey, matchedId)
+    return matchedId
+  }, [])
+
   const handlePinClick = useCallback(
     async (spot: MapSpot) => {
-      let items: SpotPreviewItem[] = []
       try {
-        const previewData =
-          spot.attractionId != null ? await spotPreviewApi([spot.attractionId]) : null
-        items = previewData?.items ?? []
+        const spotId = await resolveSpotId(spot)
+        const detail = spotId != null ? await spotDetailApi(spotId) : null
+
+        if (detail) {
+          // 유저가 올린 사진(방문 기록 대표 사진, 최신순 최대 3건)을 리스트로 노출한다.
+          // 기록이 없으면 스팟 대표 이미지, 그것도 없으면 꽃 아이콘으로 내려간다.
+          const recordPhotos = detail.recordPreview
+            .map((record) => record.coverPhoto?.url)
+            .filter((url): url is string => !!url)
+          const images =
+            recordPhotos.length > 0
+              ? recordPhotos
+              : detail.representativeImageUrl
+                ? [detail.representativeImageUrl]
+                : spot.flowers.map((f) => f.src)
+
+          openPinDrawer([
+            {
+              type: 'list' as const,
+              title: detail.name,
+              location: detail.address ?? spot.title ?? '위치 정보 없음',
+              description: detail.bloom
+                ? `현재 ${BADGE_STATUS_LABEL[detail.bloom.status]} 상태입니다.`
+                : '',
+              Badges: detail.bloom ? [detail.bloom.displayName] : [],
+              isFavorite: detail.favorite.favorited,
+              images,
+              spotId: detail.id,
+            },
+          ])
+          return
+        }
       } catch (e) {
         console.error(e)
       }
 
-      // 프리뷰가 있으면 썸네일·상태 뱃지로 드로어를 채운다.
-      if (items.length > 0) {
-        openPinDrawer(
-          items.map((item) => ({
-            type: 'list' as const,
-            title: item.name,
-            location: spot.title ?? '위치 정보 없음',
-            description: item.badge
-              ? `현재 ${BADGE_STATUS_LABEL[item.badge.status]} 상태입니다.`
-              : '',
-            Badges: item.badge ? [item.badge.displayName] : [],
-            isFavorite: false,
-            images: item.thumbnailUrl ? [item.thumbnailUrl] : [],
-            spotId: item.spotId,
-          }))
-        )
-        return
-      }
-
-      // 프리뷰가 없으면(좌표만 있는 핀·조회 실패) 기존 개화 데이터로 폴백한다.
+      // 상세를 못 가져오면(비로그인·매칭 실패 등) 기존 개화 데이터로 폴백한다.
       openPinDrawer(
         spot.flowers.map((f) => ({
           type: 'list' as const,
@@ -138,11 +167,11 @@ export const MapContainer = () => {
           Badges: f.alt ? [f.alt] : [],
           isFavorite: false,
           images: [f.src],
-          spotId: spot.attractionId,
+          spotId: spot.spotId ?? spot.attractionId,
         }))
       )
     },
-    [openPinDrawer]
+    [openPinDrawer, resolveSpotId]
   )
 
   useMapCluster(mapInstance, spots, handlePinClick)

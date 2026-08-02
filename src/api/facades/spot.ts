@@ -1,6 +1,7 @@
 import {
   postSpotsMatch,
   getSpotsPreview,
+  getSpotsById,
   useGetSpotsPreview,
   usePostSpotsMatch as useMatchGen,
   useGetSpotsById,
@@ -9,6 +10,12 @@ import type { SpotMatchRequest } from '@/api/facades/generated/peakdaApi.schemas
 
 export async function matchSpotApi(payload: SpotMatchRequest) {
   const res = await postSpotsMatch(payload)
+  return res.data.data ?? null
+}
+
+// 이벤트(핀 클릭 등)에서 스팟 상세를 즉시 조회할 때 사용하는 plain async.
+export async function spotDetailApi(id: number) {
+  const res = await getSpotsById(id)
   return res.data.data ?? null
 }
 

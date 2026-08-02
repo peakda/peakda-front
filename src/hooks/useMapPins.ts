@@ -9,6 +9,8 @@ export interface MapSpot {
   maxStage: Stage
   title?: string
   attractionId?: number
+  // 스팟 API(상세·기록)의 id. 명소형은 Spot 행이 아직 없으면 없다(탭 시 match 로 materialize).
+  spotId?: number
 }
 
 interface ClusterGroup {
