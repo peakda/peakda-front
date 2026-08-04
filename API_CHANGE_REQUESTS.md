@@ -9,15 +9,14 @@
 | # | 우선순위 | 항목 | 유형 |
 |---|---|---|---|
 | 1 | **P0** | 조회 응답에 "내 상태"(리액션·차단·팔로우)가 없음 | 필드 추가 |
-| 2 | **P0** | `FestivalDetailResponse.dDay` 가 `writeOnly` + `dday` 와 중복 | 스펙 버그 |
-| 3 | P1 | `SpotSearchItem` 표시 정보 부족 | 필드 추가 |
-| 4 | P1 | `ExploreFestivalItem` 에 이미지·진행상태 없음 | 필드 추가 |
-| 5 | P1 | `ExploreSpotItem.spotId` null 시 상세 진입 불가 | 정책 확인 |
-| 6 | P2 | 필터 조건(지역·개화상태·스팟타입) 파라미터 부재 | 파라미터 추가 |
-| 7 | P2 | 꽃 카테고리 enum 확정 필요 | 정책 확인 |
-| 8 | P2 | 알림 딥링크 규격 미문서화 | 문서화 |
-| 9 | P2 | 축제 문의처 필드 없음 | 필드 추가 |
-| 10 | P3 | 미연동 엔드포인트 사용 계획 확인 | 질의 |
+| 2 | P1 | `SpotSearchItem` 표시 정보 부족 | 필드 추가 |
+| 3 | P1 | `ExploreFestivalItem` 에 이미지·진행상태 없음 | 필드 추가 |
+| 4 | P1 | `ExploreSpotItem.spotId` null 시 상세 진입 불가 | 정책 확인 |
+| 5 | P2 | 필터 조건(지역·개화상태·스팟타입) 파라미터 부재 | 파라미터 추가 |
+| 6 | P2 | 꽃 카테고리 enum 확정 필요 | 정책 확인 |
+| 7 | P2 | 알림 딥링크 규격 미문서화 | 문서화 |
+| 8 | P2 | 축제 문의처 필드 없음 | 필드 추가 |
+| 9 | P3 | 미연동 엔드포인트 사용 계획 확인 · 스펙 정리 | 질의 |
 
 ---
 
@@ -56,35 +55,11 @@
 - 목록(`GET /api/feed`)에서 N+1이 부담이면 `counts` 만 내리고 `myReactions` 는 상세에만 넣어도 됩니다. 다만 그 경우 **목록에서는 토글 선택 상태를 표현할 수 없습니다.**
 - 참고: 상대가 나를 차단한 경우의 응답 정책(404 / 빈 프로필 / 별도 플래그)도 알려주시면 화면에 반영하겠습니다.
 
-### 2. `FestivalDetailResponse.dDay` 가 `writeOnly` 이고 `dday` 와 중복
-
-**영향 화면**: `/festivals/[id]`
-
-의미가 겹치는 필드가 두 개 있고 둘 다 문제가 있습니다.
-
-```jsonc
-"dDay": { "type": ["integer","null"], "writeOnly": true },  // ← 규약상 응답에 미포함
-"dday": { "type": "integer" }                                // ← nullable·description 없음
-```
-
-프론트는 카멜케이스 관례대로 `dDay` 를 읽고 있어, 응답에 이 필드가 없으면 **D-Day 배지("D-3" / "D-DAY")가 표시되지 않습니다.**
-
-**요청**
-
-1. 둘 중 하나로 통일해 주세요 (`dDay` 에서 `writeOnly` 제거 + `dday` 삭제 권장).
-2. 남기는 필드에 **nullable 여부와 종료된 축제일 때의 값**을 명시해 주세요. 지금은 0인지 음수인지 필드 누락인지 알 수 없습니다.
-
-```jsonc
-{ "dDay": { "type": ["integer","null"], "description": "개막까지 남은 일수. 당일 0, 이미 시작했거나 종료면 null" } }
-```
-
-> 실제 서버가 직렬화하는 필드명만 알려주시면 프론트는 즉시 맞추겠습니다.
-
 ---
 
 ## P1
 
-### 3. `SpotSearchItem` 표시 정보 부족
+### 2. `SpotSearchItem` 표시 정보 부족
 
 **영향 화면**: `/search` — 검색 결과 카드가 다른 화면의 스팟 카드 대비 정보량이 적어 빈 껍데기처럼 보입니다.
 현재 필드: `spotId`, `type`, `name`, `address`, `latitude`, `longitude`.
@@ -101,7 +76,7 @@
 
 `UserSearchItem` 은 1번에 포함했습니다. `followerCount` 도 있으면 좋지만 필수는 아닙니다.
 
-### 4. `ExploreFestivalItem` 에 이미지·진행상태가 없음
+### 3. `ExploreFestivalItem` 에 이미지·진행상태가 없음
 
 **영향 화면**: `/explore`, `/explore/festivals`
 
@@ -117,7 +92,7 @@
 
 `GET /api/explore/festivals` 가 진행 중 축제만 반환한다면 **최소한 `ONGOING` / `ENDING_SOON` 은 구분**되어야 "곧 종료" 안내가 가능합니다.
 
-### 5. `ExploreSpotItem.spotId` 가 null 일 때 상세 진입 경로가 없음
+### 4. `ExploreSpotItem.spotId` 가 null 일 때 상세 진입 경로가 없음
 
 **영향 화면**: `/explore`, `/explore/spots`
 
@@ -137,7 +112,7 @@ C로 확정되면 프론트에서 비활성 처리로 마감하겠습니다. 어
 
 ## P2
 
-### 6. 필터 조건에 대응하는 파라미터가 없음
+### 5. 필터 조건에 대응하는 파라미터가 없음
 
 **영향 화면**: `/map`(필터 드로어), `/explore`, `/search`
 
@@ -154,7 +129,7 @@ GET /api/search/spots     + category?: (꽃 카테고리 enum)
 - 지역 6개 권역은 프론트가 임의로 쓰는 값입니다. **서버 기준 코드가 있으면 그쪽에 맞추겠습니다.**
 - 이 필터를 살릴 계획이 없으면 **UI를 걷어내겠으니 알려만 주세요.**
 
-### 7. 꽃 카테고리 enum 확정 필요
+### 6. 꽃 카테고리 enum 확정 필요
 
 프론트에 꽃 목록이 두 벌 있고 서로 다릅니다. `profile/edit`(관심 꽃 설정)은 API enum 13개와 정확히 일치하지만, **필터 드로어는 해바라기·국화가 추가되고 핑크뮬리가 빠져** 있습니다.
 
@@ -163,7 +138,7 @@ GET /api/search/spots     + category?: (꽃 카테고리 enum)
 
 현재 enum(13): `PLUM, FORSYTHIA, AZALEA_KR, CHERRY, CANOLA, AZALEA, HYDRANGEA, LOTUS, COSMOS, PINK_MUHLY, SILVERGRASS, MAPLE, CAMELLIA`
 
-### 8. 알림 딥링크 규격 문서화 요청
+### 7. 알림 딥링크 규격 문서화 요청
 
 **영향 화면**: `/notification` — 현재 알림을 눌러도 **읽음 처리만 되고 아무 데도 가지 않습니다.**
 
@@ -179,13 +154,13 @@ GET /api/search/spots     + category?: (꽃 카테고리 enum)
 - `INTERNAL` 일 때 `linkUrl` 이 **프론트 경로 문자열**인지, `targetId` 로 프론트가 조합해야 하는지도 알려주세요.
 - `segment` 에 `TIMING` 값이 있는데 화면 탭은 전체/활동/공지 3개뿐입니다. **TIMING 탭이 기획에 있나요?**
 
-### 9. 축제 문의처 필드 없음
+### 8. 축제 문의처 필드 없음
 
 `FestivalDetailResponse` / `FestivalEditorialResponse` 에 전화번호·문의처가 없어 현재 `homepageUrl` 링크로 대체 중입니다. 원천 데이터(TourAPI 등)에 있다면 `{ "inquiryPhone": "055-225-3000" }`(nullable) 추가를 요청드립니다.
 
 ---
 
-## P3 — 미연동 엔드포인트 사용 계획 확인
+## P3 — 미연동 엔드포인트 사용 계획 확인 · 스펙 정리
 
 구현되어 있으나 프론트에서 호출하지 않는 API입니다. 계획을 알려주시면 연동하거나 정리하겠습니다.
 
@@ -200,9 +175,10 @@ GET /api/search/spots     + category?: (꽃 카테고리 enum)
 | `GET /api/spots/preview` | 지도 **클러스터 다중 핀 리스트**(SCR-011d) 용도 맞나요? |
 | `POST /api/devices` / `DELETE /api/devices/{token}` | **푸시 인프라(FCM 등) 도입 일정**이 잡히면 알려주세요. 그 전까지 보류 |
 
-**추가 확인 2건**
+**추가 확인 3건**
 
-- **`POST /api/spots/match` 의 부작용** — 지도 핀 클릭 시 `spotId` 없는 명소를 이 API로 생성(materialize)하고 있습니다. **조회 동작에 POST 생성이 일어나는 구조**라, 5번을 A안으로 해결하면 이 호출은 사라집니다. 함께 검토 부탁드립니다.
+- **`FestivalDetailResponse` 의 `dDay` / `dday` 중복** — 의미가 같은 필드가 둘인데 `dDay` 는 `writeOnly: true`(규약상 응답 미포함)이고 `dday` 는 nullable·description이 없습니다. 프론트는 **`startsOn` 으로 D-Day를 직접 계산하도록 수정했으므로 급하지 않지만**, 둘 중 하나로 정리하시는 편이 좋겠습니다.
+- **`POST /api/spots/match` 의 부작용** — 지도 핀 클릭 시 `spotId` 없는 명소를 이 API로 생성(materialize)하고 있습니다. **조회 동작에 POST 생성이 일어나는 구조**라, 4번을 A안으로 해결하면 이 호출은 사라집니다. 함께 검토 부탁드립니다.
 - **사진 업로드가 1장씩만 가능** — `SpotRecordPhotoUploadForm.images` 가 `type: string`(단일 바이너리)이라 5장 올릴 때 **요청을 5번** 보냅니다. 필드명이 복수형인데 다중 업로드 의도였는지 확인 부탁드리며, 가능하면 배열로 변경 요청드립니다.
 
 ---
