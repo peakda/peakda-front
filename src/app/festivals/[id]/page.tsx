@@ -26,6 +26,18 @@ const formatDate = (iso: string) => {
   return m && d ? `${Number(m)}월 ${Number(d)}일` : iso
 }
 
+// 'YYYY-MM-DD'(KST 기준일)와 오늘(KST) 사이의 일수 차. 양수면 아직 시작 전, 파싱 실패면 null.
+// 브라우저 로컬 타임존으로 계산하면 해외 접속 시 하루 어긋나므로 KST 로 고정한다.
+const KST_OFFSET_MS = 9 * 60 * 60 * 1000
+const DAY_MS = 24 * 60 * 60 * 1000
+
+function daysUntilKst(iso: string): number | null {
+  const [y, m, d] = iso.split('-').map(Number)
+  if (!y || !m || !d) return null
+  const todayKst = Math.floor((Date.now() + KST_OFFSET_MS) / DAY_MS) * DAY_MS
+  return Math.round((Date.UTC(y, m - 1, d) - todayKst) / DAY_MS)
+}
+
 // 개행으로 구분된 안내 텍스트를 줄 단위로 쪼갠다.
 const toLines = (text?: string | null) =>
   (text ?? '')
@@ -44,9 +56,11 @@ export default function FestivalDetailPage() {
   const phaseLabel = festival.phase ? PHASE_LABEL[festival.phase] : null
 
   // 시작 전이면 개막까지, 진행 중이면 종료까지 남은 일수를 보여준다.
+  // 응답의 dDay 는 writeOnly 라 내려오지 않으므로 startsOn 으로 직접 계산한다.
+  const daysUntilStart = festival.startsOn ? daysUntilKst(festival.startsOn) : null
   const dDayLabel = (() => {
-    if (festival.dDay != null && festival.dDay > 0) return `D-${festival.dDay}`
-    if (festival.dDay === 0) return 'D-DAY'
+    if (daysUntilStart != null && daysUntilStart > 0) return `D-${daysUntilStart}`
+    if (daysUntilStart === 0) return 'D-DAY'
     if (festival.endsInDays != null) return `종료 D-${festival.endsInDays}`
     return null
   })()
