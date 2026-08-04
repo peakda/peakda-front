@@ -1,6 +1,6 @@
 # ARCHITECTURE.md
 
-Peakda 프런트엔드(Next.js, Vercel)와 백엔드(Railway) 간 실제 데이터 흐름. 세부 디렉터리는 `src/CLAUDE.md`, `public/CLAUDE.md` 참고.
+Peakda 프런트엔드(Next.js, Vercel)와 백엔드(AWS) 간 실제 데이터 흐름. 세부 디렉터리는 `src/CLAUDE.md`, `public/CLAUDE.md` 참고.
 
 ## API 호출 흐름
 
@@ -10,7 +10,7 @@ flowchart LR
   Facade["src/api/facades/*.ts"]
   Generated["src/api/facades/generated/** (orval, react-query)"]
   Mutator["src/api/mutator (customInstance)"]
-  Backend[("Backend API · Railway")]
+  Backend[("Backend API · AWS")]
   Upload["src/app/api/uploadthing (Route Handler)"]
   UT[("UploadThing")]
 
@@ -44,7 +44,7 @@ sequenceDiagram
   end
 ```
 
-> **Note**: 프런트(Vercel)·백엔드(Railway) 도메인이 달라 크로스사이트 쿠키(`SameSite=None; Secure`)로 인증을 주고받는다. 이 때문에 `src/api/mutator/index.ts`는 `NEXT_PUBLIC_API_URL`로 **브라우저/서버에서 백엔드를 직접 호출**하는 것이 의도된 설계다 (`AGENTS.md` API 호출 규칙과 일치, 2026-07-19 정합). Route Handler 프록시 패턴은 `src/app/api/uploadthing` (파일 업로드)에만 적용된다.
+> **Note**: 프런트(Vercel)·백엔드(AWS) 도메인이 달라 크로스사이트 쿠키(`SameSite=None; Secure`)로 인증을 주고받는다. 이 때문에 `src/api/mutator/index.ts`는 `NEXT_PUBLIC_API_URL`로 **브라우저/서버에서 백엔드를 직접 호출**하는 것이 의도된 설계다 (`AGENTS.md` API 호출 규칙과 일치, 2026-07-19 정합). Route Handler 프록시 패턴은 `src/app/api/uploadthing` (파일 업로드)에만 적용된다.
 
 ## 카카오맵 흐름
 

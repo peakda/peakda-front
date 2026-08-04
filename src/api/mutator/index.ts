@@ -1,4 +1,4 @@
-// 프론트(Vercel)·백엔드(Railway) 도메인이 달라, 브라우저/서버 모두 백엔드를 직접 호출하고
+// 프론트(Vercel)·백엔드(AWS) 도메인이 달라, 브라우저/서버 모두 백엔드를 직접 호출하고
 // 크로스사이트 쿠키(SameSite=None; Secure)를 credentials: 'include' 로 주고받는다.
 const getBaseUrl = () => process.env.NEXT_PUBLIC_API_URL ?? ''
 
