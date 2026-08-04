@@ -14,9 +14,9 @@ interface PinProps {
 
 const BORDER_CLASS: Record<Stage, string> = {
   Before: 'border-border-tertiary',
-  Start: 'border-pink-300',
+  Start: 'border-pink-200',
   Peak: 'border-pink-400',
-  End: 'border-border-tertiary',
+  End: 'border-pink-600',
 }
 
 export function Pin({ flowers, maxStage }: PinProps) {

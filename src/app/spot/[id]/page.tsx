@@ -22,11 +22,11 @@ const BLOOM_STATUS_LABEL: Record<string, string> = {
   ENDED: '끝났어요',
 }
 
-const BLOOM_STATUS_VARIANT: Record<string, 'green' | 'bloom' | 'secondary'> = {
+const BLOOM_STATUS_VARIANT: Record<string, 'green' | 'starting' | 'bloom' | 'late'> = {
   PREPARING: 'green',
-  STARTED: 'green',
+  STARTED: 'starting',
   PEAK: 'bloom',
-  ENDED: 'secondary',
+  ENDED: 'late',
 }
 
 const BLOOM_BANNER_MESSAGE: Record<string, string> = {

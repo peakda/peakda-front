@@ -48,7 +48,7 @@ export interface FeedCardProps {
   timeAgo: string
   visitDate: string
   statusLabel: string
-  statusVariant: 'dark' | 'bloom' | 'secondary' | 'green'
+  statusVariant: 'dark' | 'bloom' | 'secondary' | 'green' | 'starting' | 'late'
   images: string[]
   flowers: FlowerTag[]
   content: string
