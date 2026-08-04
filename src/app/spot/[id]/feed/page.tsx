@@ -1,14 +1,18 @@
 'use client'
 
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { FeedCard } from '@/components/ui/card/FeedCard'
-import { useSpotRecordsBySpot } from '@/api/facades/spot-record'
+import { Drawer } from '@/components/ui/layout/Drawer'
+import { useSpotRecordsBySpot, useDeleteSpotRecord } from '@/api/facades/spot-record'
 import { useSpotDetail } from '@/api/facades/spot'
+import { useCurrentUser } from '@/api/facades/auth'
+import { useDrawerStore } from '@/stores/useDrawerStore'
 import { toFeedCardProps } from '@/lib/utils/spotRecordToFeed'
 
 export default function SpotFeedPage() {
+  const router = useRouter()
   const { id } = useParams<{ id: string }>()
   const { data: spot } = useSpotDetail(Number(id))
 
@@ -17,6 +21,10 @@ export default function SpotFeedPage() {
     pageRequest: { page: 0, size: 20 },
   })
   const records = data?.content ?? []
+
+  const { data: currentUser } = useCurrentUser()
+  const deleteRecord = useDeleteSpotRecord()
+  const openDeleteConfirmDrawer = useDrawerStore((s) => s.openDeleteConfirmDrawer)
 
   return (
     <div className="bg-bg-primary relative flex min-h-screen flex-col pb-12">
@@ -38,10 +46,20 @@ export default function SpotFeedPage() {
       ) : (
         <div className="divide-border-primary divide-y">
           {records.map((record) => (
-            <FeedCard key={record.id} {...toFeedCardProps(record)} />
+            <FeedCard
+              key={record.id}
+              {...toFeedCardProps(record, {
+                isOwner: record.user.id === currentUser?.id,
+                onEdit: () => router.push(`/record/${record.id}/edit`),
+                onDelete: () =>
+                  openDeleteConfirmDrawer(() => deleteRecord.mutate({ id: record.id })),
+              })}
+            />
           ))}
         </div>
       )}
+
+      <Drawer />
     </div>
   )
 }

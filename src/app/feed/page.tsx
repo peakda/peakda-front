@@ -7,7 +7,11 @@ import { Header } from '@/components/ui/layout/Header'
 import { Nav } from '@/components/ui/layout/Nav'
 import { CategoryChip } from '@/components/ui/category/CategoryChip'
 import { FeedCard } from '@/components/ui/card/FeedCard'
+import { Drawer } from '@/components/ui/layout/Drawer'
 import { useFeedList } from '@/api/facades/feed'
+import { useCurrentUser } from '@/api/facades/auth'
+import { useDeleteSpotRecord } from '@/api/facades/spot-record'
+import { useDrawerStore } from '@/stores/useDrawerStore'
 import { filterFromTab } from '@/lib/utils/feed'
 import { toFeedCardProps } from '@/lib/utils/spotRecordToFeed'
 
@@ -22,6 +26,10 @@ export default function FeedPage() {
     pageRequest: { page: 0, size: 20 },
   })
   const records = data?.content ?? []
+
+  const { data: currentUser } = useCurrentUser()
+  const deleteRecord = useDeleteSpotRecord()
+  const openDeleteConfirmDrawer = useDrawerStore((s) => s.openDeleteConfirmDrawer)
 
   return (
     <div className="bg-bg-primary relative flex min-h-screen flex-col pb-24">
@@ -61,13 +69,19 @@ export default function FeedPage() {
           {records.map((record) => (
             <FeedCard
               key={record.id}
-              {...toFeedCardProps(record)}
+              {...toFeedCardProps(record, {
+                isOwner: record.user.id === currentUser?.id,
+                onEdit: () => router.push(`/record/${record.id}/edit`),
+                onDelete: () =>
+                  openDeleteConfirmDrawer(() => deleteRecord.mutate({ id: record.id })),
+              })}
               onOpen={() => router.push(`/feed/${record.id}`)}
             />
           ))}
         </div>
       )}
 
+      <Drawer />
       <Nav activeTab="feed" />
     </div>
   )
