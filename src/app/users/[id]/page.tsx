@@ -95,6 +95,7 @@ export default function UserProfilePage() {
         recordCount={stats?.recordCount ?? '0'}
         followerCount={stats?.followerCount ?? '0'}
         followingCount={stats?.followingCount ?? '0'}
+        userId={userId}
       />
 
       {/* 관심 식물 */}

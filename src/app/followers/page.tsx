@@ -1,5 +1,7 @@
 'use client'
 
+import { Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { UserRow } from '@/components/ui/list/UserRow'
@@ -29,8 +31,11 @@ function FollowerList({ userId }: { userId: number }) {
   )
 }
 
-export default function FollowersPage() {
+function FollowersContent() {
+  // ?userId 가 있으면 그 유저의 팔로워, 없으면 내 팔로워를 본다.
+  const param = Number(useSearchParams().get('userId'))
   const { data: me } = useCurrentUser()
+  const userId = param > 0 ? param : me?.id
 
   return (
     <div className="bg-bg-primary relative flex min-h-screen flex-col pb-12">
@@ -41,7 +46,16 @@ export default function FollowersPage() {
         />
       </div>
 
-      {me?.id != null && <FollowerList userId={me.id} />}
+      {userId != null && <FollowerList userId={userId} />}
     </div>
+  )
+}
+
+// useSearchParams 는 App Router 에서 Suspense 경계가 필요하다.
+export default function FollowersPage() {
+  return (
+    <Suspense fallback={null}>
+      <FollowersContent />
+    </Suspense>
   )
 }
