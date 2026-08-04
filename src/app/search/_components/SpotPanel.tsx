@@ -1,12 +1,18 @@
 import { Search } from 'lucide-react'
 import { IconBtn } from '@/components/ui/button/IconBtn'
 import { SpotCard } from '@/components/ui/card/SpotCard'
+import type { CardBadgeVariant } from '@/components/ui/card/CardBadge'
 
 export interface SPOTProps {
-  id: number
+  // 스팟 상세로 이동할 spotId. 명소만 있고 Spot 행이 아직 없으면 null(이동 불가)
+  id: number | null
   name: string
   location: string
+  // 카드 썸네일. 없으면 회색 플레이스홀더
+  imageUrl?: string | null
+  // 개화 상태 라벨. 정보가 없으면 '' (배지 미표시)
   status: string
+  statusVariant?: CardBadgeVariant
   nameList: string[]
 }
 

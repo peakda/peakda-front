@@ -18,7 +18,7 @@ const SEARCH_TABS: TabItem[] = [
   { value: 'user', label: '유저' },
 ]
 
-// 검색 API 는 스팟명·주소만 준다(개화상태·식물태그 없음). 없는 자리는 비운다.
+// 검색 API 는 스팟명·주소만 준다(썸네일·개화상태·식물태그 없음). 없는 자리는 비운다.
 const toSpotProps = (item: {
   spotId: number
   name: string
