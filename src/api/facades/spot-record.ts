@@ -11,8 +11,6 @@ import {
   usePostSpotsRecords as useCreateGen,
   useDeleteSpotsRecordsById as useDeleteGen,
   useGetSpotsRecordsById,
-  useGetSpotsRecords,
-  useGetSpotsRecordsMe,
   usePatchSpotsRecordsById as useUpdateGen,
   usePostSpotsRecordsPhotos as useUploadPhotosGen,
   deleteSpotsRecordsById,
@@ -31,6 +29,19 @@ import { PAGE_SIZE, nextPageParam } from '@/api/facades/pagination'
 
 // 기록 리스트 캐시 키 (스팟별 / 본인) — mutation 성공 시 무효화한다.
 const recordListKeys = [['/api/spots/records'], ['/api/spots/records/me']] as const
+
+// 스팟 상세('/api/spots/{id}')만 고른다. '/api/spots/records...' 나 즐겨찾기 키는 걸리지 않는다.
+const SPOT_DETAIL_KEY = /^\/api\/spots\/\d+$/
+
+// 기록이 바뀌면 스팟 상세의 recordPreview(최대 3건)도 낡는다.
+// 전역 staleTime 이 5분이라 무효화하지 않으면 그동안 옛 목록이 그대로 보인다.
+const invalidateSpotDetail = (queryClient: ReturnType<typeof useQueryClient>, spotId?: number) =>
+  queryClient.invalidateQueries(
+    spotId != null
+      ? { queryKey: [`/api/spots/${spotId}`] }
+      : // 삭제는 응답에 스팟 정보가 없어 어느 스팟인지 알 수 없다. 스팟 상세 전체를 턴다.
+        { predicate: (q) => typeof q.queryKey[0] === 'string' && SPOT_DETAIL_KEY.test(q.queryKey[0]) }
+  )
 
 // ▷ plain async (이벤트 기반 호출) ─────────────────────────────────────────
 
@@ -73,12 +84,6 @@ export async function uploadSpotRecordPhotosApi(form: SpotRecordPhotoUploadForm)
 export const useSpotRecord = (id: number) =>
   useGetSpotsRecordsById(id, { query: { select: (res) => res.data.data ?? null } })
 
-export const useSpotRecordsBySpot = (params: GetSpotsRecordsParams) =>
-  useGetSpotsRecords(params, { query: { select: (res) => res.data.data ?? null } })
-
-export const useMySpotRecords = (params: GetSpotsRecordsMeParams) =>
-  useGetSpotsRecordsMe(params, { query: { select: (res) => res.data.data ?? null } })
-
 // 무한 스크롤용. 키 프리픽스를 recordListKeys 와 맞춰 mutation 무효화에 함께 걸리게 한다.
 
 export const useSpotRecordsBySpotInfinite = (spotId: number) =>
@@ -105,8 +110,10 @@ export const useCreateSpotRecord = () => {
   const queryClient = useQueryClient()
   return useCreateGen({
     mutation: {
-      onSuccess: () =>
-        recordListKeys.forEach((queryKey) => queryClient.invalidateQueries({ queryKey })),
+      onSuccess: (res) => {
+        recordListKeys.forEach((queryKey) => queryClient.invalidateQueries({ queryKey }))
+        invalidateSpotDetail(queryClient, res.data.data?.spot.id)
+      },
     },
   })
 }
@@ -115,10 +122,11 @@ export const useUpdateSpotRecord = () => {
   const queryClient = useQueryClient()
   return useUpdateGen({
     mutation: {
-      onSuccess: (_data, { id }) => {
+      onSuccess: (res, { id }) => {
         queryClient.invalidateQueries({ queryKey: getGetSpotsRecordsQueryKey() })
         queryClient.invalidateQueries({ queryKey: getGetSpotsRecordsMeQueryKey() })
         queryClient.invalidateQueries({ queryKey: [`/api/spots/records/${id}`] })
+        invalidateSpotDetail(queryClient, res.data.data?.spot.id)
       },
     },
   })
@@ -130,6 +138,7 @@ export const useDeleteSpotRecord = () => {
     mutation: {
       onSuccess: () => {
         recordListKeys.forEach((queryKey) => queryClient.invalidateQueries({ queryKey }))
+        invalidateSpotDetail(queryClient)
         // 게시된 기록이면 피드에도 노출되므로 '/api/feed' 프리픽스 캐시를 함께 무효화한다.
         queryClient.invalidateQueries({
           predicate: (q) =>

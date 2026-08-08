@@ -7,7 +7,6 @@ import {
   getGetFeedByIdQueryKey,
   usePostFeedByIdReactions as useAddReactionGen,
   useGetFeedById,
-  useGetFeed,
   useDeleteFeedByIdReactions as useRemoveReactionGen,
 } from '@/api/facades/generated/feed/feed'
 import type {
@@ -49,9 +48,6 @@ export async function removeReactionApi(id: number, params: DeleteFeedByIdReacti
 }
 
 // ▷ React Query hooks (캐싱 / 상태 관리) ───────────────────────────────────
-
-export const useFeedList = (params: GetFeedParams) =>
-  useGetFeed(params, { query: { select: (res) => res.data.data ?? null } })
 
 // 무한 스크롤용. 기록 삭제 시 '/api/feed' 프리픽스 무효화에 함께 걸린다.
 export const useFeedListInfinite = (filter: GetFeedFilter) =>

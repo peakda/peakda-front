@@ -3,7 +3,6 @@ import {
   getExploreSpots,
   useGetExplore,
   useGetExploreFestivals,
-  useGetExploreSpots,
 } from '@/api/facades/generated/explore/explore'
 import type {
   GetExploreFestivalsParams,
@@ -25,10 +24,7 @@ export async function exploreSpotsApi(params: GetExploreSpotsParams) {
 export const useExploreCuration = (params?: GetExploreParams) =>
   useGetExplore(params, { query: { select: (res) => res.data.data ?? null } })
 
-// 탐색 스팟 섹션 전체 보기 — section(PEAK_NOW | NEXT_WEEK)과 pageRequest 필수.
-export const useExploreSpots = (params: GetExploreSpotsParams) =>
-  useGetExploreSpots(params, { query: { select: (res) => res.data.data ?? null } })
-
+// 탐색 스팟 섹션 전체 보기 — section(PEAK_NOW | NEXT_WEEK) 필수.
 // 무한 스크롤용. category 가 바뀌면 페이지가 처음부터 다시 쌓인다.
 export const useExploreSpotsInfinite = (
   section: GetExploreSpotsSection,

@@ -4,7 +4,6 @@ import {
   patchNotificationsReadAll,
   patchNotificationsByIdRead,
   getNotificationsUnreadCount,
-  useGetNotifications,
   usePatchNotificationsReadAll as useMarkAllReadGen,
   usePatchNotificationsByIdRead as useMarkReadGen,
   useGetNotificationsUnreadCount,
@@ -45,9 +44,6 @@ export async function markAllNotificationsReadApi() {
 }
 
 // ▷ React Query hooks (캐싱 / 상태 관리) ───────────────────────────────────
-
-export const useNotificationList = (params: GetNotificationsParams) =>
-  useGetNotifications(params, { query: { select: (res) => res.data.data ?? null } })
 
 // 무한 스크롤용. 읽음 처리 시 '/api/notifications' 프리픽스 무효화에 함께 걸린다.
 export const useNotificationListInfinite = (segment: NotificationSegment) =>

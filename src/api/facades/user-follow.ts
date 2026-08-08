@@ -5,8 +5,6 @@ import {
   getUsersByUserIdFollowings,
   deleteUsersByUserIdFollow,
   usePostUsersByUserIdFollow as useFollowGen,
-  useGetUsersByUserIdFollowers,
-  useGetUsersByUserIdFollowings,
   useDeleteUsersByUserIdFollow as useUnfollowGen,
 } from '@/api/facades/generated/user-follow/user-follow'
 import type {
@@ -44,14 +42,6 @@ export async function followersApi(userId: number, params: GetUsersByUserIdFollo
 }
 
 // ▷ React Query hooks (캐싱 / 상태 관리) ───────────────────────────────────
-
-export const useFollowingList = (userId: number, params: GetUsersByUserIdFollowingsParams) =>
-  useGetUsersByUserIdFollowings(userId, params, {
-    query: { select: (res) => res.data.data ?? null },
-  })
-
-export const useFollowerList = (userId: number, params: GetUsersByUserIdFollowersParams) =>
-  useGetUsersByUserIdFollowers(userId, params, { query: { select: (res) => res.data.data ?? null } })
 
 // 무한 스크롤용. 키에 '/follow' 가 들어가야 invalidateFollow 에 함께 걸린다.
 

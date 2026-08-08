@@ -5,7 +5,6 @@ import {
   getUsersMeBlocks,
   deleteUsersByUserIdBlock,
   usePostUsersByUserIdBlock as useBlockGen,
-  useGetUsersMeBlocks,
   useDeleteUsersByUserIdBlock as useUnblockGen,
 } from '@/api/facades/generated/user-block/user-block'
 import type { GetUsersMeBlocksParams } from '@/api/facades/generated/peakdaApi.schemas'
@@ -32,9 +31,6 @@ export async function blockedListApi(params: GetUsersMeBlocksParams) {
 }
 
 // ▷ React Query hooks (캐싱 / 상태 관리) ───────────────────────────────────
-
-export const useBlockedList = (params: GetUsersMeBlocksParams) =>
-  useGetUsersMeBlocks(params, { query: { select: (res) => res.data.data ?? null } })
 
 // 무한 스크롤용. blockedListKey 프리픽스를 공유해 차단/해제 시 함께 무효화된다.
 export const useBlockedListInfinite = () =>
