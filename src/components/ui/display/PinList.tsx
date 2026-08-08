@@ -4,12 +4,13 @@ import { MultiImageProps } from '@/types/types'
 import { cn } from '@/lib/utils/cn'
 
 export function PinList(props: MultiImageProps) {
-  const { title, location, description, Badges, isFavorite, tagText, type } = props
+  const { title, location, description, Badges, badgeIcon, isFavorite, tagText, type } = props
 
   return (
     <div className="flex w-full flex-col border-b border-gray-100">
       <PinText
         Badges={Badges}
+        badgeIcon={badgeIcon}
         description={description}
         isFavorite={isFavorite}
         location={location}
