@@ -15,4 +15,4 @@ AI 에이전트(Claude Code 등)가 이 저장소에서 대표적인 작업을 �
 
 ## 회귀 확인
 
-[CLAUDE.md](../CLAUDE.md), [AGENTS.md](../AGENTS.md), [ARCHITECTURE.md](../ARCHITECTURE.md) 등 context 문서를 크게 바꾼 뒤에는 태스크 2-3개를 재실행해 pass-rate가 떨어지지 않았는지 확인한다.
+[CLAUDE.md](../CLAUDE.md), [ARCHITECTURE.md](../ARCHITECTURE.md) 등 context 문서를 크게 바꾼 뒤에는 태스크 2-3개를 재실행해 pass-rate가 떨어지지 않았는지 확인한다.
