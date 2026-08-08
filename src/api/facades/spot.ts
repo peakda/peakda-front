@@ -8,7 +8,10 @@ import {
   usePostSpotsMatch as useMatchGen,
   useGetSpotsById,
 } from '@/api/facades/generated/spot/spot'
-import type { SpotMatchRequest } from '@/api/facades/generated/peakdaApi.schemas'
+import type {
+  BloomSlotCategory,
+  SpotMatchRequest,
+} from '@/api/facades/generated/peakdaApi.schemas'
 
 export async function matchSpotApi(payload: SpotMatchRequest) {
   const res = await postSpotsMatch(payload)
@@ -36,11 +39,23 @@ export const useSpotDetailFetcher = () => {
 export const useSpotDetail = (id: number | undefined) =>
   useGetSpotsById(id ?? 0, { query: { enabled: !!id, select: (res) => res.data.data ?? null } })
 
-// 이벤트(핀 클릭 등)에서 프리뷰를 즉시 조회할 때 사용하는 plain async.
+interface SpotPreviewOptions {
+  /** 거리(distanceMeters) 계산 기준 좌표. 없으면 서버가 null 로 준다 */
+  coords?: { lat: number; lng: number } | null
+  /** 꽃 필터가 걸려 있으면 그 꽃 기준으로 뱃지를 계산한다. 생략 시 각 스팟의 대표 단계 */
+  category?: BloomSlotCategory | null
+}
+
+// 이벤트(필터 결과 보기, 핀 클릭 등)에서 프리뷰를 즉시 조회할 때 쓰는 plain async.
 // spotIds 가 비면 요청하지 않는다.
-export async function spotPreviewApi(spotIds: number[], coords?: { lat: number; lng: number }) {
+export async function spotPreviewApi(spotIds: number[], options: SpotPreviewOptions = {}) {
   if (spotIds.length === 0) return null
-  const res = await getSpotsPreview({ spotIds, ...(coords ?? {}) })
+
+  const res = await getSpotsPreview({
+    spotIds,
+    ...(options.coords ?? {}),
+    category: options.category ?? undefined,
+  })
   return res.data.data ?? null
 }
 

@@ -3,7 +3,7 @@
 import { useLazyMapLoad } from '@/hooks/useLazyMapLoad'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
-import { MainMessage } from '@/components/ui/message/MainMessage'
+import { MapSkeleton } from '@/components/Map/MapSkeleton'
 import { Header } from '@/components/ui/layout/Header'
 import Image from 'next/image'
 import { prefetchInitialTiles } from '@/lib/kakao/tilePrefetch'
@@ -14,8 +14,9 @@ import { Category } from '@/components/ui/category/Category'
 import { toast } from 'sonner'
 import { useMapCluster, type MapSpot } from '@/hooks/useMapPins'
 import { useDrawerStore } from '@/stores/useDrawerStore'
-import { useFilterStore, type PinTypeFilter } from '@/stores/useFilterStore'
+import { hasActiveFilter, useFilterStore, type PinTypeFilter } from '@/stores/useFilterStore'
 import { filterMapSpots } from '@/lib/utils/mapFilter'
+import { isFutureTiming, timingToDate, timingToStatuses } from '@/lib/utils/timing'
 import { useBloomMap } from '@/api/facades/seasonal-bloom'
 import { useHomeSuggestion } from '@/api/facades/home'
 import { useUnreadNotificationCount } from '@/api/facades/notification'
@@ -127,9 +128,17 @@ export const MapContainer = () => {
   const openFilterDrawer = useDrawerStore((s) => s.openFilterDrawer)
   const openPinDrawer = useDrawerStore((s) => s.openPinDrawer)
   const pinType = useFilterStore((s) => s.pinType)
-  const category = useFilterStore((s) => s.category)
-  const statuses = useFilterStore((s) => s.statuses)
+  const applied = useFilterStore((s) => s.applied)
+  const draftCategories = useFilterStore((s) => s.draft.categories)
   const setPinType = useFilterStore((s) => s.setPinType)
+  const setVisibleSpots = useFilterStore((s) => s.setVisibleSpots)
+
+  // 방문예정일 조회는 명소형 핀만 재계산된다(동네형은 최근 관측값 유지 — 서버 스펙).
+  // 섞어서 보여주면 "그날 절정"이 아닌 동네 핀이 끼므로 명소형으로 고정한다.
+  const localUnavailable = isFutureTiming(applied.timing)
+  const effectivePinType = localUnavailable ? 'ATTRACTION' : pinType
+  const date = timingToDate(applied.timing)
+  const statuses = useMemo(() => timingToStatuses(applied.timing), [applied.timing])
 
   const latParam = searchParams.get('lat')
   const lngParam = searchParams.get('lng')
@@ -139,17 +148,65 @@ export const MapContainer = () => {
     return lat != null && lng != null ? { lat, lng } : null
   }, [latParam, lngParam])
 
-  // 꽃 종류만 서버 파라미터(category)로 거르고, 핀 유형·개화 상태는 응답을 받아 클라에서 거른다.
-  const bloomParams = useMemo(
-    () => (bbox ? { ...bbox, category: category ?? undefined } : null),
-    [bbox, category]
-  )
-  const { data: bloomData } = useBloomMap(bloomParams)
+  // 서버로 나가는 건 bbox 와 방문예정일(date)뿐이다. 둘 다 applied 기준이라
+  // 드로어에서 필터를 만지는 것만으로는 요청이 나가지 않는다.
+  // 꽃 종류는 서버 category 가 단일 값이라 복수 선택을 지원하려고 클라에서 거른다.
+  const bloomParams = useMemo(() => (bbox ? { ...bbox, date } : null), [bbox, date])
+  const { data: bloomData, isPlaceholderData } = useBloomMap(bloomParams)
   const allSpots = useMemo(() => (bloomData ? bloomToMapSpots(bloomData) : []), [bloomData])
+
   const spots = useMemo(
-    () => filterMapSpots(allSpots, { pinType, statuses }),
-    [allSpots, pinType, statuses]
+    () =>
+      filterMapSpots(allSpots, {
+        pinType: effectivePinType,
+        statuses,
+        categories: applied.categories,
+      }),
+    [allSpots, effectivePinType, statuses, applied.categories]
   )
+
+  // 꽃 종류는 클라 필터라 서버를 다녀오지 않고도 draft 기준 개수를 미리 셀 수 있다.
+  // (지역·시기는 서버를 다녀와야 알 수 있어 버튼이 '명소 보기' 로 고정된다)
+  const draftSpots = useMemo(
+    () =>
+      filterMapSpots(allSpots, {
+        pinType: effectivePinType,
+        statuses,
+        categories: draftCategories,
+      }),
+    [allSpots, effectivePinType, statuses, draftCategories]
+  )
+
+  // 드로어의 'N개의 명소 보기' 버튼이 쓸 현재 화면의 필터 결과를 올려준다.
+  // 프리뷰는 spotId 로만 조회하므로 아직 Spot 행이 없는 명소(spotId=null)는 제외한다.
+  useEffect(() => {
+    // bbox 는 캐시 히트를 위해 격자에 스냅돼 화면보다 넓다. 개수는 실제 화면 기준이어야 하므로
+    // 여기서 현재 bounds 로 한 번 더 거른다.
+    const bounds = mapInstance?.getBounds()
+    const inView = (list: MapSpot[]) => {
+      if (!bounds) return list
+      const sw = bounds.getSouthWest()
+      const ne = bounds.getNorthEast()
+      return list.filter(
+        (s) =>
+          s.lat >= sw.getLat() &&
+          s.lat <= ne.getLat() &&
+          s.lng >= sw.getLng() &&
+          s.lng <= ne.getLng()
+      )
+    }
+
+    const center = mapInstance?.getCenter()
+    setVisibleSpots({
+      spotIds: inView(spots)
+        .map((s) => s.spotId)
+        .filter((id): id is number => id != null),
+      center: center ? { lat: center.getLat(), lng: center.getLng() } : null,
+      // 아직 이전 조건의 결과를 보고 있으면 목록 열기를 기다려야 한다.
+      isStale: isPlaceholderData,
+      draftCount: inView(draftSpots).filter((s) => s.spotId != null).length,
+    })
+  }, [spots, draftSpots, mapInstance, isPlaceholderData, setVisibleSpots])
 
   // 시즌 추천어(홈 검색바 보조 카피). 절정 데이터 없으면(available=false) 기본 문구로 폴백.
   const { data: suggestion } = useHomeSuggestion()
@@ -372,8 +429,8 @@ export const MapContainer = () => {
       )}
 
       {!isReady && (
-        <div className="flex min-h-screen flex-col items-center justify-center py-11">
-          <MainMessage />
+        <div className="absolute inset-0">
+          <MapSkeleton />
         </div>
       )}
 
@@ -382,7 +439,9 @@ export const MapContainer = () => {
           <Category
             isMap
             categories={PIN_TYPE_LABELS}
-            value={PIN_TYPE_LABEL[pinType]}
+            value={PIN_TYPE_LABEL[effectivePinType]}
+            // 방문예정일 조회 중에는 동네형을 그날 기준으로 계산할 수 없어 고를 수 없다.
+            disabled={localUnavailable ? [PIN_TYPE_LABEL.ALL, PIN_TYPE_LABEL.LOCAL] : []}
             onChange={(label) => {
               const next = PIN_TYPES.find((type) => PIN_TYPE_LABEL[type] === label)
               if (next) setPinType(next)
@@ -393,6 +452,7 @@ export const MapContainer = () => {
             placeholder="지금 피크인 곳을 검색해보세요."
             description={searchDescription}
             onFilterClick={openFilterDrawer}
+            hasActiveFilter={hasActiveFilter(applied)}
           />
           <MapLocationBtn onLocate={handleLocate} />
           <Nav activeTab="map" />

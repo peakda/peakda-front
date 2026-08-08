@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from 'react'
 import type { FlowerItem } from '@/components/Map/Pin'
 import type {
   BloomMapPinType,
+  BloomSlotCategory,
   BloomSlotStatus,
 } from '@/api/facades/generated/peakdaApi.schemas'
 import { type Stage, STAGE_COLOR, STAGE_PRIORITY } from '@/constants/map'
@@ -19,6 +20,8 @@ export interface MapSpot {
   type: BloomMapPinType
   // 시기 필터용. 이 핀에 달린 꽃들의 개화 상태(핀 하나에 여러 개 가능).
   statuses: BloomSlotStatus[]
+  // 꽃 종류 필터용. 서버 category 가 단일 값이라 복수 선택은 클라에서 거른다.
+  categories: BloomSlotCategory[]
 }
 
 interface ClusterGroup {

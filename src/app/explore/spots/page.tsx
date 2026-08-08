@@ -25,8 +25,8 @@ function ExploreSpotsContent() {
       ? GetExploreSpotsSection.NEXT_WEEK
       : GetExploreSpotsSection.PEAK_NOW
 
-  // 필터 드로어에서 고른 꽃 종류(단일 선택). 없으면 전체를 받는다.
-  const category = useFilterStore((state) => state.category)
+  // 필터 드로어에서 고른 꽃 종류. 서버 category 는 값 하나만 받으므로 첫 번째만 보낸다.
+  const category = useFilterStore((state) => state.applied.categories[0])
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useExploreSpotsInfinite(section, category ?? undefined)

@@ -52,6 +52,23 @@ describe('lib/utils/bloomToMapSpots', () => {
     expect(spots[0].statuses).toEqual(['PEAK', 'PREPARING'])
   })
 
+  // 서버 category 가 단일 값이라 꽃 종류 복수 선택은 이 배열로 클라에서 거른다.
+  it('꽃 슬롯의 category 를 categories 배열로 싣는다', () => {
+    const spots = bloomToMapSpots(
+      response([
+        {
+          type: 'ATTRACTION',
+          name: '여의도',
+          latitude: 37.52,
+          longitude: 126.93,
+          blooms: [bloom('CHERRY', 'PEAK', '벚꽃'), bloom('CANOLA', 'PREPARING', '유채꽃')],
+        },
+      ])
+    )
+
+    expect(spots[0].categories).toEqual(['CHERRY', 'CANOLA'])
+  })
+
   it('좌표가 없는 핀은 제외한다', () => {
     const spots = bloomToMapSpots(
       response([
