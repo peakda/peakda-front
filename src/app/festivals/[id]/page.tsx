@@ -8,6 +8,7 @@ import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { Button } from '@/components/ui/button/Button'
 import { CardBadge } from '@/components/ui/card/CardBadge'
 import { useFestivalDetail } from '@/api/facades/festival'
+import { buildMapUrl } from '@/lib/utils/spotCta'
 
 // 서버가 판정한 축제 상태(phase) → 화면 문구
 const PHASE_LABEL: Record<string, string> = {
@@ -48,9 +49,40 @@ const toLines = (text?: string | null) =>
 export default function FestivalDetailPage() {
   const router = useRouter()
   const { id } = useParams<{ id: string }>()
-  const { data: festival } = useFestivalDetail(Number(id))
+  const { data: festival, isLoading, isError, refetch } = useFestivalDetail(Number(id))
 
-  if (!festival) return null
+  if (isLoading) {
+    return (
+      <div className="bg-bg-primary flex min-h-screen flex-col" aria-busy="true">
+        <div className="h-14">
+          <Header left={<LeftArrow />} />
+        </div>
+        <div className="h-64 animate-pulse bg-gray-200" />
+        <div className="flex flex-col gap-3 px-4 py-4">
+          <div className="h-6 w-1/2 animate-pulse rounded bg-gray-200" />
+          <div className="h-4 w-2/3 animate-pulse rounded bg-gray-100" />
+          <div className="h-20 w-full animate-pulse rounded-xl bg-gray-100" />
+        </div>
+      </div>
+    )
+  }
+
+  // 404·네트워크 오류·잘못된 id 모두 여기로 온다. 백지 대신 재시도 수단을 준다.
+  if (isError || !festival) {
+    return (
+      <div className="bg-bg-primary flex min-h-screen flex-col">
+        <div className="h-14">
+          <Header left={<LeftArrow />} />
+        </div>
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 px-4">
+          <p className="text-text-secondary text-sm">정보를 불러오지 못했어요</p>
+          <Button variant="outlined" color="primary" size="md" onClick={() => refetch()}>
+            다시 시도
+          </Button>
+        </div>
+      </div>
+    )
+  }
 
   const editorial = festival.editorial
   const phaseLabel = festival.phase ? PHASE_LABEL[festival.phase] : null
@@ -93,7 +125,11 @@ export default function FestivalDetailPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70" />
 
         <div className="absolute top-3 right-3 left-3 flex items-center justify-between">
-          {phaseLabel ? <CardBadge label={phaseLabel} variant="bloom" /> : <span />}
+          <div className="flex items-center gap-1">
+            {phaseLabel && <CardBadge label={phaseLabel} variant="bloom" />}
+            {/* 축제명으로 판정한 꽃 카테고리 (없으면 null) */}
+            {festival.displayName && <CardBadge label={festival.displayName} variant="dark" />}
+          </div>
           {dDayLabel && <CardBadge label={dDayLabel} variant="dark" />}
         </div>
 
@@ -202,7 +238,7 @@ export default function FestivalDetailPage() {
           color="primary"
           size="lg"
           className="flex-1"
-          onClick={() => router.push('/map')}
+          onClick={() => router.push(buildMapUrl(festival))}
         >
           지도에서 보기
         </Button>

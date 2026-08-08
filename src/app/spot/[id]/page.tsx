@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { Heart, Share2, MapPin } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { Button } from '@/components/ui/button/Button'
@@ -13,6 +14,7 @@ import { Drawer } from '@/components/ui/layout/Drawer'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import { toFeedCardProps } from '@/lib/utils/spotRecordToFeed'
 import { useSpotDetail } from '@/api/facades/spot'
+import { buildRecordUrl, canUseWebShare, isShareAbort } from '@/lib/utils/spotCta'
 import { cn } from '@/lib/utils/cn'
 
 const BLOOM_STATUS_LABEL: Record<string, string> = {
@@ -59,9 +61,40 @@ export default function SpotDetailPage() {
   const { id } = useParams<{ id: string }>()
   const openSaveSpotDrawer = useDrawerStore((s) => s.openSaveSpotDrawer)
 
-  const { data: spot } = useSpotDetail(Number(id))
+  const { data: spot, isLoading, isError, refetch } = useSpotDetail(Number(id))
 
-  if (!spot) return null
+  if (isLoading) {
+    return (
+      <div className="bg-bg-primary flex min-h-screen flex-col" aria-busy="true">
+        <div className="h-14">
+          <Header left={<LeftArrow />} />
+        </div>
+        <div className="h-64 animate-pulse bg-gray-200" />
+        <div className="flex flex-col gap-3 px-4 py-4">
+          <div className="h-6 w-1/2 animate-pulse rounded bg-gray-200" />
+          <div className="h-4 w-2/3 animate-pulse rounded bg-gray-100" />
+          <div className="h-20 w-full animate-pulse rounded-xl bg-gray-100" />
+        </div>
+      </div>
+    )
+  }
+
+  // 404·네트워크 오류·잘못된 id 모두 여기로 온다. 백지 대신 재시도 수단을 준다.
+  if (isError || !spot) {
+    return (
+      <div className="bg-bg-primary flex min-h-screen flex-col">
+        <div className="h-14">
+          <Header left={<LeftArrow />} />
+        </div>
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 px-4">
+          <p className="text-text-secondary text-sm">정보를 불러오지 못했어요</p>
+          <Button variant="outlined" color="primary" size="md" onClick={() => refetch()}>
+            다시 시도
+          </Button>
+        </div>
+      </div>
+    )
+  }
 
   const previewRecords = spot.recordPreview ?? []
   const favorited = spot.favorite.favorited
@@ -81,6 +114,24 @@ export default function SpotDetailPage() {
 
   const handleSave = () =>
     openSaveSpotDrawer({ spotId: Number(id), name: spot.name, location: spot.address ?? '' })
+
+  // Web Share 지원 기기는 공유 시트, 아니면 링크 복사로 대체한다.
+  const handleShare = async () => {
+    const url = window.location.href
+    try {
+      if (canUseWebShare(navigator)) {
+        await navigator.share({ title: spot.name, url })
+        return
+      }
+      await navigator.clipboard.writeText(url)
+      toast('링크를 복사했어요')
+    } catch (err) {
+      // 사용자가 공유 시트를 닫은 것뿐이면 실패가 아니다.
+      if (isShareAbort(err)) return
+      console.error(err)
+      toast.error('공유하지 못했어요')
+    }
+  }
 
   return (
     <div className="bg-bg-primary relative flex min-h-screen flex-col pb-28">
@@ -127,7 +178,7 @@ export default function SpotDetailPage() {
                   )}
                 />
               </button>
-              <button type="button" aria-label="공유">
+              <button type="button" aria-label="공유" onClick={handleShare}>
                 <Share2 className="h-5 w-5 cursor-pointer text-gray-600" />
               </button>
             </div>
@@ -193,7 +244,7 @@ export default function SpotDetailPage() {
           color="primary"
           size="lg"
           className="flex-1"
-          onClick={() => router.push('/record')}
+          onClick={() => router.push(buildRecordUrl(spot.id))}
         >
           방문 기록 남기기
         </Button>

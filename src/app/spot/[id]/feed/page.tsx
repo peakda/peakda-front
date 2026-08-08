@@ -5,10 +5,12 @@ import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { FeedCard } from '@/components/ui/card/FeedCard'
 import { Drawer } from '@/components/ui/layout/Drawer'
-import { useSpotRecordsBySpot, useDeleteSpotRecord } from '@/api/facades/spot-record'
+import { useSpotRecordsBySpotInfinite, useDeleteSpotRecord } from '@/api/facades/spot-record'
 import { useSpotDetail } from '@/api/facades/spot'
 import { useCurrentUser } from '@/api/facades/auth'
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { useDrawerStore } from '@/stores/useDrawerStore'
+import { flattenPages } from '@/lib/utils/infinitePages'
 import { toFeedCardProps } from '@/lib/utils/spotRecordToFeed'
 
 export default function SpotFeedPage() {
@@ -16,11 +18,10 @@ export default function SpotFeedPage() {
   const { id } = useParams<{ id: string }>()
   const { data: spot } = useSpotDetail(Number(id))
 
-  const { data, isLoading } = useSpotRecordsBySpot({
-    spotId: Number(id),
-    pageRequest: { page: 0, size: 20 },
-  })
-  const records = data?.content ?? []
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useSpotRecordsBySpotInfinite(Number(id))
+  const records = flattenPages(data)
+  const sentinelRef = useInfiniteScroll(() => fetchNextPage(), hasNextPage && !isFetchingNextPage)
 
   const { data: currentUser } = useCurrentUser()
   const deleteRecord = useDeleteSpotRecord()
@@ -56,6 +57,11 @@ export default function SpotFeedPage() {
               })}
             />
           ))}
+          {/* 하단에 닿으면 다음 페이지를 불러온다 */}
+          <div ref={sentinelRef} className="h-8" />
+          {isFetchingNextPage && (
+            <p className="text-text-tertiary py-4 text-center text-sm">불러오는 중...</p>
+          )}
         </div>
       )}
 
