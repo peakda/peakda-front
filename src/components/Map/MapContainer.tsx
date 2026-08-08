@@ -19,7 +19,7 @@ import { filterMapSpots } from '@/lib/utils/mapFilter'
 import { useBloomMap } from '@/api/facades/seasonal-bloom'
 import { useHomeSuggestion } from '@/api/facades/home'
 import { useUnreadNotificationCount } from '@/api/facades/notification'
-import { matchSpotApi, spotDetailApi } from '@/api/facades/spot'
+import { matchSpotApi, useSpotDetailFetcher } from '@/api/facades/spot'
 import { bloomToMapSpots } from '@/lib/utils/bloomToMapSpots'
 import { STAGE_LABEL } from '@/constants/map'
 import type {
@@ -39,6 +39,11 @@ const DEFAULT_CENTER = {
 }
 
 const NETWORK_TOAST_ID = 'map-network-error'
+
+// initMap 의 level 과 prefetchInitialTiles 에 넘기는 level 은 반드시 같아야 한다.
+// tilePrefetch 가 zoom = 14 - level 로 타일을 고르므로, 다르면 지도가 쓰지도 않을
+// 줌의 타일을 받아와 프리페치가 통째로 버려진다.
+const INITIAL_LEVEL = 8
 
 // bbox를 격자에 스냅해 미세 이동 시 동일 쿼리 키로 수렴시킨다(캐시 히트 + staleTime 작동).
 // 소수점 2자리(≈ 1km) 격자. 뷰를 항상 덮도록 min은 내림, max는 올림.
@@ -72,6 +77,22 @@ function toCoord(value: string | null) {
   return Number.isFinite(num) ? num : null
 }
 
+// snapHeight 는 드로어를 스냅할 때마다 바뀐다. MapContainer 가 직접 구독하면
+// 그때마다 지도 UI 전체(헤더·칩·검색바·Nav·드로어)가 다시 렌더되므로 이 버튼만 구독한다.
+function MapLocationBtn({ onLocate }: { onLocate: () => void }) {
+  const snapHeight = useDrawerStore((s) => s.snapHeight)
+
+  return (
+    <LocationBtn
+      onLocate={onLocate}
+      style={{
+        bottom: snapHeight > 0 ? `${snapHeight + 16}px` : '96px',
+        transition: 'bottom 0.5s cubic-bezier(0.32,0.72,0,1)',
+      }}
+    />
+  )
+}
+
 function panToCurrentLocation(map: kakao.maps.Map, onPermissionDenied?: () => void) {
   navigator.geolocation.getCurrentPosition(
     ({ coords }) => map.panTo(new kakao.maps.LatLng(coords.latitude, coords.longitude)),
@@ -84,7 +105,7 @@ function panToCurrentLocation(map: kakao.maps.Map, onPermissionDenied?: () => vo
 const initMap = (container: HTMLElement, center: { lat: number; lng: number }) => {
   const map = new kakao.maps.Map(container, {
     center: new kakao.maps.LatLng(center.lat, center.lng),
-    level: 8,
+    level: INITIAL_LEVEL,
     maxLevel: 13,
     draggable: true,
     scrollwheel: true,
@@ -103,8 +124,12 @@ export const MapContainer = () => {
   const [mapInstance, setMapInstance] = useState<kakao.maps.Map | null>(null)
   const [bbox, setBbox] = useState<GetSeasonalBloomsParams | null>(null)
   const { isReady, error, retry } = useLazyMapLoad(containerRef)
-  const { snapHeight, openFilterDrawer, openPinDrawer } = useDrawerStore()
-  const { pinType, category, statuses, setPinType } = useFilterStore()
+  const openFilterDrawer = useDrawerStore((s) => s.openFilterDrawer)
+  const openPinDrawer = useDrawerStore((s) => s.openPinDrawer)
+  const pinType = useFilterStore((s) => s.pinType)
+  const category = useFilterStore((s) => s.category)
+  const statuses = useFilterStore((s) => s.statuses)
+  const setPinType = useFilterStore((s) => s.setPinType)
 
   const latParam = searchParams.get('lat')
   const lngParam = searchParams.get('lng')
@@ -156,11 +181,13 @@ export const MapContainer = () => {
     return matchedId
   }, [])
 
+  const fetchSpotDetail = useSpotDetailFetcher()
+
   const handlePinClick = useCallback(
     async (spot: MapSpot) => {
       try {
         const spotId = await resolveSpotId(spot)
-        const detail = spotId != null ? await spotDetailApi(spotId) : null
+        const detail = spotId != null ? await fetchSpotDetail(spotId) : null
 
         if (detail) {
           // 유저가 올린 사진(방문 기록 대표 사진, 최신순 최대 3건)을 리스트로 노출한다.
@@ -209,7 +236,7 @@ export const MapContainer = () => {
         }))
       )
     },
-    [openPinDrawer, resolveSpotId]
+    [openPinDrawer, resolveSpotId, fetchSpotDetail]
   )
 
   useMapCluster(mapInstance, spots, handlePinClick)
@@ -223,12 +250,23 @@ export const MapContainer = () => {
       const bounds = mapInstance.getBounds()
       const sw = bounds.getSouthWest()
       const ne = bounds.getNorthEast()
-      setBbox({
+      const next = {
         minLat: snapDown(sw.getLat()),
         minLng: snapDown(sw.getLng()),
         maxLat: snapUp(ne.getLat()),
         maxLng: snapUp(ne.getLng()),
-      })
+      }
+      // 격자 스냅 덕에 미세 이동은 같은 값으로 수렴한다. 값이 같으면 객체를 갈지 않아
+      // 조회도 리렌더도 일어나지 않게 한다(새 객체로 setState 하면 값이 같아도 리렌더된다).
+      setBbox((prev) =>
+        prev &&
+        prev.minLat === next.minLat &&
+        prev.minLng === next.minLng &&
+        prev.maxLat === next.maxLat &&
+        prev.maxLng === next.maxLng
+          ? prev
+          : next
+      )
     }
 
     let timer: ReturnType<typeof setTimeout>
@@ -282,7 +320,7 @@ export const MapContainer = () => {
     if (!isReady || !containerRef.current || mapRef.current) return
 
     const center = initialCenter ?? DEFAULT_CENTER
-    prefetchInitialTiles(center, 13)
+    prefetchInitialTiles(center, INITIAL_LEVEL)
     mapRef.current = initMap(containerRef.current, center)
     setMapInstance(mapRef.current)
     // 쿼리 좌표로 들어온 경우엔 현재 위치로 튕기지 않는다.
@@ -356,13 +394,7 @@ export const MapContainer = () => {
             description={searchDescription}
             onFilterClick={openFilterDrawer}
           />
-          <LocationBtn
-            onLocate={handleLocate}
-            style={{
-              bottom: snapHeight > 0 ? `${snapHeight + 16}px` : '96px',
-              transition: 'bottom 0.5s cubic-bezier(0.32,0.72,0,1)',
-            }}
-          />
+          <MapLocationBtn onLocate={handleLocate} />
           <Nav activeTab="map" />
           <Drawer />
         </>

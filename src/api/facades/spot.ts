@@ -1,7 +1,9 @@
+import { useCallback } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   postSpotsMatch,
   getSpotsPreview,
-  getSpotsById,
+  getGetSpotsByIdQueryOptions,
   useGetSpotsPreview,
   usePostSpotsMatch as useMatchGen,
   useGetSpotsById,
@@ -13,13 +15,22 @@ export async function matchSpotApi(payload: SpotMatchRequest) {
   return res.data.data ?? null
 }
 
-// 이벤트(핀 클릭 등)에서 스팟 상세를 즉시 조회할 때 사용하는 plain async.
-export async function spotDetailApi(id: number) {
-  const res = await getSpotsById(id)
-  return res.data.data ?? null
-}
-
 export const useMatchSpot = () => useMatchGen()
+
+// 지도 핀 클릭처럼 렌더 밖에서 상세가 필요할 때 쓴다.
+// useSpotDetail(/spot/[id])과 같은 캐시를 공유하므로, 같은 핀을 다시 눌러도 ·
+// 드로어에서 상세 페이지로 넘어가도 staleTime 안에서는 재요청하지 않는다.
+export const useSpotDetailFetcher = () => {
+  const queryClient = useQueryClient()
+
+  return useCallback(
+    async (id: number) => {
+      const res = await queryClient.fetchQuery(getGetSpotsByIdQueryOptions(id))
+      return res.data.data ?? null
+    },
+    [queryClient]
+  )
+}
 
 // id 가 아직 없으면(선행 조회 대기) 요청하지 않는다.
 export const useSpotDetail = (id: number | undefined) =>

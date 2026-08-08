@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import type { FlowerItem } from '@/components/Map/Pin'
 import type {
   BloomMapPinType,
@@ -105,74 +105,127 @@ export function clusterSpots(spots: MapSpot[], level: number): ClusterGroup[] {
   }))
 }
 
-export function useMapCluster(map: kakao.maps.Map | null, spots: MapSpot[], onPinClick?: (spot: MapSpot) => void) {
-  const overlaysRef = useRef<kakao.maps.CustomOverlay[]>([])
+// 핀치줌 중 zoom_changed 가 연속 발화하므로 마지막 한 번만 다시 그린다.
+const ZOOM_DEBOUNCE_MS = 120
+
+interface OverlayEntry {
+  overlay: kakao.maps.CustomOverlay
+  // 클릭 시점의 최신 데이터. 오버레이를 재사용해도 리스너가 옛 spot 을 붙들지 않도록 여기서 읽는다.
+  spots: MapSpot[]
+}
+
+export function useMapCluster(
+  map: kakao.maps.Map | null,
+  spots: MapSpot[],
+  onPinClick?: (spot: MapSpot) => void
+) {
+  // 화면에 떠 있는 오버레이를 key 로 들고 있다가, 다시 그릴 때 내용이 같은 것은 그대로 둔다.
+  // key 에 렌더 결과 HTML 을 넣어 내용이 달라지면 자동으로 다른 key 가 되게 한다(오래된 핀 재사용 방지).
+  const entriesRef = useRef(new Map<string, OverlayEntry>())
+  const clusterCacheRef = useRef(new Map<number, ClusterGroup[]>())
+  const spotsRef = useRef(spots)
+  const onPinClickRef = useRef(onPinClick)
+
+  useEffect(() => {
+    onPinClickRef.current = onPinClick
+  })
+
+  const render = useCallback((map: kakao.maps.Map) => {
+    const level = map.getLevel()
+    const entries = entriesRef.current
+
+    if (!clusterCacheRef.current.has(level)) {
+      clusterCacheRef.current.set(level, clusterSpots(spotsRef.current, level))
+    }
+    const clusters = clusterCacheRef.current.get(level)!
+
+    const add = (key: string, lat: number, lng: number, html: string, members: MapSpot[]) => {
+      const existing = entries.get(key)
+      if (existing) {
+        existing.spots = members
+        return
+      }
+
+      const container = document.createElement('div')
+      container.innerHTML = html
+      const entry: OverlayEntry = { overlay: null!, spots: members }
+
+      if (members.length >= 2) {
+        // 평균 좌표로 2단계 확대하면 구성원이 화면 밖으로 흩어진다.
+        // 구성원 전체를 감싸는 영역에 맞춰 확대해 항상 화면 안에 들어오게 한다.
+        // padding 은 헤더·카테고리·검색바(위)와 Nav(아래)에 가리지 않을 만큼.
+        container.addEventListener('click', () => {
+          const bounds = new kakao.maps.LatLngBounds()
+          entry.spots.forEach((s) => bounds.extend(new kakao.maps.LatLng(s.lat, s.lng)))
+          map.setBounds(bounds, 180, 40, 140, 40)
+        })
+      } else {
+        container.style.cursor = 'pointer'
+        container.addEventListener('click', () => onPinClickRef.current?.(entry.spots[0]))
+      }
+
+      entry.overlay = new kakao.maps.CustomOverlay({
+        position: new kakao.maps.LatLng(lat, lng),
+        content: container,
+        xAnchor: 0.5,
+        yAnchor: members.length >= 2 ? 0.5 : 1,
+      })
+      entry.overlay.setMap(map)
+      entries.set(key, entry)
+    }
+
+    const nextKeys = new Set<string>()
+
+    for (const cluster of clusters) {
+      if (cluster.spots.length >= 2 && level >= 4) {
+        const html = createClusterHTML(cluster.spots)
+        const key = `c:${cluster.lat},${cluster.lng}|${html}`
+        nextKeys.add(key)
+        add(key, cluster.lat, cluster.lng, html, cluster.spots)
+        continue
+      }
+
+      for (const spot of cluster.spots) {
+        const html = createPinHTML(spot.flowers, spot.maxStage)
+        const key = `p:${spot.lat},${spot.lng}|${html}`
+        nextKeys.add(key)
+        add(key, spot.lat, spot.lng, html, [spot])
+      }
+    }
+
+    // 이번에 안 쓰인 것만 걷어낸다. 그대로인 핀은 DOM 을 건드리지 않는다.
+    for (const [key, entry] of entries) {
+      if (nextKeys.has(key)) continue
+      entry.overlay.setMap(null)
+      entries.delete(key)
+    }
+  }, [])
+
+  // spots 가 바뀌면 클러스터 계산 캐시를 버리고 다시 그린다.
+  useEffect(() => {
+    spotsRef.current = spots
+    clusterCacheRef.current.clear()
+    if (map) render(map)
+  }, [map, spots, render])
 
   useEffect(() => {
     if (!map) return
 
-    const clusterCache = new Map<number, ClusterGroup[]>()
-
-    const renderOverlays = () => {
-      overlaysRef.current.forEach((o) => o.setMap(null))
-      overlaysRef.current = []
-
-      const level = map.getLevel()
-      if (!clusterCache.has(level)) {
-        clusterCache.set(level, clusterSpots(spots, level))
-      }
-      const clusters = clusterCache.get(level)!
-
-      clusters.forEach((cluster) => {
-        const isCluster = cluster.spots.length >= 2 && level >= 4
-
-        if (isCluster) {
-          const container = document.createElement('div')
-          container.innerHTML = createClusterHTML(cluster.spots)
-          // 평균 좌표로 2단계 확대하면 구성원이 화면 밖으로 흩어진다.
-          // 구성원 전체를 감싸는 영역에 맞춰 확대해 항상 화면 안에 들어오게 한다.
-          // padding 은 헤더·카테고리·검색바(위)와 Nav(아래)에 가리지 않을 만큼.
-          container.addEventListener('click', () => {
-            const bounds = new kakao.maps.LatLngBounds()
-            cluster.spots.forEach((s) => bounds.extend(new kakao.maps.LatLng(s.lat, s.lng)))
-            map.setBounds(bounds, 180, 40, 140, 40)
-          })
-
-          const overlay = new kakao.maps.CustomOverlay({
-            position: new kakao.maps.LatLng(cluster.lat, cluster.lng),
-            content: container,
-            xAnchor: 0.5,
-            yAnchor: 0.5,
-          })
-          overlay.setMap(map)
-          overlaysRef.current.push(overlay)
-        } else {
-          cluster.spots.forEach((spot) => {
-            const container = document.createElement('div')
-            container.innerHTML = createPinHTML(spot.flowers, spot.maxStage)
-            container.style.cursor = 'pointer'
-            if (onPinClick) container.addEventListener('click', () => onPinClick(spot))
-
-            const overlay = new kakao.maps.CustomOverlay({
-              position: new kakao.maps.LatLng(spot.lat, spot.lng),
-              content: container,
-              xAnchor: 0.5,
-              yAnchor: 1,
-            })
-            overlay.setMap(map)
-            overlaysRef.current.push(overlay)
-          })
-        }
-      })
+    let timer: ReturnType<typeof setTimeout>
+    const onZoom = () => {
+      clearTimeout(timer)
+      timer = setTimeout(() => render(map), ZOOM_DEBOUNCE_MS)
     }
 
-    renderOverlays()
-    kakao.maps.event.addListener(map, 'zoom_changed', renderOverlays)
-
+    kakao.maps.event.addListener(map, 'zoom_changed', onZoom)
+    const entries = entriesRef.current
+    const clusterCache = clusterCacheRef.current
     return () => {
-      kakao.maps.event.removeListener(map, 'zoom_changed', renderOverlays)
-      overlaysRef.current.forEach((o) => o.setMap(null))
-      overlaysRef.current = []
+      clearTimeout(timer)
+      kakao.maps.event.removeListener(map, 'zoom_changed', onZoom)
+      entries.forEach((e) => e.overlay.setMap(null))
+      entries.clear()
+      clusterCache.clear()
     }
-  }, [map, spots])
+  }, [map, render])
 }
