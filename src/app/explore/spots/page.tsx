@@ -5,9 +5,12 @@ import { useSearchParams } from 'next/navigation'
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { SpotCard } from '@/components/ui/card/SpotCard'
-import { useExploreSpots } from '@/api/facades/explore'
+import { useExploreSpotsInfinite } from '@/api/facades/explore'
 import { GetExploreSpotsSection } from '@/api/facades/generated/peakdaApi.schemas'
 import { toExploreSpotProps } from '@/lib/utils/explore'
+import { flattenPages } from '@/lib/utils/infinitePages'
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
+import { useFilterStore } from '@/stores/useFilterStore'
 
 const SECTION_TITLE: Record<GetExploreSpotsSection, string> = {
   PEAK_NOW: '지금이 절정이에요',
@@ -22,12 +25,13 @@ function ExploreSpotsContent() {
       ? GetExploreSpotsSection.NEXT_WEEK
       : GetExploreSpotsSection.PEAK_NOW
 
-  // 첫 페이지만 조회한다(페이지네이션 미구현).
-  const { data, isLoading } = useExploreSpots({
-    section,
-    pageRequest: { page: 0, size: 50 },
-  })
-  const spots = data?.content ?? []
+  // 필터 드로어에서 고른 꽃 종류(단일 선택). 없으면 전체를 받는다.
+  const category = useFilterStore((state) => state.category)
+
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useExploreSpotsInfinite(section, category ?? undefined)
+  const spots = flattenPages(data)
+  const sentinelRef = useInfiniteScroll(fetchNextPage, hasNextPage && !isFetchingNextPage)
 
   return (
     <div className="bg-bg-primary relative flex min-h-screen flex-col pb-12">
@@ -47,16 +51,19 @@ function ExploreSpotsContent() {
             <p className="text-text-tertiary text-base">다음 개화 소식을 기다려주세요</p>
           </div>
         ) : (
-          <ul className="divide-y divide-gray-100">
-            {spots.map((item) => (
-              <SpotCard
-                key={`${item.attractionId}-${item.category}`}
-                spot={toExploreSpotProps(item)}
-                favoriteSpotId={item.spotId ?? undefined}
-                initialFavorite={item.favorited}
-              />
-            ))}
-          </ul>
+          <>
+            <ul className="divide-y divide-gray-100">
+              {spots.map((item) => (
+                <SpotCard
+                  key={`${item.attractionId}-${item.category}`}
+                  spot={toExploreSpotProps(item)}
+                  favoriteSpotId={item.spotId ?? undefined}
+                  initialFavorite={item.favorited}
+                />
+              ))}
+            </ul>
+            <div ref={sentinelRef} />
+          </>
         ))}
     </div>
   )

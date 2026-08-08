@@ -5,7 +5,6 @@ import { Settings } from 'lucide-react'
 import { Header } from '@/components/ui/layout/Header'
 import { Nav } from '@/components/ui/layout/Nav'
 import { Button } from '@/components/ui/button/Button'
-import { SPOTProps } from '@/app/search/_components/SpotPanel'
 import { ProfileStats } from '@/app/my/_components/ProfileStats'
 import { InterestFlowerSection } from '@/app/my/_components/InterestFlowerSection'
 import { MyRecordSection } from '@/app/my/_components/MyRecordSection'
@@ -16,6 +15,7 @@ import { toMyRecordThumb } from '@/lib/utils/spotRecordToFeed'
 import { toProfileStats, toFavoriteFlowerLabels } from '@/lib/utils/userProfile'
 import { useMyPage } from '@/api/facades/user'
 import { useFavoriteList } from '@/api/facades/spot-favorite'
+import { toFavoriteSpotProps } from '@/lib/utils/spotFavorite'
 import { useUnreadNotificationCount } from '@/api/facades/notification'
 import { formatUnreadBadge } from '@/lib/utils/notificationToAlarm'
 
@@ -28,13 +28,7 @@ export default function MyPage() {
   const { data: unread } = useUnreadNotificationCount()
   const unreadBadge = formatUnreadBadge(unread?.unreadCount ?? 0)
   const { data: favoriteData } = useFavoriteList()
-  const savedSpots: SPOTProps[] = (favoriteData?.favorites ?? []).slice(0, 3).map((f) => ({
-    id: f.spotId,
-    name: f.name,
-    location: f.address ?? '',
-    status: '',
-    nameList: [],
-  }))
+  const savedSpots = (favoriteData?.favorites ?? []).slice(0, 3).map(toFavoriteSpotProps)
 
   return (
     <div className="bg-bg-primary relative flex min-h-screen w-full flex-col pb-24">
@@ -102,8 +96,8 @@ export default function MyPage() {
       {/* 내 기록 */}
       <MyRecordSection records={records} count={myPage?.stats.recordCount} />
 
-      {/* 저장한 스팟 */}
-      <SavedSpotSection spots={savedSpots} />
+      {/* 저장한 스팟 — 미리보기 3건만 노출하므로 전체 개수는 응답의 count 를 쓴다 */}
+      <SavedSpotSection spots={savedSpots} count={favoriteData?.count} />
 
       <Nav activeTab="my" />
     </div>

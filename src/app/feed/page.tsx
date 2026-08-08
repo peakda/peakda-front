@@ -7,8 +7,15 @@ import { Header } from '@/components/ui/layout/Header'
 import { Nav } from '@/components/ui/layout/Nav'
 import { CategoryChip } from '@/components/ui/category/CategoryChip'
 import { FeedCard } from '@/components/ui/card/FeedCard'
-import { useFeedList } from '@/api/facades/feed'
+import { Drawer } from '@/components/ui/layout/Drawer'
+import { useFeedListInfinite } from '@/api/facades/feed'
+import { useCurrentUser } from '@/api/facades/auth'
+import { useDeleteSpotRecord } from '@/api/facades/spot-record'
+import { useDrawerStore } from '@/stores/useDrawerStore'
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { filterFromTab } from '@/lib/utils/feed'
+import { flattenPages } from '@/lib/utils/infinitePages'
+import { shouldLoadMore } from '@/lib/utils/myRecords'
 import { toFeedCardProps } from '@/lib/utils/spotRecordToFeed'
 
 const FEED_CATEGORIES = ['전체', '관심 식물', '팔로잉']
@@ -17,11 +24,25 @@ export default function FeedPage() {
   const router = useRouter()
   const [tab, setTab] = useState(FEED_CATEGORIES[0])
 
-  const { data, isLoading } = useFeedList({
-    filter: filterFromTab(tab),
-    pageRequest: { page: 0, size: 20 },
-  })
-  const records = data?.content ?? []
+  const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } = useFeedListInfinite(
+    filterFromTab(tab)
+  )
+  const records = flattenPages(data)
+  const sentinelRef = useInfiniteScroll(
+    () => fetchNextPage(),
+    shouldLoadMore(hasNextPage, isFetchingNextPage)
+  )
+
+  // 탭마다 무한 쿼리 키가 달라 목록이 처음부터 다시 쌓인다.
+  // 깊이 스크롤한 상태로 탭을 바꾸면 짧아진 목록의 sentinel 이 곧바로 보여 다음 페이지가 연쇄 로드되므로 맨 위로 올린다.
+  const handleTabClick = (cate: string) => {
+    setTab(cate)
+    window.scrollTo({ top: 0 })
+  }
+
+  const { data: currentUser } = useCurrentUser()
+  const deleteRecord = useDeleteSpotRecord()
+  const openDeleteConfirmDrawer = useDrawerStore((s) => s.openDeleteConfirmDrawer)
 
   return (
     <div className="bg-bg-primary relative flex min-h-screen flex-col pb-24">
@@ -45,7 +66,7 @@ export default function FeedPage() {
             key={cate}
             label={cate}
             selected={tab}
-            onClick={() => setTab(cate)}
+            onClick={() => handleTabClick(cate)}
             className="w-auto px-3"
           />
         ))}
@@ -57,17 +78,26 @@ export default function FeedPage() {
       ) : records.length === 0 ? (
         <p className="text-text-tertiary py-10 text-center text-sm">아직 피드가 없어요</p>
       ) : (
-        <div className="divide-border-primary divide-y">
-          {records.map((record) => (
-            <FeedCard
-              key={record.id}
-              {...toFeedCardProps(record)}
-              onOpen={() => router.push(`/feed/${record.id}`)}
-            />
-          ))}
-        </div>
+        <>
+          <div className="divide-border-primary divide-y">
+            {records.map((record) => (
+              <FeedCard
+                key={record.id}
+                {...toFeedCardProps(record, {
+                  isOwner: record.user.id === currentUser?.id,
+                  onEdit: () => router.push(`/record/${record.id}/edit`),
+                  onDelete: () =>
+                    openDeleteConfirmDrawer(() => deleteRecord.mutate({ id: record.id })),
+                })}
+                onOpen={() => router.push(`/feed/${record.id}`)}
+              />
+            ))}
+          </div>
+          <div ref={sentinelRef} />
+        </>
       )}
 
+      <Drawer />
       <Nav activeTab="feed" />
     </div>
   )

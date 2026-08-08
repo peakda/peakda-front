@@ -2,13 +2,20 @@
 
 import Image from 'next/image'
 import { Button } from '@/components/ui/button/Button'
-import { useBlockedList, useUnblockUser } from '@/api/facades/user-block'
+import { useBlockedListInfinite, useUnblockUser } from '@/api/facades/user-block'
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
+import { flattenPages } from '@/lib/utils/infinitePages'
+import { shouldLoadMore } from '@/lib/utils/myRecords'
 import { toBlockedRow } from '@/lib/utils/userProfile'
 
 export function BlockedUsersSection() {
-  const { data } = useBlockedList({ pageRequest: { page: 0, size: 20 } })
+  const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useBlockedListInfinite()
   const unblockMutation = useUnblockUser()
-  const rows = (data?.content ?? []).map(toBlockedRow)
+  const rows = flattenPages(data).map(toBlockedRow)
+  const sentinelRef = useInfiniteScroll(
+    () => fetchNextPage(),
+    shouldLoadMore(hasNextPage, isFetchingNextPage)
+  )
 
   return (
     <>
@@ -45,6 +52,7 @@ export function BlockedUsersSection() {
           </div>
         ))
       )}
+      <div ref={sentinelRef} />
     </>
   )
 }

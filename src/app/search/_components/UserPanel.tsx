@@ -1,5 +1,6 @@
 import { IconBtn } from '@/components/ui/button/IconBtn'
 import { UserList } from '@/app/search/_components/UserList'
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import Image from 'next/image'
 
 export interface UserProps {
@@ -7,13 +8,20 @@ export interface UserProps {
   name: string
   stats: string
   following: boolean
+  // 프로필 이미지. 없으면 기본 아이콘
+  imageUrl?: string | null
 }
 
 interface Props {
   users: UserProps[]
+  // 목록 하단에 닿았을 때 다음 페이지를 부른다. hasMore 가 false 면 관찰하지 않는다.
+  onLoadMore?: () => void
+  hasMore?: boolean
 }
 
-export function UserPanel({ users }: Props) {
+export function UserPanel({ users, onLoadMore, hasMore = false }: Props) {
+  const sentinelRef = useInfiniteScroll(() => onLoadMore?.(), hasMore)
+
   if (users.length === 0) {
     return (
       <div className="flex h-96 flex-col items-center justify-center gap-2 py-6 text-center">
@@ -29,10 +37,13 @@ export function UserPanel({ users }: Props) {
   }
 
   return (
-    <ul className="divide-y divide-gray-100">
-      {users.map((user) => (
-        <UserList user={user} key={user.id} />
-      ))}
-    </ul>
+    <>
+      <ul className="divide-y divide-gray-100">
+        {users.map((user) => (
+          <UserList user={user} key={user.id} />
+        ))}
+      </ul>
+      <div ref={sentinelRef} />
+    </>
   )
 }

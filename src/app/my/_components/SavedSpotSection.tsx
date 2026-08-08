@@ -5,12 +5,18 @@ import { SavedSpotEmpty } from '@/app/my/_components/SavedSpotEmpty'
 
 interface Props {
   spots: SPOTProps[]
+  // 전체 찜 개수. spots 는 미리보기라 잘려 있을 수 있어 개수는 따로 받는다.
+  count?: number
 }
 
-export function SavedSpotSection({ spots }: Props) {
+export function SavedSpotSection({ spots, count }: Props) {
   return (
     <section className="mt-4">
-      <SectionHeader title={`저장한 스팟 (${spots.length})`} action="전체" href="/my/saved" />
+      <SectionHeader
+        title={`저장한 스팟 (${count ?? spots.length})`}
+        action="전체"
+        href="/my/saved"
+      />
       {spots.length === 0 ? (
         <SavedSpotEmpty />
       ) : (

@@ -17,9 +17,9 @@ const BLOOM_STATUS_LABEL: Record<string, string> = {
   PEAK: '절정',
 }
 
-const BLOOM_STATUS_VARIANT: Record<string, 'green' | 'bloom' | 'secondary'> = {
+const BLOOM_STATUS_VARIANT: Record<string, 'green' | 'starting' | 'bloom'> = {
   PREPARING: 'green',
-  STARTED: 'green',
+  STARTED: 'starting',
   PEAK: 'bloom',
 }
 

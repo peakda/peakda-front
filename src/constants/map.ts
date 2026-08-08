@@ -2,12 +2,12 @@
 
 export type Stage = 'Before' | 'Start' | 'Peak' | 'End'
 
-// End 는 아직 Before 와 같은 회색. 구분되는 색이 정해지면 이 값만 바꾸면 된다.
+// 개화 단계 색(디자인 확정): 개화 전 gray-400 → 시작 pink-200 → 절정 pink-400 → 종료 pink-600
 export const STAGE_COLOR: Record<Stage, string> = {
   Before: '#a8b0bc',
-  Start: '#ff7f92',
+  Start: '#ffa8b4',
   Peak: '#f7576b',
-  End: '#a8b0bc',
+  End: '#c41f33',
 }
 
 export const STAGE_LABEL: Record<Stage, string> = {
