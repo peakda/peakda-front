@@ -18,6 +18,8 @@ const spot = (lat: number, lng: number): MapSpot => ({
   lng,
   flowers: [{ src: '/flowers/cherry-blossom.svg', alt: '벚꽃' }],
   maxStage: 'Peak',
+  type: 'ATTRACTION',
+  statuses: ['PEAK'],
 })
 
 /** 클러스터 구성원들이 차지하는 지리적 범위를 화면 px 로 환산 */

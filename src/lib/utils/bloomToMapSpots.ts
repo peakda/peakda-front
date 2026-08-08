@@ -22,6 +22,9 @@ export function bloomToMapSpots(data: BloomMapResponse): MapSpot[] {
         title: a.name,
         attractionId: a.attractionId ?? undefined,
         spotId: a.spotId ?? undefined,
+        // 상단 칩·시기 필터는 서버 파라미터가 없어 클라이언트에서 거른다.
+        type: a.type,
+        statuses: a.blooms.map((b) => b.status),
       },
     ]
   })

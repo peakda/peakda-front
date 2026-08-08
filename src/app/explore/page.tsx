@@ -8,6 +8,7 @@ import { SearchInput } from '@/app/search/_components/SearchInput'
 import { ExplorCard } from '@/components/ui/card/ExplorCard'
 import { SpotCard } from '@/components/ui/card/SpotCard'
 import { useDrawerStore } from '@/stores/useDrawerStore'
+import { useFilterStore } from '@/stores/useFilterStore'
 import { Drawer } from '@/components/ui/layout/Drawer'
 import { Nav } from '@/components/ui/layout/Nav'
 import { useHomeSuggestion } from '@/api/facades/home'
@@ -63,9 +64,11 @@ export default function ExplorePage() {
   const router = useRouter()
   const { openFlowerFilterDrawer } = useDrawerStore()
   const { data: suggestion } = useHomeSuggestion()
+  // 필터 드로어에서 고른 꽃 종류(단일 선택). 없으면 전체를 받는다.
+  const category = useFilterStore((state) => state.category)
 
   // 절정/다음 주/축제/큐레이션 4개 섹션이 한 번에 내려온다.
-  const { data: explore, isLoading } = useExploreCuration()
+  const { data: explore, isLoading } = useExploreCuration({ category: category ?? undefined })
   const peakNow = explore?.peakNow ?? []
   const nextWeek = explore?.nextWeek ?? []
   const festivals = explore?.festivals ?? []
