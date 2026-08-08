@@ -6,28 +6,39 @@ import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { UserRow } from '@/components/ui/list/UserRow'
 import { useCurrentUser } from '@/api/facades/auth'
-import { useFollowerList } from '@/api/facades/user-follow'
+import { useFollowerListInfinite } from '@/api/facades/user-follow'
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
+import { flattenPages } from '@/lib/utils/infinitePages'
+import { shouldLoadMore } from '@/lib/utils/myRecords'
 
 function FollowerList({ userId }: { userId: number }) {
-  const { data } = useFollowerList(userId, { pageRequest: { page: 0, size: 50 } })
-  const users = data?.content ?? []
+  const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
+    useFollowerListInfinite(userId)
+  const users = flattenPages(data)
+  const sentinelRef = useInfiniteScroll(
+    () => fetchNextPage(),
+    shouldLoadMore(hasNextPage, isFetchingNextPage)
+  )
 
-  if (users.length === 0) {
+  if (!isLoading && users.length === 0) {
     return <p className="text-text-secondary py-12 text-center text-sm">팔로워가 없습니다.</p>
   }
 
   return (
-    <ul>
-      {users.map((user) => (
-        <UserRow
-          key={user.userId}
-          userId={user.userId}
-          name={user.nickname}
-          profileImageUrl={user.profileImageUrl}
-          initialFollowing={user.following}
-        />
-      ))}
-    </ul>
+    <>
+      <ul>
+        {users.map((user) => (
+          <UserRow
+            key={user.userId}
+            userId={user.userId}
+            name={user.nickname}
+            profileImageUrl={user.profileImageUrl}
+            initialFollowing={user.following}
+          />
+        ))}
+      </ul>
+      <div ref={sentinelRef} />
+    </>
   )
 }
 
