@@ -21,6 +21,13 @@ const IMAGESIZE: Record<AvatarSize, string> = {
   lg: 'h-6 w-6',
 }
 
+// SIZE 와 같은 값. sizes 를 안 주면 100vw 로 간주해 화면 폭 이미지를 받는다.
+const IMAGE_SIZES: Record<AvatarSize, string> = {
+  sm: '32px',
+  md: '36px',
+  lg: '40px',
+}
+
 export function Avatar({ imageUrl, size = 'sm', className }: AvatarProps) {
   return (
     <div
@@ -31,7 +38,7 @@ export function Avatar({ imageUrl, size = 'sm', className }: AvatarProps) {
       )}
     >
       {imageUrl ? (
-        <Image src={imageUrl} alt="" fill className="object-cover" />
+        <Image src={imageUrl} alt="" fill sizes={IMAGE_SIZES[size]} className="object-cover" />
       ) : (
         <Image
           src="/icons/person.svg"

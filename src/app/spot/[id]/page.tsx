@@ -142,7 +142,14 @@ export default function SpotDetailPage() {
       {/* 대표 이미지 */}
       <div className="relative h-64 bg-gray-200">
         {spot.representativeImageUrl && (
-          <Image src={spot.representativeImageUrl} alt={spot.name} fill className="object-cover" />
+          <Image
+            src={spot.representativeImageUrl}
+            alt={spot.name}
+            fill
+            priority
+            sizes="(max-width: 430px) 100vw, 430px"
+            className="object-cover"
+          />
         )}
         {spot.bloom && (
           <div className="absolute top-3 left-3 flex items-center gap-1">
