@@ -1,12 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Header } from '@/components/ui/layout/Header'
 import { Nav } from '@/components/ui/layout/Nav'
 import { CategoryChip } from '@/components/ui/category/CategoryChip'
-import { FeedCard } from '@/components/ui/card/FeedCard'
+import { FeedListItem } from '@/components/ui/card/FeedListItem'
 import { Drawer } from '@/components/ui/layout/Drawer'
 import { useFeedListInfinite } from '@/api/facades/feed'
 import { useCurrentUser } from '@/api/facades/auth'
@@ -16,7 +16,6 @@ import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { filterFromTab } from '@/lib/utils/feed'
 import { flattenPages } from '@/lib/utils/infinitePages'
 import { shouldLoadMore } from '@/lib/utils/myRecords'
-import { toFeedCardProps } from '@/lib/utils/spotRecordToFeed'
 
 const FEED_CATEGORIES = ['전체', '관심 식물', '팔로잉']
 
@@ -41,8 +40,16 @@ export default function FeedPage() {
   }
 
   const { data: currentUser } = useCurrentUser()
-  const deleteRecord = useDeleteSpotRecord()
+  const { mutate: deleteRecord } = useDeleteSpotRecord()
   const openDeleteConfirmDrawer = useDrawerStore((s) => s.openDeleteConfirmDrawer)
+
+  // 아이템에 넘기는 콜백은 참조가 고정돼야 FeedListItem 의 memo 가 동작한다.
+  const handleOpen = useCallback((id: number) => router.push(`/feed/${id}`), [router])
+  const handleEdit = useCallback((id: number) => router.push(`/record/${id}/edit`), [router])
+  const handleDelete = useCallback(
+    (id: number) => openDeleteConfirmDrawer(() => deleteRecord({ id })),
+    [openDeleteConfirmDrawer, deleteRecord]
+  )
 
   return (
     <div className="bg-bg-primary relative flex min-h-screen flex-col pb-24">
@@ -81,15 +88,13 @@ export default function FeedPage() {
         <>
           <div className="divide-border-primary divide-y">
             {records.map((record) => (
-              <FeedCard
+              <FeedListItem
                 key={record.id}
-                {...toFeedCardProps(record, {
-                  isOwner: record.user.id === currentUser?.id,
-                  onEdit: () => router.push(`/record/${record.id}/edit`),
-                  onDelete: () =>
-                    openDeleteConfirmDrawer(() => deleteRecord.mutate({ id: record.id })),
-                })}
-                onOpen={() => router.push(`/feed/${record.id}`)}
+                record={record}
+                isOwner={record.user.id === currentUser?.id}
+                onOpen={handleOpen}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
               />
             ))}
           </div>
