@@ -57,6 +57,8 @@ export const useNotificationListInfinite = (segment: NotificationSegment) =>
       notificationListApi({ segment, pageRequest: { page: pageParam, size: PAGE_SIZE } }),
     initialPageParam: 0,
     getNextPageParam: nextPageParam,
+    // 다른 사용자의 행동으로 바뀌는 값이라 전역 5분을 따르지 않는다 (CLAUDE.md API 호출 규칙)
+    staleTime: 0,
   })
 
 export const useUnreadNotificationCount = () =>

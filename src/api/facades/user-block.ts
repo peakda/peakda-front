@@ -43,6 +43,8 @@ export const useBlockedListInfinite = () =>
     queryFn: ({ pageParam }) => blockedListApi({ pageRequest: { page: pageParam, size: PAGE_SIZE } }),
     initialPageParam: 0,
     getNextPageParam: nextPageParam,
+    // 즉시 반영이 필요한 목록이라 전역 5분을 따르지 않는다 (CLAUDE.md API 호출 규칙)
+    staleTime: 0,
   })
 
 // mutate({ userId }) 형태로 호출 → 성공 시 차단 목록 캐시 무효화
