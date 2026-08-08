@@ -11,7 +11,7 @@
 | `api/mutator/` | orval customInstance — 순수 `fetch` 래퍼(axios 미사용). 401 시 refresh 후 1회 재시도까지 담당하며 생성 코드가 공통으로 사용 |
 | `api/facades/generated/` | `pnpm generate:api`로 orval이 생성 (tags-split 모드, 도메인별 분리). **직접 수정 금지** — swagger 재생성 시 덮어씀 |
 | `api/facades/*.ts` | 도메인별 수동 파사드. generated 훅을 감싸서 앱에 노출. 언래핑 규칙: `res.data`(orval 래퍼) → `res.data.data`(백엔드 실제 payload) |
-| `app/` | Next.js App Router. 라우트: explore, feed, map, spot, search, my, profile, users, creators, festivals, followers, following, notification, onboarding, login/auth, Terms(약관), record. `app/_components/`는 앱 전역 공용 컴포넌트(Providers, SplashScreen), `app/api/`는 uploadthing 전용 Route Handler (백엔드 API 프록시 아님 — `ARCHITECTURE.md` 참고) |
+| `app/` | Next.js App Router. 라우트: explore, feed, map, spot, search, my, profile, users, creators, festivals, followers, following, notification, onboarding, login/auth, Terms(약관), record. `app/_components/`는 앱 전역 공용 컴포넌트(Providers, SplashScreen). Route Handler 디렉터리는 없다 — 백엔드를 직접 호출한다 (`ARCHITECTURE.md` 참고) |
 | `components/Map/` | 카카오맵 관련 컴포넌트 — `dynamic import + ssr: false` 필수 |
 | `components/ui/` | 프레젠테이셔널 컴포넌트 (button, card, category, display, form, icon, layout, list, message, Tab) |
 | `components/notification/` | 알림 관련 컴포넌트 |

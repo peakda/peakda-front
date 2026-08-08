@@ -1,28 +1,24 @@
-﻿import { keepPreviousData } from '@tanstack/react-query'
+import { keepPreviousData } from '@tanstack/react-query'
 import {
   getSeasonalBloomsCalendar,
   getSeasonalBlooms,
-  getSeasonalBloomsPeak,
   useGetSeasonalBloomsCalendar,
   useGetSeasonalBlooms,
-  useGetSeasonalBloomsPeak,
 } from '@/api/facades/generated/seasonal-bloom/seasonal-bloom'
-import type { GetSeasonalBloomsCalendarParams, GetSeasonalBloomsParams, GetSeasonalBloomsPeakParams } from '@/api/facades/generated/peakdaApi.schemas'
+import type {
+  GetSeasonalBloomsCalendarParams,
+  GetSeasonalBloomsParams,
+} from '@/api/facades/generated/peakdaApi.schemas'
 
-// ?몃옒??洹쒖튃: res.data (Orval ?섑띁) ??res.data.data (諛깆뿏???ㅼ젣 payload)
+// 언랩 규칙: res.data (Orval 래퍼) → res.data.data (백엔드 실제 payload)
 
-// bbox 誘몄?鍮????몄텧??留됯린 ?꾪븳 ?붾? ??useBloomMap(null) ?대㈃ enabled:false 濡??붿껌?섏? ?딅뒗??
+// bbox 미지정 시 호출을 막기 위한 더미 값. useBloomMap(null) 이면 enabled:false 로 요청하지 않는다.
 const EMPTY_BBOX: GetSeasonalBloomsParams = { minLat: 0, maxLat: 0, minLng: 0, maxLng: 0 }
 
-// ??? plain async (?대깽??湲곕컲 ?몄텧) ???????????????????????????????????????????
+// ▷ plain async (이벤트 기반 호출) ─────────────────────────────────────────
 
 export async function bloomMapApi(params: GetSeasonalBloomsParams) {
   const res = await getSeasonalBlooms(params)
-  return res.data.data ?? null
-}
-
-export async function bloomPeakApi(params?: GetSeasonalBloomsPeakParams) {
-  const res = await getSeasonalBloomsPeak(params)
   return res.data.data ?? null
 }
 
@@ -31,7 +27,7 @@ export async function bloomCalendarApi(params: GetSeasonalBloomsCalendarParams) 
   return res.data.data ?? null
 }
 
-// ??? React Query hooks (罹먯떛 / ?곹깭 愿由? ????????????????????????????????????
+// ▷ React Query hooks (캐싱 / 상태 관리) ───────────────────────────────────
 
 export const useBloomMap = (params: GetSeasonalBloomsParams | null) =>
   useGetSeasonalBlooms(params ?? EMPTY_BBOX, {
@@ -42,8 +38,6 @@ export const useBloomMap = (params: GetSeasonalBloomsParams | null) =>
     },
   })
 
-export const useBloomPeak = (params?: GetSeasonalBloomsPeakParams) =>
-  useGetSeasonalBloomsPeak(params, { query: { select: (res) => res.data.data ?? null } })
-
+// 스팟 상세의 일별 개화 타임라인용. 화면 확정 전이라 아직 호출부가 없다.
 export const useBloomCalendar = (params: GetSeasonalBloomsCalendarParams) =>
   useGetSeasonalBloomsCalendar(params, { query: { select: (res) => res.data.data ?? null } })

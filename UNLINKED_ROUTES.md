@@ -1,77 +1,69 @@
-# 연동 안 된 API / 라우팅 안 된 페이지 정리
+# 연동 안 된 API / 라우팅 안 된 페이지
 
-> 조사 기준: 2026-07-26 (`feat/11` 브랜치)
+> 조사 기준: 2026-08-08 (`feat/15` 브랜치, Phase 0 정리 직후)
+> 이전 판(2026-07-26, `feat/11`)은 explore·festivals·creators가 모두 목데이터라고 적고 있었으나 그 사이 실 API로 연동되어 내용 대부분이 무효가 됐다. 전면 갱신했다.
 
 ## 아키텍처 요약
 
-- `src/app/api`에는 uploadthing 라우트 1개만 존재 (`route.ts` + `core.ts`) — 백엔드 API 프록시가 아니라 이미지 업로드 전용.
-- 실제 백엔드 API는 `src/api/facades/*.ts` (수동 파사드) → `src/api/facades/generated/**` (orval 생성) 구조로 호출됨. 컴포넌트/페이지는 파사드의 `useXxx` 훅 또는 `xxxApi` 비동기 함수를 사용.
+- `src/app/api` Route Handler는 **없다.** 유일하게 있던 uploadthing 라우트는 호출부가 없어 2026-08-08 제거했다.
+- 백엔드 API는 `src/api/facades/*.ts`(수동 파사드) → `src/api/facades/generated/**`(orval) → `src/api/mutator` 순으로 호출된다.
 
 ---
 
-## 1. 연동 안 된 API
+## 1. 라우팅 안 된 페이지
 
-| 파일/함수 | 이유 |
+**없다.** 이전 판에서 orphan으로 적혀 있던 두 페이지는 현재 모두 진입 동선이 있다.
+
+| 라우트 | 진입 경로 |
 |---|---|
-| `src/app/api/uploadthing/route.ts`, `core.ts` | 이를 호출하는 `src/lib/uploadthing.ts`의 `useUploadThing` 헬퍼가 앱 어디서도 미사용. 실제 프로필 이미지 업로드는 `uploadProfileImageApi`/`uploadSignupProfileImageApi`(백엔드 API)로 처리되고 있어 죽은 코드로 보임 |
-| `src/api/facades/seasonal-bloom.ts` — `bloomCalendarApi`, `useBloomCalendar` | "개화 캘린더" 엔드포인트. 함수·훅 모두 어디서도 호출되지 않음 (`useBloomMap`, `useBloomPeak`만 사용됨) |
-| `src/api/facades/spot-record.ts` — `listMySpotRecordsApi`, `useMySpotRecords` | "내 스팟 기록 목록" 엔드포인트. 함수·훅 모두 미사용 |
-| `src/api/facades/spot-record.ts` — `publishSpotRecordApi`, `usePublishSpotRecord` | "기록 게시(publish)" 엔드포인트. 미사용 (기록 작성 플로우는 create/update만 사용) |
-| `src/api/facades/user-follow.ts` — `followSummaryApi`, `useFollowSummary` | "팔로우 요약" 엔드포인트. 미사용 |
-| `src/api/facades/device.ts` — `registerDeviceApi`, `unregisterDeviceApi` | 디바이스(푸시) 등록/해제 API. 미사용 |
-| `src/api/facades/auth.ts` — `refreshApi` | 직접 호출 지점 없음 (단, axios interceptor 내부에서 처리될 가능성 있음 — 아래 애매한 경우 참고) |
+| `/festivals/[id]` | `/explore` 축제 카드, `/explore/festivals` 목록 (둘 다 `Link` 연결됨) |
+| `/creators/[id]` | `/explore` 큐레이션 카드 (`Link href={`/creators/${item.id}`}`) |
+
+`/auth/callback`은 OAuth 리다이렉트 외부 진입점이라 내부 링크가 없는 게 정상이다.
 
 ---
 
-## 2. 라우팅 안 된 페이지 (Orphan Pages)
+## 2. 연동 안 된 API (파사드는 있고 호출부가 없음)
 
-| 파일 경로 | 라우트 | 이유 |
-|---|---|---|
-| `src/app/creators/[id]/page.tsx` | `/creators/[id]` | `/creators` 링크가 코드베이스 어디에도 없음. `MOCK_CREATOR_DETAIL` 목데이터만 사용, API 연동도 없음 |
-| `src/app/festivals/[id]/page.tsx` | `/festivals/[id]` | `/festivals` 링크 없음. `explore` 페이지의 축제 카드(`ExplorCard`)에 `onClick`/`Link`가 구현되어 있지 않아 클릭해도 이동하지 않음. `MOCK_FESTIVAL_DETAIL` 목데이터만 사용 |
-
-두 페이지 모두 화면 구현 자체는 완성돼 있고, 진입 동선(카드 클릭 → 라우팅)만 빠진 상태.
-
-### 정상 라우팅된 페이지 (참고)
-
-`/map`, `/explore`, `/record`(+`[id]`, `[id]/edit`), `/feed`(+`[id]`), `/my`(+`/saved`, `/settings`), `/notification`, `/search`, `/spot/[id]`(+`/feed`), `/users/[id]`, `/followers`, `/following`, `/profile`(+`/edit`), `/Terms`(+`/[slug]`), `/login`, `/onboarding` — 모두 `Nav.tsx`, 각 상세/목록 페이지, `SplashScreen`, `OnboardingCarousel` 등에서 `router.push`/`Link`로 연결됨.
-
----
-
-## 3. 딥다이브 — `/spot/[id]` (스팟 상세) 축제/일반 연동 여부
-
-### 결론: `/spot/[id]` 자체는 정상, "축제"는 데이터 모델에 없는 개념이라 별도로 겉돎
-
-- 백엔드 스키마(`SpotDetailResponseType`)에는 `ATTRACTION`(명소) / `LOCAL`(사용자 등록 로컬 스팟) 두 타입만 존재하고 **"축제(festival)" 타입 자체가 없음**. `SpotSearchItemType`, `SpotPreviewItemType`도 동일.
-- `src/app/spot/[id]/page.tsx`, `src/app/spot/[id]/feed/page.tsx` 모두 `spot.type` 분기 없이 `useSpotDetail`/`useSpotRecordsBySpot` 공통 로직으로 처리하며 ATTRACTION/LOCAL 둘 다 정상 동작.
-
-### 진입 동선
-
-| 진입 경로 | 동작 |
+| 파사드 | 상태 |
 |---|---|
-| 지도 핀 클릭 → `Drawer.tsx` "명소 보기" | `router.push(`/spot/${id}`)` — 정상 |
-| 검색 → `SpotCard.tsx` | `Link href={`/spot/${id}`}` — 정상 |
-| explore "요즘 뜨는 축제" (`ExplorCard type='festival'`, `FESTIVAL_CARDS`) | 완전 하드코딩 목데이터 + `ExplorCard`에 `onClick`/`Link` 자체가 없어 클릭해도 이동 안 함 |
-| explore "지금이 절정이에요"(`type='peak'`) / "이번 주말 어디로"(`type='course'`) | 마찬가지로 `ExplorCard`에 이벤트 핸들러 없어 클릭 불가 |
+| `seasonal-bloom.ts` — `bloomCalendarApi`, `useBloomCalendar` | **연동 가능, 화면 기획 대기.** 스팟 상세의 일별 개화 타임라인용. 필요한 파라미터(`attractionId`, `category`)는 `SpotDetailResponse`에 이미 다 있다 |
+| `spot-record.ts` — `listMySpotRecordsApi`, `useMySpotRecords`, `useMySpotRecordsInfinite` | **Phase 1에서 연동 예정.** 마이 "내 기록 전체보기"(`/my/records`)용. `MyPageResponse.recordPreview` 스키마 주석에 "더보기는 스팟 기록 리스트 API로"라고 명시돼 있어 용도 확정 |
+| `spot.ts` — `spotPreviewApi`, `useSpotPreview` | 지도 클러스터 다중 핀 리스트(SCR-011d)용. 해당 화면이 아직 없어 보류 |
+| `device.ts` — `registerDeviceApi`, `unregisterDeviceApi` | 푸시 인프라(FCM 등) 도입 전까지 보류 |
+| `auth.ts` — `refreshApi` | 실질 미사용. 토큰 갱신은 `src/api/mutator/index.ts`가 orval 부트스트랩 순환을 피하려고 **raw fetch로 직접** 호출한다. 파사드 쪽은 남은 껍데기 |
 
-### `/festivals/[id]` vs `/spot/[id]` 관계 판단
+### 2026-08-08 삭제한 것
 
-중복/미완성 기능이며 서로 통합되지 않은 상태. `/festivals/[id]`가 다루려던 "축제"는 현재 백엔드 데이터 모델에 없고, `dateRange`/`status` 같은 독자 필드는 `SpotDetailResponse`에도 없어 지금 스키마로는 `/spot/[id]`에 자연스럽게 흡수되지도 않음. 라우트 이름(`festivals`)과 explore 축제 카드의 도메인이 일치하는 것으로 보아 원래는 카드 클릭 → `/festivals/[id]` 연결을 의도했던 것으로 보이나, `ExplorCard`에 클릭 핸들러가 빠지면서 구현이 중단된 상태로 남음.
+호출부가 없고 대체 경로가 확정된 것만 지웠다.
+
+- `src/lib/uploadthing.ts`, `src/app/api/uploadthing/` — 프로필 이미지 업로드는 백엔드 API(`uploadProfileImageApi`)가 처리
+- `seasonal-bloom.ts` — `bloomPeakApi` / `useBloomPeak` (`GET /api/explore`로 대체됨)
+- `user-follow.ts` — `followSummaryApi` / `useFollowSummary` (`UserProfileResponse.stats`와 중복)
+- `spot-record.ts` — `publishSpotRecordApi` / `usePublishSpotRecord` (DRAFT 흐름이 기획에 없음)
+
+> ⚠️ `next.config.ts`의 UploadThing 이미지 도메인(`utfs.io`, `*.ufs.sh`, `t3.storageapi.dev`)은 **백엔드가 내려주는 presigned URL** 때문에 여전히 필요하다. 라우트를 지웠다고 함께 지우면 안 된다.
+> `package.json`의 `uploadthing`·`@uploadthing/react` 의존성은 이제 소스에서 참조되지 않는다. 제거는 별도로 판단한다.
 
 ---
 
-## 4. 애매한 경우
+## 3. API가 주는데 화면이 안 쓰는 필드
 
-- **`/auth/callback`**: 내부 `Link`/`router.push`로 연결되는 곳은 없지만, 카카오 OAuth 로그인 후 백엔드/카카오가 브라우저를 리다이렉트시키는 외부 진입점이므로 orphan 아님.
-- **`src/api/facades/spot.ts` — `useSpotPreview` / `spotPreviewApi`**: 둘 다 현재 미사용. 이전에는 `spotPreviewApi`를 `MapContainer.tsx` 핀 클릭에서 호출했으나, 프리뷰 응답의 `thumbnailUrl`이 단일 필드라 "유저 사진 리스트"를 만들 수 없어 `spotDetailApi`(`recordPreview`)로 교체함. `/api/spots/preview` 는 spotIds 복수를 받는 배치 API 라 클러스터 리스트(SCR-011d) 구현 시 다시 쓸 여지가 있어 facade 는 남겨둠.
-- **`src/api/facades/auth.ts` — `refreshApi`**: axios 401 인터셉터(`src/api/mutator/index.ts`) 내부에서 자동 토큰 갱신 로직으로 쓰일 가능성이 있어 정적 grep만으로는 완전한 미사용이라 단정하기 어려움 (인터셉터 코드 직접 확인 필요).
-- **`bloomMapApi`, `bloomPeakApi` 등**: 프론트에서 직접 호출되는 곳은 없지만 같은 파일의 `useBloomMap`/`useBloomPeak` 훅으로 래핑되어 실제 사용 중. "미사용"이 아니라 imperative 호출용으로 병행 제공되는 설계로 판단해 미사용 목록에서 제외. (`matchSpotApi` 는 `MapContainer.tsx` 핀 클릭에서 직접 호출되어 이 범주에서 빠짐.)
+백엔드 요청 없이 프론트에서 해결 가능한 것들. 상세는 [API_CHANGE_REQUESTS.md](API_CHANGE_REQUESTS.md)와 구분해서 본다(그쪽은 백엔드 조치가 필요한 건).
+
+| 필드 | 화면 |
+|---|---|
+| `FestivalDetailResponse.latitude/longitude` | `/festivals/[id]` "지도에서 보기"가 좌표 없이 `/map`으로만 이동 (스키마 주석은 "지도 CTA에 사용할"이라고 명시) |
+| `UserSearchItem.profileImageUrl` | `/search` 유저 결과 아바타가 항상 기본 아이콘 |
+| `SpotSearchItem.type` | `/search` 스팟 카드에서 명소/동네 구분 미표시 |
+| `SpotDetailResponse.recordCount` | `/spot/[id]` 헤더에 방문 기록 수 미표시 |
+| `BloomMapPin.type` | `/map` 상단 "전체/명소/동네" 칩이 무기능 (`bloomToMapSpots`가 이 필드를 버림) |
+| `ExploreFestivalItem.endsInDays` | 설명 문구엔 쓰지만 상태 배지는 `"진행중"` 하드코딩 |
 
 ---
 
-## 다음 액션 후보
+## 4. 페이지네이션
 
-1. `creators`/`festivals` 진입 동선(카드 클릭 → 라우팅) 연결 여부 결정
-2. uploadthing 및 미사용 파사드 함수(`bloomCalendarApi`, `listMySpotRecordsApi`, `publishSpotRecordApi`, `followSummaryApi`, `registerDeviceApi`/`unregisterDeviceApi`) 삭제 여부 결정
-3. `refreshApi` 및 axios 인터셉터의 실제 토큰 갱신 흐름 확인
-4. `ExplorCard`에 클릭 핸들러 추가 여부 및 방향 결정 — (a) `/festivals/[id]`를 살려서 연결할지, (b) 백엔드에 축제 타입이 없으므로 `/spot/[id]`로 통합하고 `/festivals/[id]`·`FESTIVAL_CARDS` 목데이터는 정리할지
+모든 목록 API가 공통 `PageResponse`(`page`/`hasNext`/`totalPages`)를 주지만, 2026-08-08 이전에는 이를 쓰는 코드가 하나도 없어 전 목록이 첫 페이지 고정이었다.
+
+Phase 0에서 파사드에 무한 스크롤 훅(`useXxxInfinite`)과 공용 헬퍼(`src/api/facades/pagination.ts`, `src/hooks/useInfiniteScroll.ts`)를 깔았고, 화면 연결은 Phase 1에서 진행한다. 연결 후 남는 단일 페이지 훅(`useFeedList`, `useNotificationList` 등)은 정리 대상이다.

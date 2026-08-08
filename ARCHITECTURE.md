@@ -11,13 +11,12 @@ flowchart LR
   Generated["src/api/facades/generated/** (orval, react-query)"]
   Mutator["src/api/mutator (customInstance)"]
   Backend[("Backend API · AWS")]
-  Upload["src/app/api/uploadthing (Route Handler)"]
-  UT[("UploadThing")]
 
   Page --> Facade --> Generated --> Mutator
   Mutator -->|"fetch + credentials: include"| Backend
-  Page -->|파일 업로드만| Upload --> UT
 ```
+
+- 이미지 업로드도 백엔드 API(`uploadProfileImageApi`, `uploadSpotRecordPhotosApi`)로 처리한다. `src/app/api` Route Handler는 없다 (2026-08-08 미사용 uploadthing 라우트 제거).
 
 - 새 API 도메인: swagger 갱신 → `pnpm generate:api` → `pnpm generate:facades` → 파사드 TODO 채우기 (`src/CLAUDE.md` 참고).
 - 응답 언래핑: 파사드에서 `res.data`(orval 래퍼) → `res.data.data`(백엔드 실제 payload) 순으로 벗겨 앱에 노출한다.
@@ -44,7 +43,7 @@ sequenceDiagram
   end
 ```
 
-> **Note**: 프런트(Vercel)·백엔드(AWS) 도메인이 달라 크로스사이트 쿠키(`SameSite=None; Secure`)로 인증을 주고받는다. 이 때문에 `src/api/mutator/index.ts`는 `NEXT_PUBLIC_API_URL`로 **브라우저/서버에서 백엔드를 직접 호출**하는 것이 의도된 설계다 (`CLAUDE.md` API 호출 규칙과 일치, 2026-07-19 정합). Route Handler 프록시 패턴은 `src/app/api/uploadthing` (파일 업로드)에만 적용된다.
+> **Note**: 프런트(Vercel)·백엔드(AWS) 도메인이 달라 크로스사이트 쿠키(`SameSite=None; Secure`)로 인증을 주고받는다. 이 때문에 `src/api/mutator/index.ts`는 `NEXT_PUBLIC_API_URL`로 **브라우저/서버에서 백엔드를 직접 호출**하는 것이 의도된 설계다 (`CLAUDE.md` API 호출 규칙과 일치, 2026-07-19 정합). Route Handler 프록시는 어디에도 쓰지 않는다.
 
 ## 카카오맵 흐름
 

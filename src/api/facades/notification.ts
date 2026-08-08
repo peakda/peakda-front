@@ -1,4 +1,4 @@
-import { useQueryClient } from '@tanstack/react-query'
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import {
   getNotifications,
   patchNotificationsReadAll,
@@ -9,7 +9,11 @@ import {
   usePatchNotificationsByIdRead as useMarkReadGen,
   useGetNotificationsUnreadCount,
 } from '@/api/facades/generated/notification/notification'
-import type { GetNotificationsParams } from '@/api/facades/generated/peakdaApi.schemas'
+import type {
+  GetNotificationsParams,
+  GetNotificationsSegment as NotificationSegment,
+} from '@/api/facades/generated/peakdaApi.schemas'
+import { PAGE_SIZE, nextPageParam } from '@/api/facades/pagination'
 
 // 트레이드 규칙: res.data (Orval 래퍼) → res.data.data (백엔드 실제 payload)
 
@@ -44,6 +48,16 @@ export async function markAllNotificationsReadApi() {
 
 export const useNotificationList = (params: GetNotificationsParams) =>
   useGetNotifications(params, { query: { select: (res) => res.data.data ?? null } })
+
+// 무한 스크롤용. 읽음 처리 시 '/api/notifications' 프리픽스 무효화에 함께 걸린다.
+export const useNotificationListInfinite = (segment: NotificationSegment) =>
+  useInfiniteQuery({
+    queryKey: ['/api/notifications', 'infinite', segment],
+    queryFn: ({ pageParam }) =>
+      notificationListApi({ segment, pageRequest: { page: pageParam, size: PAGE_SIZE } }),
+    initialPageParam: 0,
+    getNextPageParam: nextPageParam,
+  })
 
 export const useUnreadNotificationCount = () =>
   useGetNotificationsUnreadCount({ query: { select: (res) => res.data.data ?? null } })

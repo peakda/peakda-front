@@ -1,4 +1,4 @@
-﻿import { useQueryClient } from '@tanstack/react-query'
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import {
   postSpotsRecords,
   getSpotsRecordsById,
@@ -6,7 +6,6 @@ import {
   getGetSpotsRecordsMeQueryKey,
   getSpotsRecords,
   getSpotsRecordsMe,
-  postSpotsRecordsByIdPublish,
   patchSpotsRecordsById,
   postSpotsRecordsPhotos,
   usePostSpotsRecords as useCreateGen,
@@ -14,7 +13,6 @@ import {
   useGetSpotsRecordsById,
   useGetSpotsRecords,
   useGetSpotsRecordsMe,
-  usePostSpotsRecordsByIdPublish as usePublishGen,
   usePatchSpotsRecordsById as useUpdateGen,
   usePostSpotsRecordsPhotos as useUploadPhotosGen,
   deleteSpotsRecordsById,
@@ -23,16 +21,18 @@ import type {
   CreateSpotRecordRequest,
   GetSpotsRecordsParams,
   GetSpotsRecordsMeParams,
+  GetSpotsRecordsMeStatus,
   SpotRecordPhotoUploadForm,
   UpdateSpotRecordRequest,
 } from '@/api/facades/generated/peakdaApi.schemas'
+import { PAGE_SIZE, nextPageParam } from '@/api/facades/pagination'
 
-// ?몃옒??洹쒖튃: res.data (Orval ?섑띁) ??res.data.data (諛깆뿏???ㅼ젣 payload)
+// 언랩 규칙: res.data (Orval 래퍼) → res.data.data (백엔드 실제 payload)
 
-// 湲곕줉 由ъ뒪??罹먯떆 ??(?ㅽ뙚蹂?/ 蹂몄씤) ??mutation ?깃났 ??臾댄슚?????
+// 기록 리스트 캐시 키 (스팟별 / 본인) — mutation 성공 시 무효화한다.
 const recordListKeys = [['/api/spots/records'], ['/api/spots/records/me']] as const
 
-// ??? plain async (?대깽??湲곕컲 ?몄텧) ???????????????????????????????????????????
+// ▷ plain async (이벤트 기반 호출) ─────────────────────────────────────────
 
 export async function getSpotRecordApi(id: number) {
   const res = await getSpotsRecordsById(id)
@@ -59,11 +59,6 @@ export async function updateSpotRecordApi(id: number, payload: UpdateSpotRecordR
   return res.data.data ?? null
 }
 
-export async function publishSpotRecordApi(id: number) {
-  const res = await postSpotsRecordsByIdPublish(id)
-  return res.data.data ?? null
-}
-
 export async function deleteSpotRecordApi(id: number) {
   await deleteSpotsRecordsById(id)
 }
@@ -73,7 +68,7 @@ export async function uploadSpotRecordPhotosApi(form: SpotRecordPhotoUploadForm)
   return res.data.data ?? null
 }
 
-// ??? React Query hooks (罹먯떛 / ?곹깭 愿由? ????????????????????????????????????
+// ▷ React Query hooks (캐싱 / 상태 관리) ───────────────────────────────────
 
 export const useSpotRecord = (id: number) =>
   useGetSpotsRecordsById(id, { query: { select: (res) => res.data.data ?? null } })
@@ -84,7 +79,27 @@ export const useSpotRecordsBySpot = (params: GetSpotsRecordsParams) =>
 export const useMySpotRecords = (params: GetSpotsRecordsMeParams) =>
   useGetSpotsRecordsMe(params, { query: { select: (res) => res.data.data ?? null } })
 
-// 湲곕줉 蹂寃?mutation ???깃났 ???ㅽ뙚蹂?蹂몄씤 湲곕줉 由ъ뒪??罹먯떆 臾댄슚??
+// 무한 스크롤용. 키 프리픽스를 recordListKeys 와 맞춰 mutation 무효화에 함께 걸리게 한다.
+
+export const useSpotRecordsBySpotInfinite = (spotId: number) =>
+  useInfiniteQuery({
+    queryKey: ['/api/spots/records', 'infinite', spotId],
+    queryFn: ({ pageParam }) =>
+      listSpotRecordsBySpotApi({ spotId, pageRequest: { page: pageParam, size: PAGE_SIZE } }),
+    initialPageParam: 0,
+    getNextPageParam: nextPageParam,
+  })
+
+export const useMySpotRecordsInfinite = (status: GetSpotsRecordsMeStatus) =>
+  useInfiniteQuery({
+    queryKey: ['/api/spots/records/me', 'infinite', status],
+    queryFn: ({ pageParam }) =>
+      listMySpotRecordsApi({ status, pageRequest: { page: pageParam, size: PAGE_SIZE } }),
+    initialPageParam: 0,
+    getNextPageParam: nextPageParam,
+  })
+
+// 기록 변경 mutation — 성공 시 스팟별·본인 기록 리스트 캐시 무효화
 
 export const useCreateSpotRecord = () => {
   const queryClient = useQueryClient()
@@ -99,19 +114,6 @@ export const useCreateSpotRecord = () => {
 export const useUpdateSpotRecord = () => {
   const queryClient = useQueryClient()
   return useUpdateGen({
-    mutation: {
-      onSuccess: (_data, { id }) => {
-        queryClient.invalidateQueries({ queryKey: getGetSpotsRecordsQueryKey() })
-        queryClient.invalidateQueries({ queryKey: getGetSpotsRecordsMeQueryKey() })
-        queryClient.invalidateQueries({ queryKey: [`/api/spots/records/${id}`] })
-      },
-    },
-  })
-}
-
-export const usePublishSpotRecord = () => {
-  const queryClient = useQueryClient()
-  return usePublishGen({
     mutation: {
       onSuccess: (_data, { id }) => {
         queryClient.invalidateQueries({ queryKey: getGetSpotsRecordsQueryKey() })
@@ -138,5 +140,5 @@ export const useDeleteSpotRecord = () => {
   })
 }
 
-// mutate({ data: form }) ?뺥깭濡??몄텧
+// mutate({ data: form }) 형태로 호출
 export const useUploadSpotRecordPhotos = () => useUploadPhotosGen()
