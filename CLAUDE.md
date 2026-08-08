@@ -57,7 +57,9 @@ pnpm validate:context  # context 문서 경로 검증 (CI에서도 실행)
 - 백엔드(AWS) API는 `src/api/mutator`의 `customInstance`를 통해 직접 호출한다.
   Why: 프런트(Vercel)와 도메인이 달라 크로스사이트 쿠키로 인증을 주고받기 때문에 Route Handler 프록시를 거치지 않는다 ([ARCHITECTURE.md](ARCHITECTURE.md), [MEMORY.md](MEMORY.md) 참고)
 - `/app/api/` Route Handler는 백엔드 프록시 용도가 아니라 uploadthing 등 별도 목적으로만 사용
-- TanStack Query로 캐싱, staleTime 명시
+- TanStack Query로 캐싱. 전역 기본값은 `staleTime` 5분 + `retry` 1 (`src/app/_components/Providers.tsx`)
+- **즉시 반영돼야 하는 데이터는 전역 5분을 따르지 말고 쿼리별로 분리한다** — 알림 목록/읽지 않은 알림 뱃지, 팔로우·팔로워 수, 차단 목록처럼 다른 사용자의 행동으로 바뀌는 값은 해당 파사드에서 `staleTime: 0`을 명시할 것. 전역값을 그대로 두면 최대 5분간 과거 데이터가 보인다.
+  - 단, 내 행동으로 바뀌는 값(기록 작성·삭제, 좋아요 등)은 mutation 후 `invalidateQueries`가 staleTime과 무관하게 갱신하므로 따로 손댈 필요 없다.
 - 에러 처리는 try/catch + 타입 가드로 처리
 
 새 API 도메인을 추가할 때:
