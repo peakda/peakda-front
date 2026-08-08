@@ -25,6 +25,8 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'k.kakaocdn.net' },
       // 네이버 소셜 로그인 프로필
       { protocol: 'https', hostname: 'phinf.pstatic.net' },
+      // 백엔드 S3 미디어 (스팟 기록 사진 등, presigned URL)
+      { protocol: 'https', hostname: 'peakda-dev-media-421438965126.s3.ap-northeast-2.amazonaws.com' },
     ],
   },
 }
