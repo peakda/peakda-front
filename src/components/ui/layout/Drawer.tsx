@@ -3,6 +3,7 @@
 import { Drawer as VaulDrawer } from 'vaul'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useShallow } from 'zustand/react/shallow'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import { Button } from '@/components/ui/button/Button'
 import { FilterDrawerContent } from './FilterDrawerContent'
@@ -14,6 +15,7 @@ import { DeleteConfirmDrawerContent } from './DeleteConfirmDrawerContent'
 import { PinList } from '@/components/ui/display/PinList'
 
 export function Drawer() {
+  // snapHeight 는 여기서 쓰지 않는다 — 전체 구독하면 스냅 변경마다 드로어 전체가 다시 그려진다.
   const {
     isOpen,
     type,
@@ -23,7 +25,18 @@ export function Drawer() {
     deleteConfirmData,
     closeDrawer,
     setSnapHeight,
-  } = useDrawerStore()
+  } = useDrawerStore(
+    useShallow((s) => ({
+      isOpen: s.isOpen,
+      type: s.type,
+      pinListData: s.pinListData,
+      saveSpotData: s.saveSpotData,
+      dateSelectData: s.dateSelectData,
+      deleteConfirmData: s.deleteConfirmData,
+      closeDrawer: s.closeDrawer,
+      setSnapHeight: s.setSnapHeight,
+    }))
+  )
   const router = useRouter()
   const [snap, setSnap] = useState<string | number | null>('400px')
 

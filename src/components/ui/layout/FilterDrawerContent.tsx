@@ -31,7 +31,8 @@ const FLOWER_SEASONS: { season: FlowerSeason; label: string }[] = [
 
 // 꽃 종류는 서버 category 파라미터가 단일 값이라 단일 선택이다.
 function FlowerSections() {
-  const { category, setCategory } = useFilterStore()
+  const category = useFilterStore((s) => s.category)
+  const setCategory = useFilterStore((s) => s.setCategory)
 
   return (
     <div className="space-y-6">
@@ -130,7 +131,8 @@ export function FilterDrawerContent({
   flowersOnly = false,
 }: FilterDrawerContentProps) {
   // 드로어를 닫아도 선택이 유지돼야 해서 로컬 state 가 아닌 전역 필터 스토어를 쓴다.
-  const { statuses, toggleStatus } = useFilterStore()
+  const statuses = useFilterStore((s) => s.statuses)
+  const toggleStatus = useFilterStore((s) => s.toggleStatus)
   const touchStart = useRef({ x: 0, y: 0 })
 
   const snapPx =

@@ -62,7 +62,7 @@ function EmptySection({ text }: { text: string }) {
 
 export default function ExplorePage() {
   const router = useRouter()
-  const { openFlowerFilterDrawer } = useDrawerStore()
+  const openFlowerFilterDrawer = useDrawerStore((s) => s.openFlowerFilterDrawer)
   const { data: suggestion } = useHomeSuggestion()
   // 필터 드로어에서 고른 꽃 종류(단일 선택). 없으면 전체를 받는다.
   const category = useFilterStore((state) => state.category)
