@@ -14,6 +14,8 @@ import { Category } from '@/components/ui/category/Category'
 import { toast } from 'sonner'
 import { useMapCluster, type MapSpot } from '@/hooks/useMapPins'
 import { useDrawerStore } from '@/stores/useDrawerStore'
+import { useFilterStore, type PinTypeFilter } from '@/stores/useFilterStore'
+import { filterMapSpots } from '@/lib/utils/mapFilter'
 import { useBloomMap } from '@/api/facades/seasonal-bloom'
 import { useHomeSuggestion } from '@/api/facades/home'
 import { useUnreadNotificationCount } from '@/api/facades/notification'
@@ -24,7 +26,7 @@ import type {
   BloomBadgeStatus,
   GetSeasonalBloomsParams,
 } from '@/api/facades/generated/peakdaApi.schemas'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 const Drawer = dynamic(
   () => import('@/components/ui/layout/Drawer').then((m) => ({ default: m.Drawer })),
@@ -54,6 +56,22 @@ const BADGE_STATUS_LABEL: Record<BloomBadgeStatus, string> = {
   ENDED: '개화 종료',
 }
 
+// 상단 칩. 서버 파라미터가 없어 응답의 pin.type 으로 클라이언트에서 거른다.
+const PIN_TYPES: PinTypeFilter[] = ['ALL', 'ATTRACTION', 'LOCAL']
+const PIN_TYPE_LABEL: Record<PinTypeFilter, string> = {
+  ALL: '전체',
+  ATTRACTION: '명소',
+  LOCAL: '동네',
+}
+const PIN_TYPE_LABELS = PIN_TYPES.map((type) => PIN_TYPE_LABEL[type])
+
+// 축제 상세 등에서 /map?lat=..&lng=.. 로 넘어오면 그 좌표를 초기 중심으로 쓴다.
+function toCoord(value: string | null) {
+  if (value == null || value.trim() === '') return null
+  const num = Number(value)
+  return Number.isFinite(num) ? num : null
+}
+
 function panToCurrentLocation(map: kakao.maps.Map, onPermissionDenied?: () => void) {
   navigator.geolocation.getCurrentPosition(
     ({ coords }) => map.panTo(new kakao.maps.LatLng(coords.latitude, coords.longitude)),
@@ -63,9 +81,9 @@ function panToCurrentLocation(map: kakao.maps.Map, onPermissionDenied?: () => vo
   )
 }
 
-const initMap = (container: HTMLElement) => {
+const initMap = (container: HTMLElement, center: { lat: number; lng: number }) => {
   const map = new kakao.maps.Map(container, {
-    center: new kakao.maps.LatLng(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng),
+    center: new kakao.maps.LatLng(center.lat, center.lng),
     level: 8,
     maxLevel: 13,
     draggable: true,
@@ -80,14 +98,33 @@ const initMap = (container: HTMLElement) => {
 export const MapContainer = () => {
   const containerRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
+  const searchParams = useSearchParams()
   const mapRef = useRef<kakao.maps.Map | null>(null)
   const [mapInstance, setMapInstance] = useState<kakao.maps.Map | null>(null)
   const [bbox, setBbox] = useState<GetSeasonalBloomsParams | null>(null)
   const { isReady, error, retry } = useLazyMapLoad(containerRef)
   const { snapHeight, openFilterDrawer, openPinDrawer } = useDrawerStore()
+  const { pinType, category, statuses, setPinType } = useFilterStore()
 
-  const { data: bloomData } = useBloomMap(bbox)
-  const spots = useMemo(() => (bloomData ? bloomToMapSpots(bloomData) : []), [bloomData])
+  const latParam = searchParams.get('lat')
+  const lngParam = searchParams.get('lng')
+  const initialCenter = useMemo(() => {
+    const lat = toCoord(latParam)
+    const lng = toCoord(lngParam)
+    return lat != null && lng != null ? { lat, lng } : null
+  }, [latParam, lngParam])
+
+  // 꽃 종류만 서버 파라미터(category)로 거르고, 핀 유형·개화 상태는 응답을 받아 클라에서 거른다.
+  const bloomParams = useMemo(
+    () => (bbox ? { ...bbox, category: category ?? undefined } : null),
+    [bbox, category]
+  )
+  const { data: bloomData } = useBloomMap(bloomParams)
+  const allSpots = useMemo(() => (bloomData ? bloomToMapSpots(bloomData) : []), [bloomData])
+  const spots = useMemo(
+    () => filterMapSpots(allSpots, { pinType, statuses }),
+    [allSpots, pinType, statuses]
+  )
 
   // 시즌 추천어(홈 검색바 보조 카피). 절정 데이터 없으면(available=false) 기본 문구로 폴백.
   const { data: suggestion } = useHomeSuggestion()
@@ -244,11 +281,13 @@ export const MapContainer = () => {
   useEffect(() => {
     if (!isReady || !containerRef.current || mapRef.current) return
 
-    prefetchInitialTiles(DEFAULT_CENTER, 13)
-    mapRef.current = initMap(containerRef.current)
+    const center = initialCenter ?? DEFAULT_CENTER
+    prefetchInitialTiles(center, 13)
+    mapRef.current = initMap(containerRef.current, center)
     setMapInstance(mapRef.current)
-    panToCurrentLocation(mapRef.current)
-  }, [isReady])
+    // 쿼리 좌표로 들어온 경우엔 현재 위치로 튕기지 않는다.
+    if (!initialCenter) panToCurrentLocation(mapRef.current)
+  }, [isReady, initialCenter])
 
   return (
     <div
@@ -302,7 +341,15 @@ export const MapContainer = () => {
 
       {isReady && (
         <>
-          <Category isMap />
+          <Category
+            isMap
+            categories={PIN_TYPE_LABELS}
+            value={PIN_TYPE_LABEL[pinType]}
+            onChange={(label) => {
+              const next = PIN_TYPES.find((type) => PIN_TYPE_LABEL[type] === label)
+              if (next) setPinType(next)
+            }}
+          />
 
           <SearchBar
             placeholder="지금 피크인 곳을 검색해보세요."

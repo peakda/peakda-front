@@ -1,15 +1,19 @@
 'use client'
 
+import Link from 'next/link'
 import {
   useMarkAllNotificationsRead,
   useMarkNotificationRead,
-  useNotificationList,
+  useNotificationListInfinite,
 } from '@/api/facades/notification'
 import { Alarm } from '@/components/ui/display/Alarm'
 import { Button } from '@/components/ui/button/Button'
 import { TabPanels } from '@/components/ui/Tab/TabPanel'
 import { Tabs } from '@/components/ui/Tab/Tab'
 import { TabItem } from '@/context/TabContext'
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
+import { flattenPages } from '@/lib/utils/infinitePages'
+import { shouldLoadMore } from '@/lib/utils/myRecords'
 import { segmentFromTab, toAlarmItem } from '@/lib/utils/notificationToAlarm'
 import { Plus } from 'lucide-react'
 
@@ -31,41 +35,49 @@ function EmptyState({ label }: { label: string }) {
       <p className="text-text-primary text-xl font-semibold">아직 알림이 없어요</p>
       <p className="text-text-tertiary text-base whitespace-pre-line">{EMPTY_TEXT[label]}</p>
       {label === 'all' && (
-        <Button
-          variant="filled"
-          color="primary"
-          size="md"
-          leftIcon={<Plus className="h-5 w-5" strokeWidth={1.5} />}
-          className="rounded-2xl px-6 py-5"
-        >
-          찜 명소 추가하기
-        </Button>
+        <Link href="/map">
+          <Button
+            variant="filled"
+            color="primary"
+            size="md"
+            leftIcon={<Plus className="h-5 w-5" strokeWidth={1.5} />}
+            className="rounded-2xl px-6 py-5"
+          >
+            찜 명소 추가하기
+          </Button>
+        </Link>
       )}
       {label === 'activity' && (
-        <Button
-          variant="filled"
-          color="primary"
-          size="md"
-          leftIcon={<Plus className="h-5 w-5" strokeWidth={1.5} />}
-          className="rounded-2xl px-6 py-5"
-        >
-          기록 남기기
-        </Button>
+        <Link href="/record">
+          <Button
+            variant="filled"
+            color="primary"
+            size="md"
+            leftIcon={<Plus className="h-5 w-5" strokeWidth={1.5} />}
+            className="rounded-2xl px-6 py-5"
+          >
+            기록 남기기
+          </Button>
+        </Link>
       )}
     </div>
   )
 }
 
 function NotificationPanel({ tabValue, label }: { tabValue: string; label: string }) {
-  const { data, isLoading } = useNotificationList({
-    segment: segmentFromTab(tabValue),
-    pageRequest: { page: 0, size: 20 },
-  })
+  const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
+    useNotificationListInfinite(segmentFromTab(tabValue))
   const markRead = useMarkNotificationRead()
+  // isLoading 은 무한 쿼리에서도 "첫 페이지 로딩 중"만 참이라 빈 상태 판정 기준은 그대로 유효하다.
+  // (다음 페이지 로딩은 isFetchingNextPage 로만 나타난다)
+  const sentinelRef = useInfiniteScroll(
+    () => fetchNextPage(),
+    shouldLoadMore(hasNextPage, isFetchingNextPage)
+  )
 
   if (isLoading) return null
 
-  const notifications = data?.content ?? []
+  const notifications = flattenPages(data)
   if (!notifications.length) return <EmptyState label={label} />
 
   return (
@@ -90,6 +102,7 @@ function NotificationPanel({ tabValue, label }: { tabValue: string; label: strin
           </div>
         )
       })}
+      <div ref={sentinelRef} />
     </div>
   )
 }

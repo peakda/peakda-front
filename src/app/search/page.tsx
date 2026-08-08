@@ -1,52 +1,37 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Tabs } from '@/components/ui/Tab/Tab'
 import { TabPanels } from '@/components/ui/Tab/TabPanel'
 import { TabItem } from '@/context/TabContext'
 import { RecentList } from './_components/RecentList'
 import { HotChipList } from './_components/HotChipList'
-import { SpotPanel, SPOTProps } from './_components/SpotPanel'
-import { UserPanel, UserProps } from './_components/UserPanel'
+import { SpotPanel } from './_components/SpotPanel'
+import { UserPanel } from './_components/UserPanel'
 import { SearchInput } from './_components/SearchInput'
 import { useHomeSuggestion } from '@/api/facades/home'
-import { useSearchSpots, useSearchUsers } from '@/api/facades/search'
+import { useSearchSpotsInfinite, useSearchUsersInfinite } from '@/api/facades/search'
 import { useDebounce } from '@/hooks/useDebounce'
+import { flattenPages } from '@/lib/utils/infinitePages'
+import {
+  RECENT_SEARCH_KEY,
+  addRecentSearch,
+  readRecentSearches,
+  removeRecentSearch,
+  toSpotProps,
+  toUserProps,
+} from '@/lib/utils/search'
 
 const SEARCH_TABS: TabItem[] = [
   { value: 'spot', label: '스팟' },
   { value: 'user', label: '유저' },
 ]
 
-// 검색 API 는 스팟명·주소만 준다(개화상태·식물태그 없음). 없는 자리는 비운다.
-const toSpotProps = (item: {
-  spotId: number
-  name: string
-  address?: string | null
-}): SPOTProps => ({
-  id: item.spotId,
-  name: item.name,
-  location: item.address ?? '',
-  status: '',
-  nameList: [],
-})
-
-// 검색 API 는 닉네임만 준다(팔로워수·팔로우여부 없음).
-const toUserProps = (item: { userId: number; nickname: string }): UserProps => ({
-  id: item.userId,
-  name: item.nickname,
-  stats: '',
-  following: false,
-})
-
 export default function SearchPage() {
   const [query, setQuery] = useState('')
-  const [recentSearches, setRecentSearches] = useState([
-    '어디든 맞꽃',
-    '진해 군항제',
-    '단풍 명소',
-    '제주 유채꽃',
-  ])
+  const [recentSearches, setRecentSearches] = useState<string[]>([])
+  // localStorage 를 읽기 전에 빈 배열로 덮어쓰지 않도록 로드 완료를 기다린다
+  const [recentLoaded, setRecentLoaded] = useState(false)
 
   const hasQuery = query.trim().length > 0
   const keyword = useDebounce(query.trim())
@@ -55,13 +40,30 @@ export default function SearchPage() {
   const searchPlaceholder =
     suggestion?.available && suggestion.message ? suggestion.message : undefined
 
-  const { data: spotResult } = useSearchSpots(keyword)
-  const { data: userResult } = useSearchUsers(keyword)
-  const spots = (spotResult?.content ?? []).map(toSpotProps)
-  const users = (userResult?.content ?? []).map(toUserProps)
+  const spotQuery = useSearchSpotsInfinite(keyword)
+  const userQuery = useSearchUsersInfinite(keyword)
+  const spots = flattenPages(spotQuery.data).map(toSpotProps)
+  const users = flattenPages(userQuery.data).map(toUserProps)
+  // 로드된 개수가 아니라 전체 건수를 보여준다(스크롤해도 숫자가 늘지 않도록)
+  const spotTotal = spotQuery.data?.pages[0]?.totalElements ?? 0
+
+  // SSR 에는 localStorage 가 없으므로 마운트 후에 읽는다
+  useEffect(() => {
+    setRecentSearches(readRecentSearches(window.localStorage.getItem(RECENT_SEARCH_KEY)))
+    setRecentLoaded(true)
+  }, [])
+
+  useEffect(() => {
+    if (!recentLoaded) return
+    window.localStorage.setItem(RECENT_SEARCH_KEY, JSON.stringify(recentSearches))
+  }, [recentSearches, recentLoaded])
 
   const removeRecent = (item: string) => {
-    setRecentSearches((prev) => prev.filter((r) => r !== item))
+    setRecentSearches((prev) => removeRecentSearch(prev, item))
+  }
+
+  const submitSearch = (value: string) => {
+    setRecentSearches((prev) => addRecentSearch(prev, value))
   }
 
   return (
@@ -73,6 +75,7 @@ export default function SearchPage() {
         setQuery={setQuery}
         isCancle
         placeholder={searchPlaceholder}
+        onSubmit={submitSearch}
       />
       {!hasQuery ? (
         /* 빈 상태 */
@@ -91,11 +94,19 @@ export default function SearchPage() {
         /* 검색 결과 */
         <Tabs tabs={SEARCH_TABS} defaultValue="spot">
           <span className="px-4 pt-2 pb-2 text-xs text-gray-400">
-            스팟 결과 <span className="text-text-secondary font-medium">{spots.length}</span>개
+            스팟 결과 <span className="text-text-secondary font-medium">{spotTotal}</span>개
           </span>
           <TabPanels tabs={SEARCH_TABS} className="mt-0">
-            <SpotPanel spots={spots} />
-            <UserPanel users={users} />
+            <SpotPanel
+              spots={spots}
+              onLoadMore={spotQuery.fetchNextPage}
+              hasMore={spotQuery.hasNextPage && !spotQuery.isFetchingNextPage}
+            />
+            <UserPanel
+              users={users}
+              onLoadMore={userQuery.fetchNextPage}
+              hasMore={userQuery.hasNextPage && !userQuery.isFetchingNextPage}
+            />
           </TabPanels>
         </Tabs>
       )}

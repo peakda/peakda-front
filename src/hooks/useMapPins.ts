@@ -1,5 +1,9 @@
 import { useEffect, useRef } from 'react'
 import type { FlowerItem } from '@/components/Map/Pin'
+import type {
+  BloomMapPinType,
+  BloomSlotStatus,
+} from '@/api/facades/generated/peakdaApi.schemas'
 import { type Stage, STAGE_COLOR, STAGE_PRIORITY } from '@/constants/map'
 
 export interface MapSpot {
@@ -11,6 +15,10 @@ export interface MapSpot {
   attractionId?: number
   // 스팟 API(상세·기록)의 id. 명소형은 Spot 행이 아직 없으면 없다(탭 시 match 로 materialize).
   spotId?: number
+  // 상단 칩(명소/동네) 필터용. 서버 파라미터가 없어 응답의 pin.type 을 그대로 들고 온다.
+  type: BloomMapPinType
+  // 시기 필터용. 이 핀에 달린 꽃들의 개화 상태(핀 하나에 여러 개 가능).
+  statuses: BloomSlotStatus[]
 }
 
 interface ClusterGroup {

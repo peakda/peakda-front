@@ -13,7 +13,6 @@ pnpm dev
 
 ## 문서
 
-- [CLAUDE.md](CLAUDE.md) — 작업 원칙
-- [AGENTS.md](AGENTS.md) — 코딩 규칙
+- [CLAUDE.md](CLAUDE.md) — 작업 원칙 + 코딩 규칙
 - [ARCHITECTURE.md](ARCHITECTURE.md) — 아키텍처 (API 흐름, 인증, 카카오맵)
 - [MEMORY.md](MEMORY.md) — 결정 이유 / 자주 하는 작업

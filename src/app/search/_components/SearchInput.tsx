@@ -16,6 +16,8 @@ interface SearchBarProps {
   // 입력 대신 클릭만 받는 용도 (예: 탐색 페이지에서 검색 페이지로 이동)
   readOnly?: boolean
   onClick?: () => void
+  // Enter 로 검색을 확정할 때 현재 입력값을 넘긴다 (최근 검색어 저장 등)
+  onSubmit?: (value: string) => void
 }
 
 export function SearchInput({
@@ -27,6 +29,7 @@ export function SearchInput({
   onFocus,
   readOnly,
   onClick,
+  onSubmit,
 }: SearchBarProps) {
   const router = useRouter()
   return (
@@ -54,6 +57,10 @@ export function SearchInput({
             ) : undefined
           }
           onChange={(e) => setQuery?.(e.target.value)}
+          onKeyDown={(e) => {
+            // 한글 입력 중 조합을 확정하는 Enter 는 검색 확정으로 보지 않는다
+            if (e.key === 'Enter' && !e.nativeEvent.isComposing) onSubmit?.(query)
+          }}
           onFocus={onFocus}
           placeholder={placeholder}
           readOnly={readOnly}

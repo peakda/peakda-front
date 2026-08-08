@@ -14,9 +14,9 @@ const BLOOM_LABEL = {
 
 const BLOOM_VARIANT: Record<keyof typeof BLOOM_LABEL, FeedCardProps['statusVariant']> = {
   EARLY: 'green',
-  STARTING: 'green',
+  STARTING: 'starting',
   PEAK: 'bloom',
-  LATE: 'secondary',
+  LATE: 'late',
 }
 
 // ISO 문자열(날짜/일시) → 'YYYY.MM.DD'
@@ -37,7 +37,10 @@ function formatTimeAgo(iso: string): string {
 // SpotRecordSummaryResponse → FeedCard props
 // 한계: 요약 응답에는 식물 이모지·리액션 정보가 없어 기본값(🌸 / 빈 배열)을 사용한다.
 // 대표 사진이 없으면 placeholder 이미지를 사용한다.
-export function toFeedCardProps(record: SpotRecordSummaryResponse): FeedCardProps {
+export function toFeedCardProps(
+  record: SpotRecordSummaryResponse,
+  options?: Pick<FeedCardProps, 'isOwner' | 'onEdit' | 'onDelete' | 'onReport'>
+): FeedCardProps {
   return {
     recordId: record.id,
     authorId: record.user.id,
@@ -51,6 +54,7 @@ export function toFeedCardProps(record: SpotRecordSummaryResponse): FeedCardProp
     images: record.coverPhoto?.url ? [record.coverPhoto.url] : ['/images/explore.png'],
     flowers: record.plants.map((plant) => ({ emoji: '🌸', label: plant.name })),
     content: record.memo ?? '',
+    ...options,
   }
 }
 

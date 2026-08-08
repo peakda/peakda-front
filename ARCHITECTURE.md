@@ -1,6 +1,6 @@
 # ARCHITECTURE.md
 
-Peakda 프런트엔드(Next.js, Vercel)와 백엔드(Railway) 간 실제 데이터 흐름. 세부 디렉터리는 `src/CLAUDE.md`, `public/CLAUDE.md` 참고.
+Peakda 프런트엔드(Next.js, Vercel)와 백엔드(AWS) 간 실제 데이터 흐름. 세부 디렉터리는 `src/CLAUDE.md`, `public/CLAUDE.md` 참고.
 
 ## API 호출 흐름
 
@@ -10,14 +10,13 @@ flowchart LR
   Facade["src/api/facades/*.ts"]
   Generated["src/api/facades/generated/** (orval, react-query)"]
   Mutator["src/api/mutator (customInstance)"]
-  Backend[("Backend API · Railway")]
-  Upload["src/app/api/uploadthing (Route Handler)"]
-  UT[("UploadThing")]
+  Backend[("Backend API · AWS")]
 
   Page --> Facade --> Generated --> Mutator
   Mutator -->|"fetch + credentials: include"| Backend
-  Page -->|파일 업로드만| Upload --> UT
 ```
+
+- 이미지 업로드도 백엔드 API(`uploadProfileImageApi`, `uploadSpotRecordPhotosApi`)로 처리한다. `src/app/api` Route Handler는 없다 (2026-08-08 미사용 uploadthing 라우트 제거).
 
 - 새 API 도메인: swagger 갱신 → `pnpm generate:api` → `pnpm generate:facades` → 파사드 TODO 채우기 (`src/CLAUDE.md` 참고).
 - 응답 언래핑: 파사드에서 `res.data`(orval 래퍼) → `res.data.data`(백엔드 실제 payload) 순으로 벗겨 앱에 노출한다.
@@ -44,21 +43,27 @@ sequenceDiagram
   end
 ```
 
-> **Note**: 프런트(Vercel)·백엔드(Railway) 도메인이 달라 크로스사이트 쿠키(`SameSite=None; Secure`)로 인증을 주고받는다. 이 때문에 `src/api/mutator/index.ts`는 `NEXT_PUBLIC_API_URL`로 **브라우저/서버에서 백엔드를 직접 호출**하는 것이 의도된 설계다 (`AGENTS.md` API 호출 규칙과 일치, 2026-07-19 정합). Route Handler 프록시 패턴은 `src/app/api/uploadthing` (파일 업로드)에만 적용된다.
+> **Note**: 프런트(Vercel)·백엔드(AWS) 도메인이 달라 크로스사이트 쿠키(`SameSite=None; Secure`)로 인증을 주고받는다. 이 때문에 `src/api/mutator/index.ts`는 `NEXT_PUBLIC_API_URL`로 **브라우저/서버에서 백엔드를 직접 호출**하는 것이 의도된 설계다 (`CLAUDE.md` API 호출 규칙과 일치, 2026-07-19 정합). Route Handler 프록시는 어디에도 쓰지 않는다.
 
 ## 카카오맵 흐름
 
 ```mermaid
 flowchart LR
-  MapUI["src/components/Map (dynamic import, ssr:false)"] --> KakaoLib["src/lib/kakao"] --> SDK[("Kakao Maps SDK")]
-  Hooks["src/hooks (useKakaoPlaces, useMapPins, useLazyMapLoad)"] --> KakaoLib
+  MapUI["src/components/Map (dynamic import, ssr:false)"] --> Loader["src/lib/kakao/kakaoLoader"] --> SDK[("Kakao Maps SDK")]
+  Hooks["src/hooks (useKakaoPlaces, useMapPins, useLazyMapLoad)"] --> Loader
+  MapUI --> Prefetch["src/lib/kakao/tilePrefetch"]
+  MapUI -->|"navigator.serviceWorker.register"| SW["public/map-tile-sw.js"]
+  Prefetch --> SW --> SDK
 ```
+
+- 타일 캐싱: `src/components/Map/MapContainer.tsx`가 서비스워커(`public/map-tile-sw.js`)를 등록하고 `prefetchInitialTiles`로 초기 타일을 미리 받는다.
+- `src/lib/kakao/kakaoLogin.ts`는 지도가 아니라 **카카오 소셜 로그인**용이다 (`src/app/login`에서 사용) — 같은 디렉터리에 있지만 위 흐름과 무관.
 
 ## 상태 관리 계층
 
 | 계층 | 도구 | 위치 |
 | --- | --- | --- |
-| 서버 상태 (API 데이터) | TanStack Query | `src/api/facades/generated/**` 훅 |
+| 서버 상태 (API 데이터) | TanStack Query | `src/api/facades/*.ts` (generated 훅을 감싼 파사드) — 페이지는 generated를 직접 쓰지 않는다 |
 | 클라이언트 전역 상태 | Zustand | `src/stores/` |
 | 탭 등 국소 공유 상태 | React Context | `src/context/TabContext.tsx` (신규 공유 상태는 Zustand 우선 검토) |
 | 로컬 UI 상태 | useState | 컴포넌트 내부 |
