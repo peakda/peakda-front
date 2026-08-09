@@ -19,6 +19,7 @@ import {
   toExploreSpotProps,
   toFestivalDateRange,
   toFestivalDescription,
+  toFestivalStatus,
 } from '@/lib/utils/explore'
 
 // 탐색 응답에는 카드 이미지가 없는 항목이 있어 공통 플레이스홀더를 쓴다.
@@ -169,22 +170,26 @@ export default function ExplorePage() {
           !isLoading && <EmptySection text="진행 중인 축제가 없어요" />
         ) : (
           <div className="flex gap-3 overflow-x-auto px-4 pb-4 [&::-webkit-scrollbar]:hidden">
-            {festivals.map((item) => (
-              <Link
-                key={item.festivalId}
-                href={`/festivals/${item.festivalId}`}
-                className="shrink-0"
-              >
-                <ExplorCard
-                  type="festival"
-                  image={PLACEHOLDER_IMAGE}
-                  name={item.name}
-                  description={toFestivalDescription(item)}
-                  dateRange={toFestivalDateRange(item)}
-                  status="진행중"
-                />
-              </Link>
-            ))}
+            {festivals.map((item) => {
+              const status = toFestivalStatus(item)
+              return (
+                <Link
+                  key={item.festivalId}
+                  href={`/festivals/${item.festivalId}`}
+                  className="shrink-0"
+                >
+                  <ExplorCard
+                    type="festival"
+                    image={PLACEHOLDER_IMAGE}
+                    name={item.name}
+                    description={toFestivalDescription(item)}
+                    dateRange={toFestivalDateRange(item)}
+                    status={status.label}
+                    statusVariant={status.variant}
+                  />
+                </Link>
+              )
+            })}
           </div>
         )}
       </section>
