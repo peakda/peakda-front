@@ -38,6 +38,11 @@ export const useBloomMap = (params: GetSeasonalBloomsParams | null) =>
     },
   })
 
-// 스팟 상세의 일별 개화 타임라인용. 화면 확정 전이라 아직 호출부가 없다.
-export const useBloomCalendar = (params: GetSeasonalBloomsCalendarParams) =>
-  useGetSeasonalBloomsCalendar(params, { query: { select: (res) => res.data.data ?? null } })
+// 명소 id·카테고리가 아직 없으면(동네 스팟이거나 상세 조회 대기) 요청하지 않는다.
+const EMPTY_CALENDAR: GetSeasonalBloomsCalendarParams = { attractionId: 0, category: 'CHERRY' }
+
+// 단일 명소×카테고리의 일별 개화 타임라인. 피드 상세의 '올해 만개 시기'에서 사용한다.
+export const useBloomCalendar = (params: GetSeasonalBloomsCalendarParams | null) =>
+  useGetSeasonalBloomsCalendar(params ?? EMPTY_CALENDAR, {
+    query: { enabled: params !== null, select: (res) => res.data.data ?? null },
+  })

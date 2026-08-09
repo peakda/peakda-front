@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ChevronRight, SmilePlus } from 'lucide-react'
+import { SmilePlus } from 'lucide-react'
 import { IconBtn } from '@/components/ui/button/IconBtn'
 import { EmojiBtn } from '@/components/ui/button/EmojiBtn'
 import { CardBadge } from '@/components/ui/card/CardBadge'
@@ -12,7 +12,9 @@ import { Indecator } from '@/app/onboarding/_components/Indecator'
 import { useCarousel } from '@/hooks/useEmblaCarousel'
 import { useAddReaction, useRemoveReaction } from '@/api/facades/feed'
 import { reactionToggleAction } from '@/lib/utils/feed'
-import type { FeedCardProps, SpotSummaryInfo } from '@/components/ui/card/FeedCard'
+import { SpotBloomSummary } from './SpotBloomSummary'
+import type { SpotBloomSummaryProps } from './SpotBloomSummary'
+import type { FeedCardProps } from '@/components/ui/card/FeedCard'
 import type {
   FeedReactionSummaryResponseMyReactionsItem,
   ReactionCount,
@@ -36,7 +38,7 @@ type FeedDetailViewProps = Pick<
   | 'images'
   | 'flowers'
   | 'content'
-> & { spotSummary?: SpotSummaryInfo }
+> & { spotSummary?: SpotBloomSummaryProps }
 
 // 피드 상세 전용 레이아웃. 목록용 FeedCard 와 달리 사진이 풀블리드로 깔리고
 // 헤더(뒤로가기·더보기)가 그 위에 겹치며, 방문일·상태 뱃지는 사진 아래 작성자 영역으로 내려간다.
@@ -148,22 +150,8 @@ export function FeedDetailView({
         </div>
       </div>
 
-      {/* 스팟 요약 */}
-      {spotSummary && (
-        <button
-          type="button"
-          onClick={spotSummary.onClick}
-          className="bg-bg-secondary mx-4 flex items-center justify-between rounded-xl px-3.5 py-3 text-left"
-        >
-          <div className="flex flex-col gap-0.5">
-            <span className="text-text-primary text-sm font-semibold">{spotSummary.name}</span>
-            <span className="text-text-tertiary text-xs">
-              방문 기록 {spotSummary.recordCount} · {spotSummary.address}
-            </span>
-          </div>
-          <ChevronRight className="text-icon-quaternary h-4 w-4 shrink-0" />
-        </button>
-      )}
+      {/* 스팟 요약 + 올해 만개 시기 */}
+      {spotSummary && <SpotBloomSummary {...spotSummary} />}
 
       {/* 꽃 태그 */}
       {flowers.length > 0 && (
