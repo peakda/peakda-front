@@ -92,23 +92,27 @@ export default function SearchPage() {
         </div>
       ) : (
         /* 검색 결과 */
-        <Tabs tabs={SEARCH_TABS} defaultValue="spot">
-          <span className="px-4 pt-2 pb-2 text-xs text-gray-400">
-            스팟 결과 <span className="text-text-secondary font-medium">{spotTotal}</span>개
-          </span>
-          <TabPanels tabs={SEARCH_TABS} className="mt-0">
-            <SpotPanel
-              spots={spots}
-              onLoadMore={spotQuery.fetchNextPage}
-              hasMore={spotQuery.hasNextPage && !spotQuery.isFetchingNextPage}
-            />
-            <UserPanel
-              users={users}
-              onLoadMore={userQuery.fetchNextPage}
-              hasMore={userQuery.hasNextPage && !userQuery.isFetchingNextPage}
-            />
-          </TabPanels>
-        </Tabs>
+        <div onClickCapture={() => submitSearch(query)}>
+          <Tabs tabs={SEARCH_TABS} defaultValue="spot">
+            <span className="px-4 pt-2 pb-2 text-xs text-gray-400">
+              스팟 결과 <span className="text-text-secondary font-medium">{spotTotal}</span>개
+            </span>
+            <TabPanels tabs={SEARCH_TABS} className="mt-0">
+              <SpotPanel
+                spots={spots}
+                onLoadMore={spotQuery.fetchNextPage}
+                hasMore={spotQuery.hasNextPage && !spotQuery.isFetchingNextPage}
+                isLoadingMore={spotQuery.isFetchingNextPage}
+              />
+              <UserPanel
+                users={users}
+                onLoadMore={userQuery.fetchNextPage}
+                hasMore={userQuery.hasNextPage && !userQuery.isFetchingNextPage}
+                isLoadingMore={userQuery.isFetchingNextPage}
+              />
+            </TabPanels>
+          </Tabs>
+        </div>
       )}
     </div>
   )
