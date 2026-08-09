@@ -54,7 +54,8 @@ export function Drawer() {
   const mapCenter = useFilterStore((s) => s.mapCenter)
   const isVisibleStale = useFilterStore((s) => s.isVisibleStale)
   const draftVisibleCount = useFilterStore((s) => s.draftVisibleCount)
-  const appliedCategories = useFilterStore((s) => s.applied.categories)
+  const applied = useFilterStore((s) => s.applied)
+  const visibleAppliedFor = useFilterStore((s) => s.visibleAppliedFor)
   const applyDraft = useFilterStore((s) => s.applyDraft)
   const syncDraft = useFilterStore((s) => s.syncDraft)
 
@@ -84,7 +85,7 @@ export function Drawer() {
       const preview = await spotPreviewApi(visibleSpotIds, {
         coords: mapCenter,
         // 서버 category 는 값 하나만 받는다. 여러 개 골랐으면 뱃지는 각 스팟의 대표 단계로 둔다.
-        category: appliedCategories.length === 1 ? appliedCategories[0] : null,
+        category: applied.categories.length === 1 ? applied.categories[0] : null,
       })
       const items = preview ? toPinListItems(preview.items) : []
 
@@ -101,7 +102,7 @@ export function Drawer() {
     } finally {
       setIsLoadingPreview(false)
     }
-  }, [visibleSpotIds, mapCenter, appliedCategories, openPinDrawer, closeDrawer])
+  }, [visibleSpotIds, mapCenter, applied, openPinDrawer, closeDrawer])
 
   // 하단 버튼 → 필터 커밋. 지도 조회가 끝나야 목록을 열 수 있어 대기 플래그를 세운다.
   const handleApplyFilter = () => {
@@ -116,11 +117,16 @@ export function Drawer() {
     setIsPendingList(true)
   }
 
+  // 지도가 새 applied 기준으로 다시 발행할 때까지 기다린다.
+  // 드로어가 지도의 자식이라 effect 가 먼저 도는데, 그 시점의 visibleSpotIds 는
+  // 아직 직전 필터 기준이라 그대로 열면 방금 건 필터가 목록에 반영되지 않는다.
+  const isVisibleFresh = visibleAppliedFor === applied && !isVisibleStale
+
   useEffect(() => {
-    if (!isPendingList || isVisibleStale) return
+    if (!isPendingList || !isVisibleFresh) return
     setIsPendingList(false)
     void openPreviewList()
-  }, [isPendingList, isVisibleStale, openPreviewList])
+  }, [isPendingList, isVisibleFresh, openPreviewList])
 
   useEffect(() => {
     if (isOpen) {

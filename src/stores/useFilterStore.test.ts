@@ -112,15 +112,69 @@ describe('stores/useFilterStore', () => {
   })
 
   it('setVisibleSpots — 지도가 발행한 결과를 담는다', () => {
-    useFilterStore
-      .getState()
-      .setVisibleSpots({ spotIds: [3, 1], center: { lat: 37.5, lng: 127 }, isStale: true, draftCount: 5 })
+    const s = () => useFilterStore.getState()
+    s().setVisibleSpots({
+      spotIds: [3, 1],
+      center: { lat: 37.5, lng: 127 },
+      isStale: true,
+      draftCount: 5,
+      appliedFor: s().applied,
+    })
 
-    const s = useFilterStore.getState()
-    expect(s.visibleSpotIds).toEqual([3, 1])
-    expect(s.mapCenter).toEqual({ lat: 37.5, lng: 127 })
-    expect(s.isVisibleStale).toBe(true)
-    expect(s.draftVisibleCount).toBe(5)
+    expect(s().visibleSpotIds).toEqual([3, 1])
+    expect(s().mapCenter).toEqual({ lat: 37.5, lng: 127 })
+    expect(s().isVisibleStale).toBe(true)
+    expect(s().draftVisibleCount).toBe(5)
+  })
+
+  // 지도(부모)보다 드로어(자식)의 effect 가 먼저 돌기 때문에, 커밋 직후 발행값은
+  // 아직 옛 applied 기준이다. 드로어는 이걸 보고 목록 열기를 미뤄야 한다.
+  describe('발행된 결과가 현재 applied 기준인지', () => {
+    it('지도가 방금 발행했으면 현재 applied 와 같은 참조다', () => {
+      const s = () => useFilterStore.getState()
+      s().setVisibleSpots({
+        spotIds: [1, 2, 3],
+        center: null,
+        isStale: false,
+        draftCount: 3,
+        appliedFor: s().applied,
+      })
+
+      expect(s().visibleAppliedFor).toBe(s().applied)
+    })
+
+    it('applyDraft 직후 재발행 전에는 참조가 어긋난다', () => {
+      const s = () => useFilterStore.getState()
+      s().setVisibleSpots({
+        spotIds: [1, 2, 3],
+        center: null,
+        isStale: false,
+        draftCount: 3,
+        appliedFor: s().applied,
+      })
+
+      s().toggleDraftCategory('CHERRY')
+      s().applyDraft()
+
+      expect(s().visibleAppliedFor).not.toBe(s().applied)
+    })
+
+    // 아무것도 안 고치고 버튼만 눌렀으면 지금 발행값이 이미 정답이라 기다릴 이유가 없다.
+    it('draft 를 안 건드리고 applyDraft 하면 참조가 유지된다', () => {
+      const s = () => useFilterStore.getState()
+      s().setVisibleSpots({
+        spotIds: [1],
+        center: null,
+        isStale: false,
+        draftCount: 1,
+        appliedFor: s().applied,
+      })
+
+      s().syncDraft()
+      s().applyDraft()
+
+      expect(s().visibleAppliedFor).toBe(s().applied)
+    })
   })
 
   it('reset — 전부 초기값으로 되돌린다', () => {
@@ -128,7 +182,13 @@ describe('stores/useFilterStore', () => {
     s().setPinType('ATTRACTION')
     s().toggleDraftCategory('CHERRY')
     s().applyDraft()
-    s().setVisibleSpots({ spotIds: [1], center: { lat: 1, lng: 2 }, isStale: true, draftCount: 3 })
+    s().setVisibleSpots({
+      spotIds: [1],
+      center: { lat: 1, lng: 2 },
+      isStale: true,
+      draftCount: 3,
+      appliedFor: s().applied,
+    })
 
     s().reset()
 
@@ -140,5 +200,6 @@ describe('stores/useFilterStore', () => {
     expect(after.mapCenter).toBeNull()
     expect(after.isVisibleStale).toBe(false)
     expect(after.draftVisibleCount).toBe(0)
+    expect(after.visibleAppliedFor).toBe(after.applied)
   })
 })

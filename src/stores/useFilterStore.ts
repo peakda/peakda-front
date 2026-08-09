@@ -27,6 +27,8 @@ interface VisibleSpots {
   isStale: boolean
   /** draft 기준으로 세어 둔 개수 — 꽃 종류 탭 버튼의 'N개' */
   draftCount: number
+  /** 이 결과가 어떤 applied 기준으로 계산됐는지 — 드로어가 최신 여부를 참조 비교로 판단한다 */
+  appliedFor: FilterValues
 }
 
 interface FilterState {
@@ -41,6 +43,14 @@ interface FilterState {
   mapCenter: MapCoords | null
   isVisibleStale: boolean
   draftVisibleCount: number
+  /**
+   * visibleSpotIds 를 계산할 때 쓰인 applied.
+   *
+   * 드로어는 지도의 자식이라 effect 가 먼저 돈다. 버튼을 눌러 applied 가 바뀐 직후
+   * 발행값은 아직 옛 조건 기준이므로, 이 값이 applied 와 같은 참조가 될 때까지 기다려야
+   * 직전 필터 결과로 목록을 여는 일이 없다.
+   */
+  visibleAppliedFor: FilterValues
 
   setPinType: (pinType: PinTypeFilter) => void
   toggleDraftRegion: (region: RegionKey) => void
@@ -68,6 +78,7 @@ const INITIAL = {
   mapCenter: null,
   isVisibleStale: false,
   draftVisibleCount: 0,
+  visibleAppliedFor: EMPTY_VALUES,
 }
 
 // 같은 값을 다시 누르면 해제되는 단일 선택
@@ -105,12 +116,13 @@ export const useFilterStore = create<FilterState>((set) => ({
   syncDraft: () => set((s) => ({ draft: s.applied })),
   applyDraft: () => set((s) => ({ applied: s.draft })),
 
-  setVisibleSpots: ({ spotIds, center, isStale, draftCount }) =>
+  setVisibleSpots: ({ spotIds, center, isStale, draftCount, appliedFor }) =>
     set({
       visibleSpotIds: spotIds,
       mapCenter: center,
       isVisibleStale: isStale,
       draftVisibleCount: draftCount,
+      visibleAppliedFor: appliedFor,
     }),
 
   reset: () => set(INITIAL),

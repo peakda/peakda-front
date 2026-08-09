@@ -205,8 +205,12 @@ export const MapContainer = () => {
       // 아직 이전 조건의 결과를 보고 있으면 목록 열기를 기다려야 한다.
       isStale: isPlaceholderData,
       draftCount: inView(draftSpots).filter((s) => s.spotId != null).length,
+      // 어떤 조건으로 계산한 결과인지 함께 올린다. 드로어가 이걸로 최신 여부를 판단한다.
+      appliedFor: applied,
     })
-  }, [spots, draftSpots, mapInstance, isPlaceholderData, setVisibleSpots])
+    // applied 는 spots 에 반영되지만, 지역만 바뀌면(서버 파라미터가 없어 조회에 안 쓰임)
+    // spots 참조가 그대로라 재발행이 안 된다. 그래서 명시적으로 넣는다.
+  }, [spots, draftSpots, mapInstance, isPlaceholderData, applied, setVisibleSpots])
 
   // 시즌 추천어(홈 검색바 보조 카피). 절정 데이터 없으면(available=false) 기본 문구로 폴백.
   const { data: suggestion } = useHomeSuggestion()
