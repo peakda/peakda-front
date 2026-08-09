@@ -58,6 +58,8 @@ interface FilterState {
   toggleDraftCategory: (category: BloomSlotCategory) => void
   /** 드로어를 열 때 applied 기준으로 되돌린다 — 지난번에 버린 선택이 남지 않게 */
   syncDraft: () => void
+  /** 초기화 버튼. draft 만 비우므로 하단 버튼을 눌러야 실제로 풀린다 */
+  resetDraft: () => void
   applyDraft: () => void
   setVisibleSpots: (visible: VisibleSpots) => void
   reset: () => void
@@ -114,6 +116,7 @@ export const useFilterStore = create<FilterState>((set) => ({
     })),
 
   syncDraft: () => set((s) => ({ draft: s.applied })),
+  resetDraft: () => set({ draft: EMPTY_VALUES }),
   applyDraft: () => set((s) => ({ applied: s.draft })),
 
   setVisibleSpots: ({ spotIds, center, isStale, draftCount, appliedFor }) =>

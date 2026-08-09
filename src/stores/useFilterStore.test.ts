@@ -111,6 +111,44 @@ describe('stores/useFilterStore', () => {
     expect(s().draft).toEqual({ region: null, timing: null, categories: ['CHERRY'] })
   })
 
+  // 필터를 끄려면 고른 걸 하나하나 다시 눌러야 했다. 초기화 버튼용.
+  describe('resetDraft', () => {
+    it('draft 선택을 전부 비운다', () => {
+      const s = () => useFilterStore.getState()
+      s().toggleDraftRegion('JEJU')
+      s().toggleDraftTiming('EARLY')
+      s().toggleDraftCategory('CHERRY')
+      s().toggleDraftCategory('MAPLE')
+
+      s().resetDraft()
+
+      expect(s().draft).toEqual({ region: null, timing: null, categories: [] })
+    })
+
+    // 초기화도 draft 단계라, 하단 버튼을 눌러야 실제로 필터가 풀린다.
+    it('applied 는 건드리지 않는다', () => {
+      const s = () => useFilterStore.getState()
+      s().toggleDraftCategory('CHERRY')
+      s().applyDraft()
+
+      s().resetDraft()
+
+      expect(s().applied.categories).toEqual(['CHERRY'])
+      expect(s().draft.categories).toEqual([])
+    })
+
+    it('초기화 후 applyDraft 하면 필터가 풀린다', () => {
+      const s = () => useFilterStore.getState()
+      s().toggleDraftCategory('CHERRY')
+      s().applyDraft()
+
+      s().resetDraft()
+      s().applyDraft()
+
+      expect(hasActiveFilter(s().applied)).toBe(false)
+    })
+  })
+
   it('setVisibleSpots — 지도가 발행한 결과를 담는다', () => {
     const s = () => useFilterStore.getState()
     s().setVisibleSpots({
