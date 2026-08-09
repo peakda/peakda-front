@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { Heart, Share2, MapPin } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { useQueryClient } from '@tanstack/react-query'
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { Button } from '@/components/ui/button/Button'
@@ -14,6 +15,8 @@ import { Drawer } from '@/components/ui/layout/Drawer'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import { toFeedCardProps } from '@/lib/utils/spotRecordToFeed'
 import { useSpotDetail } from '@/api/facades/spot'
+import { useRemoveFavorite } from '@/api/facades/spot-favorite'
+import { getGetSpotsByIdQueryKey } from '@/api/facades/generated/spot/spot'
 import { buildRecordUrl, canUseWebShare, isShareAbort } from '@/lib/utils/spotCta'
 import { cn } from '@/lib/utils/cn'
 
@@ -60,6 +63,8 @@ export default function SpotDetailPage() {
   const router = useRouter()
   const { id } = useParams<{ id: string }>()
   const openSaveSpotDrawer = useDrawerStore((s) => s.openSaveSpotDrawer)
+  const queryClient = useQueryClient()
+  const removeFavorite = useRemoveFavorite()
 
   const { data: spot, isLoading, isError, refetch } = useSpotDetail(Number(id))
 
@@ -112,8 +117,27 @@ export default function SpotDetailPage() {
     return ''
   })()
 
-  const handleSave = () =>
+  // 추가는 "개화 알림 받기" 토글이라는 실제 선택지가 있어 시트가 필요하지만,
+  // 해제는 선택지가 없어 시트가 순수 마찰이라 HeartBtn과 동일하게 즉시 토글한다.
+  const handleSave = () => {
+    if (favorited) {
+      removeFavorite.mutate(
+        { spotId: Number(id) },
+        {
+          onSuccess: () => {
+            toast('찜을 해제했어요')
+            queryClient.invalidateQueries({ queryKey: getGetSpotsByIdQueryKey(Number(id)) })
+          },
+          onError: (err) => {
+            console.error(err)
+            toast.error('찜을 해제하지 못했어요')
+          },
+        }
+      )
+      return
+    }
     openSaveSpotDrawer({ spotId: Number(id), name: spot.name, location: spot.address ?? '' })
+  }
 
   // Web Share 지원 기기는 공유 시트, 아니면 링크 복사로 대체한다.
   const handleShare = async () => {
@@ -177,7 +201,12 @@ export default function SpotDetailPage() {
               )}
             </div>
             <div className="flex shrink-0 items-center gap-3 pt-1">
-              <button type="button" aria-label="찜하기" onClick={handleSave}>
+              <button
+                type="button"
+                aria-label="찜하기"
+                onClick={handleSave}
+                disabled={removeFavorite.isPending}
+              >
                 <Heart
                   className={cn(
                     'h-5 w-5 cursor-pointer',
@@ -240,6 +269,7 @@ export default function SpotDetailPage() {
           type="button"
           aria-label="찜하기"
           onClick={handleSave}
+          disabled={removeFavorite.isPending}
           className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-gray-200"
         >
           <Heart
