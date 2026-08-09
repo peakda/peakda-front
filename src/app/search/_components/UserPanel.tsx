@@ -1,5 +1,6 @@
 import { IconBtn } from '@/components/ui/button/IconBtn'
 import { UserList } from '@/app/search/_components/UserList'
+import { InfiniteScrollFooter } from '@/components/ui/display/InfiniteScrollFooter'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import Image from 'next/image'
 
@@ -17,9 +18,11 @@ interface Props {
   // 목록 하단에 닿았을 때 다음 페이지를 부른다. hasMore 가 false 면 관찰하지 않는다.
   onLoadMore?: () => void
   hasMore?: boolean
+  // hasMore 는 로딩 중에 false 가 되므로 스피너 표시 여부는 따로 받는다.
+  isLoadingMore?: boolean
 }
 
-export function UserPanel({ users, onLoadMore, hasMore = false }: Props) {
+export function UserPanel({ users, onLoadMore, hasMore = false, isLoadingMore = false }: Props) {
   const sentinelRef = useInfiniteScroll(() => onLoadMore?.(), hasMore)
 
   if (users.length === 0) {
@@ -43,7 +46,7 @@ export function UserPanel({ users, onLoadMore, hasMore = false }: Props) {
           <UserList user={user} key={user.id} />
         ))}
       </ul>
-      <div ref={sentinelRef} />
+      <InfiniteScrollFooter sentinelRef={sentinelRef} isLoading={isLoadingMore} />
     </>
   )
 }

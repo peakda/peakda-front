@@ -8,6 +8,7 @@ import { Nav } from '@/components/ui/layout/Nav'
 import { CategoryChip } from '@/components/ui/category/CategoryChip'
 import { FeedListItem } from '@/components/ui/card/FeedListItem'
 import { Drawer } from '@/components/ui/layout/Drawer'
+import { InfiniteScrollFooter } from '@/components/ui/display/InfiniteScrollFooter'
 import { useFeedListInfinite } from '@/api/facades/feed'
 import { useCurrentUser } from '@/api/facades/auth'
 import { useDeleteSpotRecord } from '@/api/facades/spot-record'
@@ -98,7 +99,7 @@ export default function FeedPage() {
               />
             ))}
           </div>
-          <div ref={sentinelRef} />
+          <InfiniteScrollFooter sentinelRef={sentinelRef} isLoading={isFetchingNextPage} />
         </>
       )}
 

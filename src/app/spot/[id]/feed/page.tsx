@@ -6,6 +6,7 @@ import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { FeedListItem } from '@/components/ui/card/FeedListItem'
 import { Drawer } from '@/components/ui/layout/Drawer'
+import { InfiniteScrollFooter } from '@/components/ui/display/InfiniteScrollFooter'
 import { useSpotRecordsBySpotInfinite, useDeleteSpotRecord } from '@/api/facades/spot-record'
 import { useSpotDetail } from '@/api/facades/spot'
 import { useCurrentUser } from '@/api/facades/auth'
@@ -63,10 +64,7 @@ export default function SpotFeedPage() {
             />
           ))}
           {/* 하단에 닿으면 다음 페이지를 불러온다 */}
-          <div ref={sentinelRef} className="h-8" />
-          {isFetchingNextPage && (
-            <p className="text-text-tertiary py-4 text-center text-sm">불러오는 중...</p>
-          )}
+          <InfiniteScrollFooter sentinelRef={sentinelRef} isLoading={isFetchingNextPage} />
         </div>
       )}
 

@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { SpotCard } from '@/components/ui/card/SpotCard'
+import { InfiniteScrollFooter } from '@/components/ui/display/InfiniteScrollFooter'
 import { useExploreSpotsInfinite } from '@/api/facades/explore'
 import { GetExploreSpotsSection } from '@/api/facades/generated/peakdaApi.schemas'
 import { toExploreSpotProps } from '@/lib/utils/explore'
@@ -62,7 +63,7 @@ function ExploreSpotsContent() {
                 />
               ))}
             </ul>
-            <div ref={sentinelRef} />
+            <InfiniteScrollFooter sentinelRef={sentinelRef} isLoading={isFetchingNextPage} />
           </>
         ))}
     </div>
