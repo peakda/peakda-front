@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { MoreMenu } from '@/components/ui/button/MoreMenu'
@@ -44,7 +45,7 @@ export default function FeedDetailPage() {
       {
         onSuccess: () => {
           setReportModalOpen(false)
-          window.alert('신고가 접수되었어요')
+          toast.success('신고가 접수되었어요')
         },
       }
     )
