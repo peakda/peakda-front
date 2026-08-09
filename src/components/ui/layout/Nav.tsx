@@ -1,8 +1,6 @@
-'use client'
-
 import { Plus } from 'lucide-react'
+import Link from 'next/link'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
 
 interface NavProps {
   activeTab: 'map' | 'explore' | 'feed' | 'my' | 'none'
@@ -10,12 +8,11 @@ interface NavProps {
 
 export function Nav({ activeTab }: NavProps) {
   const itemClass = 'flex cursor-pointer flex-col items-center gap-1 justify-center'
-  const router = useRouter()
   return (
     <div className="border-border shadow-background fixed right-0 bottom-0 left-0 z-10 mx-auto h-20 max-w-[430px] border bg-white px-4 py-2">
       <div className="flex justify-around text-sm">
         {/* 지도 */}
-        <div className={itemClass} onClick={() => router.push('/map')}>
+        <Link href="/map" className={itemClass} aria-current={activeTab === 'map' ? 'page' : undefined}>
           <Image
             src={'/icons/explore.svg'}
             alt="지도"
@@ -24,10 +21,14 @@ export function Nav({ activeTab }: NavProps) {
             className={activeTab === 'map' ? 'opacity-100' : 'opacity-50'}
           />
           <p className={activeTab === 'map' ? 'text-black' : 'text-gray-400'}>지도</p>
-        </div>
+        </Link>
 
         {/* 추천 */}
-        <div className={itemClass} onClick={() => router.push('/explore')}>
+        <Link
+          href="/explore"
+          className={itemClass}
+          aria-current={activeTab === 'explore' ? 'page' : undefined}
+        >
           <Image
             src={'/icons/mapSearch.svg'}
             alt="탐색"
@@ -36,18 +37,19 @@ export function Nav({ activeTab }: NavProps) {
             className={activeTab === 'explore' ? 'opacity-100' : 'opacity-50'}
           />
           <p className={activeTab === 'explore' ? 'text-black' : 'text-gray-400'}>탐색</p>
-        </div>
+        </Link>
 
         {/* 플러스 버튼 (중앙) */}
-        <div
+        <Link
+          href="/record"
+          aria-label="기록 작성"
           className="bg-brand-secondary mt-2 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full"
-          onClick={() => router.push('/record')}
         >
           <Plus size={20} className="text-white" />
-        </div>
+        </Link>
 
         {/* 피드 */}
-        <div className={itemClass} onClick={() => router.push('/feed')}>
+        <Link href="/feed" className={itemClass} aria-current={activeTab === 'feed' ? 'page' : undefined}>
           <Image
             src={'/icons/feed.svg'}
             alt="피드"
@@ -56,17 +58,17 @@ export function Nav({ activeTab }: NavProps) {
             className={activeTab === 'feed' ? 'opacity-100' : 'opacity-50'}
           />
           <p className={activeTab === 'feed' ? 'text-black' : 'text-gray-400'}>피드</p>
-        </div>
+        </Link>
 
         {/* My */}
-        <div className={itemClass} onClick={() => router.push('/my')}>
+        <Link href="/my" className={itemClass} aria-current={activeTab === 'my' ? 'page' : undefined}>
           <div
             className={`rounded-full bg-gray-200 p-1 ${activeTab === 'my' ? 'opacity-100' : 'opacity-50'}`}
           >
             <Image src={'/icons/my.svg'} alt="My" width={18} height={18} />
           </div>
           <p className={activeTab === 'my' ? 'text-black' : 'text-gray-400'}>My</p>
-        </div>
+        </Link>
       </div>
     </div>
   )
