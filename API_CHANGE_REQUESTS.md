@@ -11,7 +11,7 @@
 |---|---|---|---|
 | 1 | **P0** | 조회 응답에 "내 상태"(리액션·차단·팔로우)가 없음 | **유지** — 근거 보강 |
 | 2 | P1 | `SpotSearchItem` 표시 정보 부족 | **축소** — `type`은 프론트가 쓰기 시작 |
-| 3 | P1 | `ExploreFestivalItem` 에 이미지·진행상태 없음 | 유지 |
+| 3 | P1 | `ExploreFestivalItem` 에 이미지·진행상태 없음 | **축소** — 배지는 프론트에서 날짜로 임시 판정, 이미지는 미해결 |
 | 4 | P1 | `ExploreSpotItem.spotId` null 정책 | 유지 |
 | 5 | P2 | 필터 조건 파라미터 부재 | **축소** — 2건만 남음 (`region` 은 철회 취소) |
 | 6 | P2 | 꽃 카테고리 enum | **철회** — 프론트에서 13개로 통일 완료 |
@@ -88,7 +88,9 @@
 
 **영향 화면**: `/explore`, `/explore/festivals`
 
-목록용 DTO 에 이미지와 상태가 없어, 축제 카드가 **전부 동일한 플레이스홀더 이미지**에 배지는 **`"진행중"` 하드코딩**입니다 (`explore/page.tsx:183`, `explore/festivals/page.tsx:41`). `FestivalDetailResponse` 에는 `phase` 와 `editorial.heroImageUrl` 이 있는데 목록에서는 못 씁니다.
+목록용 DTO 에 이미지와 상태가 없어, 축제 카드가 **전부 동일한 플레이스홀더 이미지**입니다. `FestivalDetailResponse` 에는 `phase` 와 `editorial.heroImageUrl` 이 있는데 목록에서는 못 씁니다.
+
+> **8/9 업데이트 — 배지는 프론트에서 임시 해결했습니다.** `"진행중"` 하드코딩 때문에 **이미 끝난 축제도 진행중으로 표시되던** 문제라, `startsOn`/`endsOn`/`endsInDays` 만으로 `예정`/`진행중`/`곧 종료`/`종료` 를 판정하는 함수를 넣었습니다 (`src/lib/utils/explore.ts` 의 `toFestivalStatus`). **여전히 `phase` 를 요청드립니다** — 프론트 판정은 날짜만 보므로 취소·연기 같은 상태를 표현할 수 없고, 서버와 판정 기준이 갈릴 위험이 있습니다. `phase` 가 오면 이 함수만 걷어냅니다. **이미지(`thumbnailUrl`)는 그대로 미해결입니다.**
 
 ```jsonc
 // ExploreFestivalItem 추가
