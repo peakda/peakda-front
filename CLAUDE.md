@@ -92,7 +92,8 @@ pnpm generate:facades   # 없는 도메인만 파사드 스텁 생성
 | [MEMORY.md](MEMORY.md) | **코드만 봐서는 알 수 없는 결정과 이유** — 작업 전 먼저 확인 |
 | [src/CLAUDE.md](src/CLAUDE.md), [public/CLAUDE.md](public/CLAUDE.md) | 디렉터리별 구조와 규칙 |
 | [design-tokens.md](design-tokens.md) | Figma 디자인 토큰 원본 (색상 스케일, Text Style, Flower_colors) |
-| [API_CHANGE_REQUESTS.md](API_CHANGE_REQUESTS.md) | 백엔드에 요청한 API 변경 사항과 처리 상태 |
+| [BACKEND_API_REQUESTS.md](BACKEND_API_REQUESTS.md) | **백엔드에 전달하는 요청서** — 요청 내용만. 백엔드와 공유하는 문서 |
+| [API_CHANGE_REQUESTS.md](API_CHANGE_REQUESTS.md) | 위 요청들의 프론트 대응 현황과 경위 (내부용) |
 | [UNLINKED_ROUTES.md](UNLINKED_ROUTES.md) | 생성됐지만 아직 화면에 연결되지 않은 라우트 목록 |
 | [UX_BACKLOG.md](UX_BACKLOG.md) | 동작은 하지만 사용자 흐름이 어색해 고쳐야 하는 것 (보류 중인 건만) |
 
