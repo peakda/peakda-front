@@ -21,7 +21,8 @@ function SectionTitle({ children }: { children: string }) {
 }
 
 export default function SettingsPage() {
-  const { openLogoutDrawer, openWithdrawDrawer } = useDrawerStore()
+  const openLogoutDrawer = useDrawerStore((s) => s.openLogoutDrawer)
+  const openWithdrawDrawer = useDrawerStore((s) => s.openWithdrawDrawer)
 
   return (
     <div className="bg-bg-primary relative flex min-h-screen flex-col pb-12">

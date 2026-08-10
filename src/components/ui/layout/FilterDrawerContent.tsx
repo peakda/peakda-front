@@ -1,26 +1,20 @@
 'use client'
 
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { Tabs } from '@/components/ui/Tab/Tab'
 import { TabPanels } from '@/components/ui/Tab/TabPanel'
 import { FilterCard } from '@/components/ui/card/FilterCard'
 import { FlowerCard } from '@/components/ui/card/FlowerCard'
 import { TabItem, useTabsContext } from '@/context/TabContext'
 import { FLOWER_CATEGORIES, type FlowerSeason } from '@/constants/flower'
+import { REGIONS } from '@/constants/region'
+import { TIMINGS } from '@/lib/utils/timing'
 import { useFilterStore } from '@/stores/useFilterStore'
-import type { BloomSlotStatus } from '@/api/facades/generated/peakdaApi.schemas'
 
-// 지역 탭은 서버 파라미터도, 클라에서 판정할 근거(권역 정보)도 없어 제외했다.
 const TABS: TabItem[] = [
+  { value: 'region', label: '지역' },
   { value: 'timing', label: '시기' },
   { value: 'flowers', label: '꽃 종류' },
-]
-
-// 개화 상태는 서버 파라미터가 없어 클라이언트에서 거른다. 복수 선택.
-const TIMINGS: { status: BloomSlotStatus; title: string; subTitle: string }[] = [
-  { status: 'PEAK', title: '절정', subTitle: '지금 피크에요!' },
-  { status: 'STARTED', title: '피기시작', subTitle: '1~2주 내 절정' },
-  { status: 'PREPARING', title: '이르다', subTitle: '미리 계획 중' },
 ]
 
 const FLOWER_SEASONS: { season: FlowerSeason; label: string }[] = [
@@ -29,9 +23,10 @@ const FLOWER_SEASONS: { season: FlowerSeason; label: string }[] = [
   { season: 'FALL', label: '가을 · 겨울' },
 ]
 
-// 꽃 종류는 서버 category 파라미터가 단일 값이라 단일 선택이다.
+// 서버 category 파라미터는 값 하나만 받지만, 응답에 category 가 있어 복수 선택은 클라에서 거른다.
 function FlowerSections() {
-  const { category, setCategory } = useFilterStore()
+  const categories = useFilterStore((s) => s.draft.categories)
+  const toggleDraftCategory = useFilterStore((s) => s.toggleDraftCategory)
 
   return (
     <div className="space-y-6">
@@ -45,8 +40,8 @@ function FlowerSections() {
                 label={f.label}
                 date={f.months}
                 image={f.image}
-                selected={category === f.value}
-                onClick={() => setCategory(f.value)}
+                selected={categories.includes(f.value)}
+                onClick={() => toggleDraftCategory(f.value)}
               />
             ))}
           </div>
@@ -54,6 +49,17 @@ function FlowerSections() {
       ))}
     </div>
   )
+}
+
+// 하단 버튼 라벨이 탭마다 달라서(꽃 종류만 'N개의 명소 보기') 활성 탭을 드로어로 올려준다.
+function ActiveTabReporter({ onChange }: { onChange: (tab: string) => void }) {
+  const { active } = useTabsContext()
+
+  useEffect(() => {
+    onChange(active)
+  }, [active, onChange])
+
+  return null
 }
 
 function SwipeableContent({
@@ -122,15 +128,21 @@ interface FilterDrawerContentProps {
   snap: string | number | null
   onExpandToFull: () => void
   flowersOnly?: boolean
+  onTabChange?: (tab: string) => void
 }
 
 export function FilterDrawerContent({
   snap,
   onExpandToFull,
   flowersOnly = false,
+  onTabChange,
 }: FilterDrawerContentProps) {
-  // 드로어를 닫아도 선택이 유지돼야 해서 로컬 state 가 아닌 전역 필터 스토어를 쓴다.
-  const { statuses, toggleStatus } = useFilterStore()
+  // 여기서 고르는 값은 draft 일 뿐이다. 하단 버튼을 눌러야 applied 가 되고,
+  // 지도를 눌러 그냥 닫으면 버려진다.
+  const timing = useFilterStore((s) => s.draft.timing)
+  const toggleDraftTiming = useFilterStore((s) => s.toggleDraftTiming)
+  const region = useFilterStore((s) => s.draft.region)
+  const toggleDraftRegion = useFilterStore((s) => s.toggleDraftRegion)
   const touchStart = useRef({ x: 0, y: 0 })
 
   const snapPx =
@@ -164,22 +176,39 @@ export function FilterDrawerContent({
 
   return (
     <Tabs
-      defaultValue="timing"
+      defaultValue="region"
       tabs={TABS}
       className="flex min-h-0 flex-1 flex-col overflow-hidden"
     >
+      {onTabChange && <ActiveTabReporter onChange={onTabChange} />}
       <SwipeableContent snap={snap} onExpandToFull={onExpandToFull}>
         <TabPanels tabs={TABS} className="min-h-0 flex-1">
           <div>
-            <p className="text-text-secondary mb-1 font-semibold">지금 상태</p>
+            {/* 서버에 region 파라미터가 아직 없어 선택만 저장된다. 파라미터가 생기면 date 옆에 붙인다. */}
+            <p className="text-text-secondary mb-1 font-semibold">권역 선택</p>
+            <div className="grid grid-cols-2 gap-2">
+              {REGIONS.map((r) => (
+                <FilterCard
+                  key={r.key}
+                  title={r.label}
+                  subTitle={r.subLabel}
+                  isActive={region === r.key}
+                  onClick={() => toggleDraftRegion(r.key)}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <p className="text-text-secondary mb-1 font-semibold">언제 갈까요?</p>
             <div className="grid grid-cols-3 gap-2">
               {TIMINGS.map((t) => (
                 <FilterCard
-                  key={t.status}
-                  title={t.title}
-                  subTitle={t.subTitle}
-                  isActive={statuses.includes(t.status)}
-                  onClick={() => toggleStatus(t.status)}
+                  key={t.key}
+                  title={t.label}
+                  subTitle={t.subLabel}
+                  isActive={timing === t.key}
+                  onClick={() => toggleDraftTiming(t.key)}
                 />
               ))}
             </div>

@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { SpotCard } from '@/components/ui/card/SpotCard'
+import { InfiniteScrollFooter } from '@/components/ui/display/InfiniteScrollFooter'
 import { useExploreSpotsInfinite } from '@/api/facades/explore'
 import { GetExploreSpotsSection } from '@/api/facades/generated/peakdaApi.schemas'
 import { toExploreSpotProps } from '@/lib/utils/explore'
@@ -25,8 +26,8 @@ function ExploreSpotsContent() {
       ? GetExploreSpotsSection.NEXT_WEEK
       : GetExploreSpotsSection.PEAK_NOW
 
-  // 필터 드로어에서 고른 꽃 종류(단일 선택). 없으면 전체를 받는다.
-  const category = useFilterStore((state) => state.category)
+  // 필터 드로어에서 고른 꽃 종류. 서버 category 는 값 하나만 받으므로 첫 번째만 보낸다.
+  const category = useFilterStore((state) => state.applied.categories[0])
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useExploreSpotsInfinite(section, category ?? undefined)
@@ -62,7 +63,7 @@ function ExploreSpotsContent() {
                 />
               ))}
             </ul>
-            <div ref={sentinelRef} />
+            <InfiniteScrollFooter sentinelRef={sentinelRef} isLoading={isFetchingNextPage} />
           </>
         ))}
     </div>

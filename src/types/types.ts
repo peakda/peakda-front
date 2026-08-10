@@ -20,6 +20,8 @@ interface BasePinProps {
   location: string
   description: string
   Badges: string[]
+  // 뱃지 왼쪽 꽃 아이콘. 개화 정보가 없으면 아이콘 없이 라벨만 보여준다.
+  badgeIcon?: string
   isFavorite: boolean
   // 스팟 상세(/spot/[id]) 이동용. 좌표만 있는 핀 등 없을 수 있어 optional.
   spotId?: number

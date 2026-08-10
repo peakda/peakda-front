@@ -6,6 +6,8 @@ interface SearchBarProps {
   placeholder?: string
   description?: string
   onFilterClick?: () => void
+  /** 필터가 걸려 있으면 아이콘 오른쪽 위에 점을 찍는다 */
+  hasActiveFilter?: boolean
   className?: string
 }
 
@@ -14,6 +16,7 @@ export const SearchBar = ({
   description,
 
   onFilterClick,
+  hasActiveFilter = false,
   className,
 }: SearchBarProps) => {
   const router = useRouter()
@@ -34,8 +37,14 @@ export const SearchBar = ({
             <p className="text-xs leading-tight tracking-tight text-[#4E5666]">{description}</p>
           )}
         </div>
-        <button type="button" className="cursor-pointer" onClick={onFilterClick}>
+        <button type="button" className="relative cursor-pointer" onClick={onFilterClick}>
           <Image src="/icons/filter.svg" alt="필터" width={24} height={24} />
+          {hasActiveFilter && (
+            <span
+              aria-label="필터 적용됨"
+              className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-red-500"
+            />
+          )}
         </button>
       </div>
     </div>

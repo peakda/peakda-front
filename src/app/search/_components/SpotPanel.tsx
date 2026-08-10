@@ -2,6 +2,7 @@ import { Search } from 'lucide-react'
 import { IconBtn } from '@/components/ui/button/IconBtn'
 import { SpotCard } from '@/components/ui/card/SpotCard'
 import type { CardBadgeVariant } from '@/components/ui/card/CardBadge'
+import { InfiniteScrollFooter } from '@/components/ui/display/InfiniteScrollFooter'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 
 export interface SPOTProps {
@@ -22,9 +23,11 @@ interface Props {
   // 목록 하단에 닿았을 때 다음 페이지를 부른다. hasMore 가 false 면 관찰하지 않는다.
   onLoadMore?: () => void
   hasMore?: boolean
+  // hasMore 는 로딩 중에 false 가 되므로 스피너 표시 여부는 따로 받는다.
+  isLoadingMore?: boolean
 }
 
-export function SpotPanel({ spots, onLoadMore, hasMore = false }: Props) {
+export function SpotPanel({ spots, onLoadMore, hasMore = false, isLoadingMore = false }: Props) {
   const sentinelRef = useInfiniteScroll(() => onLoadMore?.(), hasMore)
 
   if (spots.length === 0) {
@@ -46,7 +49,7 @@ export function SpotPanel({ spots, onLoadMore, hasMore = false }: Props) {
           <SpotCard spot={spot} key={spot.id} />
         ))}
       </ul>
-      <div ref={sentinelRef} />
+      <InfiniteScrollFooter sentinelRef={sentinelRef} isLoading={isLoadingMore} />
     </>
   )
 }

@@ -1,17 +1,18 @@
 'use client'
 
+import { useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
-import { FeedCard } from '@/components/ui/card/FeedCard'
+import { FeedListItem } from '@/components/ui/card/FeedListItem'
 import { Drawer } from '@/components/ui/layout/Drawer'
+import { InfiniteScrollFooter } from '@/components/ui/display/InfiniteScrollFooter'
 import { useSpotRecordsBySpotInfinite, useDeleteSpotRecord } from '@/api/facades/spot-record'
 import { useSpotDetail } from '@/api/facades/spot'
 import { useCurrentUser } from '@/api/facades/auth'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import { flattenPages } from '@/lib/utils/infinitePages'
-import { toFeedCardProps } from '@/lib/utils/spotRecordToFeed'
 
 export default function SpotFeedPage() {
   const router = useRouter()
@@ -24,8 +25,15 @@ export default function SpotFeedPage() {
   const sentinelRef = useInfiniteScroll(() => fetchNextPage(), hasNextPage && !isFetchingNextPage)
 
   const { data: currentUser } = useCurrentUser()
-  const deleteRecord = useDeleteSpotRecord()
+  const { mutate: deleteRecord } = useDeleteSpotRecord()
   const openDeleteConfirmDrawer = useDrawerStore((s) => s.openDeleteConfirmDrawer)
+
+  // 아이템에 넘기는 콜백은 참조가 고정돼야 FeedListItem 의 memo 가 동작한다.
+  const handleEdit = useCallback((id: number) => router.push(`/record/${id}/edit`), [router])
+  const handleDelete = useCallback(
+    (id: number) => openDeleteConfirmDrawer(() => deleteRecord({ id })),
+    [openDeleteConfirmDrawer, deleteRecord]
+  )
 
   return (
     <div className="bg-bg-primary relative flex min-h-screen flex-col pb-12">
@@ -47,21 +55,16 @@ export default function SpotFeedPage() {
       ) : (
         <div className="divide-border-primary divide-y">
           {records.map((record) => (
-            <FeedCard
+            <FeedListItem
               key={record.id}
-              {...toFeedCardProps(record, {
-                isOwner: record.user.id === currentUser?.id,
-                onEdit: () => router.push(`/record/${record.id}/edit`),
-                onDelete: () =>
-                  openDeleteConfirmDrawer(() => deleteRecord.mutate({ id: record.id })),
-              })}
+              record={record}
+              isOwner={record.user.id === currentUser?.id}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
             />
           ))}
           {/* 하단에 닿으면 다음 페이지를 불러온다 */}
-          <div ref={sentinelRef} className="h-8" />
-          {isFetchingNextPage && (
-            <p className="text-text-tertiary py-4 text-center text-sm">불러오는 중...</p>
-          )}
+          <InfiniteScrollFooter sentinelRef={sentinelRef} isLoading={isFetchingNextPage} />
         </div>
       )}
 

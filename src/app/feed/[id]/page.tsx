@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { MoreMenu } from '@/components/ui/button/MoreMenu'
@@ -44,7 +45,7 @@ export default function FeedDetailPage() {
       {
         onSuccess: () => {
           setReportModalOpen(false)
-          window.alert('신고가 접수되었어요')
+          toast.success('신고가 접수되었어요')
         },
       }
     )
@@ -68,17 +69,21 @@ export default function FeedDetailPage() {
       {isLoading ? (
         <p className="text-text-tertiary pt-20 pb-10 text-center text-sm">불러오는 중...</p>
       ) : !record ? (
-        <p className="text-text-tertiary pt-20 pb-10 text-center text-sm">게시글을 찾을 수 없어요</p>
+        <p className="text-text-tertiary pt-20 pb-10 text-center text-sm">
+          게시글을 찾을 수 없어요
+        </p>
       ) : (
         <FeedDetailView
           {...detailToFeedCardProps(record)}
           spotSummary={
             spot
               ? {
+                  spotId: record.spot.id,
                   name: record.spot.name,
                   recordCount: spot.recordCount,
                   address: spot.address ?? '',
-                  onClick: () => router.push(`/spot/${record.spot.id}`),
+                  attractionId: spot.attractionId,
+                  category: spot.bloom?.category,
                 }
               : undefined
           }

@@ -20,6 +20,7 @@ const spot = (lat: number, lng: number): MapSpot => ({
   maxStage: 'Peak',
   type: 'ATTRACTION',
   statuses: ['PEAK'],
+  categories: ['CHERRY'],
 })
 
 /** 클러스터 구성원들이 차지하는 지리적 범위를 화면 px 로 환산 */

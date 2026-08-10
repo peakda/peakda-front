@@ -6,6 +6,7 @@ import { Check } from 'lucide-react'
 import { Button } from '@/components/ui/button/Button'
 import { cn } from '@/lib/utils/cn'
 import { withdrawApi } from '@/api/facades/user'
+import { clearAuthMarker } from '@/lib/auth/session'
 
 interface Props {
   onClose: () => void
@@ -31,6 +32,7 @@ export function WithdrawDrawerContent({ onClose }: Props) {
       setIsWithdrawing(false)
       return
     }
+    clearAuthMarker()
     onClose()
     router.replace('/login')
   }

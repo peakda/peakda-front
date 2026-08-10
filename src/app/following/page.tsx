@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { UserRow } from '@/components/ui/list/UserRow'
+import { InfiniteScrollFooter } from '@/components/ui/display/InfiniteScrollFooter'
 import { useCurrentUser } from '@/api/facades/auth'
 import { useFollowingListInfinite } from '@/api/facades/user-follow'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
@@ -37,7 +38,7 @@ function FollowingList({ userId }: { userId: number }) {
           />
         ))}
       </ul>
-      <div ref={sentinelRef} />
+      <InfiniteScrollFooter sentinelRef={sentinelRef} isLoading={isFetchingNextPage} />
     </>
   )
 }

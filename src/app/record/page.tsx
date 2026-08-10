@@ -12,6 +12,7 @@ import { LocationStepForm, type Category, type PhotoItem } from '@/app/record/_c
 import { DetailsStepForm, type BloomStage } from '@/app/record/_components/DetailsStepForm'
 import { LocationSearchView } from '@/app/record/_components/LocationSearchView'
 import { RecordCompleteView } from '@/app/record/_components/RecordCompleteView'
+import { RecordSkeleton } from '@/app/record/_components/RecordSkeleton'
 
 // 매칭/생성에 필요한 스팟 정보 (카카오 검색 + 스팟 매칭 결과)
 // kakaoPlaceId: 스팟 상세(?spotId=)에서 넘어오면 응답에 없으므로 null 이다.
@@ -279,7 +280,7 @@ function RecordPageContent() {
 // useSearchParams 는 App Router 에서 Suspense 경계가 필요하다.
 export default function RecordPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<RecordSkeleton />}>
       <RecordPageContent />
     </Suspense>
   )
