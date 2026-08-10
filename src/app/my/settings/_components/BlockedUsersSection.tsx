@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import { Button } from '@/components/ui/button/Button'
+import { InfiniteScrollFooter } from '@/components/ui/display/InfiniteScrollFooter'
 import { useBlockedListInfinite, useUnblockUser } from '@/api/facades/user-block'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { flattenPages } from '@/lib/utils/infinitePages'
@@ -52,7 +53,7 @@ export function BlockedUsersSection() {
           </div>
         ))
       )}
-      <div ref={sentinelRef} />
+      <InfiniteScrollFooter sentinelRef={sentinelRef} isLoading={isFetchingNextPage} />
     </>
   )
 }

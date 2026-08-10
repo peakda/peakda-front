@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button/Button'
 import { logoutApi } from '@/api/facades/auth'
+import { clearAuthMarker } from '@/lib/auth/session'
 
 interface Props {
   onClose: () => void
@@ -17,6 +18,7 @@ export function LogoutDrawerContent({ onClose }: Props) {
     } catch (e) {
       console.error('로그아웃 실패', e)
     }
+    clearAuthMarker()
     onClose()
     router.push('/login')
   }

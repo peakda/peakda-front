@@ -45,6 +45,8 @@ export default function CreatorDetailPage() {
           src={curation.heroImageUrl ?? HERO_PLACEHOLDER}
           alt={curation.title}
           fill
+          priority
+          sizes="(max-width: 430px) 100vw, 430px"
           className="object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70" />
@@ -88,6 +90,7 @@ export default function CreatorDetailPage() {
                   src={chapter.photoUrl}
                   alt={chapter.placeName}
                   fill
+                  sizes="(max-width: 430px) 100vw, 430px"
                   className="object-cover"
                 />
                 {chapter.badge && (
@@ -215,7 +218,9 @@ function RecommendationCard({
       onClick={onClick}
     >
       <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-gray-200">
-        {photoUrl && <Image src={photoUrl} alt={placeName} fill className="object-cover" />}
+        {photoUrl && (
+          <Image src={photoUrl} alt={placeName} fill sizes="80px" className="object-cover" />
+        )}
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="text-text-primary text-sm font-semibold">{title}</span>

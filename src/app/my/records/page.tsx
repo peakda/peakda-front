@@ -3,6 +3,7 @@
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { MyFeed } from '@/app/my/_components/MyFeed'
+import { InfiniteScrollFooter } from '@/components/ui/display/InfiniteScrollFooter'
 import { useMySpotRecordsInfinite } from '@/api/facades/spot-record'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { flattenPages } from '@/lib/utils/infinitePages'
@@ -41,7 +42,7 @@ export default function MyRecordsPage() {
           </div>
         ))}
 
-      <div ref={sentinelRef} />
+      <InfiniteScrollFooter sentinelRef={sentinelRef} isLoading={isFetchingNextPage} />
     </div>
   )
 }

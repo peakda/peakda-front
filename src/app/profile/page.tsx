@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button/Button'
 import { Header } from '@/components/ui/layout/Header'
 import { InputFiled } from '@/components/ui/form/InputFiled'
 import { useCheckNickname } from '@/hooks/useCheckNickname'
+import { setAuthMarker } from '@/lib/auth/session'
 import { cn } from '@/lib/utils/cn'
+import { isValidNickname } from '@/lib/utils/nickname'
 import { useUploadSignupProfileImage } from '@/api/facades/auth'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -45,7 +47,11 @@ export default function ProfilePage() {
   const { isPending, check, isError, message } = useCheckNickname(nickname)
   const { mutate: uploadImage, isPending: isUploading } = useUploadSignupProfileImage()
   const { isPending: signupPending, check: submit } = useSignUpComplete(nickname, profileImageKey, selected, {
-    onSuccess: () => router.replace('/map'),
+    onSuccess: () => {
+      // 가입이 끝나야 정식 인증 상태 — 이 시점에 마커를 심어야 미들웨어가 /map 을 통과시킨다.
+      setAuthMarker()
+      router.replace('/map')
+    },
   })
 
   // 검증 통과 여부는 저장된 닉네임과 현재 입력의 일치로 파생 — 입력이 바뀌면 자동 무효화
@@ -161,6 +167,7 @@ export default function ProfilePage() {
           }}
           placeholder="닉네임을 작성해주세요"
           buttonText="중복확인"
+          maxLength={10}
           onButtonClick={async () => {
             const res = await check()
             if (res.data?.data?.available) {
@@ -168,7 +175,7 @@ export default function ProfilePage() {
               toast.success('사용 가능한 닉네임이에요.')
             }
           }}
-          disabled={nickname.length > 9 || isPending}
+          disabled={!isValidNickname(nickname) || isPending}
           message="닉네임을 작성해주세요"
           error={message}
           isAvailable={isNicknameVerified}

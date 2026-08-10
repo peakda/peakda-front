@@ -3,13 +3,13 @@ import { HeartBtn } from '@/components/ui/button/HeartBtn'
 import { Badge } from './Badge'
 import { Tag } from './Tag'
 import { IconBtn } from '@/components/ui/button/IconBtn'
-import { CardBadge } from '../card/CardBadge'
 
 interface PinTextProps {
   title: string
   location: string
   description: string
   Badges: string[]
+  badgeIcon?: string
   isFavorite: boolean
   tag?: string
   variant?: 'card' | 'list'
@@ -20,7 +20,9 @@ export function PinText({
   location,
   description,
   Badges = [],
+  badgeIcon,
   isFavorite = false,
+  tag,
   variant = 'card',
 }: PinTextProps) {
   return (
@@ -29,7 +31,7 @@ export function PinText({
         <div>
           {/* 메인 제목 */}
           <div className="relative flex items-center gap-1">
-            <Tag text="절정" />
+            {tag && <Tag text={tag} />}
             <h3 className="text-base font-semibold text-gray-900">{title}</h3>
           </div>
 
@@ -54,26 +56,31 @@ export function PinText({
       </div>
 
       {/* 방문 기록 및 상세 정보 */}
-      <div className="mt-2 flex items-center gap-2">
-        <p className="text-text-tertiary text-xs">{description}</p>
-        <CardBadge label="이르다" variant="green" />
-      </div>
+      {description && (
+        <div className="mt-2 flex items-center gap-2">
+          <p className="text-text-tertiary text-xs">{description}</p>
+        </div>
+      )}
 
       {/* 하단 태그 목록 */}
-      <div className="mt-3 flex gap-2">
-        {Badges.map((badge, index) => (
-          <Badge
-            leftIcon={
-              <Image src={'/flowers/cherry-blossom.svg'} alt="벚꽃" width={20} height={20} />
-            }
-            key={index}
-            label={badge}
-            variant="filled"
-            color="pink"
-            className="px-2"
-          />
-        ))}
-      </div>
+      {Badges.length > 0 && (
+        <div className="mt-3 flex gap-2">
+          {Badges.map((badge, index) => (
+            <Badge
+              leftIcon={
+                badgeIcon ? (
+                  <Image src={badgeIcon} alt="" width={20} height={20} />
+                ) : undefined
+              }
+              key={index}
+              label={badge}
+              variant="filled"
+              color="pink"
+              className="px-2"
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

@@ -120,6 +120,8 @@ export default function FestivalDetailPage() {
           src={editorial?.heroImageUrl ?? HERO_PLACEHOLDER}
           alt={festival.name}
           fill
+          priority
+          sizes="(max-width: 430px) 100vw, 430px"
           className="object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70" />

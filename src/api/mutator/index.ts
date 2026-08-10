@@ -1,3 +1,5 @@
+import { clearAuthMarker, setReturnTo } from '@/lib/auth/session'
+
 // 프론트(Vercel)·백엔드(AWS) 도메인이 달라, 브라우저/서버 모두 백엔드를 직접 호출하고
 // 크로스사이트 쿠키(SameSite=None; Secure)를 credentials: 'include' 로 주고받는다.
 const getBaseUrl = () => process.env.NEXT_PUBLIC_API_URL ?? ''
@@ -33,7 +35,13 @@ export const customInstance = async <T>(url: string, options?: RequestInit): Pro
       await runRefresh()
       res = await request()
     } catch {
-      if (typeof window !== 'undefined') window.location.href = '/login'
+      if (typeof window !== 'undefined') {
+        // 인증이 확정적으로 끊긴 상태 — 마커를 지워 미들웨어가 다시 로그인으로 보내게 하고,
+        // 로그인 후 돌아올 위치를 남긴다.
+        clearAuthMarker()
+        setReturnTo(`${window.location.pathname}${window.location.search}`)
+        window.location.href = '/login'
+      }
       throw { response: { status: 401, data: null } }
     }
   }

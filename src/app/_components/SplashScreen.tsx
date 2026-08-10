@@ -19,7 +19,7 @@ export function SplashScreen() {
       timers.push(setTimeout(() => router.replace('/login'), 2000))
     } else {
       timers.push(setTimeout(() => setIsExiting(true), 1500))
-      timers.push(setTimeout(() => router.push('/onboarding'), 2000))
+      timers.push(setTimeout(() => router.replace('/onboarding'), 2000))
     }
 
     return () => timers.forEach(clearTimeout)

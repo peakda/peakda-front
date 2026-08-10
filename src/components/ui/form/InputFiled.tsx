@@ -37,6 +37,7 @@ export const InputFiled = ({
   onClear,
   variant = 'none',
   placeholder,
+  disabled,
   isAvailable,
   isError,
 }: InputFiledProps) => {
@@ -90,7 +91,7 @@ export const InputFiled = ({
         {buttonText && (
           <button
             onClick={onButtonClick}
-            disabled={!value || value.length < 1}
+            disabled={disabled || !value || value.length < 1}
             className={cn(
               'h-12 cursor-pointer rounded-3xl bg-[#96CE71] px-4 py-2 text-[15px] font-medium whitespace-nowrap text-white transition-colors hover:bg-[#85ba63] disabled:cursor-not-allowed disabled:bg-[#d0d4db]',
               isAvailable ? 'invisible' : 'visible'

@@ -7,6 +7,7 @@ import {
   useNotificationListInfinite,
 } from '@/api/facades/notification'
 import { Alarm } from '@/components/ui/display/Alarm'
+import { InfiniteScrollFooter } from '@/components/ui/display/InfiniteScrollFooter'
 import { Button } from '@/components/ui/button/Button'
 import { TabPanels } from '@/components/ui/Tab/TabPanel'
 import { Tabs } from '@/components/ui/Tab/Tab'
@@ -102,7 +103,7 @@ function NotificationPanel({ tabValue, label }: { tabValue: string; label: strin
           </div>
         )
       })}
-      <div ref={sentinelRef} />
+      <InfiniteScrollFooter sentinelRef={sentinelRef} isLoading={isFetchingNextPage} />
     </div>
   )
 }

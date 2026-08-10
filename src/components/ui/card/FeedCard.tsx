@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
+import { toast } from 'sonner'
 import { IconBtn } from '@/components/ui/button/IconBtn'
 import { MoreMenu } from '@/components/ui/button/MoreMenu'
 import { CardBadge } from '@/components/ui/card/CardBadge'
@@ -111,7 +112,7 @@ export function FeedCard({
       {
         onSuccess: () => {
           setReportModalOpen(false)
-          window.alert('신고가 접수되었어요')
+          toast.success('신고가 접수되었어요')
         },
       }
     )
@@ -172,8 +173,9 @@ export function FeedCard({
                 <Image
                   src={src}
                   alt={`피드 이미지 ${i + 1}`}
-                  width={400}
-                  height={300}
+                  width={430}
+                  height={240}
+                  sizes="(max-width: 430px) 100vw, 430px"
                   className="h-[240px] w-full object-cover"
                 />
               </div>

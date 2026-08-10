@@ -7,6 +7,7 @@ import { InputFiled } from '@/components/ui/form/InputFiled'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { useCheckNickname } from '@/hooks/useCheckNickname'
 import { cn } from '@/lib/utils/cn'
+import { isValidNickname } from '@/lib/utils/nickname'
 import { useCurrentUser } from '@/api/facades/auth'
 import {
   useUploadProfileImage,
@@ -183,7 +184,7 @@ export default function ProfileEditPage() {
               toast.success('사용 가능한 닉네임이에요.')
             }
           }}
-          disabled={nickname.length > 9 || isPending}
+          disabled={!isValidNickname(nickname) || isPending}
           message="닉네임을 작성해주세요"
           error={message}
           isAvailable={isNicknameVerified}

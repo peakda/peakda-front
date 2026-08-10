@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { CardBadge } from '@/components/ui/card/CardBadge'
+import { CardBadge, type CardBadgeVariant } from '@/components/ui/card/CardBadge'
 import { cn } from '@/lib/utils/cn'
 
 // 카드 클릭 시 이동은 호출부에서 넘긴다(카드 내부에서 라우터를 쓰지 않는다).
@@ -23,6 +23,8 @@ interface FestivalCardProps extends ExplorCardBaseProps {
   description: string
   dateRange: string
   status: string
+  // 진행 상태 뱃지 색. 안 넘기면 기존처럼 green(진행중) 으로 렌더된다.
+  statusVariant?: CardBadgeVariant
 }
 
 interface CourseCardProps extends ExplorCardBaseProps {
@@ -80,7 +82,11 @@ export function ExplorCard(props: ExplorCardProps) {
               label={props.dateRange}
               className="absolute top-2 left-2"
             />
-            <CardBadge variant="green" label={props.status} className="absolute top-2 right-2" />
+            <CardBadge
+              variant={props.statusVariant ?? 'green'}
+              label={props.status}
+              className="absolute top-2 right-2"
+            />
           </>
         )}
 

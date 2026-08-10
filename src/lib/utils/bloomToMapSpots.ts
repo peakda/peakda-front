@@ -22,9 +22,11 @@ export function bloomToMapSpots(data: BloomMapResponse): MapSpot[] {
         title: a.name,
         attractionId: a.attractionId ?? undefined,
         spotId: a.spotId ?? undefined,
-        // 상단 칩·시기 필터는 서버 파라미터가 없어 클라이언트에서 거른다.
+        // 상단 칩·시기·꽃 종류 필터는 서버가 거를 수 없어 클라이언트에서 쓴다.
+        // (꽃 종류는 서버 category 가 단일 값이라 복수 선택을 지원하려면 클라 필터가 필요하다)
         type: a.type,
         statuses: a.blooms.map((b) => b.status),
+        categories: a.blooms.map((b) => b.category),
       },
     ]
   })

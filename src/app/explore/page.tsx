@@ -19,6 +19,7 @@ import {
   toExploreSpotProps,
   toFestivalDateRange,
   toFestivalDescription,
+  toFestivalStatus,
 } from '@/lib/utils/explore'
 
 // 탐색 응답에는 카드 이미지가 없는 항목이 있어 공통 플레이스홀더를 쓴다.
@@ -62,10 +63,11 @@ function EmptySection({ text }: { text: string }) {
 
 export default function ExplorePage() {
   const router = useRouter()
-  const { openFlowerFilterDrawer } = useDrawerStore()
+  const openFlowerFilterDrawer = useDrawerStore((s) => s.openFlowerFilterDrawer)
   const { data: suggestion } = useHomeSuggestion()
-  // 필터 드로어에서 고른 꽃 종류(단일 선택). 없으면 전체를 받는다.
-  const category = useFilterStore((state) => state.category)
+  // 필터 드로어에서 고른 꽃 종류. 서버 category 는 값 하나만 받으므로
+  // 여러 개를 골랐으면 첫 번째만 보낸다(탐색은 지도처럼 클라 필터를 걸 목록이 없다).
+  const category = useFilterStore((state) => state.applied.categories[0])
 
   // 절정/다음 주/축제/큐레이션 4개 섹션이 한 번에 내려온다.
   const { data: explore, isLoading } = useExploreCuration({ category: category ?? undefined })
@@ -168,22 +170,26 @@ export default function ExplorePage() {
           !isLoading && <EmptySection text="진행 중인 축제가 없어요" />
         ) : (
           <div className="flex gap-3 overflow-x-auto px-4 pb-4 [&::-webkit-scrollbar]:hidden">
-            {festivals.map((item) => (
-              <Link
-                key={item.festivalId}
-                href={`/festivals/${item.festivalId}`}
-                className="shrink-0"
-              >
-                <ExplorCard
-                  type="festival"
-                  image={PLACEHOLDER_IMAGE}
-                  name={item.name}
-                  description={toFestivalDescription(item)}
-                  dateRange={toFestivalDateRange(item)}
-                  status="진행중"
-                />
-              </Link>
-            ))}
+            {festivals.map((item) => {
+              const status = toFestivalStatus(item)
+              return (
+                <Link
+                  key={item.festivalId}
+                  href={`/festivals/${item.festivalId}`}
+                  className="shrink-0"
+                >
+                  <ExplorCard
+                    type="festival"
+                    image={PLACEHOLDER_IMAGE}
+                    name={item.name}
+                    description={toFestivalDescription(item)}
+                    dateRange={toFestivalDateRange(item)}
+                    status={status.label}
+                    statusVariant={status.variant}
+                  />
+                </Link>
+              )
+            })}
           </div>
         )}
       </section>

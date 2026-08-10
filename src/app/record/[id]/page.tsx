@@ -4,9 +4,11 @@ import { useParams, useRouter } from 'next/navigation'
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { FeedCard } from '@/components/ui/card/FeedCard'
+import { Drawer } from '@/components/ui/layout/Drawer'
 import { useSpotRecord, useDeleteSpotRecord } from '@/api/facades/spot-record'
 import { useCurrentUser } from '@/api/facades/auth'
 import { detailToFeedCardProps } from '@/lib/utils/spotRecordToFeed'
+import { useDrawerStore } from '@/stores/useDrawerStore'
 
 export default function RecordDetailPage() {
   const router = useRouter()
@@ -16,12 +18,14 @@ export default function RecordDetailPage() {
   const { data: record, isLoading } = useSpotRecord(recordId)
   const { data: currentUser } = useCurrentUser()
   const deleteRecord = useDeleteSpotRecord()
+  const openDeleteConfirmDrawer = useDrawerStore((s) => s.openDeleteConfirmDrawer)
 
   const isOwner = !!record && !!currentUser && record.user.id === currentUser.id
 
   const handleDelete = () => {
-    if (!window.confirm('이 기록을 삭제할까요?')) return
-    deleteRecord.mutate({ id: recordId }, { onSuccess: () => router.back() })
+    openDeleteConfirmDrawer(() =>
+      deleteRecord.mutate({ id: recordId }, { onSuccess: () => router.back() })
+    )
   }
 
   return (
@@ -43,6 +47,8 @@ export default function RecordDetailPage() {
           })}
         />
       )}
+
+      <Drawer />
     </div>
   )
 }

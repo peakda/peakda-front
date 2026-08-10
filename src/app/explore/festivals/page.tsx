@@ -5,7 +5,7 @@ import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { ExplorCard } from '@/components/ui/card/ExplorCard'
 import { useExploreFestivals } from '@/api/facades/explore'
-import { toFestivalDateRange, toFestivalDescription } from '@/lib/utils/explore'
+import { toFestivalDateRange, toFestivalDescription, toFestivalStatus } from '@/lib/utils/explore'
 
 export default function ExploreFestivalsPage() {
   // 진행 중 축제는 페이징 없이 전량 내려온다.
@@ -29,20 +29,24 @@ export default function ExploreFestivalsPage() {
           </div>
         ) : (
           <ul className="flex flex-col items-center gap-4 px-4 pb-4">
-            {festivals.map((item) => (
-              <li key={item.festivalId}>
-                <Link href={`/festivals/${item.festivalId}`}>
-                  <ExplorCard
-                    type="festival"
-                    image="/images/exploreEmpty.jpg"
-                    name={item.name}
-                    description={toFestivalDescription(item)}
-                    dateRange={toFestivalDateRange(item)}
-                    status="진행중"
-                  />
-                </Link>
-              </li>
-            ))}
+            {festivals.map((item) => {
+              const status = toFestivalStatus(item)
+              return (
+                <li key={item.festivalId}>
+                  <Link href={`/festivals/${item.festivalId}`}>
+                    <ExplorCard
+                      type="festival"
+                      image="/images/exploreEmpty.jpg"
+                      name={item.name}
+                      description={toFestivalDescription(item)}
+                      dateRange={toFestivalDateRange(item)}
+                      status={status.label}
+                      statusVariant={status.variant}
+                    />
+                  </Link>
+                </li>
+              )
+            })}
           </ul>
         ))}
     </div>
