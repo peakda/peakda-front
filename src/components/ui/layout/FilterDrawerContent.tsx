@@ -3,13 +3,14 @@
 import { useEffect, useRef } from 'react'
 import { Tabs } from '@/components/ui/Tab/Tab'
 import { TabPanels } from '@/components/ui/Tab/TabPanel'
+import { Button } from '@/components/ui/button/Button'
 import { FilterCard } from '@/components/ui/card/FilterCard'
 import { FlowerCard } from '@/components/ui/card/FlowerCard'
 import { TabItem, useTabsContext } from '@/context/TabContext'
 import { FLOWER_CATEGORIES, type FlowerSeason } from '@/constants/flower'
 import { REGIONS } from '@/constants/region'
 import { TIMINGS } from '@/lib/utils/timing'
-import { useFilterStore } from '@/stores/useFilterStore'
+import { hasActiveFilter, useFilterStore } from '@/stores/useFilterStore'
 
 const TABS: TabItem[] = [
   { value: 'region', label: '지역' },
@@ -23,6 +24,35 @@ const FLOWER_SEASONS: { season: FlowerSeason; label: string }[] = [
   { season: 'FALL', label: '가을 · 겨울' },
 ]
 
+/**
+ * 섹션 라벨 줄. 각 탭의 첫 줄에는 오른쪽 끝에 초기화 버튼을 같이 놓는다.
+ *
+ * 초기화도 draft 단계라 하단 버튼을 눌러야 실제로 필터가 풀린다.
+ * 고른 게 없으면 비활성 — 숨기면 첫 선택에서 라벨 줄 높이가 튄다.
+ */
+function SectionLabel({ label, withReset = false }: { label: string; withReset?: boolean }) {
+  const canReset = useFilterStore((s) => hasActiveFilter(s.draft))
+  const resetDraft = useFilterStore((s) => s.resetDraft)
+
+  return (
+    <div className="mb-1 flex items-center justify-between">
+      <p className="text-text-secondary font-semibold">{label}</p>
+      {withReset && (
+        // -mr-3 으로 Button 의 좌우 패딩을 상쇄해 글자가 콘텐츠 오른쪽 끝에 맞는다.
+        <Button
+          variant="ghost"
+          size="sm"
+          className="-mr-3"
+          disabled={!canReset}
+          onClick={resetDraft}
+        >
+          초기화
+        </Button>
+      )}
+    </div>
+  )
+}
+
 // 서버 category 파라미터는 값 하나만 받지만, 응답에 category 가 있어 복수 선택은 클라에서 거른다.
 function FlowerSections() {
   const categories = useFilterStore((s) => s.draft.categories)
@@ -30,9 +60,9 @@ function FlowerSections() {
 
   return (
     <div className="space-y-6">
-      {FLOWER_SEASONS.map(({ season, label }) => (
+      {FLOWER_SEASONS.map(({ season, label }, i) => (
         <div key={season}>
-          <p className="text-text-secondary mb-1 font-semibold">{label}</p>
+          <SectionLabel label={label} withReset={i === 0} />
           <div className="grid grid-cols-4 gap-2">
             {FLOWER_CATEGORIES.filter((f) => f.season === season).map((f) => (
               <FlowerCard
@@ -185,7 +215,7 @@ export function FilterDrawerContent({
         <TabPanels tabs={TABS} className="min-h-0 flex-1">
           <div>
             {/* 서버에 region 파라미터가 아직 없어 선택만 저장된다. 파라미터가 생기면 date 옆에 붙인다. */}
-            <p className="text-text-secondary mb-1 font-semibold">권역 선택</p>
+            <SectionLabel label="권역 선택" withReset />
             <div className="grid grid-cols-2 gap-2">
               {REGIONS.map((r) => (
                 <FilterCard
@@ -200,7 +230,7 @@ export function FilterDrawerContent({
           </div>
 
           <div>
-            <p className="text-text-secondary mb-1 font-semibold">언제 갈까요?</p>
+            <SectionLabel label="언제 갈까요?" withReset />
             <div className="grid grid-cols-3 gap-2">
               {TIMINGS.map((t) => (
                 <FilterCard
