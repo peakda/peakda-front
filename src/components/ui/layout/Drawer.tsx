@@ -13,7 +13,7 @@ import { SaveSpotDrawerContent } from './SaveSpotDrawerContent'
 import { DateSelectDrawerContent } from './DateSelectDrawerContent'
 import { DeleteConfirmDrawerContent } from './DeleteConfirmDrawerContent'
 import { PinList } from '@/components/ui/display/PinList'
-import { hasActiveFilter, useFilterStore } from '@/stores/useFilterStore'
+import { useFilterStore } from '@/stores/useFilterStore'
 import { spotPreviewApi } from '@/api/facades/spot'
 import { toPinListItems } from '@/lib/utils/spotPreview'
 import { toast } from 'sonner'
@@ -58,8 +58,6 @@ export function Drawer() {
   const visibleAppliedFor = useFilterStore((s) => s.visibleAppliedFor)
   const applyDraft = useFilterStore((s) => s.applyDraft)
   const syncDraft = useFilterStore((s) => s.syncDraft)
-  const resetDraft = useFilterStore((s) => s.resetDraft)
-  const canReset = useFilterStore((s) => hasActiveFilter(s.draft))
 
   const [isLoadingPreview, setIsLoadingPreview] = useState(false)
   // 버튼을 눌러 필터를 적용한 뒤, 지도 조회가 끝나면 목록을 연다.
@@ -231,22 +229,7 @@ export function Drawer() {
             {type === 'filter' ? '검색 필터' : '명소 정보'}
           </VaulDrawer.Title>
 
-          {/* 핸들 줄 오른쪽에 얹는다 — h-7 버튼이 이 줄(28px)에 딱 들어가 세로 공간을 안 먹는다 */}
-          <div className="relative shrink-0">
-            <div className="bg-icon-quaternary mx-auto mt-4 mb-2 h-1 w-12 rounded-full" />
-            {/* 고른 걸 하나하나 되눌러야 필터가 풀리던 문제. 초기화도 draft 단계라 하단 버튼을 눌러야 반영된다. */}
-            {isFilterMode && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute top-1/2 right-2 -translate-y-1/2"
-                disabled={!canReset || isLoadingPreview || isPendingList}
-                onClick={resetDraft}
-              >
-                초기화
-              </Button>
-            )}
-          </div>
+          <div className="bg-icon-quaternary mx-auto mt-4 mb-2 h-1 w-12 shrink-0 rounded-full" />
 
           {type === 'filter' || type === 'flower-filter' ? (
             <FilterDrawerContent

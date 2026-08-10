@@ -42,7 +42,7 @@ export const SearchBar = ({
           {hasActiveFilter && (
             <span
               aria-label="필터 적용됨"
-              className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-red-500"
+              className="absolute top-0 -right-0.5 h-1 w-1 rounded-full bg-red-500"
             />
           )}
         </button>
