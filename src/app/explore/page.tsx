@@ -173,7 +173,7 @@ export default function ExplorePage() {
                 >
                   <ExplorCard
                     type="festival"
-                    image={PLACEHOLDER_IMAGE}
+                    image={item.thumbnailUrl ?? PLACEHOLDER_IMAGE}
                     name={item.name}
                     description={toFestivalDescription(item)}
                     dateRange={toFestivalDateRange(item)}
