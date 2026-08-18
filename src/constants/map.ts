@@ -29,17 +29,30 @@ export const STATUS_STAGE: Record<BloomSlotStatus, Stage> = {
   ENDED: 'End',
 }
 
+// 꽃 여러 개의 상태 → 핀 색을 정할 대표 단계.
+// 응답 변환(bloomToMapSpots)과 꽃 필터(mapFilter) 양쪽이 쓴다. 두 곳이 갈리면
+// 필터를 걸었을 때 핀 색만 옛 기준으로 남으므로 계산은 여기 한 곳에만 둔다.
+export function toMaxStage(statuses: BloomSlotStatus[]): Stage {
+  return statuses.reduce<Stage>((max, status) => {
+    const stage = STATUS_STAGE[status]
+    return STAGE_PRIORITY[stage] > STAGE_PRIORITY[max] ? stage : max
+  }, 'Before')
+}
+
 // 苑?移댄뀒怨좊━ ??? ?꾩씠肄?(PINK_MUHLY/SILVERGRASS ???꾩슜 ?먯뀑???놁뼱 ?꾩떆 fallback)
 export const CATEGORY_ICON: Record<BloomSlotCategory, string> = {
   PLUM: '/flowers/plum.svg',
   FORSYTHIA: '/flowers/forsythia.svg',
-  AZALEA_KR: '/flowers/royal-azalea.svg',
+  AZALEA_KR: '/flowers/azalea.svg',
   CHERRY: '/flowers/cherry-blossom.svg',
   CANOLA: '/flowers/canola.svg',
-  AZALEA: '/flowers/azalea.svg',
+  AZALEA: '/flowers/royal-azalea.svg',
   HYDRANGEA: '/flowers/hydrangea.svg',
   LOTUS: '/flowers/lotus.svg',
+  SUNFLOWER: '/flowers/sunflower.svg',
   COSMOS: '/flowers/cosmos.svg',
+  // 국화 전용 에셋이 없어 형태가 가장 가까운 코스모스로 대체한다(핑크뮬리와 같은 처리).
+  CHRYSANTHEMUM: '/flowers/cosmos.svg',
   PINK_MUHLY: '/flowers/cosmos.svg',
   SILVERGRASS: '/flowers/maple.svg',
   MAPLE: '/flowers/maple.svg',

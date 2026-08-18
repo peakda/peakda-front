@@ -7,7 +7,10 @@ import type {
   BloomSlotStatus,
 } from '@/api/facades/generated/peakdaApi.schemas'
 import type { PinTypeFilter } from '@/stores/useFilterStore'
+import { CATEGORY_ICON, toMaxStage } from '@/constants/map'
 
+// 실제 핀과 같은 모양으로 만든다 — flowers·statuses·categories 는 꽃 순서가 같은 병렬 배열이고
+// maxStage 는 statuses 에서 파생된다. 꽃 좁히기 테스트가 이 정렬에 기댄다.
 const spot = (
   title: string,
   type: BloomMapPinType,
@@ -16,8 +19,8 @@ const spot = (
 ): MapSpot => ({
   lat: 37.5,
   lng: 127,
-  flowers: [{ src: '/flowers/cherry-blossom.svg', alt: '벚꽃' }],
-  maxStage: 'Peak',
+  flowers: categories.map((category) => ({ src: CATEGORY_ICON[category], alt: category })),
+  maxStage: toMaxStage(statuses),
   title,
   type,
   statuses,
@@ -81,25 +84,50 @@ describe('lib/utils/mapFilter', () => {
     })
 
     it('복수 선택은 OR 조건', () => {
-      expect(filterMapSpots(ALL_SPOTS, filter({ categories: ['LOTUS', 'MAPLE'] }))).toEqual([
-        localMulti,
-        attractionEnded,
-      ])
-    })
-
-    it('핀에 꽃이 여러 개면 하나라도 걸리면 통과', () => {
-      expect(filterMapSpots([localMulti], filter({ categories: ['MAPLE'] }))).toEqual([localMulti])
+      expect(
+        filterMapSpots(ALL_SPOTS, filter({ categories: ['LOTUS', 'MAPLE'] })).map((s) => s.title)
+      ).toEqual(['동네-복수', '명소-종료'])
     })
 
     it('빈 배열이면 꽃으로 거르지 않는다', () => {
       expect(filterMapSpots(ALL_SPOTS, filter({ categories: [] }))).toEqual(ALL_SPOTS)
     })
+
+    // 핀을 통과시키기만 하면 벚꽃으로 걸러도 같은 핀의 단풍 아이콘이 그대로 뜨고
+    // 핀 색도 단풍(Peak) 기준으로 남는다. 고른 꽃만 남기고 색도 다시 계산해야 한다.
+    it('핀에 꽃이 여러 개면 고른 꽃만 남기고 핀 색도 다시 계산한다', () => {
+      const [narrowed] = filterMapSpots([localMulti], filter({ categories: ['CHERRY'] }))
+
+      expect(narrowed.categories).toEqual(['CHERRY'])
+      expect(narrowed.statuses).toEqual(['PREPARING'])
+      expect(narrowed.flowers).toEqual([{ src: CATEGORY_ICON.CHERRY, alt: 'CHERRY' }])
+      // 좁히기 전에는 단풍(PEAK) 때문에 Peak 였다.
+      expect(narrowed.maxStage).toBe('Before')
+      expect(localMulti.maxStage).toBe('Peak')
+    })
+
+    it('꽃이 전부 남으면 같은 객체를 그대로 돌려준다', () => {
+      const [same] = filterMapSpots([localMulti], filter({ categories: ['CHERRY', 'MAPLE'] }))
+      expect(same).toBe(localMulti)
+    })
   })
 
   it('세 조건을 동시에 적용한다', () => {
+    const result = filterMapSpots(
+      ALL_SPOTS,
+      filter({ pinType: 'LOCAL', statuses: ['PEAK'], categories: ['MAPLE'] })
+    )
+
+    expect(result.map((s) => s.title)).toEqual(['동네-복수'])
+    expect(result[0].categories).toEqual(['MAPLE'])
+  })
+
+  // 꽃과 상태를 같이 걸면 "고른 꽃이 그 상태인 핀" 이어야 한다.
+  // 좁히기 전 기준으로 보면 벚꽃은 개화 전인데 단풍이 절정이라는 이유로 통과해 버린다.
+  it('꽃을 좁힌 뒤 상태를 보므로 다른 꽃의 상태로는 통과하지 않는다', () => {
     expect(
-      filterMapSpots(ALL_SPOTS, filter({ pinType: 'LOCAL', statuses: ['PEAK'], categories: ['MAPLE'] }))
-    ).toEqual([localMulti])
+      filterMapSpots([localMulti], filter({ statuses: ['PEAK'], categories: ['CHERRY'] }))
+    ).toEqual([])
   })
 
   it('빈 배열을 넣으면 빈 배열', () => {

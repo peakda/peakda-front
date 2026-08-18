@@ -7,10 +7,18 @@ import type {
 } from '@/api/facades/generated/peakdaApi.schemas'
 import { type Stage, STAGE_COLOR, STAGE_PRIORITY } from '@/constants/map'
 
+/**
+ * 지도 핀 하나.
+ *
+ * flowers · statuses · categories 는 이 핀에 달린 꽃을 같은 순서로 담은 **병렬 배열**이다
+ * (flowers[i] · statuses[i] · categories[i] 가 같은 꽃). mapFilter 가 꽃 종류로 좁힐 때
+ * 이 인덱스 정렬에 기대므로, 한쪽만 따로 만들거나 정렬을 바꾸면 안 된다.
+ */
 export interface MapSpot {
   lat: number
   lng: number
   flowers: FlowerItem[]
+  // 핀 색을 정하는 대표 단계. 꽃을 좁히면 constants/map 의 toMaxStage 로 다시 계산한다.
   maxStage: Stage
   title?: string
   attractionId?: number
