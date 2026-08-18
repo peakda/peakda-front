@@ -10,6 +10,8 @@ const festival = (overrides: Partial<ExploreFestivalItem>): ExploreFestivalItem 
   startsOn: '2026-04-01',
   category: 'CHERRY',
   displayName: '벚꽃',
+  // toFestivalStatus 는 날짜로만 판정하므로 이 값은 쓰이지 않는다(서버 phase 로 옮기면 제거).
+  phase: 'ONGOING',
   ...overrides,
 })
 

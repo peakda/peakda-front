@@ -9,6 +9,12 @@ const item = (over: Partial<SpotPreviewItem> = {}): SpotPreviewItem => ({
   thumbnailUrl: 'https://img/1.jpg',
   badge: { category: 'CHERRY', displayName: '벚꽃', status: 'PEAK' },
   distanceMeters: 1234,
+  // 아직 toPinListItems 가 쓰지 않는 신규 필드 — 연동은 preview 보강 작업에서 한다.
+  favorited: false,
+  notifyEnabled: false,
+  photoUrls: [],
+  recordCount: 0,
+  badges: [],
   ...over,
 })
 

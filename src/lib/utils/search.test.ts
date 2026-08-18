@@ -9,7 +9,15 @@ import {
 
 describe('utils/search', () => {
   describe('toSpotProps', () => {
-    const base = { spotId: 1, name: '남산공원', latitude: 37.5, longitude: 127.0 }
+    // favorited·notifyEnabled 는 아직 toSpotProps 가 쓰지 않는다(검색 카드 보강 작업에서 연동).
+    const base = {
+      spotId: 1,
+      name: '남산공원',
+      latitude: 37.5,
+      longitude: 127.0,
+      favorited: false,
+      notifyEnabled: false,
+    }
 
     it('address 가 null 이면 location 은 빈 문자열', () => {
       expect(toSpotProps({ ...base, type: 'ATTRACTION', address: null }).location).toBe('')
@@ -32,10 +40,11 @@ describe('utils/search', () => {
   })
 
   describe('toUserProps', () => {
+    // following·recordCount·followerCount 는 아직 toUserProps 가 쓰지 않는다(검색 카드 보강 작업에서 연동).
+    const base = { userId: 7, nickname: '봄이', following: false, recordCount: 0, followerCount: 0 }
+
     it('profileImageUrl 을 imageUrl 로 넘긴다', () => {
-      expect(
-        toUserProps({ userId: 7, nickname: '봄이', profileImageUrl: 'https://img/a.png' })
-      ).toEqual({
+      expect(toUserProps({ ...base, profileImageUrl: 'https://img/a.png' })).toEqual({
         id: 7,
         name: '봄이',
         stats: '',
@@ -44,7 +53,7 @@ describe('utils/search', () => {
       })
     })
     it('profileImageUrl 이 없으면 imageUrl 은 null', () => {
-      expect(toUserProps({ userId: 7, nickname: '봄이' }).imageUrl).toBeNull()
+      expect(toUserProps(base).imageUrl).toBeNull()
     })
   })
 
