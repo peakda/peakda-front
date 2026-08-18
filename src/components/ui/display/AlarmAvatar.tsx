@@ -7,7 +7,8 @@ export function AlarmAvatar({
   imageUrl,
   reactionEmoji,
 }: Pick<AlarmItemData, 'type' | 'imageUrl' | 'reactionEmoji'>) {
-  const hasProfileImage = type === 'reaction' || type === 'following'
+  // imageUrl 이 오면 타입과 무관하게 아바타로 보여준다. 없으면 기존 타입별 기본 아이콘.
+  const hasProfileImage = Boolean(imageUrl) || type === 'reaction' || type === 'following'
 
   return (
     <div className="relative flex shrink-0 self-center">
