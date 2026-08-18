@@ -11,13 +11,13 @@ import { Badge } from '@/components/ui/display/Badge'
 import { Indecator } from '@/app/onboarding/_components/Indecator'
 import { useCarousel } from '@/hooks/useEmblaCarousel'
 import { useAddReaction, useRemoveReaction } from '@/api/facades/feed'
-import { reactionToggleAction } from '@/lib/utils/feed'
+import { reactionToggleAction, toReactionSummary } from '@/lib/utils/feed'
 import { SpotBloomSummary } from './SpotBloomSummary'
 import type { SpotBloomSummaryProps } from './SpotBloomSummary'
 import type { FeedCardProps } from '@/components/ui/card/FeedCard'
 import type {
   FeedReactionSummaryResponseMyReactionsItem,
-  ReactionCount,
+  ReactionSummary,
 } from '@/api/facades/generated/peakdaApi.schemas'
 
 const REACTIONS: { type: FeedReactionSummaryResponseMyReactionsItem; emoji: string }[] = [
@@ -38,6 +38,7 @@ type FeedDetailViewProps = Pick<
   | 'images'
   | 'flowers'
   | 'content'
+  | 'reactions'
 > & { spotSummary?: SpotBloomSummaryProps }
 
 // 피드 상세 전용 레이아웃. 목록용 FeedCard 와 달리 사진이 풀블리드로 깔리고
@@ -54,13 +55,15 @@ export function FeedDetailView({
   images,
   flowers,
   content,
+  reactions,
   spotSummary,
 }: FeedDetailViewProps) {
   const { emblaRef, selectedIndex, scrollSnaps, scrollTo } = useCarousel({ loop: true })
 
-  // 상세 DTO 에도 리액션 집계가 없어 빈 값으로 시작하고 mutation 응답으로만 갱신한다.
-  const [myReactions, setMyReactions] = useState<FeedReactionSummaryResponseMyReactionsItem[]>([])
-  const [reactionCounts, setReactionCounts] = useState<ReactionCount[]>([])
+  // 조회 응답의 리액션 요약을 그대로 보여주고, 이 화면에서 리액션을 누른 뒤에만
+  // mutation 응답으로 덮어쓴다. (useState 초기값으로 두면 나중에 도착한 서버 값이 반영되지 않는다)
+  const [reactionOverride, setReactionOverride] = useState<ReactionSummary | null>(null)
+  const { counts: reactionCounts, myReactions } = reactionOverride ?? reactions
   const [isPickerOpen, setPickerOpen] = useState(false)
   const addReaction = useAddReaction()
   const removeReaction = useRemoveReaction()
@@ -72,8 +75,7 @@ export function FeedDetailView({
       { id: recordId, params: { reactionType: type } },
       {
         onSuccess: (res) => {
-          setMyReactions(res.data.data?.myReactions ?? [])
-          setReactionCounts(res.data.data?.counts ?? [])
+          setReactionOverride(toReactionSummary(res.data.data))
           setPickerOpen(false)
         },
       }

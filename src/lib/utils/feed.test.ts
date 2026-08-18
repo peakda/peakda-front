@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { filterFromTab, reactionToggleAction, buildReportRequest } from './feed'
+import { filterFromTab, reactionToggleAction, buildReportRequest, toReactionSummary } from './feed'
 
 describe('utils/feed', () => {
   describe('filterFromTab', () => {
@@ -26,6 +26,25 @@ describe('utils/feed', () => {
     })
     it('빈 배열이면 add', () => {
       expect(reactionToggleAction([], 'HEART')).toBe('add')
+    })
+  })
+
+  describe('toReactionSummary', () => {
+    it('응답의 counts/myReactions 를 그대로 옮긴다', () => {
+      expect(
+        toReactionSummary({
+          recordId: 3,
+          counts: [{ reactionType: 'HEART', count: 2 }],
+          myReactions: ['HEART'],
+        })
+      ).toEqual({
+        counts: [{ reactionType: 'HEART', count: 2 }],
+        myReactions: ['HEART'],
+      })
+    })
+    it('응답 payload 가 없으면 빈 요약', () => {
+      expect(toReactionSummary(null)).toEqual({ counts: [], myReactions: [] })
+      expect(toReactionSummary(undefined)).toEqual({ counts: [], myReactions: [] })
     })
   })
 

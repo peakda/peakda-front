@@ -5,7 +5,9 @@ import {
 import type {
   CreateReportRequest,
   CreateReportRequestReason,
+  FeedReactionSummaryResponse,
   FeedReactionSummaryResponseMyReactionsItem,
+  ReactionSummary,
 } from '@/api/facades/generated/peakdaApi.schemas'
 
 // 카테고리 탭 라벨 → 피드 필터
@@ -26,6 +28,14 @@ export function reactionToggleAction(
   type: FeedReactionSummaryResponseMyReactionsItem
 ): 'add' | 'remove' {
   return myReactions.includes(type) ? 'remove' : 'add'
+}
+
+// 리액션 mutation 응답 → 조회 응답과 같은 리액션 요약 형태 (응답 payload 가 비면 빈 요약)
+export function toReactionSummary(response?: FeedReactionSummaryResponse | null): ReactionSummary {
+  return {
+    counts: response?.counts ?? [],
+    myReactions: response?.myReactions ?? [],
+  }
 }
 
 // 스팟 기록 신고 요청 페이로드 생성 (V1 은 SPOT_RECORD 만 지원)

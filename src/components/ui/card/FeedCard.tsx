@@ -14,12 +14,12 @@ import { useCarousel } from '@/hooks/useEmblaCarousel'
 import { Indecator } from '@/app/onboarding/_components/Indecator'
 import { useAddReaction, useRemoveReaction } from '@/api/facades/feed'
 import { useReport } from '@/api/facades/report'
-import { reactionToggleAction, buildReportRequest } from '@/lib/utils/feed'
+import { reactionToggleAction, buildReportRequest, toReactionSummary } from '@/lib/utils/feed'
 import { ReportModal } from '@/components/ui/card/ReportModal'
 import type {
   CreateReportRequestReason,
   FeedReactionSummaryResponseMyReactionsItem,
-  ReactionCount,
+  ReactionSummary,
 } from '@/api/facades/generated/peakdaApi.schemas'
 
 interface FlowerTag {
@@ -34,7 +34,6 @@ export interface SpotSummaryInfo {
   onClick: () => void
 }
 
-// 목록 DTO 에는 리액션 집계가 없어 처음엔 버튼만 노출하고, 반응 mutation 응답의 counts 로 갱신한다.
 const REACTIONS: { type: FeedReactionSummaryResponseMyReactionsItem; emoji: string }[] = [
   { type: 'HEART', emoji: '❤️' },
   { type: 'SMILE', emoji: '😀' },
@@ -53,6 +52,7 @@ export interface FeedCardProps {
   images: string[]
   flowers: FlowerTag[]
   content: string
+  reactions: ReactionSummary
   isOwner?: boolean
   onEdit?: () => void
   onDelete?: () => void
@@ -75,6 +75,7 @@ export function FeedCard({
   images,
   flowers,
   content,
+  reactions,
   isOwner = false,
   onEdit,
   onDelete,
@@ -85,9 +86,10 @@ export function FeedCard({
 }: FeedCardProps) {
   const { emblaRef, selectedIndex, scrollSnaps, scrollTo } = useCarousel({ loop: true })
 
-  // 내 리액션 상태·카운트: 목록 DTO 에 정보가 없어 빈 값으로 시작하고 mutation 응답으로만 갱신한다.
-  const [myReactions, setMyReactions] = useState<FeedReactionSummaryResponseMyReactionsItem[]>([])
-  const [reactionCounts, setReactionCounts] = useState<ReactionCount[]>([])
+  // 조회 응답의 리액션 요약을 그대로 보여주고, 이 화면에서 리액션을 누른 뒤에만
+  // mutation 응답으로 덮어쓴다. (useState 초기값으로 두면 나중에 도착한 서버 값이 반영되지 않는다)
+  const [reactionOverride, setReactionOverride] = useState<ReactionSummary | null>(null)
+  const { counts: reactionCounts, myReactions } = reactionOverride ?? reactions
   const [isReportModalOpen, setReportModalOpen] = useState(false)
   const addReaction = useAddReaction()
   const removeReaction = useRemoveReaction()
@@ -99,8 +101,7 @@ export function FeedCard({
       { id: recordId, params: { reactionType: type } },
       {
         onSuccess: (res) => {
-          setMyReactions(res.data.data?.myReactions ?? [])
-          setReactionCounts(res.data.data?.counts ?? [])
+          setReactionOverride(toReactionSummary(res.data.data))
         },
       }
     )
@@ -243,7 +244,7 @@ export function FeedCard({
       {/* 본문 */}
       <p className="text-text-primary text-sm leading-relaxed">{content}</p>
 
-      {/* 반응 버튼 (반응 전엔 카운트 없이 버튼만, 반응 후엔 응답 counts 로 표시) */}
+      {/* 반응 버튼 (카운트가 0 이면 숫자 없이 버튼만) */}
       <div className="flex gap-2">
         {REACTIONS.map(({ type, emoji }) => {
           const count = reactionCounts.find((c) => c.reactionType === type)?.count
