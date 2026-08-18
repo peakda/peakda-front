@@ -246,7 +246,7 @@ export const MapContainer = () => {
           title: f.alt || '명소',
           location: spot.title ?? '위치 정보 없음',
           description: `현재 ${STAGE_LABEL[spot.maxStage]} 상태입니다.`,
-          Badges: f.alt ? [f.alt] : [],
+          badges: f.alt ? [{ label: f.alt, icon: f.src }] : [],
           isFavorite: false,
           images: [f.src],
           spotId: spot.spotId ?? spot.attractionId,

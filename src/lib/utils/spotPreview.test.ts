@@ -29,8 +29,7 @@ describe('lib/utils/spotPreview', () => {
           location: '서울 중구 남산공원길',
           description: '벚꽃',
           tagText: '만개',
-          badgeIcon: '/flowers/cherry-blossom.svg',
-          Badges: ['벚꽃'],
+          badges: [{ label: '벚꽃', icon: '/flowers/cherry-blossom.svg' }],
           isFavorite: false,
           images: ['https://img/1.jpg'],
         },
@@ -46,10 +45,10 @@ describe('lib/utils/spotPreview', () => {
       expect(toPinListItems([item({ address: null })])[0].location).toBe('')
     })
 
-    // 카드는 3칸 그리드인데 서버는 최대 4장을 준다.
-    it('사진은 3장까지만 쓴다', () => {
-      const photoUrls = ['a', 'b', 'c', 'd']
-      expect(toPinListItems([item({ photoUrls })])[0].images).toEqual(['a', 'b', 'c'])
+    // 카드가 4칸 그리드고 서버도 최대 4장을 준다.
+    it('사진은 4장까지 쓴다', () => {
+      const photoUrls = ['a', 'b', 'c', 'd', 'e']
+      expect(toPinListItems([item({ photoUrls })])[0].images).toEqual(['a', 'b', 'c', 'd'])
     })
 
     it('사진이 없으면 이미지 칸을 비운다', () => {
@@ -58,21 +57,31 @@ describe('lib/utils/spotPreview', () => {
 
     it('개화 정보가 없으면 뱃지·태그를 비운다', () => {
       const result = toPinListItems([item({ badges: [] })])[0]
-      expect(result.Badges).toEqual([])
+      expect(result.badges).toEqual([])
       expect(result.tagText).toBeUndefined()
-      expect(result.badgeIcon).toBeUndefined()
       expect(result.description).toBe('')
     })
 
-    // 배지가 여러 개면 첫 번째를 대표로 쓴다.
-    it('배지가 여러 개면 첫 배지를 대표로 쓴다', () => {
+    // 꽃을 여러 개 고르면 서버가 그만큼 배지를 준다. 꽃마다 아이콘이 달라 라벨과 쌍으로 넘긴다.
+    it('배지가 여러 개면 전부 아이콘과 함께 넘긴다', () => {
       const badges: SpotPreviewItem['badges'] = [
         { category: 'MAPLE', displayName: '단풍', status: 'PEAK' },
         { category: 'COSMOS', displayName: '코스모스', status: 'STARTED' },
       ]
       const result = toPinListItems([item({ badges })])[0]
-      expect(result.Badges).toEqual(['단풍'])
-      expect(result.badgeIcon).toBe('/flowers/maple.svg')
+      expect(result.badges).toEqual([
+        { label: '단풍', icon: '/flowers/maple.svg' },
+        { label: '코스모스', icon: '/flowers/cosmos.svg' },
+      ])
+    })
+
+    // 제목 옆 상태 태그는 하나뿐이라 첫 배지를 대표로 쓴다.
+    it('상태 태그는 첫 배지 기준이다', () => {
+      const badges: SpotPreviewItem['badges'] = [
+        { category: 'MAPLE', displayName: '단풍', status: 'PEAK' },
+        { category: 'COSMOS', displayName: '코스모스', status: 'STARTED' },
+      ]
+      expect(toPinListItems([item({ badges })])[0].tagText).toBe('만개')
     })
 
     it('상태 라벨은 지도 핀과 같은 표기를 쓴다', () => {
