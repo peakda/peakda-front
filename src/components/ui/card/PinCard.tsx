@@ -10,7 +10,7 @@ export function PinCard({
   title,
   location,
   description,
-  Badges = [],
+  badges = [],
   isFavorite = false,
 }: SingleImageProps) {
   return (
@@ -27,7 +27,7 @@ export function PinCard({
 
       {/* 하단 콘텐츠 영역 */}
       <PinText
-        Badges={Badges}
+        badges={badges}
         tag="절정"
         title={title}
         location={location}

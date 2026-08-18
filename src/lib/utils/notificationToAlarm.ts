@@ -37,8 +37,36 @@ export function toAlarmItem(n: NotificationResponse): AlarmItemData {
     isRead: n.read,
     title: n.title,
     description: n.body || undefined,
+    imageUrl: n.imageUrl || undefined,
     timestamp: formatTimeAgo(n.createdAt),
   }
+}
+
+export interface NotificationLink {
+  href: string
+  isExternal: boolean
+}
+
+// INTERNAL 알림의 type → 경로 prefix. targetId 를 뒤에 붙인다.
+// NOTICE 는 관리자가 지정하는 값이라 프론트가 조합할 내부 경로가 없다 → null(이동 없음).
+const INTERNAL_PREFIX: Record<NotificationResponse['type'], string | null> = {
+  TIMING: '/spot',
+  FOLLOW: '/users',
+  REACTION: '/feed',
+  NOTICE: null,
+}
+
+// 알림 탭 시 이동할 링크. 이동할 수 없으면 null(읽음 처리만 한다).
+export function toNotificationHref(n: NotificationResponse): NotificationLink | null {
+  if (n.linkType === 'EXTERNAL') {
+    // http(s) 만 허용 — javascript: 같은 스킴이 내려와도 열지 않는다.
+    if (!n.linkUrl || !/^https?:\/\//i.test(n.linkUrl)) return null
+    return { href: n.linkUrl, isExternal: true }
+  }
+
+  const prefix = INTERNAL_PREFIX[n.type]
+  if (!prefix || n.targetId == null) return null
+  return { href: `${prefix}/${n.targetId}`, isExternal: false }
 }
 
 // 탭 value → 알림 세그먼트

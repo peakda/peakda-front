@@ -12,11 +12,11 @@ export interface MapCoords {
 }
 
 export interface FilterValues {
-  /** 아직 서버 파라미터가 없어 조회에 반영되지 않는다. 생기면 date 와 같은 자리에 붙인다. */
+  /** 권역 → 서버 region 파라미터. bbox 와 AND 로 적용된다 */
   region: RegionKey | null
-  /** 방문예정일 → 서버 date 파라미터 */
+  /** 시기 탭 → 서버 status 파라미터 (방문예정일이 아니라 현재 개화 상태다) */
   timing: TimingKey | null
-  /** 서버 category 는 값 하나만 받으므로 복수 선택은 클라이언트에서 거른다 */
+  /** 서버로 보내지 않고 응답을 받아 클라이언트에서 거른다 — 이유는 MapContainer 의 bloomParams 참고 */
   categories: BloomSlotCategory[]
 }
 
@@ -101,7 +101,7 @@ export const useFilterStore = create<FilterState>((set) => ({
   toggleDraftRegion: (region) =>
     set((s) => ({ draft: { ...s.draft, region: toggleSingle(s.draft.region, region) } })),
 
-  // 시기는 date 파라미터 하나로 나가므로 복수 선택이 성립하지 않는다.
+  // 시기는 status 파라미터 하나로 나가므로 복수 선택이 성립하지 않는다.
   toggleDraftTiming: (timing) =>
     set((s) => ({ draft: { ...s.draft, timing: toggleSingle(s.draft.timing, timing) } })),
 

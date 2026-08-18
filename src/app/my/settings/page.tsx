@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 import { Header } from '@/components/ui/layout/Header'
@@ -8,6 +9,12 @@ import { Toggle } from '@/components/ui/display/Toggle'
 import { Drawer } from '@/components/ui/layout/Drawer'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import { BlockedUsersSection } from '@/app/my/settings/_components/BlockedUsersSection'
+import {
+  APP_SETTINGS_KEY,
+  DEFAULT_APP_SETTINGS,
+  readAppSettings,
+  type AppSettings,
+} from '@/lib/utils/appSettings'
 import type { LegalSlug } from '@/app/Terms/_data/legal-content'
 
 const INFO_LINKS: { label: string; slug: LegalSlug }[] = [
@@ -23,6 +30,22 @@ function SectionTitle({ children }: { children: string }) {
 export default function SettingsPage() {
   const openLogoutDrawer = useDrawerStore((s) => s.openLogoutDrawer)
   const openWithdrawDrawer = useDrawerStore((s) => s.openWithdrawDrawer)
+
+  const [settings, setSettings] = useState<AppSettings>(DEFAULT_APP_SETTINGS)
+  // Toggle 은 initialStatus 를 마운트 때만 읽는다. 저장값을 읽기 전에는 렌더하지 않는다.
+  const [settingsLoaded, setSettingsLoaded] = useState(false)
+
+  // SSR 에는 localStorage 가 없으므로 마운트 후에 읽는다
+  useEffect(() => {
+    setSettings(readAppSettings(window.localStorage.getItem(APP_SETTINGS_KEY)))
+    setSettingsLoaded(true)
+  }, [])
+
+  const updateSetting = (key: keyof AppSettings) => (isOn: boolean) => {
+    const next = { ...settings, [key]: isOn }
+    setSettings(next)
+    window.localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(next))
+  }
 
   return (
     <div className="bg-bg-primary relative flex min-h-screen flex-col pb-12">
@@ -40,14 +63,21 @@ export default function SettingsPage() {
           <span className="text-text-primary text-base">위치 정보 활용</span>
           <span className="text-text-tertiary text-sm">내 위치 기반 추천</span>
         </div>
-        <Toggle initialStatus={true} />
+        {settingsLoaded && (
+          <Toggle
+            initialStatus={settings.locationEnabled}
+            onChange={updateSetting('locationEnabled')}
+          />
+        )}
       </div>
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex flex-col">
           <span className="text-text-primary text-base">EXIF 데이터 자동 추출</span>
           <span className="text-text-tertiary text-sm">사진에서 위치·날짜 자동 입력</span>
         </div>
-        <Toggle initialStatus={true} />
+        {settingsLoaded && (
+          <Toggle initialStatus={settings.exifEnabled} onChange={updateSetting('exifEnabled')} />
+        )}
       </div>
 
       <div className="bg-bg-secondary h-2" />

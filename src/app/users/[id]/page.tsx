@@ -21,17 +21,19 @@ export default function UserProfilePage() {
   const { data: profile } = useUserProfile(userId)
 
   const [menuOpen, setMenuOpen] = useState(false)
-  // 프로필 응답에 차단 여부가 없어 로컬로만 추적한다(초기값 false).
-  const [blocked, setBlocked] = useState(false)
+  // 차단 여부는 프로필 응답(blocked)을 따르고, 이 화면에서 차단/해제한 뒤에만 로컬 값으로 덮어쓴다.
+  // (useState 초기값으로 두면 나중에 도착한 프로필의 blocked 가 반영되지 않는다)
+  const [blockedOverride, setBlockedOverride] = useState<boolean | null>(null)
+  const blocked = blockedOverride ?? profile?.blocked ?? false
   const blockMutation = useBlockUser()
   const unblockMutation = useUnblockUser()
 
   const handleToggleBlock = () => {
     setMenuOpen(false)
     if (blocked) {
-      unblockMutation.mutate({ userId }, { onSuccess: () => setBlocked(false) })
+      unblockMutation.mutate({ userId }, { onSuccess: () => setBlockedOverride(false) })
     } else {
-      blockMutation.mutate({ userId }, { onSuccess: () => setBlocked(true) })
+      blockMutation.mutate({ userId }, { onSuccess: () => setBlockedOverride(true) })
     }
   }
 

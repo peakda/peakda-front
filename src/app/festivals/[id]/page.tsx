@@ -9,14 +9,7 @@ import { Button } from '@/components/ui/button/Button'
 import { CardBadge } from '@/components/ui/card/CardBadge'
 import { useFestivalDetail } from '@/api/facades/festival'
 import { buildMapUrl } from '@/lib/utils/spotCta'
-
-// 서버가 판정한 축제 상태(phase) → 화면 문구
-const PHASE_LABEL: Record<string, string> = {
-  UPCOMING: '예정',
-  ONGOING: '진행중',
-  ENDING_SOON: '곧 종료',
-  ENDED: '종료',
-}
+import { FESTIVAL_PHASE_LABEL as PHASE_LABEL } from '@/lib/utils/explore'
 
 // 축제에는 대표 이미지가 없을 수 있다(에디토리얼이 없으면 heroImageUrl 도 없다).
 const HERO_PLACEHOLDER = '/images/explore.png'

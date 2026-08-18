@@ -9,7 +9,14 @@ import {
 
 describe('utils/search', () => {
   describe('toSpotProps', () => {
-    const base = { spotId: 1, name: '남산공원', latitude: 37.5, longitude: 127.0 }
+    const base = {
+      spotId: 1,
+      name: '남산공원',
+      latitude: 37.5,
+      longitude: 127.0,
+      favorited: false,
+      notifyEnabled: false,
+    }
 
     it('address 가 null 이면 location 은 빈 문자열', () => {
       expect(toSpotProps({ ...base, type: 'ATTRACTION', address: null }).location).toBe('')
@@ -22,29 +29,62 @@ describe('utils/search', () => {
         id: 1,
         name: '남산공원',
         location: '서울 중구',
+        imageUrl: undefined,
         status: '',
         nameList: ['명소'],
+        favorited: false,
       })
     })
     it('LOCAL 은 동네 태그로 표시', () => {
       expect(toSpotProps({ ...base, type: 'LOCAL' }).nameList).toEqual(['동네'])
     })
+
+    it('썸네일과 찜 상태를 그대로 옮긴다', () => {
+      const result = toSpotProps({
+        ...base,
+        type: 'ATTRACTION',
+        thumbnailUrl: 'https://img/a.jpg',
+        favorited: true,
+      })
+      expect(result.imageUrl).toBe('https://img/a.jpg')
+      expect(result.favorited).toBe(true)
+    })
+
+    // 개화 배지는 찜·탐색·스팟 상세와 같은 표기를 쓴다.
+    it('개화 정보가 있으면 상태 배지를 만든다', () => {
+      const result = toSpotProps({
+        ...base,
+        type: 'ATTRACTION',
+        bloom: { category: 'CHERRY', displayName: '벚꽃', status: 'PEAK' },
+      })
+      expect(result.status).toBe('절정')
+      expect(result.statusVariant).toBe('bloom')
+    })
+
+    it('개화 정보가 없으면 배지를 비운다', () => {
+      expect(toSpotProps({ ...base, type: 'ATTRACTION' }).status).toBe('')
+    })
   })
 
   describe('toUserProps', () => {
+    const base = { userId: 7, nickname: '봄이', following: false, recordCount: 24, followerCount: 1280 }
+
     it('profileImageUrl 을 imageUrl 로 넘긴다', () => {
-      expect(
-        toUserProps({ userId: 7, nickname: '봄이', profileImageUrl: 'https://img/a.png' })
-      ).toEqual({
+      expect(toUserProps({ ...base, profileImageUrl: 'https://img/a.png' })).toEqual({
         id: 7,
         name: '봄이',
-        stats: '',
+        stats: '기록 24 · 팔로워 1280',
         following: false,
         imageUrl: 'https://img/a.png',
       })
     })
     it('profileImageUrl 이 없으면 imageUrl 은 null', () => {
-      expect(toUserProps({ userId: 7, nickname: '봄이' }).imageUrl).toBeNull()
+      expect(toUserProps(base).imageUrl).toBeNull()
+    })
+
+    // 새로고침해도 팔로우 버튼이 '팔로우'로 되돌아가지 않도록 서버 값을 그대로 쓴다.
+    it('팔로우 여부를 그대로 옮긴다', () => {
+      expect(toUserProps({ ...base, following: true }).following).toBe(true)
     })
   })
 

@@ -16,17 +16,15 @@ import { useMapCluster, type MapSpot } from '@/hooks/useMapPins'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import { hasActiveFilter, useFilterStore, type PinTypeFilter } from '@/stores/useFilterStore'
 import { filterMapSpots } from '@/lib/utils/mapFilter'
-import { isFutureTiming, timingToDate, timingToStatuses } from '@/lib/utils/timing'
+import { timingToStatus, timingToStatuses } from '@/lib/utils/timing'
 import { useBloomMap } from '@/api/facades/seasonal-bloom'
 import { useHomeSuggestion } from '@/api/facades/home'
 import { useUnreadNotificationCount } from '@/api/facades/notification'
-import { matchSpotApi, useSpotDetailFetcher } from '@/api/facades/spot'
+import { spotPreviewApi } from '@/api/facades/spot'
+import { toPinListItems } from '@/lib/utils/spotPreview'
 import { bloomToMapSpots } from '@/lib/utils/bloomToMapSpots'
 import { STAGE_LABEL } from '@/constants/map'
-import type {
-  BloomBadgeStatus,
-  GetSeasonalBloomsParams,
-} from '@/api/facades/generated/peakdaApi.schemas'
+import type { GetSeasonalBloomsParams } from '@/api/facades/generated/peakdaApi.schemas'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 const Drawer = dynamic(
@@ -54,13 +52,6 @@ const snapUp = (v: number) => Math.ceil(v * BBOX_GRID) / BBOX_GRID
 
 // 지도 정착 후 실제 조회까지의 지연. 연속 이동 중엔 마지막 정착만 조회한다.
 const BBOX_DEBOUNCE_MS = 1000
-
-const BADGE_STATUS_LABEL: Record<BloomBadgeStatus, string> = {
-  PREPARING: '개화 전',
-  STARTED: '개화 시작',
-  PEAK: '만개',
-  ENDED: '개화 종료',
-}
 
 // 상단 칩. 서버 파라미터가 없어 응답의 pin.type 으로 클라이언트에서 거른다.
 const PIN_TYPES: PinTypeFilter[] = ['ALL', 'ATTRACTION', 'LOCAL']
@@ -133,11 +124,6 @@ export const MapContainer = () => {
   const setPinType = useFilterStore((s) => s.setPinType)
   const setVisibleSpots = useFilterStore((s) => s.setVisibleSpots)
 
-  // 방문예정일 조회는 명소형 핀만 재계산된다(동네형은 최근 관측값 유지 — 서버 스펙).
-  // 섞어서 보여주면 "그날 절정"이 아닌 동네 핀이 끼므로 명소형으로 고정한다.
-  const localUnavailable = isFutureTiming(applied.timing)
-  const effectivePinType = localUnavailable ? 'ATTRACTION' : pinType
-  const date = timingToDate(applied.timing)
   const statuses = useMemo(() => timingToStatuses(applied.timing), [applied.timing])
 
   const latParam = searchParams.get('lat')
@@ -148,21 +134,30 @@ export const MapContainer = () => {
     return lat != null && lng != null ? { lat, lng } : null
   }, [latParam, lngParam])
 
-  // 서버로 나가는 건 bbox 와 방문예정일(date)뿐이다. 둘 다 applied 기준이라
+  // 서버로 나가는 건 bbox·개화상태(status)·권역(region)이다. 전부 applied 기준이라
   // 드로어에서 필터를 만지는 것만으로는 요청이 나가지 않는다.
-  // 꽃 종류는 서버 category 가 단일 값이라 복수 선택을 지원하려고 클라에서 거른다.
-  const bloomParams = useMemo(() => (bbox ? { ...bbox, date } : null), [bbox, date])
+  //
+  // 꽃 종류(categories)는 일부러 보내지 않는다. 서버가 걸러 주면 ①드로어 하단의
+  // 'N개의 명소 보기' 를 draft 기준으로 셀 수 없고 ②응답에서 안 고른 꽃이 빠져
+  // 핀 아이콘을 선택에 맞게 좁힐 수 없다. 대신 응답의 category 로 클라에서 거른다.
+  const bloomParams = useMemo(
+    () =>
+      bbox
+        ? { ...bbox, status: timingToStatus(applied.timing), region: applied.region ?? undefined }
+        : null,
+    [bbox, applied.timing, applied.region]
+  )
   const { data: bloomData, isPlaceholderData } = useBloomMap(bloomParams)
   const allSpots = useMemo(() => (bloomData ? bloomToMapSpots(bloomData) : []), [bloomData])
 
   const spots = useMemo(
     () =>
       filterMapSpots(allSpots, {
-        pinType: effectivePinType,
+        pinType,
         statuses,
         categories: applied.categories,
       }),
-    [allSpots, effectivePinType, statuses, applied.categories]
+    [allSpots, pinType, statuses, applied.categories]
   )
 
   // 꽃 종류는 클라 필터라 서버를 다녀오지 않고도 draft 기준 개수를 미리 셀 수 있다.
@@ -170,11 +165,11 @@ export const MapContainer = () => {
   const draftSpots = useMemo(
     () =>
       filterMapSpots(allSpots, {
-        pinType: effectivePinType,
+        pinType,
         statuses,
         categories: draftCategories,
       }),
-    [allSpots, effectivePinType, statuses, draftCategories]
+    [allSpots, pinType, statuses, draftCategories]
   )
 
   // 드로어의 'N개의 명소 보기' 버튼이 쓸 현재 화면의 필터 결과를 올려준다.
@@ -208,8 +203,7 @@ export const MapContainer = () => {
       // 어떤 조건으로 계산한 결과인지 함께 올린다. 드로어가 이걸로 최신 여부를 판단한다.
       appliedFor: applied,
     })
-    // applied 는 spots 에 반영되지만, 지역만 바뀌면(서버 파라미터가 없어 조회에 안 쓰임)
-    // spots 참조가 그대로라 재발행이 안 된다. 그래서 명시적으로 넣는다.
+    // 드로어가 "이 결과가 어떤 applied 기준인지" 를 참조 비교로 판단하므로 applied 를 함께 넣는다.
   }, [spots, draftSpots, mapInstance, isPlaceholderData, applied, setVisibleSpots])
 
   // 시즌 추천어(홈 검색바 보조 카피). 절정 데이터 없으면(available=false) 기본 문구로 폴백.
@@ -221,83 +215,45 @@ export const MapContainer = () => {
   const { data: unread } = useUnreadNotificationCount()
   const hasUnreadNotification = (unread?.unreadCount ?? 0) > 0
 
-  // 명소형 핀은 Spot 행이 아직 없어 spotId 가 없을 수 있다. 이때만 match 로 materialize 하고,
-  // POST(생성 부작용)라 좌표 기준으로 캐시해 같은 핀을 다시 눌러도 재호출하지 않는다.
-  const matchedSpotIdRef = useRef(new Map<string, number>())
-
-  const resolveSpotId = useCallback(async (spot: MapSpot) => {
-    if (spot.spotId != null) return spot.spotId
-
-    const cacheKey = `${spot.lat},${spot.lng}`
-    const cached = matchedSpotIdRef.current.get(cacheKey)
-    if (cached != null) return cached
-
-    const matched = await matchSpotApi({
-      latitude: spot.lat,
-      longitude: spot.lng,
-      name: spot.title ?? '이름 없는 명소',
-    })
-    const matchedId = matched?.spot?.id
-    if (matchedId != null) matchedSpotIdRef.current.set(cacheKey, matchedId)
-    return matchedId
-  }, [])
-
-  const fetchSpotDetail = useSpotDetailFetcher()
-
+  // 핀 하나든 필터 결과 목록이든 같은 preview API 로 채운다.
+  // 서버가 탐색·지도에 노출되는 명소의 Spot 행을 미리 만들어 주므로 spotId 가 사실상 항상 있고,
+  // 예전처럼 클릭 시 POST /api/spots/match 로 만들어 낼 필요가 없다.
   const handlePinClick = useCallback(
     async (spot: MapSpot) => {
       try {
-        const spotId = await resolveSpotId(spot)
-        const detail = spotId != null ? await fetchSpotDetail(spotId) : null
+        if (spot.spotId != null) {
+          const center = mapInstance?.getCenter()
+          const preview = await spotPreviewApi([spot.spotId], {
+            coords: center ? { lat: center.getLat(), lng: center.getLng() } : null,
+            categories: applied.categories,
+            status: timingToStatus(applied.timing),
+          })
+          const items = preview ? toPinListItems(preview.items) : []
 
-        if (detail) {
-          // 유저가 올린 사진(방문 기록 대표 사진, 최신순 최대 3건)을 리스트로 노출한다.
-          // 기록이 없으면 스팟 대표 이미지, 그것도 없으면 꽃 아이콘으로 내려간다.
-          const recordPhotos = detail.recordPreview
-            .map((record) => record.coverPhoto?.url)
-            .filter((url): url is string => !!url)
-          const images =
-            recordPhotos.length > 0
-              ? recordPhotos
-              : detail.representativeImageUrl
-                ? [detail.representativeImageUrl]
-                : spot.flowers.map((f) => f.src)
-
-          openPinDrawer([
-            {
-              type: 'list' as const,
-              title: detail.name,
-              location: detail.address ?? spot.title ?? '위치 정보 없음',
-              description: detail.bloom
-                ? `현재 ${BADGE_STATUS_LABEL[detail.bloom.status]} 상태입니다.`
-                : '',
-              Badges: detail.bloom ? [detail.bloom.displayName] : [],
-              isFavorite: detail.favorite.favorited,
-              images,
-              spotId: detail.id,
-            },
-          ])
-          return
+          if (items.length > 0) {
+            openPinDrawer(items)
+            return
+          }
         }
       } catch (e) {
         console.error(e)
       }
 
-      // 상세를 못 가져오면(비로그인·매칭 실패 등) 기존 개화 데이터로 폴백한다.
+      // 프리뷰를 못 가져오면(좌표만 있는 핀·비공개·네트워크 실패) 지도 개화 데이터로 폴백한다.
       openPinDrawer(
         spot.flowers.map((f) => ({
           type: 'list' as const,
           title: f.alt || '명소',
           location: spot.title ?? '위치 정보 없음',
           description: `현재 ${STAGE_LABEL[spot.maxStage]} 상태입니다.`,
-          Badges: f.alt ? [f.alt] : [],
+          badges: f.alt ? [{ label: f.alt, icon: f.src }] : [],
           isFavorite: false,
           images: [f.src],
           spotId: spot.spotId ?? spot.attractionId,
         }))
       )
     },
-    [openPinDrawer, resolveSpotId, fetchSpotDetail]
+    [openPinDrawer, mapInstance, applied.categories, applied.timing]
   )
 
   useMapCluster(mapInstance, spots, handlePinClick)
@@ -443,9 +399,7 @@ export const MapContainer = () => {
           <Category
             isMap
             categories={PIN_TYPE_LABELS}
-            value={PIN_TYPE_LABEL[effectivePinType]}
-            // 방문예정일 조회 중에는 동네형을 그날 기준으로 계산할 수 없어 고를 수 없다.
-            disabled={localUnavailable ? [PIN_TYPE_LABEL.ALL, PIN_TYPE_LABEL.LOCAL] : []}
+            value={PIN_TYPE_LABEL[pinType]}
             onChange={(label) => {
               const next = PIN_TYPES.find((type) => PIN_TYPE_LABEL[type] === label)
               if (next) setPinType(next)

@@ -1,6 +1,7 @@
 import type { SpotSearchItem, UserSearchItem } from '@/api/facades/generated/peakdaApi.schemas'
 import type { SPOTProps } from '@/app/search/_components/SpotPanel'
 import type { UserProps } from '@/app/search/_components/UserPanel'
+import { toStatusBadge } from '@/lib/utils/bloomStatus'
 
 // 최근 검색어 localStorage 키
 export const RECENT_SEARCH_KEY = 'peakda:recent-searches'
@@ -13,25 +14,25 @@ const SPOT_TYPE_LABEL: Record<SpotSearchItem['type'], string> = {
   LOCAL: '동네',
 }
 
-// 검색 API 는 스팟명·주소·유형만 준다(썸네일·개화상태·식물태그 없음). 없는 자리는 비운다.
 export const toSpotProps = (item: SpotSearchItem): SPOTProps => {
   const typeLabel = SPOT_TYPE_LABEL[item.type]
   return {
     id: item.spotId,
     name: item.name,
     location: item.address ?? '',
-    status: '',
+    imageUrl: item.thumbnailUrl,
+    ...toStatusBadge(item.bloom?.status),
     // 식물 태그 자리가 비어 있어 명소/동네 구분을 대신 노출한다.
     nameList: typeLabel ? [typeLabel] : [],
+    favorited: item.favorited,
   }
 }
 
-// 검색 API 는 닉네임·프로필 이미지만 준다(팔로워수·팔로우여부 없음).
 export const toUserProps = (item: UserSearchItem): UserProps => ({
   id: item.userId,
   name: item.nickname,
-  stats: '',
-  following: false,
+  stats: `기록 ${item.recordCount} · 팔로워 ${item.followerCount}`,
+  following: item.following,
   imageUrl: item.profileImageUrl ?? null,
 })
 

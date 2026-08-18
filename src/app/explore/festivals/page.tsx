@@ -36,7 +36,7 @@ export default function ExploreFestivalsPage() {
                   <Link href={`/festivals/${item.festivalId}`}>
                     <ExplorCard
                       type="festival"
-                      image="/images/exploreEmpty.jpg"
+                      image={item.thumbnailUrl ?? '/images/exploreEmpty.jpg'}
                       name={item.name}
                       description={toFestivalDescription(item)}
                       dateRange={toFestivalDateRange(item)}
