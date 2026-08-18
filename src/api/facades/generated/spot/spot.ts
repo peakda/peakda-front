@@ -270,7 +270,7 @@ export const getGetSpotsPreviewUrl = (params: GetSpotsPreviewParams,) => {
 }
 
 /**
- * 지도 핀 탭 시 보여줄 카드(썸네일/개화 단계 뱃지/거리)를 조회한다. spotIds 1건이면 단일 프리뷰(SCR-011e), 여러 건이면 클러스터 리스트(SCR-011d)로 그대로 쓸 수 있다. lat/lng 을 함께 주면 각 스팟까지의 거리(m)를 계산해 채운다.
+ * 지도 핀 탭 시 보여줄 카드(주소/사진/개화 단계 뱃지/찜/알림/거리)를 조회한다. spotIds 1건이면 단일 프리뷰(SCR-011e), 여러 건이면 클러스터 리스트(SCR-011d)로 그대로 쓸 수 있다. lat/lng 을 함께 주면 각 스팟까지의 거리(m)를 계산해 채운다. items 는 요청한 spotIds 순서를 보존하며 서버 정렬 옵션은 제공하지 않는다.
  * @summary 핀 클릭 프리뷰
  */
 export const getSpotsPreview = async (params: GetSpotsPreviewParams, options?: RequestInit): Promise<getSpotsPreviewResponse> => {

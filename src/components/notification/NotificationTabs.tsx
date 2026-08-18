@@ -15,8 +15,9 @@ import { TabItem } from '@/context/TabContext'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { flattenPages } from '@/lib/utils/infinitePages'
 import { shouldLoadMore } from '@/lib/utils/myRecords'
-import { segmentFromTab, toAlarmItem } from '@/lib/utils/notificationToAlarm'
+import { segmentFromTab, toAlarmItem, toNotificationHref } from '@/lib/utils/notificationToAlarm'
 import { Plus } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 const TABS: TabItem[] = [
   { value: 'All', label: '전체' },
@@ -69,6 +70,7 @@ function NotificationPanel({ tabValue, label }: { tabValue: string; label: strin
   const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useNotificationListInfinite(segmentFromTab(tabValue))
   const markRead = useMarkNotificationRead()
+  const router = useRouter()
   // isLoading 은 무한 쿼리에서도 "첫 페이지 로딩 중"만 참이라 빈 상태 판정 기준은 그대로 유효하다.
   // (다음 페이지 로딩은 isFetchingNextPage 로만 나타난다)
   const sentinelRef = useInfiniteScroll(
@@ -85,17 +87,21 @@ function NotificationPanel({ tabValue, label }: { tabValue: string; label: strin
     <div className="px-4">
       {notifications.map((n) => {
         const item = toAlarmItem(n)
-        const handleRead = () => {
+        const link = toNotificationHref(n)
+        const handleSelect = () => {
           if (!n.read) markRead.mutate({ id: n.id })
+          if (!link) return
+          if (link.isExternal) window.open(link.href, '_blank', 'noopener,noreferrer')
+          else router.push(link.href)
         }
         return (
           <div
             key={item.id}
             role="button"
             tabIndex={0}
-            onClick={handleRead}
+            onClick={handleSelect}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') handleRead()
+              if (e.key === 'Enter' || e.key === ' ') handleSelect()
             }}
             className="cursor-pointer"
           >

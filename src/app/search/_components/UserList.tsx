@@ -17,7 +17,6 @@ export function UserList({ user }: Props) {
           <span className="text-xs text-gray-400">{user.stats}</span>
         </div>
       </Link>
-      {/* 검색 응답에 following 이 아직 없어 항상 '팔로우'로 시작한다(새로고침 시 초기화) */}
       <FollowButton userId={user.id} initialFollowing={user.following} />
     </li>
   )

@@ -113,27 +113,20 @@ export default function ExplorePage() {
           !isLoading && <EmptySection text="지금 절정인 명소가 없어요" />
         ) : (
           <div className="flex gap-3 overflow-x-auto px-4 pb-4 [&::-webkit-scrollbar]:hidden">
-            {peakNow.map((item) => {
-              const card = (
+            {peakNow.map((item) => (
+              <Link
+                key={`${item.attractionId}-${item.category}`}
+                href={`/spot/${item.spotId}`}
+                className="shrink-0"
+              >
                 <ExplorCard
                   type="peak"
                   image={item.thumbnailUrl ?? PLACEHOLDER_IMAGE}
                   name={item.name}
                   description={toPeakDescription(item)}
                 />
-              )
-              const key = `${item.attractionId}-${item.category}`
-              // 명소만 있고 스팟이 아직 없으면(spotId null) 이동할 상세가 없다.
-              return item.spotId != null ? (
-                <Link key={key} href={`/spot/${item.spotId}`} className="shrink-0">
-                  {card}
-                </Link>
-              ) : (
-                <div key={key} className="shrink-0">
-                  {card}
-                </div>
-              )
-            })}
+              </Link>
+            ))}
           </div>
         )}
       </section>
@@ -180,7 +173,7 @@ export default function ExplorePage() {
                 >
                   <ExplorCard
                     type="festival"
-                    image={PLACEHOLDER_IMAGE}
+                    image={item.thumbnailUrl ?? PLACEHOLDER_IMAGE}
                     name={item.name}
                     description={toFestivalDescription(item)}
                     dateRange={toFestivalDateRange(item)}

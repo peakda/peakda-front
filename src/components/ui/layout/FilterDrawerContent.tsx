@@ -53,7 +53,7 @@ function SectionLabel({ label, withReset = false }: { label: string; withReset?:
   )
 }
 
-// 서버 category 파라미터는 값 하나만 받지만, 응답에 category 가 있어 복수 선택은 클라에서 거른다.
+// 꽃 종류는 서버로 보내지 않고 응답의 category 로 클라에서 거른다(MapContainer 의 bloomParams 참고).
 function FlowerSections() {
   const categories = useFilterStore((s) => s.draft.categories)
   const toggleDraftCategory = useFilterStore((s) => s.toggleDraftCategory)
@@ -214,7 +214,6 @@ export function FilterDrawerContent({
       <SwipeableContent snap={snap} onExpandToFull={onExpandToFull}>
         <TabPanels tabs={TABS} className="min-h-0 flex-1">
           <div>
-            {/* 서버에 region 파라미터가 아직 없어 선택만 저장된다. 파라미터가 생기면 date 옆에 붙인다. */}
             <SectionLabel label="권역 선택" withReset />
             <div className="grid grid-cols-2 gap-2">
               {REGIONS.map((r) => (

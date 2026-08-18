@@ -16,6 +16,7 @@ import { PinList } from '@/components/ui/display/PinList'
 import { useFilterStore } from '@/stores/useFilterStore'
 import { spotPreviewApi } from '@/api/facades/spot'
 import { toPinListItems } from '@/lib/utils/spotPreview'
+import { timingToStatus } from '@/lib/utils/timing'
 import { toast } from 'sonner'
 
 // 닫힘 애니메이션이 끝난 뒤 목록 드로어를 띄우기 위한 대기 시간(vaul 슬라이드 아웃 기준).
@@ -84,8 +85,9 @@ export function Drawer() {
     try {
       const preview = await spotPreviewApi(visibleSpotIds, {
         coords: mapCenter,
-        // 서버 category 는 값 하나만 받는다. 여러 개 골랐으면 뱃지는 각 스팟의 대표 단계로 둔다.
-        category: applied.categories.length === 1 ? applied.categories[0] : null,
+        // 고른 꽃·시기를 그대로 넘겨야 카드 뱃지가 지도 핀과 같은 기준으로 계산된다.
+        categories: applied.categories,
+        status: timingToStatus(applied.timing),
       })
       const items = preview ? toPinListItems(preview.items) : []
 

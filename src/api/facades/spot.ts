@@ -1,39 +1,17 @@
-import { useCallback } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
 import {
-  postSpotsMatch,
   getSpotsPreview,
-  getGetSpotsByIdQueryOptions,
   useGetSpotsPreview,
   usePostSpotsMatch as useMatchGen,
   useGetSpotsById,
 } from '@/api/facades/generated/spot/spot'
 import type {
   BloomSlotCategory,
-  SpotMatchRequest,
+  BloomSlotStatus,
 } from '@/api/facades/generated/peakdaApi.schemas'
 
-export async function matchSpotApi(payload: SpotMatchRequest) {
-  const res = await postSpotsMatch(payload)
-  return res.data.data ?? null
-}
-
+// 기록 작성에서 카카오 장소를 고르면 그 좌표로 Spot 을 찾거나 만든다.
+// 지도 핀 클릭에는 더 이상 쓰지 않는다 — 서버가 노출 명소의 Spot 행을 미리 만들어 준다.
 export const useMatchSpot = () => useMatchGen()
-
-// 지도 핀 클릭처럼 렌더 밖에서 상세가 필요할 때 쓴다.
-// useSpotDetail(/spot/[id])과 같은 캐시를 공유하므로, 같은 핀을 다시 눌러도 ·
-// 드로어에서 상세 페이지로 넘어가도 staleTime 안에서는 재요청하지 않는다.
-export const useSpotDetailFetcher = () => {
-  const queryClient = useQueryClient()
-
-  return useCallback(
-    async (id: number) => {
-      const res = await queryClient.fetchQuery(getGetSpotsByIdQueryOptions(id))
-      return res.data.data ?? null
-    },
-    [queryClient]
-  )
-}
 
 // id 가 아직 없으면(선행 조회 대기) 요청하지 않는다.
 export const useSpotDetail = (id: number | undefined) =>
@@ -42,8 +20,10 @@ export const useSpotDetail = (id: number | undefined) =>
 interface SpotPreviewOptions {
   /** 거리(distanceMeters) 계산 기준 좌표. 없으면 서버가 null 로 준다 */
   coords?: { lat: number; lng: number } | null
-  /** 꽃 필터가 걸려 있으면 그 꽃 기준으로 뱃지를 계산한다. 생략 시 각 스팟의 대표 단계 */
-  category?: BloomSlotCategory | null
+  /** 꽃 필터. 고른 꽃 기준으로 뱃지를 계산한다. 비면 각 스팟의 대표 단계 */
+  categories?: BloomSlotCategory[]
+  /** 시기 필터. 이 상태의 뱃지가 없는 스팟은 결과에서 빠진다 */
+  status?: BloomSlotStatus
 }
 
 // 이벤트(필터 결과 보기, 핀 클릭 등)에서 프리뷰를 즉시 조회할 때 쓰는 plain async.
@@ -54,7 +34,8 @@ export async function spotPreviewApi(spotIds: number[], options: SpotPreviewOpti
   const res = await getSpotsPreview({
     spotIds,
     ...(options.coords ?? {}),
-    category: options.category ?? undefined,
+    categories: options.categories?.length ? options.categories : undefined,
+    status: options.status,
   })
   return res.data.data ?? null
 }

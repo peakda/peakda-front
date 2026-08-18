@@ -35,7 +35,7 @@ function formatTimeAgo(iso: string): string {
 }
 
 // SpotRecordSummaryResponse → FeedCard props
-// 한계: 요약 응답에는 식물 이모지·리액션 정보가 없어 기본값(🌸 / 빈 배열)을 사용한다.
+// 한계: 요약 응답에는 식물 이모지가 없어 기본값(🌸)을 사용한다.
 // 대표 사진이 없으면 placeholder 이미지를 사용한다.
 export function toFeedCardProps(
   record: SpotRecordSummaryResponse,
@@ -54,6 +54,7 @@ export function toFeedCardProps(
     images: record.coverPhoto?.url ? [record.coverPhoto.url] : ['/images/explore.png'],
     flowers: record.plants.map((plant) => ({ emoji: '🌸', label: plant.name })),
     content: record.memo ?? '',
+    reactions: record.reactions,
     ...options,
   }
 }
@@ -77,6 +78,7 @@ export function detailToFeedCardProps(
     images: record.photos.length > 0 ? record.photos.map((p) => p.url) : ['/images/explore.png'],
     flowers: record.plants.map((plant) => ({ emoji: '🌸', label: plant.name })),
     content: record.memo ?? '',
+    reactions: record.reactions,
     ...options,
   }
 }

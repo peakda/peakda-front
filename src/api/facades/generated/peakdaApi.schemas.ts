@@ -17,7 +17,9 @@ export const FavoriteCategoryUpdateRequestCategoriesItem = {
   AZALEA: 'AZALEA',
   HYDRANGEA: 'HYDRANGEA',
   LOTUS: 'LOTUS',
+  SUNFLOWER: 'SUNFLOWER',
   COSMOS: 'COSMOS',
+  CHRYSANTHEMUM: 'CHRYSANTHEMUM',
   PINK_MUHLY: 'PINK_MUHLY',
   SILVERGRASS: 'SILVERGRASS',
   MAPLE: 'MAPLE',
@@ -50,7 +52,9 @@ export const ItemCategory = {
   AZALEA: 'AZALEA',
   HYDRANGEA: 'HYDRANGEA',
   LOTUS: 'LOTUS',
+  SUNFLOWER: 'SUNFLOWER',
   COSMOS: 'COSMOS',
+  CHRYSANTHEMUM: 'CHRYSANTHEMUM',
   PINK_MUHLY: 'PINK_MUHLY',
   SILVERGRASS: 'SILVERGRASS',
   MAPLE: 'MAPLE',
@@ -840,6 +844,45 @@ export const SpotRecordResponseStatus = {
 } as const;
 
 /**
+ * 리액션 타입
+ */
+export type ReactionCountReactionType = typeof ReactionCountReactionType[keyof typeof ReactionCountReactionType];
+
+
+export const ReactionCountReactionType = {
+  HEART: 'HEART',
+  SMILE: 'SMILE',
+} as const;
+
+/**
+ * 리액션 타입별 집계 1건
+ */
+export interface ReactionCount {
+  /** 리액션 타입 */
+  reactionType: ReactionCountReactionType;
+  /** 개수 */
+  count: number;
+}
+
+export type ReactionSummaryMyReactionsItem = typeof ReactionSummaryMyReactionsItem[keyof typeof ReactionSummaryMyReactionsItem];
+
+
+export const ReactionSummaryMyReactionsItem = {
+  HEART: 'HEART',
+  SMILE: 'SMILE',
+} as const;
+
+/**
+ * 스팟 기록의 리액션 요약
+ */
+export interface ReactionSummary {
+  /** 리액션 타입별 집계 */
+  counts: ReactionCount[];
+  /** 현재 로그인 사용자가 남긴 리액션 타입들 (없으면 빈 배열) */
+  myReactions: ReactionSummaryMyReactionsItem[];
+}
+
+/**
  * 스팟 기록 상세 응답
  */
 export interface SpotRecordResponse {
@@ -879,6 +922,8 @@ export interface SpotRecordResponse {
   createdAt: string;
   /** 최종 수정 시각 */
   updatedAt: string;
+  /** 리액션 요약 */
+  reactions: ReactionSummary;
 }
 
 /**
@@ -898,8 +943,12 @@ export interface ApiResponseSpotRecordResponse {
  * 스팟 기록 사진 업로드 multipart form
  */
 export interface SpotRecordPhotoUploadForm {
-  /** 업로드할 이미지 파일들 (jpeg/png/webp, 1~5장, 단일 파일 최대 10MB) */
-  images: Blob;
+  /**
+     * 업로드할 이미지 파일들 (jpeg/png/webp, 1~5장, 단일 파일 최대 10MB)
+     * @minItems 1
+     * @maxItems 5
+     */
+  images: Blob[];
 }
 
 /**
@@ -1065,7 +1114,9 @@ export const BloomCategory = {
   AZALEA: 'AZALEA',
   HYDRANGEA: 'HYDRANGEA',
   LOTUS: 'LOTUS',
+  SUNFLOWER: 'SUNFLOWER',
   COSMOS: 'COSMOS',
+  CHRYSANTHEMUM: 'CHRYSANTHEMUM',
   PINK_MUHLY: 'PINK_MUHLY',
   SILVERGRASS: 'SILVERGRASS',
   MAPLE: 'MAPLE',
@@ -1136,7 +1187,9 @@ export const CategoryChipCategory = {
   AZALEA: 'AZALEA',
   HYDRANGEA: 'HYDRANGEA',
   LOTUS: 'LOTUS',
+  SUNFLOWER: 'SUNFLOWER',
   COSMOS: 'COSMOS',
+  CHRYSANTHEMUM: 'CHRYSANTHEMUM',
   PINK_MUHLY: 'PINK_MUHLY',
   SILVERGRASS: 'SILVERGRASS',
   MAPLE: 'MAPLE',
@@ -1301,27 +1354,6 @@ export interface ApiResponsePlantResponse {
   data?: PlantResponse | null;
 }
 
-/**
- * 리액션 타입
- */
-export type ReactionCountReactionType = typeof ReactionCountReactionType[keyof typeof ReactionCountReactionType];
-
-
-export const ReactionCountReactionType = {
-  HEART: 'HEART',
-  SMILE: 'SMILE',
-} as const;
-
-/**
- * 리액션 타입별 집계 1건
- */
-export interface ReactionCount {
-  /** 리액션 타입 */
-  reactionType: ReactionCountReactionType;
-  /** 개수 */
-  count: number;
-}
-
 export type FeedReactionSummaryResponseMyReactionsItem = typeof FeedReactionSummaryResponseMyReactionsItem[keyof typeof FeedReactionSummaryResponseMyReactionsItem];
 
 
@@ -1401,7 +1433,9 @@ export const SignupCompleteRequestFavoriteCategoriesItem = {
   AZALEA: 'AZALEA',
   HYDRANGEA: 'HYDRANGEA',
   LOTUS: 'LOTUS',
+  SUNFLOWER: 'SUNFLOWER',
   COSMOS: 'COSMOS',
+  CHRYSANTHEMUM: 'CHRYSANTHEMUM',
   PINK_MUHLY: 'PINK_MUHLY',
   SILVERGRASS: 'SILVERGRASS',
   MAPLE: 'MAPLE',
@@ -1695,7 +1729,9 @@ export const UpdatePlantRequestBloomCategory = {
   AZALEA: 'AZALEA',
   HYDRANGEA: 'HYDRANGEA',
   LOTUS: 'LOTUS',
+  SUNFLOWER: 'SUNFLOWER',
   COSMOS: 'COSMOS',
+  CHRYSANTHEMUM: 'CHRYSANTHEMUM',
   PINK_MUHLY: 'PINK_MUHLY',
   SILVERGRASS: 'SILVERGRASS',
   MAPLE: 'MAPLE',
@@ -1773,7 +1809,9 @@ export const PlantAdminResponseBloomCategory = {
   AZALEA: 'AZALEA',
   HYDRANGEA: 'HYDRANGEA',
   LOTUS: 'LOTUS',
+  SUNFLOWER: 'SUNFLOWER',
   COSMOS: 'COSMOS',
+  CHRYSANTHEMUM: 'CHRYSANTHEMUM',
   PINK_MUHLY: 'PINK_MUHLY',
   SILVERGRASS: 'SILVERGRASS',
   MAPLE: 'MAPLE',
@@ -1991,6 +2029,8 @@ export interface SpotRecordSummaryResponse {
   publishedAt?: string | null;
   createdAt: string;
   updatedAt: string;
+  /** 리액션 요약 */
+  reactions: ReactionSummary;
 }
 
 /**
@@ -2014,6 +2054,8 @@ export interface UserProfileResponse {
   recordPreview: SpotRecordSummaryResponse[];
   /** 현재 로그인 사용자가 이 사용자를 팔로우 중인지 여부. 본인 프로필이면 항상 false. */
   following: boolean;
+  /** 현재 로그인 사용자가 이 사용자를 차단 중인지 여부. 본인 프로필이면 항상 false. */
+  blocked: boolean;
 }
 
 /**
@@ -2137,7 +2179,9 @@ export const BloomBannerCategory = {
   AZALEA: 'AZALEA',
   HYDRANGEA: 'HYDRANGEA',
   LOTUS: 'LOTUS',
+  SUNFLOWER: 'SUNFLOWER',
   COSMOS: 'COSMOS',
+  CHRYSANTHEMUM: 'CHRYSANTHEMUM',
   PINK_MUHLY: 'PINK_MUHLY',
   SILVERGRASS: 'SILVERGRASS',
   MAPLE: 'MAPLE',
@@ -2306,7 +2350,9 @@ export const BloomBadgeCategory = {
   AZALEA: 'AZALEA',
   HYDRANGEA: 'HYDRANGEA',
   LOTUS: 'LOTUS',
+  SUNFLOWER: 'SUNFLOWER',
   COSMOS: 'COSMOS',
+  CHRYSANTHEMUM: 'CHRYSANTHEMUM',
   PINK_MUHLY: 'PINK_MUHLY',
   SILVERGRASS: 'SILVERGRASS',
   MAPLE: 'MAPLE',
@@ -2314,7 +2360,7 @@ export const BloomBadgeCategory = {
 } as const;
 
 /**
- * 현재 상태 (PREPARING/STARTED/PEAK)
+ * PREPARING/STARTED/PEAK 중 하나. ENDED 는 이 응답에서 제외된다
  */
 export type BloomBadgeStatus = typeof BloomBadgeStatus[keyof typeof BloomBadgeStatus];
 
@@ -2334,8 +2380,13 @@ export interface BloomBadge {
   category: BloomBadgeCategory;
   /** 카테고리 표시명 */
   displayName: string;
-  /** 현재 상태 (PREPARING/STARTED/PEAK) */
+  /** PREPARING/STARTED/PEAK 중 하나. ENDED 는 이 응답에서 제외된다 */
   status: BloomBadgeStatus;
+  /**
+     * 절정 지속일 (양 끝 포함). 날짜가 없으면 null
+     * @nullable
+     */
+  peakDurationDays?: number | null;
 }
 
 /**
@@ -2359,6 +2410,21 @@ export interface SpotPreviewItem {
      * @nullable
      */
   distanceMeters?: number | null;
+  /**
+     * 스팟 주소 (없으면 null)
+     * @nullable
+     */
+  address?: string | null;
+  /** 현재 사용자의 찜 여부 */
+  favorited: boolean;
+  /** 현재 사용자의 알림 활성화 여부 */
+  notifyEnabled: boolean;
+  /** 최근 게시 방문 기록 사진 URL (최대 4장) */
+  photoUrls: string[];
+  /** 게시된 방문 기록 수 */
+  recordCount: number;
+  /** 개화 신호 뱃지 목록 */
+  badges: BloomBadge[];
 }
 
 /**
@@ -2432,7 +2498,9 @@ export const BloomSlotCategory = {
   AZALEA: 'AZALEA',
   HYDRANGEA: 'HYDRANGEA',
   LOTUS: 'LOTUS',
+  SUNFLOWER: 'SUNFLOWER',
   COSMOS: 'COSMOS',
+  CHRYSANTHEMUM: 'CHRYSANTHEMUM',
   PINK_MUHLY: 'PINK_MUHLY',
   SILVERGRASS: 'SILVERGRASS',
   MAPLE: 'MAPLE',
@@ -2568,7 +2636,9 @@ export const BloomPeakItemCategory = {
   AZALEA: 'AZALEA',
   HYDRANGEA: 'HYDRANGEA',
   LOTUS: 'LOTUS',
+  SUNFLOWER: 'SUNFLOWER',
   COSMOS: 'COSMOS',
+  CHRYSANTHEMUM: 'CHRYSANTHEMUM',
   PINK_MUHLY: 'PINK_MUHLY',
   SILVERGRASS: 'SILVERGRASS',
   MAPLE: 'MAPLE',
@@ -2659,7 +2729,9 @@ export const BloomCalendarResponseCategory = {
   AZALEA: 'AZALEA',
   HYDRANGEA: 'HYDRANGEA',
   LOTUS: 'LOTUS',
+  SUNFLOWER: 'SUNFLOWER',
   COSMOS: 'COSMOS',
+  CHRYSANTHEMUM: 'CHRYSANTHEMUM',
   PINK_MUHLY: 'PINK_MUHLY',
   SILVERGRASS: 'SILVERGRASS',
   MAPLE: 'MAPLE',
@@ -2744,6 +2816,12 @@ export interface UserSearchItem {
      * @nullable
      */
   profileImageUrl?: string | null;
+  /** 현재 사용자가 팔로우 중인지 여부 */
+  following: boolean;
+  /** 게시된 기록 수 */
+  recordCount: number;
+  /** 팔로워 수 */
+  followerCount: number;
 }
 
 /**
@@ -2857,6 +2935,16 @@ export interface SpotSearchItem {
   latitude: number;
   /** 경도 */
   longitude: number;
+  /**
+     * 대표 이미지 URL. 명소 대표 이미지가 없으면 최근 게시 기록 사진, 없으면 null
+     * @nullable
+     */
+  thumbnailUrl?: string | null;
+  bloom?: BloomBadge | null;
+  /** 현재 사용자가 찜한 스팟인지 여부 */
+  favorited: boolean;
+  /** 현재 사용자의 찜 알림 활성화 여부 */
+  notifyEnabled: boolean;
 }
 
 /**
@@ -2946,15 +3034,20 @@ export interface NotificationResponse {
   /** 탭 시 이동 방식 */
   linkType: NotificationResponseLinkType;
   /**
-     * EXTERNAL 일 때 이동할 외부 링크
+     * EXTERNAL 일 때 이동할 외부 링크. INTERNAL 일 때는 사용하지 않는다. 프론트가 type + targetId 로 경로를 조합한다.
      * @nullable
      */
   linkUrl?: string | null;
   /**
-     * INTERNAL 일 때 이동 대상 id (팔로워 id·기록 id·스팟 id 등)
+     * 타입별 이동 대상 id. TIMING은 spotId, FOLLOW는 팔로우한 사람의 userId, REACTION은 recordId, NOTICE는 관리자가 지정한 값이다.
      * @nullable
      */
   targetId?: number | null;
+  /**
+     * FOLLOW/REACTION 알림 행위자의 프로필 이미지 URL. TIMING/NOTICE는 null이다.
+     * @nullable
+     */
+  imageUrl?: string | null;
   /** 읽음 여부 */
   read: boolean;
   /** 생성 시각 */
@@ -3029,7 +3122,9 @@ export const HomeSuggestionResponseCategory = {
   AZALEA: 'AZALEA',
   HYDRANGEA: 'HYDRANGEA',
   LOTUS: 'LOTUS',
+  SUNFLOWER: 'SUNFLOWER',
   COSMOS: 'COSMOS',
+  CHRYSANTHEMUM: 'CHRYSANTHEMUM',
   PINK_MUHLY: 'PINK_MUHLY',
   SILVERGRASS: 'SILVERGRASS',
   MAPLE: 'MAPLE',
@@ -3103,7 +3198,9 @@ export const FestivalDetailResponseCategory = {
   AZALEA: 'AZALEA',
   HYDRANGEA: 'HYDRANGEA',
   LOTUS: 'LOTUS',
+  SUNFLOWER: 'SUNFLOWER',
   COSMOS: 'COSMOS',
+  CHRYSANTHEMUM: 'CHRYSANTHEMUM',
   PINK_MUHLY: 'PINK_MUHLY',
   SILVERGRASS: 'SILVERGRASS',
   MAPLE: 'MAPLE',
@@ -3272,7 +3369,6 @@ export interface FestivalDetailResponse {
      */
   endsInDays?: number | null;
   editorial?: FestivalEditorialResponse | null;
-  dday?: number;
 }
 
 /**
@@ -3303,7 +3399,9 @@ export const ExploreSpotItemCategory = {
   AZALEA: 'AZALEA',
   HYDRANGEA: 'HYDRANGEA',
   LOTUS: 'LOTUS',
+  SUNFLOWER: 'SUNFLOWER',
   COSMOS: 'COSMOS',
+  CHRYSANTHEMUM: 'CHRYSANTHEMUM',
   PINK_MUHLY: 'PINK_MUHLY',
   SILVERGRASS: 'SILVERGRASS',
   MAPLE: 'MAPLE',
@@ -3328,7 +3426,7 @@ export const ExploreSpotItemStatus = {
  */
 export interface ExploreSpotItem {
   /**
-     * 명소형 스팟 id. 아직 생성되지 않았거나 비노출이면 null
+     * 명소형 스팟 id. 정상 데이터에서는 항상 채워진다. null이면 좌표를 보유하지 않아 스팟을 생성할 수 없는 명소다
      * @nullable
      */
   spotId?: number | null;
@@ -3395,11 +3493,26 @@ export const ExploreFestivalItemCategory = {
   AZALEA: 'AZALEA',
   HYDRANGEA: 'HYDRANGEA',
   LOTUS: 'LOTUS',
+  SUNFLOWER: 'SUNFLOWER',
   COSMOS: 'COSMOS',
+  CHRYSANTHEMUM: 'CHRYSANTHEMUM',
   PINK_MUHLY: 'PINK_MUHLY',
   SILVERGRASS: 'SILVERGRASS',
   MAPLE: 'MAPLE',
   CAMELLIA: 'CAMELLIA',
+} as const;
+
+/**
+ * 축제 상태
+ */
+export type ExploreFestivalItemPhase = typeof ExploreFestivalItemPhase[keyof typeof ExploreFestivalItemPhase];
+
+
+export const ExploreFestivalItemPhase = {
+  UPCOMING: 'UPCOMING',
+  ONGOING: 'ONGOING',
+  ENDING_SOON: 'ENDING_SOON',
+  ENDED: 'ENDED',
 } as const;
 
 /**
@@ -3448,6 +3561,13 @@ export interface ExploreFestivalItem {
      * @nullable
      */
   homepageUrl?: string | null;
+  /**
+     * 축제 카드 배경 이미지 URL. 발행 에디토리얼 hero 이미지가 우선된다
+     * @nullable
+     */
+  thumbnailUrl?: string | null;
+  /** 축제 상태 */
+  phase: ExploreFestivalItemPhase;
 }
 
 /**
@@ -3804,7 +3924,9 @@ export const UserInfoResponseFavoriteCategoriesItem = {
   AZALEA: 'AZALEA',
   HYDRANGEA: 'HYDRANGEA',
   LOTUS: 'LOTUS',
+  SUNFLOWER: 'SUNFLOWER',
   COSMOS: 'COSMOS',
+  CHRYSANTHEMUM: 'CHRYSANTHEMUM',
   PINK_MUHLY: 'PINK_MUHLY',
   SILVERGRASS: 'SILVERGRASS',
   MAPLE: 'MAPLE',
@@ -4169,6 +4291,89 @@ export interface ApiResponsePageResponseNoticeResponse {
   /** 사람이 읽는 메시지 */
   message: string;
   data?: PageResponseNoticeResponse | null;
+}
+
+/**
+ * 취득경로
+ */
+export type LocationUsageLogResponseChannel = typeof LocationUsageLogResponseChannel[keyof typeof LocationUsageLogResponseChannel];
+
+
+export const LocationUsageLogResponseChannel = {
+  ANDROID: 'ANDROID',
+  IOS: 'IOS',
+  WEB: 'WEB',
+  UNKNOWN: 'UNKNOWN',
+} as const;
+
+/**
+ * 제공서비스
+ */
+export type LocationUsageLogResponseService = typeof LocationUsageLogResponseService[keyof typeof LocationUsageLogResponseService];
+
+
+export const LocationUsageLogResponseService = {
+  BLOOM_MAP: 'BLOOM_MAP',
+  CURATION_DETAIL: 'CURATION_DETAIL',
+  SPOT_MATCH: 'SPOT_MATCH',
+  SPOT_PREVIEW: 'SPOT_PREVIEW',
+} as const;
+
+/**
+ * 위치정보 이용·제공사실 확인자료 1건
+ */
+export interface LocationUsageLogResponse {
+  /** 확인자료 id */
+  id: number;
+  /** 대상 사용자 id */
+  userId: number;
+  /**
+     * 대상 사용자 이메일. 이메일이 없거나 탈퇴한 계정은 null
+     * @nullable
+     */
+  email?: string | null;
+  /**
+     * 대상 사용자 닉네임. 조회 시점에 계정이 없으면 null
+     * @nullable
+     */
+  nickname?: string | null;
+  /** 취득경로 */
+  channel: LocationUsageLogResponseChannel;
+  /** 제공서비스 */
+  service: LocationUsageLogResponseService;
+  /** 이용일시 */
+  usedAt: string;
+}
+
+/**
+ * 공통 페이지 응답 (0-based)
+ */
+export interface PageResponseLocationUsageLogResponse {
+  /** 현재 페이지의 항목 리스트 */
+  content: LocationUsageLogResponse[];
+  /** 0-based 현재 페이지 */
+  page: number;
+  /** 페이지 크기 */
+  size: number;
+  /** 전체 항목 수 */
+  totalElements: number;
+  /** 전체 페이지 수 */
+  totalPages: number;
+  /** 다음 페이지 존재 여부 */
+  hasNext: boolean;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponsePageResponseLocationUsageLogResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: PageResponseLocationUsageLogResponse | null;
 }
 
 /**
@@ -5003,9 +5208,17 @@ export type GetSpotsPreviewParams = {
  */
 spotIds: number[];
 /**
- * 꽃 카테고리 필터 (생략 시 각 스팟의 대표 단계)
+ * 꽃 카테고리 단일 필터. categories 와 함께 전달하면 두 파라미터의 합집합으로 필터링한다.
  */
 category?: GetSpotsPreviewCategory;
+/**
+ * 꽃 카테고리 반복 필터. category 와 함께 전달하면 두 파라미터의 합집합으로 필터링한다.
+ */
+categories?: GetSpotsPreviewCategoriesItem[];
+/**
+ * 지금 상태 필터 (PEAK=절정, STARTED=피기시작, PREPARING=이르다)
+ */
+status?: GetSpotsPreviewStatus;
 /**
  * 거리 계산 기준 위도 (lng 과 함께 생략 가능)
  */
@@ -5028,11 +5241,44 @@ export const GetSpotsPreviewCategory = {
   AZALEA: 'AZALEA',
   HYDRANGEA: 'HYDRANGEA',
   LOTUS: 'LOTUS',
+  SUNFLOWER: 'SUNFLOWER',
   COSMOS: 'COSMOS',
+  CHRYSANTHEMUM: 'CHRYSANTHEMUM',
   PINK_MUHLY: 'PINK_MUHLY',
   SILVERGRASS: 'SILVERGRASS',
   MAPLE: 'MAPLE',
   CAMELLIA: 'CAMELLIA',
+} as const;
+
+export type GetSpotsPreviewCategoriesItem = typeof GetSpotsPreviewCategoriesItem[keyof typeof GetSpotsPreviewCategoriesItem];
+
+
+export const GetSpotsPreviewCategoriesItem = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  SUNFLOWER: 'SUNFLOWER',
+  COSMOS: 'COSMOS',
+  CHRYSANTHEMUM: 'CHRYSANTHEMUM',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
+} as const;
+
+export type GetSpotsPreviewStatus = typeof GetSpotsPreviewStatus[keyof typeof GetSpotsPreviewStatus];
+
+
+export const GetSpotsPreviewStatus = {
+  PREPARING: 'PREPARING',
+  STARTED: 'STARTED',
+  PEAK: 'PEAK',
+  ENDED: 'ENDED',
 } as const;
 
 export type GetSeasonalBloomsParams = {
@@ -5057,7 +5303,19 @@ maxLng: number;
  */
 category?: GetSeasonalBloomsCategory;
 /**
- * 방문예정일 (생략 시 오늘 기준). 명소형 핀 상태를 해당일 기준으로 재계산한다. 동네형은 최근 관측값 유지.
+ * 꽃 카테고리 반복 필터. category 와 함께 지정하면 합집합으로 처리한다.
+ */
+categories?: GetSeasonalBloomsCategoriesItem[];
+/**
+ * 개화 상태 필터. 명소형 추정과 동네형 최근 관측에 동일하게 적용한다.
+ */
+status?: GetSeasonalBloomsStatus;
+/**
+ * 단일 권역 필터. bbox 와 AND 로 적용한다. 동네형은 주소 첫 토큰으로 판정하며, 판정 불가 시 제외한다.
+ */
+region?: GetSeasonalBloomsRegion;
+/**
+ * 방문예정일 (생략 시 오늘 기준). 명소형 핀 상태를 해당일 기준으로 재계산한다. 동네형은 최근 관측값 유지. 필터 UI 의 시기 탭은 status 를 쓴다. date 는 방문예정일 기반 재계산용이며, 동네형은 최근 관측값을 유지하므로 미래 날짜에서는 두 기준이 섞인다.
  */
 date?: string;
 };
@@ -5074,11 +5332,56 @@ export const GetSeasonalBloomsCategory = {
   AZALEA: 'AZALEA',
   HYDRANGEA: 'HYDRANGEA',
   LOTUS: 'LOTUS',
+  SUNFLOWER: 'SUNFLOWER',
   COSMOS: 'COSMOS',
+  CHRYSANTHEMUM: 'CHRYSANTHEMUM',
   PINK_MUHLY: 'PINK_MUHLY',
   SILVERGRASS: 'SILVERGRASS',
   MAPLE: 'MAPLE',
   CAMELLIA: 'CAMELLIA',
+} as const;
+
+export type GetSeasonalBloomsCategoriesItem = typeof GetSeasonalBloomsCategoriesItem[keyof typeof GetSeasonalBloomsCategoriesItem];
+
+
+export const GetSeasonalBloomsCategoriesItem = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  SUNFLOWER: 'SUNFLOWER',
+  COSMOS: 'COSMOS',
+  CHRYSANTHEMUM: 'CHRYSANTHEMUM',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
+} as const;
+
+export type GetSeasonalBloomsStatus = typeof GetSeasonalBloomsStatus[keyof typeof GetSeasonalBloomsStatus];
+
+
+export const GetSeasonalBloomsStatus = {
+  PREPARING: 'PREPARING',
+  STARTED: 'STARTED',
+  PEAK: 'PEAK',
+  ENDED: 'ENDED',
+} as const;
+
+export type GetSeasonalBloomsRegion = typeof GetSeasonalBloomsRegion[keyof typeof GetSeasonalBloomsRegion];
+
+
+export const GetSeasonalBloomsRegion = {
+  CAPITAL: 'CAPITAL',
+  GANGWON: 'GANGWON',
+  CHUNGCHEONG: 'CHUNGCHEONG',
+  GYEONGSANG: 'GYEONGSANG',
+  JEOLLA: 'JEOLLA',
+  JEJU: 'JEJU',
 } as const;
 
 export type GetSeasonalBloomsPeakParams = {
@@ -5100,7 +5403,9 @@ export const GetSeasonalBloomsPeakCategory = {
   AZALEA: 'AZALEA',
   HYDRANGEA: 'HYDRANGEA',
   LOTUS: 'LOTUS',
+  SUNFLOWER: 'SUNFLOWER',
   COSMOS: 'COSMOS',
+  CHRYSANTHEMUM: 'CHRYSANTHEMUM',
   PINK_MUHLY: 'PINK_MUHLY',
   SILVERGRASS: 'SILVERGRASS',
   MAPLE: 'MAPLE',
@@ -5130,7 +5435,9 @@ export const GetSeasonalBloomsCalendarCategory = {
   AZALEA: 'AZALEA',
   HYDRANGEA: 'HYDRANGEA',
   LOTUS: 'LOTUS',
+  SUNFLOWER: 'SUNFLOWER',
   COSMOS: 'COSMOS',
+  CHRYSANTHEMUM: 'CHRYSANTHEMUM',
   PINK_MUHLY: 'PINK_MUHLY',
   SILVERGRASS: 'SILVERGRASS',
   MAPLE: 'MAPLE',
@@ -5150,8 +5457,33 @@ export type GetSearchSpotsParams = {
  * 검색어
  */
 q: string;
+/**
+ * 개화 신호가 있는 꽃 카테고리로 결과를 제한한다
+ */
+category?: GetSearchSpotsCategory;
 pageRequest: PageRequest;
 };
+
+export type GetSearchSpotsCategory = typeof GetSearchSpotsCategory[keyof typeof GetSearchSpotsCategory];
+
+
+export const GetSearchSpotsCategory = {
+  PLUM: 'PLUM',
+  FORSYTHIA: 'FORSYTHIA',
+  AZALEA_KR: 'AZALEA_KR',
+  CHERRY: 'CHERRY',
+  CANOLA: 'CANOLA',
+  AZALEA: 'AZALEA',
+  HYDRANGEA: 'HYDRANGEA',
+  LOTUS: 'LOTUS',
+  SUNFLOWER: 'SUNFLOWER',
+  COSMOS: 'COSMOS',
+  CHRYSANTHEMUM: 'CHRYSANTHEMUM',
+  PINK_MUHLY: 'PINK_MUHLY',
+  SILVERGRASS: 'SILVERGRASS',
+  MAPLE: 'MAPLE',
+  CAMELLIA: 'CAMELLIA',
+} as const;
 
 export type GetPlantsSearchParams = {
 keyword: string;
@@ -5211,7 +5543,9 @@ export const GetExploreCategory = {
   AZALEA: 'AZALEA',
   HYDRANGEA: 'HYDRANGEA',
   LOTUS: 'LOTUS',
+  SUNFLOWER: 'SUNFLOWER',
   COSMOS: 'COSMOS',
+  CHRYSANTHEMUM: 'CHRYSANTHEMUM',
   PINK_MUHLY: 'PINK_MUHLY',
   SILVERGRASS: 'SILVERGRASS',
   MAPLE: 'MAPLE',
@@ -5250,7 +5584,9 @@ export const GetExploreSpotsCategory = {
   AZALEA: 'AZALEA',
   HYDRANGEA: 'HYDRANGEA',
   LOTUS: 'LOTUS',
+  SUNFLOWER: 'SUNFLOWER',
   COSMOS: 'COSMOS',
+  CHRYSANTHEMUM: 'CHRYSANTHEMUM',
   PINK_MUHLY: 'PINK_MUHLY',
   SILVERGRASS: 'SILVERGRASS',
   MAPLE: 'MAPLE',
@@ -5276,7 +5612,9 @@ export const GetExploreFestivalsCategory = {
   AZALEA: 'AZALEA',
   HYDRANGEA: 'HYDRANGEA',
   LOTUS: 'LOTUS',
+  SUNFLOWER: 'SUNFLOWER',
   COSMOS: 'COSMOS',
+  CHRYSANTHEMUM: 'CHRYSANTHEMUM',
   PINK_MUHLY: 'PINK_MUHLY',
   SILVERGRASS: 'SILVERGRASS',
   MAPLE: 'MAPLE',
@@ -5374,6 +5712,36 @@ export const GetAdminPlantsStatus = {
   ACTIVE: 'ACTIVE',
   PENDING: 'PENDING',
   REJECTED: 'REJECTED',
+} as const;
+
+export type GetAdminLocationUsageLogsParams = {
+/**
+ * 대상 사용자 이메일 검색어 (부분일치)
+ */
+email?: string;
+/**
+ * 제공서비스 필터 (생략 시 전체)
+ */
+service?: GetAdminLocationUsageLogsService;
+/**
+ * 이용일시 시작 (이 시각 이후)
+ */
+from?: string;
+/**
+ * 이용일시 종료 (이 시각 이전)
+ */
+to?: string;
+pageRequest: PageRequest;
+};
+
+export type GetAdminLocationUsageLogsService = typeof GetAdminLocationUsageLogsService[keyof typeof GetAdminLocationUsageLogsService];
+
+
+export const GetAdminLocationUsageLogsService = {
+  BLOOM_MAP: 'BLOOM_MAP',
+  CURATION_DETAIL: 'CURATION_DETAIL',
+  SPOT_MATCH: 'SPOT_MATCH',
+  SPOT_PREVIEW: 'SPOT_PREVIEW',
 } as const;
 
 export type GetAdminJobsRunsParams = {

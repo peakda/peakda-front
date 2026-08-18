@@ -361,7 +361,7 @@ export const getPostSpotsRecordsPhotosUrl = () => {
  */
 export const postSpotsRecordsPhotos = async (spotRecordPhotoUploadForm: SpotRecordPhotoUploadForm, options?: RequestInit): Promise<postSpotsRecordsPhotosResponse> => {
     const formData = new FormData();
-formData.append(`images`, spotRecordPhotoUploadForm.images);
+spotRecordPhotoUploadForm.images.forEach(value => formData.append(`images`, value));
 
   return customInstance<postSpotsRecordsPhotosResponse>(getPostSpotsRecordsPhotosUrl(),
   {
