@@ -4,13 +4,12 @@ import { MultiImageProps } from '@/types/types'
 import { cn } from '@/lib/utils/cn'
 
 export function PinList(props: MultiImageProps) {
-  const { title, location, description, Badges, badgeIcon, isFavorite, tagText, type } = props
+  const { title, location, description, badges, isFavorite, tagText, type } = props
 
   return (
     <div className="flex w-full flex-col border-b border-gray-100">
       <PinText
-        Badges={Badges}
-        badgeIcon={badgeIcon}
+        badges={badges}
         description={description}
         isFavorite={isFavorite}
         location={location}
@@ -19,7 +18,7 @@ export function PinList(props: MultiImageProps) {
         variant={type}
       />
 
-      <div className="grid grid-cols-3 gap-2 px-4 pb-4">
+      <div className="grid grid-cols-4 gap-2 px-4 pb-4">
         {props.images.map((src, idx) => (
           <div
             key={idx}
@@ -30,7 +29,7 @@ export function PinList(props: MultiImageProps) {
                 src={src}
                 alt={`${title}-${idx}`}
                 fill
-                sizes="(max-width: 430px) 33vw, 130px"
+                sizes="(max-width: 430px) 25vw, 100px"
                 className="object-cover"
               />
             )}
