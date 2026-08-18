@@ -154,13 +154,15 @@ function RecordPageContent() {
     if (!selectedSpot || selectedStatus === '') return
 
     try {
-      const photoKeys: string[] = []
-      for (const item of photoItems) {
-        const res = await uploadPhotos.mutateAsync({ data: { images: item.file } })
-        const key = res.data.data?.photos[0]?.objectKey
-        // 한 장이라도 키를 못 받으면 사진이 빠진 채 기록이 생성되므로 전체를 중단한다.
-        if (!key) throw new Error('사진 업로드 응답에 objectKey 가 없습니다')
-        photoKeys.push(key)
+      // 서버가 한 요청에 1~5장을 받는다. 장당 한 번씩 보내면 모바일 네트워크에서
+      // 실패 지점이 장수만큼 늘어나므로 한 번에 올린다(업로드 순서 = 응답 순서).
+      const res = await uploadPhotos.mutateAsync({
+        data: { images: photoItems.map((item) => item.file) },
+      })
+      const photoKeys = (res.data.data?.photos ?? []).map((photo) => photo.objectKey)
+      // 한 장이라도 키를 못 받으면 사진이 빠진 채 기록이 생성되므로 전체를 중단한다.
+      if (photoKeys.length !== photoItems.length) {
+        throw new Error('사진 업로드 응답의 개수가 요청과 다릅니다')
       }
 
       const payload: CreateSpotRecordRequest = {
