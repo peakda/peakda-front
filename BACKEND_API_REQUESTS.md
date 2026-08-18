@@ -1,12 +1,63 @@
 # Peakda 백엔드 API 요청 사항
 
-> **작성일**: 2026-08-10 · **기준 스펙**: PEAKDA API v1 (`swagger.json`, Develop: `https://peakda-dev.up.railway.app`)
+> **작성일**: 2026-08-10 · **회신 반영**: 2026-08-18 · **기준 스펙**: PEAKDA API v1 (Develop: `https://api-dev.peakda.com`)
 >
 > 이 문서는 **백엔드 조치가 필요한 것만** 담습니다. 프론트 진행 상황이나 임시 처리 경위는 [API_CHANGE_REQUESTS.md](API_CHANGE_REQUESTS.md) 를 참고해 주세요.
 >
 > **필드 추가 요청은 모두 nullable 또는 기본값이 있어 기존 클라이언트를 깨지 않습니다.**
 
-## 요약
+---
+
+## ✅ 8/10 요청 13건은 모두 회신받아 종결되었습니다
+
+PR #70~#75 로 반영해 주신 내용을 프론트에 모두 연동했습니다. 감사합니다.
+아래 본문은 **요청 당시 원문**이며 기록용으로 남겨둡니다. 현재 상태는 이 절만 보시면 됩니다.
+
+| 처리 | 항목 |
+|---|---|
+| 반영 완료 | 1 · 2 · 3 · 4 · 5 · 6 · 7 · 10 · 11 · 12 · 13 |
+| 미반영(합의) | 8 (축제 문의처 — 디자인에 표시 영역이 없어 불필요) |
+| 일부 대기 | 9 (미연동 엔드포인트 — 아래 참고) |
+
+### 새로 확인 부탁드리는 것 3가지
+
+**1. `categories` 를 탐색 엔드포인트에도 넣어주실 수 있을까요? (12번 후속)**
+
+`GET /api/seasonal/blooms` 와 `GET /api/spots/preview` 에는 넣어주셨는데, 탐색 3개에는 단일 `category` 만 있습니다.
+
+```
+GET /api/explore            category → + categories?: enum[]
+GET /api/explore/spots      category → + categories?: enum[]
+GET /api/explore/festivals  category → + categories?: enum[]
+```
+
+필터 드로어는 꽃 복수 선택이라, 지금 탐색 화면은 **고른 것 중 첫 번째만** 보내고 있습니다. 지도는 클라이언트에서 걸러 전부 반영하는데 탐색은 하나만 반영돼, **같은 필터 UI인데 화면마다 결과가 다릅니다.** 급하지는 않습니다.
+
+**2. 권역 `displayName` · `subtitle` 은 어디서 받나요? (5번 관련)**
+
+회신에 "`displayName` 과 `subtitle` 도 응답하므로 프론트 하드코딩은 제거할 수 있다"고 적어주셨는데, 재생성한 스펙에서 **권역 목록을 주는 엔드포인트도 `Region` 응답 스키마도 찾지 못했습니다.** `GetSeasonalBloomsRegion` 은 요청 파라미터 enum 뿐입니다.
+
+일단 프론트에 라벨을 그대로 두었습니다. 응답이 있다면 경로를 알려주시고, 없다면 이대로 두겠습니다.
+
+**3. `spotId` 백필이 실제로 완료됐는지 확인 부탁드립니다 (4번 관련)**
+
+A안으로 알려주셔서 `spotId == null` 분기와 `POST /api/spots/match` 호출을 **모두 제거**했습니다. 다만 회신에 적힌 "관리자 트리거 백필 작업" 엔드포인트가 스펙에 없어 저희 쪽에서는 확인할 방법이 없었습니다.
+
+타입이 `Long?` 로 남아 있어, 만약 `null` 이 내려오면 프론트가 잘못된 경로로 이동합니다. **탐색·지도 응답에서 실제로 `spotId` 가 모두 채워졌는지** 확인해 주시면 감사하겠습니다.
+
+### 9번 중 아직 대기 중인 것
+
+| 엔드포인트 | 상태 |
+|---|---|
+| `GET /api/seasonal/blooms/peak` | 제거 여부 검토 결과 공유 부탁드립니다 |
+| `GET /api/users/{userId}/follow-summary` | 용도 확인 결과 공유 부탁드립니다 |
+| `GET /api/curations` | 큐레이션 목록 화면은 기획 확인 중입니다 |
+| `POST /api/spots/records/{id}/publish` | DRAFT 흐름 확정 시 알려주세요 |
+| `POST /api/devices` · `DELETE /api/devices/{token}` | 푸시 인프라 일정 잡히면 알려주세요 |
+
+---
+
+## 요약 *(2026-08-10 요청 당시 원문 — 아래는 모두 처리 완료)*
 
 | # | 우선순위 | 대상 | 요청 |
 |---|---|---|---|
