@@ -16,7 +16,7 @@ import { useMapCluster, type MapSpot } from '@/hooks/useMapPins'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import { hasActiveFilter, useFilterStore, type PinTypeFilter } from '@/stores/useFilterStore'
 import { filterMapSpots } from '@/lib/utils/mapFilter'
-import { isFutureTiming, timingToDate, timingToStatuses } from '@/lib/utils/timing'
+import { timingToStatus, timingToStatuses } from '@/lib/utils/timing'
 import { useBloomMap } from '@/api/facades/seasonal-bloom'
 import { useHomeSuggestion } from '@/api/facades/home'
 import { useUnreadNotificationCount } from '@/api/facades/notification'
@@ -133,11 +133,6 @@ export const MapContainer = () => {
   const setPinType = useFilterStore((s) => s.setPinType)
   const setVisibleSpots = useFilterStore((s) => s.setVisibleSpots)
 
-  // 방문예정일 조회는 명소형 핀만 재계산된다(동네형은 최근 관측값 유지 — 서버 스펙).
-  // 섞어서 보여주면 "그날 절정"이 아닌 동네 핀이 끼므로 명소형으로 고정한다.
-  const localUnavailable = isFutureTiming(applied.timing)
-  const effectivePinType = localUnavailable ? 'ATTRACTION' : pinType
-  const date = timingToDate(applied.timing)
   const statuses = useMemo(() => timingToStatuses(applied.timing), [applied.timing])
 
   const latParam = searchParams.get('lat')
@@ -148,21 +143,30 @@ export const MapContainer = () => {
     return lat != null && lng != null ? { lat, lng } : null
   }, [latParam, lngParam])
 
-  // 서버로 나가는 건 bbox 와 방문예정일(date)뿐이다. 둘 다 applied 기준이라
+  // 서버로 나가는 건 bbox·개화상태(status)·권역(region)이다. 전부 applied 기준이라
   // 드로어에서 필터를 만지는 것만으로는 요청이 나가지 않는다.
-  // 꽃 종류는 서버 category 가 단일 값이라 복수 선택을 지원하려고 클라에서 거른다.
-  const bloomParams = useMemo(() => (bbox ? { ...bbox, date } : null), [bbox, date])
+  //
+  // 꽃 종류(categories)는 일부러 보내지 않는다. 서버가 걸러 주면 ①드로어 하단의
+  // 'N개의 명소 보기' 를 draft 기준으로 셀 수 없고 ②응답에서 안 고른 꽃이 빠져
+  // 핀 아이콘을 선택에 맞게 좁힐 수 없다. 대신 응답의 category 로 클라에서 거른다.
+  const bloomParams = useMemo(
+    () =>
+      bbox
+        ? { ...bbox, status: timingToStatus(applied.timing), region: applied.region ?? undefined }
+        : null,
+    [bbox, applied.timing, applied.region]
+  )
   const { data: bloomData, isPlaceholderData } = useBloomMap(bloomParams)
   const allSpots = useMemo(() => (bloomData ? bloomToMapSpots(bloomData) : []), [bloomData])
 
   const spots = useMemo(
     () =>
       filterMapSpots(allSpots, {
-        pinType: effectivePinType,
+        pinType,
         statuses,
         categories: applied.categories,
       }),
-    [allSpots, effectivePinType, statuses, applied.categories]
+    [allSpots, pinType, statuses, applied.categories]
   )
 
   // 꽃 종류는 클라 필터라 서버를 다녀오지 않고도 draft 기준 개수를 미리 셀 수 있다.
@@ -170,11 +174,11 @@ export const MapContainer = () => {
   const draftSpots = useMemo(
     () =>
       filterMapSpots(allSpots, {
-        pinType: effectivePinType,
+        pinType,
         statuses,
         categories: draftCategories,
       }),
-    [allSpots, effectivePinType, statuses, draftCategories]
+    [allSpots, pinType, statuses, draftCategories]
   )
 
   // 드로어의 'N개의 명소 보기' 버튼이 쓸 현재 화면의 필터 결과를 올려준다.
@@ -208,8 +212,7 @@ export const MapContainer = () => {
       // 어떤 조건으로 계산한 결과인지 함께 올린다. 드로어가 이걸로 최신 여부를 판단한다.
       appliedFor: applied,
     })
-    // applied 는 spots 에 반영되지만, 지역만 바뀌면(서버 파라미터가 없어 조회에 안 쓰임)
-    // spots 참조가 그대로라 재발행이 안 된다. 그래서 명시적으로 넣는다.
+    // 드로어가 "이 결과가 어떤 applied 기준인지" 를 참조 비교로 판단하므로 applied 를 함께 넣는다.
   }, [spots, draftSpots, mapInstance, isPlaceholderData, applied, setVisibleSpots])
 
   // 시즌 추천어(홈 검색바 보조 카피). 절정 데이터 없으면(available=false) 기본 문구로 폴백.
@@ -443,9 +446,7 @@ export const MapContainer = () => {
           <Category
             isMap
             categories={PIN_TYPE_LABELS}
-            value={PIN_TYPE_LABEL[effectivePinType]}
-            // 방문예정일 조회 중에는 동네형을 그날 기준으로 계산할 수 없어 고를 수 없다.
-            disabled={localUnavailable ? [PIN_TYPE_LABEL.ALL, PIN_TYPE_LABEL.LOCAL] : []}
+            value={PIN_TYPE_LABEL[pinType]}
             onChange={(label) => {
               const next = PIN_TYPES.find((type) => PIN_TYPE_LABEL[type] === label)
               if (next) setPinType(next)
