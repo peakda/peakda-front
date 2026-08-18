@@ -20,13 +20,11 @@ import { timingToStatus, timingToStatuses } from '@/lib/utils/timing'
 import { useBloomMap } from '@/api/facades/seasonal-bloom'
 import { useHomeSuggestion } from '@/api/facades/home'
 import { useUnreadNotificationCount } from '@/api/facades/notification'
-import { matchSpotApi, useSpotDetailFetcher } from '@/api/facades/spot'
+import { spotPreviewApi } from '@/api/facades/spot'
+import { toPinListItems } from '@/lib/utils/spotPreview'
 import { bloomToMapSpots } from '@/lib/utils/bloomToMapSpots'
 import { STAGE_LABEL } from '@/constants/map'
-import type {
-  BloomBadgeStatus,
-  GetSeasonalBloomsParams,
-} from '@/api/facades/generated/peakdaApi.schemas'
+import type { GetSeasonalBloomsParams } from '@/api/facades/generated/peakdaApi.schemas'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 const Drawer = dynamic(
@@ -54,13 +52,6 @@ const snapUp = (v: number) => Math.ceil(v * BBOX_GRID) / BBOX_GRID
 
 // 지도 정착 후 실제 조회까지의 지연. 연속 이동 중엔 마지막 정착만 조회한다.
 const BBOX_DEBOUNCE_MS = 1000
-
-const BADGE_STATUS_LABEL: Record<BloomBadgeStatus, string> = {
-  PREPARING: '개화 전',
-  STARTED: '개화 시작',
-  PEAK: '만개',
-  ENDED: '개화 종료',
-}
 
 // 상단 칩. 서버 파라미터가 없어 응답의 pin.type 으로 클라이언트에서 거른다.
 const PIN_TYPES: PinTypeFilter[] = ['ALL', 'ATTRACTION', 'LOCAL']
@@ -224,69 +215,31 @@ export const MapContainer = () => {
   const { data: unread } = useUnreadNotificationCount()
   const hasUnreadNotification = (unread?.unreadCount ?? 0) > 0
 
-  // 명소형 핀은 Spot 행이 아직 없어 spotId 가 없을 수 있다. 이때만 match 로 materialize 하고,
-  // POST(생성 부작용)라 좌표 기준으로 캐시해 같은 핀을 다시 눌러도 재호출하지 않는다.
-  const matchedSpotIdRef = useRef(new Map<string, number>())
-
-  const resolveSpotId = useCallback(async (spot: MapSpot) => {
-    if (spot.spotId != null) return spot.spotId
-
-    const cacheKey = `${spot.lat},${spot.lng}`
-    const cached = matchedSpotIdRef.current.get(cacheKey)
-    if (cached != null) return cached
-
-    const matched = await matchSpotApi({
-      latitude: spot.lat,
-      longitude: spot.lng,
-      name: spot.title ?? '이름 없는 명소',
-    })
-    const matchedId = matched?.spot?.id
-    if (matchedId != null) matchedSpotIdRef.current.set(cacheKey, matchedId)
-    return matchedId
-  }, [])
-
-  const fetchSpotDetail = useSpotDetailFetcher()
-
+  // 핀 하나든 필터 결과 목록이든 같은 preview API 로 채운다.
+  // 서버가 탐색·지도에 노출되는 명소의 Spot 행을 미리 만들어 주므로 spotId 가 사실상 항상 있고,
+  // 예전처럼 클릭 시 POST /api/spots/match 로 만들어 낼 필요가 없다.
   const handlePinClick = useCallback(
     async (spot: MapSpot) => {
       try {
-        const spotId = await resolveSpotId(spot)
-        const detail = spotId != null ? await fetchSpotDetail(spotId) : null
+        if (spot.spotId != null) {
+          const center = mapInstance?.getCenter()
+          const preview = await spotPreviewApi([spot.spotId], {
+            coords: center ? { lat: center.getLat(), lng: center.getLng() } : null,
+            categories: applied.categories,
+            status: timingToStatus(applied.timing),
+          })
+          const items = preview ? toPinListItems(preview.items) : []
 
-        if (detail) {
-          // 유저가 올린 사진(방문 기록 대표 사진, 최신순 최대 3건)을 리스트로 노출한다.
-          // 기록이 없으면 스팟 대표 이미지, 그것도 없으면 꽃 아이콘으로 내려간다.
-          const recordPhotos = detail.recordPreview
-            .map((record) => record.coverPhoto?.url)
-            .filter((url): url is string => !!url)
-          const images =
-            recordPhotos.length > 0
-              ? recordPhotos
-              : detail.representativeImageUrl
-                ? [detail.representativeImageUrl]
-                : spot.flowers.map((f) => f.src)
-
-          openPinDrawer([
-            {
-              type: 'list' as const,
-              title: detail.name,
-              location: detail.address ?? spot.title ?? '위치 정보 없음',
-              description: detail.bloom
-                ? `현재 ${BADGE_STATUS_LABEL[detail.bloom.status]} 상태입니다.`
-                : '',
-              Badges: detail.bloom ? [detail.bloom.displayName] : [],
-              isFavorite: detail.favorite.favorited,
-              images,
-              spotId: detail.id,
-            },
-          ])
-          return
+          if (items.length > 0) {
+            openPinDrawer(items)
+            return
+          }
         }
       } catch (e) {
         console.error(e)
       }
 
-      // 상세를 못 가져오면(비로그인·매칭 실패 등) 기존 개화 데이터로 폴백한다.
+      // 프리뷰를 못 가져오면(좌표만 있는 핀·비공개·네트워크 실패) 지도 개화 데이터로 폴백한다.
       openPinDrawer(
         spot.flowers.map((f) => ({
           type: 'list' as const,
@@ -300,7 +253,7 @@ export const MapContainer = () => {
         }))
       )
     },
-    [openPinDrawer, resolveSpotId, fetchSpotDetail]
+    [openPinDrawer, mapInstance, applied.categories, applied.timing]
   )
 
   useMapCluster(mapInstance, spots, handlePinClick)

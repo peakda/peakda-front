@@ -11,8 +11,8 @@ export const formatMonthDay = (iso: string) => {
   return m && d ? `${Number(m)}.${Number(d)}` : iso
 }
 
-// 명소만 있고 Spot 행이 아직 없으면 spotId 가 null 이다. attractionId 는 다른 키라
-// 상세 경로에 쓸 수 없으므로 null 그대로 넘겨 카드가 링크 없이 렌더되게 한다.
+// 서버가 탐색에 노출되는 명소의 Spot 행을 미리 만들어 주므로 spotId 는 실질적으로 항상 있다.
+// 좌표 없는 명소를 대비해 타입은 nullable 로 남아 있어 그대로 넘긴다.
 export const toExploreSpotProps = (item: ExploreSpotItem): SPOTProps => ({
   id: item.spotId ?? null,
   name: item.name,
