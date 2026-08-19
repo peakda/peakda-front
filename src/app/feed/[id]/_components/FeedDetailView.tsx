@@ -123,32 +123,26 @@ export function FeedDetailView({
         />
       </div>
 
-      {/* 작성자 + 방문일·상태 */}
-      <div className="flex flex-col gap-2 px-4">
-        <div className="flex items-center gap-2">
-          <Link href={`/users/${authorId}`}>
-            <IconBtn size="md" className="relative overflow-hidden">
-              {authorImageUrl ? (
-                <Image
-                  src={authorImageUrl}
-                  alt="프로필"
-                  fill
-                  className="object-cover"
-                  sizes="32px"
-                />
-              ) : (
-                <Image src="/icons/person.svg" alt="프로필" width={16} height={16} />
-              )}
-            </IconBtn>
-          </Link>
+      {/* 작성자 + 방문일·상태 (방문일 줄은 닉네임과 같은 열에 붙는다) */}
+      <div className="flex items-center gap-2 px-4">
+        <Link href={`/users/${authorId}`}>
+          <IconBtn size="md" className="relative overflow-hidden">
+            {authorImageUrl ? (
+              <Image src={authorImageUrl} alt="프로필" fill className="object-cover" sizes="32px" />
+            ) : (
+              <Image src="/icons/person.svg" alt="프로필" width={16} height={16} />
+            )}
+          </IconBtn>
+        </Link>
+        <div className="flex flex-col gap-1">
           <Link href={`/users/${authorId}`} className="flex items-center gap-2">
             <span className="text-text-primary text-sm font-semibold">{authorName}</span>
             <span className="text-text-quaternary text-xs">{timeAgo}</span>
           </Link>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-text-tertiary text-xs">{visitDate} 방문</span>
-          <CardBadge label={statusLabel} variant={statusVariant} />
+          <div className="flex items-center gap-1.5">
+            <span className="text-text-tertiary text-xs">{visitDate} 방문</span>
+            <CardBadge label={statusLabel} variant={statusVariant} />
+          </div>
         </div>
       </div>
 
