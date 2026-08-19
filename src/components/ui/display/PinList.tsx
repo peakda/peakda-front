@@ -4,7 +4,8 @@ import { MultiImageProps } from '@/types/types'
 import { cn } from '@/lib/utils/cn'
 
 export function PinList(props: MultiImageProps) {
-  const { title, location, description, badges, isFavorite, tagText, type } = props
+  const { title, location, description, badges, isFavorite, notifyEnabled, tagText, type, spotId } =
+    props
 
   return (
     <div className="flex w-full flex-col border-b border-gray-100">
@@ -12,6 +13,8 @@ export function PinList(props: MultiImageProps) {
         badges={badges}
         description={description}
         isFavorite={isFavorite}
+        notifyEnabled={notifyEnabled}
+        spotId={spotId}
         location={location}
         title={title}
         tag={tagText}
@@ -22,7 +25,10 @@ export function PinList(props: MultiImageProps) {
         {props.images.map((src, idx) => (
           <div
             key={idx}
-            className={cn('relative aspect-square overflow-hidden rounded-md', !src && 'bg-gray-100')}
+            className={cn(
+              'relative aspect-square overflow-hidden rounded-md',
+              !src && 'bg-gray-100'
+            )}
           >
             {src && (
               <Image

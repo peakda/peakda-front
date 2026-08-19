@@ -24,6 +24,7 @@ export function toPinListItems(items: SpotPreviewItem[]): MultiImageProps[] {
         icon: CATEGORY_ICON[badge.category],
       })),
       isFavorite: item.favorited,
+      notifyEnabled: item.notifyEnabled,
       images: item.photoUrls.slice(0, MAX_PHOTOS),
     }
   })

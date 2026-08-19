@@ -25,6 +25,7 @@ export const toSpotProps = (item: SpotSearchItem): SPOTProps => {
     // 식물 태그 자리가 비어 있어 명소/동네 구분을 대신 노출한다.
     nameList: typeLabel ? [typeLabel] : [],
     favorited: item.favorited,
+    notifyEnabled: item.notifyEnabled,
   }
 }
 

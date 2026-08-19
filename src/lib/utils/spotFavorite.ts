@@ -12,4 +12,7 @@ export const toFavoriteSpotProps = (fav: SpotFavoriteResponse): SPOTProps => ({
   imageUrl: fav.photoUrls[0] ?? null,
   ...toStatusBadge(fav.bloom?.status),
   nameList: fav.categories.map((category) => category.displayName),
+  // 찜 목록에서 온 항목이라 찜 상태는 항상 true 다.
+  favorited: true,
+  notifyEnabled: fav.notifyEnabled,
 })
