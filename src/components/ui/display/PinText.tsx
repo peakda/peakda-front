@@ -1,5 +1,8 @@
+'use client'
 import Image from 'next/image'
+import { useState } from 'react'
 import { HeartBtn } from '@/components/ui/button/HeartBtn'
+import { BellBtn } from '@/components/ui/button/BellBtn'
 import { Badge } from './Badge'
 import { Tag } from './Tag'
 import { IconBtn } from '@/components/ui/button/IconBtn'
@@ -14,6 +17,10 @@ interface PinTextProps {
   description: string
   badges: PinBadge[]
   isFavorite: boolean
+  // 개화 알림 on/off 초기값. 찜하지 않았으면 종은 어차피 비활성이다.
+  notifyEnabled?: boolean
+  // 찜/알림 API 호출 대상. 없으면 두 버튼 다 비활성된다.
+  spotId?: number
   tag?: string
   variant?: 'card' | 'list'
 }
@@ -24,9 +31,14 @@ export function PinText({
   description,
   badges = [],
   isFavorite = false,
+  notifyEnabled = false,
+  spotId,
   tag,
   variant = 'card',
 }: PinTextProps) {
+  // 알림은 찜에 종속이라, 이 자리에서 하트를 누르면 종도 같이 켜지고 꺼져야 한다.
+  const [favorited, setFavorited] = useState(isFavorite)
+
   return (
     <div className="flex-1 p-4">
       <div className="flex items-start justify-between">
@@ -44,14 +56,24 @@ export function PinText({
           </div>
         </div>
 
-        {/* 찜(좋아요) 버튼 */}
-        <div className="flex items-center gap-1">
+        {/* 찜/알림 버튼. 목록 행 전체가 상세로 가는 클릭 영역이라 버블링을 끊는다. */}
+        <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
           <IconBtn size="md">
-            <HeartBtn InitFavorite={isFavorite} className="h-5 w-5" />
+            <HeartBtn
+              InitFavorite={isFavorite}
+              spotId={spotId}
+              onToggle={setFavorited}
+              className="h-5 w-5"
+            />
           </IconBtn>
           {variant === 'list' && (
             <IconBtn size="md">
-              <Image src={'/icons/alram.svg'} alt="알람" width={20} height={20} />
+              <BellBtn
+                InitEnabled={notifyEnabled}
+                spotId={spotId}
+                favorited={favorited}
+                className="h-5 w-5"
+              />
             </IconBtn>
           )}
         </div>

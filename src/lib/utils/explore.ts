@@ -21,6 +21,8 @@ export const toExploreSpotProps = (item: ExploreSpotItem): SPOTProps => ({
   imageUrl: item.thumbnailUrl,
   ...toStatusBadge(item.status),
   nameList: [item.displayName],
+  favorited: item.favorited,
+  notifyEnabled: item.notifyEnabled,
 })
 
 export const toFestivalDateRange = (item: ExploreFestivalItem) =>

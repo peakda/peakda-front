@@ -33,6 +33,7 @@ describe('utils/search', () => {
         status: '',
         nameList: ['명소'],
         favorited: false,
+        notifyEnabled: false,
       })
     })
     it('LOCAL 은 동네 태그로 표시', () => {

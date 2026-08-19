@@ -1,29 +1,16 @@
 'use client'
 
-import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { SmilePlus } from 'lucide-react'
 import { IconBtn } from '@/components/ui/button/IconBtn'
-import { EmojiBtn } from '@/components/ui/button/EmojiBtn'
 import { CardBadge } from '@/components/ui/card/CardBadge'
+import { ReactionBar } from '@/components/ui/card/ReactionBar'
 import { Badge } from '@/components/ui/display/Badge'
 import { Indecator } from '@/app/onboarding/_components/Indecator'
 import { useCarousel } from '@/hooks/useEmblaCarousel'
-import { useAddReaction, useRemoveReaction } from '@/api/facades/feed'
-import { reactionToggleAction, toReactionSummary } from '@/lib/utils/feed'
 import { SpotBloomSummary } from './SpotBloomSummary'
 import type { SpotBloomSummaryProps } from './SpotBloomSummary'
 import type { FeedCardProps } from '@/components/ui/card/FeedCard'
-import type {
-  FeedReactionSummaryResponseMyReactionsItem,
-  ReactionSummary,
-} from '@/api/facades/generated/peakdaApi.schemas'
-
-const REACTIONS: { type: FeedReactionSummaryResponseMyReactionsItem; emoji: string }[] = [
-  { type: 'HEART', emoji: '❤️' },
-  { type: 'SMILE', emoji: '😀' },
-]
 
 type FeedDetailViewProps = Pick<
   FeedCardProps,
@@ -59,31 +46,6 @@ export function FeedDetailView({
   spotSummary,
 }: FeedDetailViewProps) {
   const { emblaRef, selectedIndex, scrollSnaps, scrollTo } = useCarousel({ loop: true })
-
-  // 조회 응답의 리액션 요약을 그대로 보여주고, 이 화면에서 리액션을 누른 뒤에만
-  // mutation 응답으로 덮어쓴다. (useState 초기값으로 두면 나중에 도착한 서버 값이 반영되지 않는다)
-  const [reactionOverride, setReactionOverride] = useState<ReactionSummary | null>(null)
-  const { counts: reactionCounts, myReactions } = reactionOverride ?? reactions
-  const [isPickerOpen, setPickerOpen] = useState(false)
-  const addReaction = useAddReaction()
-  const removeReaction = useRemoveReaction()
-
-  const handleReaction = (type: FeedReactionSummaryResponseMyReactionsItem) => {
-    const mutation =
-      reactionToggleAction(myReactions, type) === 'add' ? addReaction : removeReaction
-    mutation.mutate(
-      { id: recordId, params: { reactionType: type } },
-      {
-        onSuccess: (res) => {
-          setReactionOverride(toReactionSummary(res.data.data))
-          setPickerOpen(false)
-        },
-      }
-    )
-  }
-
-  const countOf = (type: FeedReactionSummaryResponseMyReactionsItem) =>
-    reactionCounts.find((c) => c.reactionType === type)?.count ?? 0
 
   return (
     <div className="flex flex-col gap-3">
@@ -123,32 +85,26 @@ export function FeedDetailView({
         />
       </div>
 
-      {/* 작성자 + 방문일·상태 */}
-      <div className="flex flex-col gap-2 px-4">
-        <div className="flex items-center gap-2">
-          <Link href={`/users/${authorId}`}>
-            <IconBtn size="md" className="relative overflow-hidden">
-              {authorImageUrl ? (
-                <Image
-                  src={authorImageUrl}
-                  alt="프로필"
-                  fill
-                  className="object-cover"
-                  sizes="32px"
-                />
-              ) : (
-                <Image src="/icons/person.svg" alt="프로필" width={16} height={16} />
-              )}
-            </IconBtn>
-          </Link>
+      {/* 작성자 + 방문일·상태 (방문일 줄은 닉네임과 같은 열에 붙는다) */}
+      <div className="flex items-center gap-2 px-4">
+        <Link href={`/users/${authorId}`}>
+          <IconBtn size="md" className="relative overflow-hidden">
+            {authorImageUrl ? (
+              <Image src={authorImageUrl} alt="프로필" fill className="object-cover" sizes="32px" />
+            ) : (
+              <Image src="/icons/person.svg" alt="프로필" width={16} height={16} />
+            )}
+          </IconBtn>
+        </Link>
+        <div className="flex flex-col gap-1">
           <Link href={`/users/${authorId}`} className="flex items-center gap-2">
             <span className="text-text-primary text-sm font-semibold">{authorName}</span>
             <span className="text-text-quaternary text-xs">{timeAgo}</span>
           </Link>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-text-tertiary text-xs">{visitDate} 방문</span>
-          <CardBadge label={statusLabel} variant={statusVariant} />
+          <div className="flex items-center gap-1.5">
+            <span className="text-text-tertiary text-xs">{visitDate} 방문</span>
+            <CardBadge label={statusLabel} variant={statusVariant} />
+          </div>
         </div>
       </div>
 
@@ -174,45 +130,7 @@ export function FeedDetailView({
       <p className="text-text-primary px-4 text-sm leading-relaxed">{content}</p>
 
       {/* 리액션 — 추가 버튼 + 남겨진 리액션만 카운트 칩으로 노출 */}
-      <div className="relative flex items-center gap-2 px-4">
-        <button
-          type="button"
-          aria-label="리액션 추가"
-          aria-expanded={isPickerOpen}
-          onClick={() => setPickerOpen((prev) => !prev)}
-          className="border-border-primary text-icon-quaternary flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full border"
-        >
-          <SmilePlus className="h-4 w-4" />
-        </button>
-
-        {REACTIONS.filter(({ type }) => countOf(type) > 0 || myReactions.includes(type)).map(
-          ({ type, emoji }) => (
-            <EmojiBtn
-              key={type}
-              emoji={emoji}
-              label={`+${countOf(type)}`}
-              selected={myReactions.includes(type)}
-              onClick={() => handleReaction(type)}
-            />
-          )
-        )}
-
-        {isPickerOpen && (
-          <div className="border-border-primary absolute bottom-10 left-4 z-20 flex gap-1 rounded-full border bg-white px-2 py-1.5 shadow-lg">
-            {REACTIONS.map(({ type, emoji }) => (
-              <button
-                key={type}
-                type="button"
-                aria-label={type}
-                onClick={() => handleReaction(type)}
-                className="hover:bg-bg-secondary cursor-pointer rounded-full px-2 py-1 text-lg leading-none"
-              >
-                {emoji}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+      <ReactionBar recordId={recordId} reactions={reactions} className="px-4" />
     </div>
   )
 }

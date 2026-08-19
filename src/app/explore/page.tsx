@@ -145,8 +145,6 @@ export default function ExplorePage() {
               <SpotCard
                 key={`${item.attractionId}-${item.category}`}
                 spot={toExploreSpotProps(item)}
-                favoriteSpotId={item.spotId ?? undefined}
-                initialFavorite={item.favorited}
               />
             ))}
           </ul>

@@ -31,6 +31,7 @@ describe('lib/utils/spotPreview', () => {
           tagText: '만개',
           badges: [{ label: '벚꽃', icon: '/flowers/cherry-blossom.svg' }],
           isFavorite: false,
+          notifyEnabled: false,
           images: ['https://img/1.jpg'],
         },
       ])
@@ -38,6 +39,10 @@ describe('lib/utils/spotPreview', () => {
 
     it('찜 상태를 그대로 반영한다', () => {
       expect(toPinListItems([item({ favorited: true })])[0].isFavorite).toBe(true)
+    })
+
+    it('알림 활성화 상태를 그대로 반영한다', () => {
+      expect(toPinListItems([item({ notifyEnabled: true })])[0].notifyEnabled).toBe(true)
     })
 
     // 주소가 없으면 위치 줄을 비운다(탐색 카드와 같은 처리).

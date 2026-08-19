@@ -28,6 +28,8 @@ interface BasePinProps {
   // 한 스팟에 여러 꽃이 피어 있을 수 있어 배열이다. 꽃마다 아이콘이 달라 라벨과 쌍으로 든다.
   badges: PinBadge[]
   isFavorite: boolean
+  // 개화 알림 on/off. 찜에 종속이라 isFavorite 가 false 면 의미가 없다.
+  notifyEnabled?: boolean
   // 스팟 상세(/spot/[id]) 이동용. 좌표만 있는 핀 등 없을 수 있어 optional.
   spotId?: number
 }

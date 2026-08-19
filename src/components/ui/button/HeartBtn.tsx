@@ -8,9 +8,11 @@ interface HeartBtnProps {
   InitFavorite: boolean
   className?: string
   spotId?: number
+  // 같은 카드의 종 버튼이 찜 상태에 따라 켜지고 꺼져야 해서, 토글 결과를 위로 알린다.
+  onToggle?: (isFavorite: boolean) => void
 }
 
-export function HeartBtn({ InitFavorite, className, spotId }: HeartBtnProps) {
+export function HeartBtn({ InitFavorite, className, spotId, onToggle }: HeartBtnProps) {
   const [isFavorite, setIsFavorite] = useState(InitFavorite)
   const addFavorite = useAddFavorite()
   const removeFavorite = useRemoveFavorite()
@@ -21,8 +23,17 @@ export function HeartBtn({ InitFavorite, className, spotId }: HeartBtnProps) {
 
     const next = !isFavorite
     setIsFavorite(next)
+    onToggle?.(next)
     const mutation = next ? addFavorite : removeFavorite
-    mutation.mutate({ spotId }, { onError: () => setIsFavorite(!next) })
+    mutation.mutate(
+      { spotId },
+      {
+        onError: () => {
+          setIsFavorite(!next)
+          onToggle?.(!next)
+        },
+      }
+    )
   }
 
   // spotId 가 없으면 찜할 대상이 없다. 눌러도 서버에 저장되지 않으므로 비활성 처리한다.
