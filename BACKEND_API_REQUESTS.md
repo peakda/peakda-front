@@ -55,6 +55,24 @@ A안으로 알려주셔서 `spotId == null` 분기와 `POST /api/spots/match` �
 | `POST /api/spots/records/{id}/publish` | DRAFT 흐름 확정 시 알려주세요 |
 | `POST /api/devices` · `DELETE /api/devices/{token}` | 푸시 인프라 일정 잡히면 알려주세요 |
 
+### 모바일 푸시 구현 전 확인 요청 *(2026-08-19)*
+
+Capacitor 안드로이드 앱은 네이티브 FCM 토큰을 기존
+`POST /api/devices`에 `platform: ANDROID`로 등록할 예정입니다. AWS 사용 여부만으로
+발송 경로가 정해지지는 않아 아래 내용을 확인 부탁드립니다.
+
+1. 기술 문서의 `FCM or SSE` 중 모바일 백그라운드 알림은 FCM으로 확정할 수 있나요?
+   FCM이면 Firebase Admin SDK에서 직접 호출하나요, 아니면 AWS SNS Mobile Push를 거치나요?
+   SSE는 앱 실행 중 목록·뱃지 갱신에 병행하는 용도인지도 알려주세요.
+2. 저장된 디바이스 토큰을 실제 알림 이벤트가 소비하는 일정은 언제인가요?
+3. FCM 토큰 갱신·만료·발송 실패 시 서버에서 기존 토큰을 비활성화하거나 삭제하나요?
+4. 로그아웃 시 `DELETE /api/devices/{token}` 호출만으로 해당 기기의 수신 해제가 보장되나요?
+5. 푸시 payload에 이동할 프런트 경로(`linkUrl`) 또는 알림 조회용 ID를 어떤 키로 내려주나요?
+6. 개발·운영 환경별 Firebase 프로젝트와 Android 패키지 ID를 분리하나요?
+
+현재 개발 Swagger에는 토큰 등록·해제와 알림 조회/읽음 API만 있고, FCM 발송이나
+SSE 구독 엔드포인트는 노출되어 있지 않습니다.
+
 ---
 
 ## 요약 *(2026-08-10 요청 당시 원문 — 아래는 모두 처리 완료)*
