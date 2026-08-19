@@ -4,6 +4,7 @@
 
 > 이 문서는 "무엇을 어떤 순서로 할지"를 담은 실행 계획이다.
 > 왜 Capacitor 인가 / TWA 와의 비교는 [ANDROID_APP_DECISION.md](ANDROID_APP_DECISION.md) 를 본다.
+> 외부 담당자에게 받아야 할 값과 백엔드 질문은 [CAPACITOR_EXTERNAL_REQUIREMENTS.md](CAPACITOR_EXTERNAL_REQUIREMENTS.md) 에서 관리한다.
 
 ---
 

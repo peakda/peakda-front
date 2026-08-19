@@ -51,6 +51,9 @@ The native package ID is currently `com.peakda.app`. Because changing the value 
 `capacitor.config.ts` does not rename an existing Android project, confirm it before Play
 Console registration and change the native namespace/application ID together if needed.
 
+See [CAPACITOR_EXTERNAL_REQUIREMENTS.md](CAPACITOR_EXTERNAL_REQUIREMENTS.md) for the
+backend, Firebase, production-domain, design, signing, and Play Console inputs still needed.
+
 After Android Studio opens, verify on an emulator and a physical device:
 
 - The production site loads and navigation works.
