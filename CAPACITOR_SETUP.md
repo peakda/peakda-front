@@ -42,6 +42,7 @@ require Node.js 22 or newer and a configured Android SDK.
 - Android application backup disabled
 - Keyboard resize behavior enabled
 - Signing files, Firebase configuration, local SDK paths, and build outputs ignored by Git
+- Android CI validation for lint, debug APK, and unsigned release AAB
 
 The generated launcher and splash artwork are placeholders. Replace them when final
 design assets are available.

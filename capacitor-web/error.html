@@ -12,9 +12,9 @@
     <script src="./error.js" defer></script>
   </head>
   <body>
-    <main>
-      <h1>네트워크 연결을 확인해 주세요</h1>
-      <p>Peakda를 불러오지 못했습니다. 연결 상태를 확인한 뒤 다시 시도해 주세요.</p>
+    <main aria-labelledby="error-title">
+      <h1 id="error-title" tabindex="-1">네트워크 연결을 확인해 주세요</h1>
+      <p role="alert">Peakda를 불러오지 못했습니다. 연결 상태를 확인한 뒤 다시 시도해 주세요.</p>
       <button type="button" id="retry-button">다시 시도</button>
     </main>
   </body>
