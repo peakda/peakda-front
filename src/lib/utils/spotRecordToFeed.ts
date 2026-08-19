@@ -87,6 +87,7 @@ export function detailToFeedCardProps(
 // 한계: 인기 여부 데이터가 없어 isPopular 는 설정하지 않는다.
 export function toMyRecordThumb(record: SpotRecordSummaryResponse): MyRecord {
   return {
+    id: record.id,
     image: record.coverPhoto?.url ?? '/images/explore.png',
     date: toDot(record.visitedDate ?? record.createdAt),
   }

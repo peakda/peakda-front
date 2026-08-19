@@ -36,8 +36,8 @@ export default function MyRecordsPage() {
           <p className="text-text-tertiary py-12 text-center text-sm">아직 기록이 없어요</p>
         ) : (
           <div className="grid grid-cols-3 gap-1.5 px-4">
-            {records.map((record, idx) => (
-              <MyFeed key={idx} {...record} />
+            {records.map((record) => (
+              <MyFeed key={record.id} {...record} />
             ))}
           </div>
         ))}

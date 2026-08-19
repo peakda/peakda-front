@@ -7,6 +7,7 @@ import { MyFeed } from '@/app/my/_components/MyFeed'
 import { myRecordsHref } from '@/lib/utils/myRecords'
 
 export interface MyRecord {
+  id: number
   image: string
   date: string
   isPopular?: boolean
@@ -47,8 +48,8 @@ export function MyRecordSection({ records, count, canRecord = true }: Props) {
         </div>
       ) : (
         <div className="grid grid-cols-3 gap-1.5 px-4">
-          {records.map((record, idx) => (
-            <MyFeed key={idx} {...record} />
+          {records.map((record) => (
+            <MyFeed key={record.id} {...record} />
           ))}
         </div>
       )}
