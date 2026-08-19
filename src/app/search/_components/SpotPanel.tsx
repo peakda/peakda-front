@@ -16,8 +16,10 @@ export interface SPOTProps {
   status: string
   statusVariant?: CardBadgeVariant
   nameList: string[]
-  // 찜 상태. 탐색 화면은 SpotCard 에 직접 넘기므로 여기서는 검색 결과만 쓴다.
+  // 찜 상태. SpotCard 하트의 초기값이다.
   favorited?: boolean
+  // 개화 알림 on/off. 알림은 찜에 종속이라 favorited 가 false 면 종은 비활성이다.
+  notifyEnabled?: boolean
 }
 
 interface Props {
@@ -48,12 +50,7 @@ export function SpotPanel({ spots, onLoadMore, hasMore = false, isLoadingMore = 
     <>
       <ul className="divide-y divide-gray-100">
         {spots.map((spot) => (
-          <SpotCard
-            spot={spot}
-            key={spot.id}
-            favoriteSpotId={spot.id ?? undefined}
-            initialFavorite={spot.favorited}
-          />
+          <SpotCard spot={spot} key={spot.id} />
         ))}
       </ul>
       <InfiniteScrollFooter sentinelRef={sentinelRef} isLoading={isLoadingMore} />

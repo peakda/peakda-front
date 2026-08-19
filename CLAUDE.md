@@ -97,6 +97,7 @@ pnpm generate:facades   # 없는 도메인만 파사드 스텁 생성
 | [UNLINKED_ROUTES.md](UNLINKED_ROUTES.md) | 생성됐지만 아직 화면에 연결되지 않은 라우트 목록 |
 | [UX_BACKLOG.md](UX_BACKLOG.md) | 동작은 하지만 사용자 흐름이 어색해 고쳐야 하는 것 (보류 중인 건만) |
 | [CONTEST_ACTION_PLAN.md](CONTEST_ACTION_PLAN.md) | 공모전 1차 심사 대응 — 심사 기준별 현재 점수와 실행 우선순위 |
+| [ANDROID_APP_DECISION.md](ANDROID_APP_DECISION.md) | Google Play 배포 방식(TWA vs Capacitor) 논의용 — 아직 미정 |
 
 ## 버그 수정 시 설명
 

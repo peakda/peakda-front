@@ -9,16 +9,14 @@ import { IconBtn } from '@/components/ui/button/IconBtn'
 import { MoreMenu } from '@/components/ui/button/MoreMenu'
 import { CardBadge } from '@/components/ui/card/CardBadge'
 import { Badge } from '@/components/ui/display/Badge'
-import { EmojiBtn } from '@/components/ui/button/EmojiBtn'
+import { ReactionBar } from '@/components/ui/card/ReactionBar'
 import { useCarousel } from '@/hooks/useEmblaCarousel'
 import { Indecator } from '@/app/onboarding/_components/Indecator'
-import { useAddReaction, useRemoveReaction } from '@/api/facades/feed'
 import { useReport } from '@/api/facades/report'
-import { reactionToggleAction, buildReportRequest, toReactionSummary } from '@/lib/utils/feed'
+import { buildReportRequest } from '@/lib/utils/feed'
 import { ReportModal } from '@/components/ui/card/ReportModal'
 import type {
   CreateReportRequestReason,
-  FeedReactionSummaryResponseMyReactionsItem,
   ReactionSummary,
 } from '@/api/facades/generated/peakdaApi.schemas'
 
@@ -33,11 +31,6 @@ export interface SpotSummaryInfo {
   address: string
   onClick: () => void
 }
-
-const REACTIONS: { type: FeedReactionSummaryResponseMyReactionsItem; emoji: string }[] = [
-  { type: 'HEART', emoji: '❤️' },
-  { type: 'SMILE', emoji: '😀' },
-]
 
 export interface FeedCardProps {
   recordId: number
@@ -86,26 +79,8 @@ export function FeedCard({
 }: FeedCardProps) {
   const { emblaRef, selectedIndex, scrollSnaps, scrollTo } = useCarousel({ loop: true })
 
-  // 조회 응답의 리액션 요약을 그대로 보여주고, 이 화면에서 리액션을 누른 뒤에만
-  // mutation 응답으로 덮어쓴다. (useState 초기값으로 두면 나중에 도착한 서버 값이 반영되지 않는다)
-  const [reactionOverride, setReactionOverride] = useState<ReactionSummary | null>(null)
-  const { counts: reactionCounts, myReactions } = reactionOverride ?? reactions
   const [isReportModalOpen, setReportModalOpen] = useState(false)
-  const addReaction = useAddReaction()
-  const removeReaction = useRemoveReaction()
   const report = useReport()
-
-  const handleReaction = (type: FeedReactionSummaryResponseMyReactionsItem) => {
-    const mutation = reactionToggleAction(myReactions, type) === 'add' ? addReaction : removeReaction
-    mutation.mutate(
-      { id: recordId, params: { reactionType: type } },
-      {
-        onSuccess: (res) => {
-          setReactionOverride(toReactionSummary(res.data.data))
-        },
-      }
-    )
-  }
 
   const handleReportSubmit = (reason: CreateReportRequestReason, detail?: string) => {
     report.mutate(
@@ -244,21 +219,8 @@ export function FeedCard({
       {/* 본문 */}
       <p className="text-text-primary text-sm leading-relaxed">{content}</p>
 
-      {/* 반응 버튼 (카운트가 0 이면 숫자 없이 버튼만) */}
-      <div className="flex gap-2">
-        {REACTIONS.map(({ type, emoji }) => {
-          const count = reactionCounts.find((c) => c.reactionType === type)?.count
-          return (
-            <EmojiBtn
-              key={type}
-              emoji={emoji}
-              label={count ? String(count) : undefined}
-              selected={myReactions.includes(type)}
-              onClick={() => handleReaction(type)}
-            />
-          )
-        })}
-      </div>
+      {/* 리액션 — 추가 버튼 + 남겨진 리액션만 카운트 칩으로 노출 */}
+      <ReactionBar recordId={recordId} reactions={reactions} />
 
       {isReportModalOpen && (
         <ReportModal

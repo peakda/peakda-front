@@ -30,12 +30,7 @@ export default function SavedSpotsPage() {
         ) : (
           <ul className="divide-y divide-gray-100">
             {favorites.map((fav) => (
-              <SpotCard
-                key={fav.spotId}
-                spot={toFavoriteSpotProps(fav)}
-                favoriteSpotId={fav.spotId}
-                initialFavorite
-              />
+              <SpotCard key={fav.spotId} spot={toFavoriteSpotProps(fav)} />
             ))}
           </ul>
         ))}
