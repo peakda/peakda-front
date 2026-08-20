@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button/Button'
 import { logoutApi } from '@/api/facades/auth'
 import { clearAuthMarker } from '@/lib/auth/session'
+import { stopPushNotifications } from '@/lib/push/pushNotifications'
 
 interface Props {
   onClose: () => void
@@ -13,6 +14,7 @@ export function LogoutDrawerContent({ onClose }: Props) {
   const router = useRouter()
 
   const handleLogout = async () => {
+    await stopPushNotifications()
     try {
       await logoutApi()
     } catch (e) {
