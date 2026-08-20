@@ -22,32 +22,26 @@
 ### 인증·지도
 
 - [ ] 카카오 개발자 콘솔 JavaScript 키 허용 목록에 정식 프런트 오리진 등록
-- [ ] 카카오·네이버 OAuth의 현재 웹 callback이 Android WebView에서도 왕복하는지 실기기 확인
-- [ ] 외부 브라우저로 이탈해 앱 복귀가 안 될 경우 App Links 도입 여부 결정
-- [ ] App Links가 필요하면 백엔드 OAuth redirect URI와 각 소셜 콘솔 설정 변경
+- [x] 카카오·네이버 OAuth의 현재 웹 callback이 Android WebView에서도 왕복하는지 실기기 확인 — **2026-08-20 백엔드 회신: 지금 구조로는 안 됨.** 성공 핸들러가 웹 URL 한 곳으로만 리다이렉트하고, 인증이 HttpOnly 쿠키 전용이라 Custom Tab에서 받은 쿠키가 앱 WebView로 안 넘어온다. 딥링크로 돌아와도 앱엔 세션이 없다.
+- [x] 외부 브라우저로 이탈해 앱 복귀가 안 될 경우 App Links 도입 여부 결정 — **App Links가 아니라 일회성 코드 교환 방식으로 결정.** Custom Tab 인증 → `peakda://auth/callback?code=...` 로 복귀 → 앱이 code를 토큰과 교환 → 이후 Bearer 헤더로 호출. 엔드포인트 경로·딥링크 스킴·요청/응답 스키마는 **아직 미확정** — 백엔드가 확정되는 대로 공유 예정.
+- [ ] App Links가 필요하면 백엔드 OAuth redirect URI와 각 소셜 콘솔 설정 변경 — 코드 교환 방식 확정 시 재검토
+- [x] 네이버 개발자센터 앱은 백엔드에서 관리. dev callback: `https://api-dev.peakda.com/login/oauth2/code/naver`, `https://api-dev.peakda.com/login/oauth2/code/kakao`. 운영 도메인 확정 시 동일 패턴으로 추가 등록 예정
+- [x] 애플 로그인은 **미지원 확정** — 추후 구글 로그인으로 교체 예정. `SocialLoginBtns`의 애플 버튼은 당분간 무반응 상태로 둔다([UX_BACKLOG.md](UX_BACKLOG.md) 1번)
 
-## P0 — 푸시 구현 전 백엔드 답변 필요
+**코드 교환 스펙이 나오기 전까지 로그인은 기존 웹 방식(`/oauth2/authorization/{provider}` 직행) 그대로 두고, 앱 전용 분기는 스펙 확정 후에 붙인다.** 카카오·네이버 버튼은 이미 이 방식으로 연결돼 있다(`src/lib/auth/socialLogin.ts`).
 
-기술 문서에는 `푸시 알림 발송 (FCM) or SSE`로 적혀 있다. SSE는 앱이 실행 중일 때
-목록·뱃지를 갱신할 수 있지만, Android 앱이 백그라운드이거나 종료된 상태의 OS 알림을
-대체할 수 없다. 모바일 푸시를 제공하려면 FCM 경로가 필요하다.
+## P0 — 푸시 구현 전 백엔드 답변 필요 (2026-08-20 회신 받음)
 
-- [ ] 모바일 백그라운드 알림을 FCM으로 제공하는지 확정
-- [ ] Firebase Admin SDK에서 FCM을 직접 호출하는지, AWS SNS Mobile Push를 거치는지 확정
-- [ ] SSE를 병행한다면 구독 URL, 인증 방식, 재연결 정책, 이벤트 스키마 제공
-- [ ] `POST /api/devices`에 저장된 토큰을 발송단이 소비하기 시작하는 일정 공유
-- [ ] FCM 토큰 갱신·만료·발송 실패 시 서버의 비활성화/삭제 정책 공유
-- [ ] 로그아웃 시 `DELETE /api/devices/{token}`만으로 수신 해제가 보장되는지 확인
-- [ ] 푸시 payload 규격 제공
-  - 알림 ID
-  - `type`
-  - 내부 이동 대상 ID 또는 경로
-  - 외부 URL 여부
-- [ ] 알림 생성 이벤트 범위 확정
-  - 개화 타이밍
-  - 팔로우
-  - 리액션
-  - 공지
+기술 문서에는 `푸시 알림 발송 (FCM) or SSE`로 적혀 있었다. 아래는 회신 결과 — 원 질문과 상세 답변 원문은 [BACKEND_API_REQUESTS.md](BACKEND_API_REQUESTS.md) 참고.
+
+- [x] 모바일 백그라운드 알림을 FCM으로 제공하는지 확정 — **FCM 확정**
+- [x] Firebase Admin SDK에서 FCM을 직접 호출하는지, AWS SNS Mobile Push를 거치는지 확정 — **Firebase Admin SDK 직접 발송**
+- [x] SSE를 병행한다면 구독 URL, 인증 방식, 재연결 정책, 이벤트 스키마 제공 — **SSE 병행 안 함.** 포그라운드 뱃지는 `GET /api/notifications/unread-count` 폴링
+- [ ] `POST /api/devices`에 저장된 토큰을 발송단이 소비하기 시작하는 일정 공유 — 알림 생성→토큰 조회→발송 호출은 연결됨, **발송 어댑터만 스텁** (Firebase 서비스 계정 키 발급 대기, 일정 미정)
+- [x] FCM 토큰 갱신·만료·발송 실패 시 서버의 비활성화/삭제 정책 공유 — 토큰은 유니크(재등록 시 소유자/플랫폼 갱신, `onNewToken`마다 멱등 POST), 사용자당 10개 상한, 탈퇴 시 전량 삭제. 실패 기반 정리(`UNREGISTERED`/`INVALID_ARGUMENT` 즉시 삭제, 5xx는 재시도 후 유지)는 FCM 연결 시 같이 추가
+- [x] 로그아웃 시 `DELETE /api/devices/{token}`만으로 수신 해제가 보장되는지 확인 — **보장됨.** 단 로그아웃 API보다 반드시 먼저 호출(쿠키 만료 후 401 남), 실패해도 다음 사용자 로그인 시 소유자가 넘어가 오배송 없음
+- [x] 푸시 payload 규격 제공 — `notification: { title, body }`, `data: { notificationId, type, linkType, targetId, linkUrl }`. `targetId`는 `type`별로 다름(TIMING=spotId, FOLLOW=userId, REACTION=recordId, NOTICE=관리자 지정값 or linkUrl). `GET /api/notifications` 응답과 같은 필드 세트
+- [x] 알림 생성 이벤트 범위 확정 — **4종 전부 구현됨**: TIMING(매일 08시, 찜한 명소 만개 예상일 내일~+7일), FOLLOW, REACTION, NOTICE(백오피스 전체 발송)
 
 현재 개발 Swagger에는 다음 API만 확인된다.
 
@@ -58,7 +52,7 @@
 - `PATCH /api/notifications/{id}/read`
 - `PATCH /api/notifications/read-all`
 
-FCM 발송 구현과 SSE 구독 엔드포인트는 Swagger에 노출되어 있지 않다.
+FCM 발송 구현과 SSE 구독 엔드포인트는 Swagger에 노출되어 있지 않다(SSE는 애초에 안 함이 확정됐으므로 앞으로도 노출되지 않을 예정).
 
 ## P0 — Firebase 담당자 입력
 
@@ -106,9 +100,9 @@ FCM 발송 구현과 SSE 구독 엔드포인트는 Swagger에 노출되어 있�
 - [ ] 다양한 화면 크기, 시스템 글꼴 크기, 다크 모드
 - [ ] FCM 확정 후 권한 요청, 토큰 등록, 알림 수신, 알림 탭 이동
 
-## 백엔드 전달용 질문
+## 백엔드 전달용 질문 (2026-08-20 회신 받음 — 기록용 원문)
 
-아래를 그대로 복사해 전달한다.
+회신 요약은 위 체크리스트와 [BACKEND_API_REQUESTS.md](BACKEND_API_REQUESTS.md)의 모바일 푸시 절 참고. 아래는 당시 보낸 원문이다.
 
 > 안녕하세요, Android 앱(Capacitor) 작업 중이라 백엔드 확인이 필요한 것들 정리해서 보냅니다.
 >
@@ -140,9 +134,9 @@ FCM 발송 구현과 SSE 구독 엔드포인트는 Swagger에 노출되어 있�
 > 1·2·6번은 앱 푸시 구현 착수에 바로 필요하고, 9~11번은 로그인 버튼 연결에 필요합니다.
 > 나머지는 일정 참고용이라 여유 있게 주셔도 됩니다.
 
-소셜 로그인 관련 프런트 현황 근거
+소셜 로그인 관련 프런트 현황 근거 (2026-08-20 기준 최신화)
 
-- `src/lib/kakao/kakaoLogin.ts` — 백엔드 OAuth 직행 방식과 그 이유
-- `src/app/login/_components/SocialLoginBtns.tsx` — 네이버·애플 버튼에 핸들러 없음
+- `src/lib/auth/socialLogin.ts` — 백엔드 OAuth 직행 방식과 그 이유, 카카오·네이버 둘 다 연결됨
+- `src/app/login/_components/SocialLoginBtns.tsx` — 애플 버튼만 핸들러 없음(미지원 확정, 추후 구글로 교체 예정)
 - `src/app/auth/callback/page.tsx` — `/auth/me` 응답으로 기존(`/map`)·신규(`/Terms`) 분기
 - `swagger.json` — `provider` enum에 `KAKAO / NAVER / APPLE`

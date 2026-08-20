@@ -1,6 +1,7 @@
 import { Capacitor, type PluginListenerHandle } from '@capacitor/core'
 import {
   PushNotifications,
+  type ActionPerformed,
   type PushNotificationSchema,
 } from '@capacitor/push-notifications'
 import { registerDeviceApi, unregisterDeviceApi } from '@/api/facades/device'
@@ -9,7 +10,7 @@ const CHANNEL_ID = 'peakda-default'
 
 interface PushCallbacks {
   onNotificationReceived?: (notification: PushNotificationSchema) => void
-  onNotificationAction?: () => void
+  onNotificationAction?: (action: ActionPerformed) => void
 }
 
 let registeredToken: string | null = null
@@ -39,8 +40,8 @@ async function installListeners(callbacks: PushCallbacks): Promise<void> {
     PushNotifications.addListener('pushNotificationReceived', (notification) => {
       activeCallbacks.onNotificationReceived?.(notification)
     }),
-    PushNotifications.addListener('pushNotificationActionPerformed', () => {
-      activeCallbacks.onNotificationAction?.()
+    PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
+      activeCallbacks.onNotificationAction?.(action)
     }),
   ])
 }

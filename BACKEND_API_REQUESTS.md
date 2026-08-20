@@ -55,23 +55,31 @@ A안으로 알려주셔서 `spotId == null` 분기와 `POST /api/spots/match` �
 | `POST /api/spots/records/{id}/publish` | DRAFT 흐름 확정 시 알려주세요 |
 | `POST /api/devices` · `DELETE /api/devices/{token}` | 푸시 인프라 일정 잡히면 알려주세요 |
 
-### 모바일 푸시 구현 전 확인 요청 *(2026-08-19)*
+### ✅ 모바일 푸시 구현 전 확인 요청 — 회신 받음 (2026-08-20)
 
 Capacitor 안드로이드 앱은 네이티브 FCM 토큰을 기존
 `POST /api/devices`에 `platform: ANDROID`로 등록할 예정입니다. AWS 사용 여부만으로
-발송 경로가 정해지지는 않아 아래 내용을 확인 부탁드립니다.
+발송 경로가 정해지지는 않아 아래 내용을 확인 부탁드렸고, 회신을 받았습니다.
+회신 요약과 프론트 대응은 [CAPACITOR_PUSH_FOLLOWUP.md](CAPACITOR_PUSH_FOLLOWUP.md) 참고.
+아래 본문은 요청 당시 원문이며 기록용으로 남겨둡니다.
 
 1. 기술 문서의 `FCM or SSE` 중 모바일 백그라운드 알림은 FCM으로 확정할 수 있나요?
    FCM이면 Firebase Admin SDK에서 직접 호출하나요, 아니면 AWS SNS Mobile Push를 거치나요?
    SSE는 앱 실행 중 목록·뱃지 갱신에 병행하는 용도인지도 알려주세요.
+   → **FCM 확정. Firebase Admin SDK 직접 발송.** 알림 생성 → 토큰 조회 → 발송 호출까지는 연결돼 있고 발송 어댑터만 스텁 상태(서비스 계정 키 발급 대기). SSE는 병행하지 않음 — 포그라운드 뱃지는 `GET /api/notifications/unread-count` 폴링으로 처리.
 2. 저장된 디바이스 토큰을 실제 알림 이벤트가 소비하는 일정은 언제인가요?
+   → Firebase 서비스 계정 키 발급 대기 중. 발급되면 공유 예정이며, **앱은 토큰 등록만 붙여두면 서버가 켜질 때 앱 변경 없이 수신 시작**.
 3. FCM 토큰 갱신·만료·발송 실패 시 서버에서 기존 토큰을 비활성화하거나 삭제하나요?
+   → 토큰은 유니크라 재등록 시 소유자/플랫폼이 갱신(`onNewToken`마다 그냥 POST, 멱등). 사용자당 10개 상한, 탈퇴 시 전량 삭제. 발송 실패 기반 정리(`UNREGISTERED`/`INVALID_ARGUMENT`는 즉시 삭제, 5xx는 재시도 후 유지)는 FCM 연결 시 같이 추가 예정.
 4. 로그아웃 시 `DELETE /api/devices/{token}` 호출만으로 해당 기기의 수신 해제가 보장되나요?
+   → 보장됨. 단 로그아웃 API보다 **먼저** 호출해야 함(인증 필요 API라 쿠키 만료 후 401). 실패해도 같은 기기에서 다음 사용자가 로그인하면 소유자가 넘어가 오배송은 없음.
 5. 푸시 payload에 이동할 프런트 경로(`linkUrl`) 또는 알림 조회용 ID를 어떤 키로 내려주나요?
+   → `notification: { title, body }`, `data: { notificationId, type, linkType, targetId, linkUrl }`. `type`: `TIMING`(spotId) / `FOLLOW`(userId) / `REACTION`(recordId) / `NOTICE`(관리자 지정값, 없으면 linkUrl). `linkType`이 `EXTERNAL`이면 `linkUrl`로 이동, `INTERNAL`이면 `type` + `targetId`로 앱 내 경로 조합. `GET /api/notifications` 응답과 같은 필드 세트.
+   → 알림 발생 범위는 4종(개화 타이밍·팔로우·리액션·공지) 전부 구현됨 — TIMING은 매일 08시, 찜한 명소 만개 예상일이 내일~+7일이면 발송.
 6. 개발·운영 환경별 Firebase 프로젝트와 Android 패키지 ID를 분리하나요?
+   → 별도 회신 없음. 서비스 계정 키 발급 시 함께 확인 필요.
 
-현재 개발 Swagger에는 토큰 등록·해제와 알림 조회/읽음 API만 있고, FCM 발송이나
-SSE 구독 엔드포인트는 노출되어 있지 않습니다.
+프론트 구현 상태: 알림 payload 규격이 확정돼 푸시 탭 시 유형별 내부 경로로 라우팅하도록 연결했다(`src/lib/utils/notificationToAlarm.ts`의 `resolvePushNotificationTarget`, `src/app/_components/PushNotificationManager.tsx`). 실제 발송은 백엔드 어댑터 활성화 후에만 검증 가능.
 
 ---
 

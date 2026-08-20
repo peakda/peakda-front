@@ -57,7 +57,6 @@ flowchart LR
 ```
 
 - 타일 캐싱: `src/components/Map/MapContainer.tsx`가 서비스워커(`public/map-tile-sw.js`)를 등록하고 `prefetchInitialTiles`로 초기 타일을 미리 받는다.
-- `src/lib/kakao/kakaoLogin.ts`는 지도가 아니라 **카카오 소셜 로그인**용이다 (`src/app/login`에서 사용) — 같은 디렉터리에 있지만 위 흐름과 무관.
 
 ## 상태 관리 계층
 

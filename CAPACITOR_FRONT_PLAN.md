@@ -42,10 +42,11 @@ Peakda 는 순수 정적 웹앱이 아니라 **Next.js 15 SSR 앱**이다. 코�
 | --- | --- | --- |
 | 인증 | 크로스사이트 쿠키(`SameSite=None; Secure`) + `credentials: 'include'`. JS 는 토큰 안 들고 있음. 401 시 refresh 1회 재시도 | `src/api/mutator/index.ts` |
 | 라우팅 인증 | 프런트 도메인 마커 쿠키로 진입 분기 (보안 경계 아님) | `src/middleware.ts` |
-| 소셜 로그인 | 백엔드가 프런트 도메인 콜백으로 리디렉트 | `src/app/auth/callback` |
-| 디바이스 토큰 | `registerDeviceApi` / `unregisterDeviceApi` 는 있고 **UI 연동만 보류** | `src/api/facades/device.ts` |
+| 소셜 로그인 | 백엔드가 프런트 도메인 콜백으로 리디렉트. 카카오·네이버 연결됨, 애플은 미지원 확정(추후 구글로 교체 예정) | `src/app/auth/callback`, `src/lib/auth/socialLogin.ts` |
+| 디바이스 토큰 | `registerDeviceApi` / `unregisterDeviceApi` UI 연동 완료(권한 요청, 토큰 등록·해제, 로그아웃 시 해제) | `src/api/facades/device.ts`, `src/lib/push/pushNotifications.ts` |
 | 토큰 스키마 | `token: string` · `platform: 'IOS' \| 'ANDROID'` | `peakdaApi.schemas.ts` |
-| 푸시 발송단 | **백엔드에 없음** — `POST /api/devices` 스펙만 존재, 일정 미정 | `BACKEND_API_REQUESTS.md` |
+| 푸시 발송단 | FCM 확정(Firebase Admin SDK 직접 발송), 배선은 연결됨 — **발송 어댑터만 스텁**(서비스 계정 키 발급 대기) | `BACKEND_API_REQUESTS.md`, `CAPACITOR_PUSH_FOLLOWUP.md` |
+| 푸시 payload·라우팅 | 규격 확정, 탭 시 유형별 내부 경로 라우팅 구현 완료 | `src/lib/utils/notificationToAlarm.ts`(`resolvePushNotificationTarget`), `src/app/_components/PushNotificationManager.tsx` |
 
 ---
 
@@ -73,23 +74,25 @@ Peakda 는 순수 정적 웹앱이 아니라 **Next.js 15 SSR 앱**이다. 코�
 ## Phase 2 — 인증·지도 실기기 검증
 
 - [ ] 카카오 개발자 콘솔 JS 키 도메인 허용 목록에 WebView 오리진(실도메인) 등록 확인
-- [ ] 소셜 로그인이 Custom Tabs(외부 브라우저)로 열리고 앱 복귀 실패 시 → **조건부 대응**:
-  - [ ] App Links(딥링크) 설정
-  - [ ] 백엔드 OAuth redirect URI 에 앱 딥링크 추가 ([ANDROID_APP_DECISION.md](ANDROID_APP_DECISION.md) 3번)
+- [x] 소셜 로그인이 Custom Tabs(외부 브라우저)로 열리고 앱 복귀 실패하는지 확인 — **2026-08-20 백엔드 회신: 지금 구조로는 실패가 확정적이다.** HttpOnly 쿠키 전용 인증이라 Custom Tab에서 받은 쿠키가 WebView로 안 넘어오고, 딥링크로 복귀해도 앱엔 세션이 없다. App Links만으로는 해결 안 됨 → **아래로 대체**:
+  - [ ] **일회성 코드 교환 방식 도입** — Custom Tab 인증 → `peakda://auth/callback?code=...` 복귀 → 앱이 code를 토큰과 교환 → 이후 Bearer 헤더로 API 호출. **엔드포인트 경로·딥링크 스킴·요청/응답 스키마는 백엔드 미확정** — 확정되는 대로 진행
+  - [ ] 스킴 확정 전까지: 로그인은 기존 웹 방식(`/oauth2/authorization/{provider}` 직행) 유지, 앱 전용 분기는 스펙 확정 후에만 추가
 - [ ] refresh/401 흐름이 WebView 에서도 동작 (`mutator/index.ts` 의 `window.location` 리디렉트 포함)
 
-## Phase 3 — 푸시 (백엔드 FCM 대기 · 차단됨)
+## Phase 3 — 푸시 (Firebase 서비스 계정 키 대기 · 부분 완료)
 
-> 2026-08-19 개발 Swagger 확인: 디바이스 토큰 등록·해제와 알림 조회/읽음 API는 존재하지만
-> FCM 발송 및 SSE 구독 엔드포인트는 노출되지 않음. 기술 문서의 `FCM or SSE` 결정 확인 필요.
+> 2026-08-20 백엔드 회신: FCM 확정, Firebase Admin SDK 직접 발송, SSE 병행 안 함. 알림 생성→토큰
+> 조회→발송 호출까지는 연결됐고 **발송 어댑터만 스텁**(서비스 계정 키 미발급). payload 규격(`type`/
+> `linkType`/`targetId`)도 확정돼 클라이언트 라우팅까지 구현했다. 남은 차단 요인은 서비스 계정 키뿐.
 
-- [ ] Firebase 프로젝트 생성 → `google-services.json` 안드로이드 앱에 배치
-- [ ] `@capacitor/push-notifications` 도입
-- [ ] 토큰 수신 → `registerDeviceApi({ token, platform: 'ANDROID' })` 배선
-- [ ] 로그아웃 → `unregisterDeviceApi(token)` 배선
-- [ ] **스키마 변경 불필요** — `platform: 'ANDROID'` 그대로 (A/TWA 와 달리 `WEB` enum 추가 안 함)
-- [ ] 알림 권한 요청 UI (앱 첫 진입 또는 알림 설정 화면)
-- [ ] 알림 탭 → 해당 라우트(알림 목록/상세)로 딥링크
+- [ ] Firebase 프로젝트 생성 → `google-services.json` 안드로이드 앱에 배치 (패키지 ID·키 확정 대기)
+- [x] `@capacitor/push-notifications` 도입
+- [x] 토큰 수신 → `registerDeviceApi({ token, platform: 'ANDROID' })` 배선
+- [x] 로그아웃 → `unregisterDeviceApi(token)` 배선 (로그아웃 API보다 먼저 호출 — 백엔드 요구사항과 일치 확인됨)
+- [x] **스키마 변경 불필요** — `platform: 'ANDROID'` 그대로 (A/TWA 와 달리 `WEB` enum 추가 안 함)
+- [x] 알림 권한 요청 UI (`requestAndStartPushNotifications`, 인증 마커·앱 설정 변경 시 재시도)
+- [x] 알림 탭 → 유형별 내부 경로로 라우팅 (`resolvePushNotificationTarget` + `PushNotificationManager`), 파싱 실패 시 `/notification` 폴백. 읽음 처리(`PATCH .../read`)도 함께 호출
+- [ ] 실기기에서 실제 FCM 발송 종단 검증 (서비스 계정 키 발급 후에만 가능)
 
 ## Phase 4 — Play 제출 준비
 
@@ -109,11 +112,12 @@ Peakda 는 순수 정적 웹앱이 아니라 **Next.js 15 SSR 앱**이다. 코�
 
 ## 차단 요인 / 리스크
 
-1. **푸시 발송단 부재** — Phase 3 전면 차단. 백엔드 FCM 일정 확인이 선행 ([ANDROID_APP_DECISION.md](ANDROID_APP_DECISION.md) 104번: FCM 은 프런트 추측)
-2. **실도메인 미확정** — Phase 0~1 못 시작
-3. **Play 14일 비공개 테스트** — 착수 늦으면 그대로 밀림
-4. **`server.url` 프로덕션 사용** — Capacitor 공식은 비권장(원래 live-reload 용). Phase 1 실기기 검증이 실사용 가능 여부를 조기에 판정하는 안전장치
-5. **오프라인 / Play 최소기능** — B안의 대표 약점. Phase 4 폴백 화면으로 완화
+1. **Firebase 서비스 계정 키 미발급** — Phase 3 발송 검증 차단(구현 자체는 완료). FCM 여부·발송 방식·payload·정책은 2026-08-20 전부 회신받아 더 이상 추측이 아니다
+2. **소셜 로그인 코드 교환 스펙 미확정** — Phase 2 신규 차단 요인. Custom Tab 방식은 백엔드가 안 된다고 확정했고, 대체할 일회성 코드 교환 방식의 엔드포인트·딥링크 스킴·스키마가 아직 안 나왔다. 그 전까지 앱은 기존 웹 로그인 방식으로만 동작
+3. **실도메인 미확정** — Phase 0~1 못 시작
+4. **Play 14일 비공개 테스트** — 착수 늦으면 그대로 밀림
+5. **`server.url` 프로덕션 사용** — Capacitor 공식은 비권장(원래 live-reload 용). Phase 1 실기기 검증이 실사용 가능 여부를 조기에 판정하는 안전장치
+6. **오프라인 / Play 최소기능** — B안의 대표 약점. Phase 4 폴백 화면으로 완화
 
 ## 다음 행동
 

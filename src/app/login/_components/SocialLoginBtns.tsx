@@ -1,6 +1,6 @@
 'use client'
 import { Button } from '@/components/ui/button/Button'
-import { handleKakaoLogin } from '@/lib/kakao/kakaoLogin'
+import { handleKakaoLogin, handleNaverLogin } from '@/lib/auth/socialLogin'
 import Image from 'next/image'
 
 export function SocialLoginBtns() {
@@ -24,10 +24,11 @@ export function SocialLoginBtns() {
         카카오로 시작하기
       </Button>
       <Button
+        onClick={handleNaverLogin}
         size="lg"
         className="rounded-3xl bg-[#03A94D] text-white hover:bg-[#03A94D]"
         variant="filled"
-        leftIcon={<Image src="/images/Naver.png" alt="애플 로고" width={24} height={24} />}
+        leftIcon={<Image src="/images/Naver.png" alt="네이버 로고" width={24} height={24} />}
       >
         네이버로 시작하기
       </Button>
