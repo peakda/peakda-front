@@ -106,10 +106,43 @@ FCM 발송 구현과 SSE 구독 엔드포인트는 Swagger에 노출되어 있�
 - [ ] 다양한 화면 크기, 시스템 글꼴 크기, 다크 모드
 - [ ] FCM 확정 후 권한 요청, 토큰 등록, 알림 수신, 알림 탭 이동
 
-## 백엔드 전달용 짧은 질문
+## 백엔드 전달용 질문
 
-> Android 앱은 Capacitor 네이티브 FCM 토큰을 기존 `POST /api/devices`에
-> `platform: ANDROID`로 등록할 예정입니다. 모바일 백그라운드 알림을 FCM으로
-> 확정할 수 있는지, 직접 FCM 발송인지 AWS SNS 경유인지, 토큰 만료 처리와 푸시
-> payload 규격은 무엇인지 알려주세요. SSE도 병행한다면 구독 URL·인증·이벤트
-> 스키마를 함께 부탁드립니다.
+아래를 그대로 복사해 전달한다.
+
+> 안녕하세요, Android 앱(Capacitor) 작업 중이라 백엔드 확인이 필요한 것들 정리해서 보냅니다.
+>
+> **[푸시]** Android 앱은 Capacitor 네이티브 FCM 토큰을 기존 `POST /api/devices`에
+> `platform: ANDROID`로 등록할 예정입니다.
+>
+> 1. 모바일 백그라운드 알림을 FCM으로 발송하나요? (SSE만으로는 앱 종료 상태의 OS 알림을 대체할 수 없어서요)
+> 2. 발송 경로는 Firebase Admin SDK 직접 발송인가요, AWS SNS Mobile Push 경유인가요?
+> 3. 저장된 디바이스 토큰을 실제 발송에 사용하기 시작하는 일정이 언제쯤일까요?
+> 4. 토큰 갱신·만료·발송 실패(`UNREGISTERED` 등) 시 서버의 비활성화/삭제 정책은 무엇인가요?
+> 5. 로그아웃 시 `DELETE /api/devices/{token}` 호출만으로 수신 해제가 보장되나요?
+> 6. 푸시 payload 규격을 부탁드립니다 — 알림 ID, `type`, 이동 대상 ID 또는 경로, 외부 URL 여부.
+>    (알림 탭 시 앱 내 어디로 보낼지 프런트가 이 값으로 분기합니다)
+> 7. 알림 발생 범위는 개화 타이밍·팔로우·리액션·공지 중 어디까지인가요?
+> 8. SSE도 병행한다면 구독 URL, 인증 방식, 재연결 정책, 이벤트 스키마를 부탁드립니다.
+>
+> **[소셜 로그인]** 현재 프런트는 카카오만 연결돼 있고, 백엔드 도메인의
+> `/oauth2/authorization/kakao` 로 직행하는 방식입니다.
+> (프런트 Vercel · 백엔드 AWS 도메인이 달라 프록시를 거치면 OAuth 세션 쿠키가 끊겨서요)
+>
+> 9. `/oauth2/authorization/naver` (와 apple)도 동일하게 열려 있나요? swagger의 `provider`
+>    enum에는 `KAKAO / NAVER / APPLE` 이 모두 있는데 실제 사용 가능한 상태인지 확인 부탁드립니다.
+> 10. 열려 있다면 네이버 개발자센터 앱은 백엔드에서 관리 중인가요? 등록된 callback URL 도 알려주세요.
+> 11. 콜백 후 프런트로 돌아오는 리다이렉트 대상과 신규/기존 유저 분기가 카카오와 동일한가요?
+>     (프런트는 `/auth/callback` 에서 `/auth/me` 200이면 `/map`, 401이면 `/Terms` 로 보내고 있습니다)
+> 12. Android WebView에서도 이 왕복이 되는지 아직 실기기 확인 전인데, 혹시 외부 브라우저로
+>     이탈하는 케이스가 알려진 게 있을까요?
+>
+> 1·2·6번은 앱 푸시 구현 착수에 바로 필요하고, 9~11번은 로그인 버튼 연결에 필요합니다.
+> 나머지는 일정 참고용이라 여유 있게 주셔도 됩니다.
+
+소셜 로그인 관련 프런트 현황 근거
+
+- `src/lib/kakao/kakaoLogin.ts` — 백엔드 OAuth 직행 방식과 그 이유
+- `src/app/login/_components/SocialLoginBtns.tsx` — 네이버·애플 버튼에 핸들러 없음
+- `src/app/auth/callback/page.tsx` — `/auth/me` 응답으로 기존(`/map`)·신규(`/Terms`) 분기
+- `swagger.json` — `provider` enum에 `KAKAO / NAVER / APPLE`
