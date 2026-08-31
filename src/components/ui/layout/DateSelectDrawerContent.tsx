@@ -12,6 +12,9 @@ interface Props extends DateSelectData {
 
 const WEEK_DAYS = ['일', '월', '화', '수', '목', '금', '토']
 const YEAR_RANGE = 5
+const PICKER_ITEM_HEIGHT = 44
+const PICKER_LIST_HEIGHT = 208
+const PICKER_PADDING = (PICKER_LIST_HEIGHT - PICKER_ITEM_HEIGHT) / 2
 
 function buildCalendarDays(year: number, month: number) {
   const firstDay = new Date(year, month, 1).getDay()
@@ -48,23 +51,61 @@ export function DateSelectDrawerContent({ value, onSelect, onClose }: Props) {
   const [selectedDay, setSelectedDay] = useState<number | null>(
     parsed && parsed.year === viewYear && parsed.month === viewMonth ? parsed.date : null
   )
-  const listRef = useRef<HTMLDivElement>(null)
+  const yearListRef = useRef<HTMLDivElement>(null)
+  const monthListRef = useRef<HTMLDivElement>(null)
+  const yearScrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const monthScrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const days = useMemo(() => buildCalendarDays(viewYear, viewMonth), [viewYear, viewMonth])
 
-  const yearMonthOptions = useMemo(() => {
-    const opts: { year: number; month: number }[] = []
+  const yearOptions = useMemo(() => {
+    const opts: number[] = []
     for (let y = today.getFullYear() - YEAR_RANGE; y <= today.getFullYear() + YEAR_RANGE; y++) {
-      for (let m = 0; m < 12; m++) opts.push({ year: y, month: m })
+      opts.push(y)
     }
     return opts
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+  const monthOptions = useMemo(() => Array.from({ length: 12 }, (_, i) => i), [])
 
+  // year-month 모드로 들어갈 때만 현재 선택 위치로 즉시 스크롤 (드래그 중엔 재실행 안 함)
   useEffect(() => {
     if (mode !== 'year-month') return
-    listRef.current?.querySelector('[data-active="true"]')?.scrollIntoView({ block: 'center' })
+    yearListRef.current?.scrollTo({
+      top: yearOptions.indexOf(viewYear) * PICKER_ITEM_HEIGHT,
+      behavior: 'auto',
+    })
+    monthListRef.current?.scrollTo({ top: viewMonth * PICKER_ITEM_HEIGHT, behavior: 'auto' })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode])
+
+  const handleYearScroll = () => {
+    if (yearScrollTimeoutRef.current) clearTimeout(yearScrollTimeoutRef.current)
+    yearScrollTimeoutRef.current = setTimeout(() => {
+      const el = yearListRef.current
+      if (!el) return
+      const index = Math.round(el.scrollTop / PICKER_ITEM_HEIGHT)
+      const year = yearOptions[Math.min(Math.max(index, 0), yearOptions.length - 1)]
+      if (year != null) {
+        setViewYear(year)
+        setSelectedDay(null)
+      }
+    }, 100)
+  }
+
+  const handleMonthScroll = () => {
+    if (monthScrollTimeoutRef.current) clearTimeout(monthScrollTimeoutRef.current)
+    monthScrollTimeoutRef.current = setTimeout(() => {
+      const el = monthListRef.current
+      if (!el) return
+      const index = Math.round(el.scrollTop / PICKER_ITEM_HEIGHT)
+      const month = monthOptions[Math.min(Math.max(index, 0), monthOptions.length - 1)]
+      if (month != null) {
+        setViewMonth(month)
+        setSelectedDay(null)
+      }
+    }, 100)
+  }
 
   const goToPrev = () => {
     if (viewMonth === 0) {
@@ -110,30 +151,71 @@ export function DateSelectDrawerContent({ value, onSelect, onClose }: Props) {
           <ChevronUp size={16} />
         </button>
 
-        <div ref={listRef} className="no-scrollbar h-52 overflow-y-auto">
-          {yearMonthOptions.map(({ year, month }) => {
-            const isActive = year === viewYear && month === viewMonth
-            return (
-              <button
-                key={`${year}-${month}`}
-                data-active={isActive}
-                onClick={() => {
-                  setViewYear(year)
-                  setViewMonth(month)
-                  setSelectedDay(null)
-                }}
-                className={cn(
-                  'flex w-full items-center justify-center gap-6 rounded-xl py-2.5 text-sm',
-                  isActive
-                    ? 'bg-green-50 font-semibold text-brand-secondary'
-                    : 'text-text-tertiary'
-                )}
-              >
-                <span>{year}년</span>
-                <span>{month + 1}월</span>
-              </button>
-            )
-          })}
+        <div className="relative h-52">
+          <div className="border-brand-secondary/30 pointer-events-none absolute inset-x-0 top-1/2 h-11 -translate-y-1/2 rounded-xl border-y" />
+          <div className="flex h-full">
+            <div
+              ref={yearListRef}
+              onScroll={handleYearScroll}
+              className="no-scrollbar snap-y snap-mandatory flex-1 overflow-y-auto scroll-smooth"
+            >
+              <div style={{ height: PICKER_PADDING }} />
+              {yearOptions.map((year) => {
+                const isActive = year === viewYear
+                return (
+                  <button
+                    key={year}
+                    onClick={() => {
+                      setViewYear(year)
+                      setSelectedDay(null)
+                      yearListRef.current?.scrollTo({
+                        top: yearOptions.indexOf(year) * PICKER_ITEM_HEIGHT,
+                        behavior: 'smooth',
+                      })
+                    }}
+                    className={cn(
+                      'flex h-11 w-full snap-center items-center justify-center text-sm',
+                      isActive ? 'font-semibold text-brand-secondary' : 'text-text-tertiary'
+                    )}
+                  >
+                    {year}년
+                  </button>
+                )
+              })}
+              <div style={{ height: PICKER_PADDING }} />
+            </div>
+
+            <div
+              ref={monthListRef}
+              onScroll={handleMonthScroll}
+              className="no-scrollbar snap-y snap-mandatory flex-1 overflow-y-auto scroll-smooth"
+            >
+              <div style={{ height: PICKER_PADDING }} />
+              {monthOptions.map((month) => {
+                const isActive = month === viewMonth
+                return (
+                  <button
+                    key={month}
+                    onClick={() => {
+                      setViewMonth(month)
+                      setSelectedDay(null)
+                      monthListRef.current?.scrollTo({
+                        top: month * PICKER_ITEM_HEIGHT,
+                        behavior: 'smooth',
+                      })
+                    }}
+                    className={cn(
+                      'flex h-11 w-full snap-center items-center justify-center text-sm',
+                      isActive ? 'font-semibold text-brand-secondary' : 'text-text-tertiary'
+                    )}
+                  >
+                    {month + 1}월
+                  </button>
+                )
+              })}
+              <div style={{ height: PICKER_PADDING }} />
+            </div>
+          </div>
         </div>
 
         <Button variant="filled" color="primary" size="lg" onClick={() => setMode('calendar')}>
