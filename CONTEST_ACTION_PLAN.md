@@ -145,16 +145,19 @@
 
 ---
 
-### 05. 애플·네이버 로그인 버튼 처리 — `+1~2점`
+### 05. 애플 로그인 버튼 처리 — `+1점`
 
 **파일**: `src/app/login/_components/SocialLoginBtns.tsx`
 
-카카오만 `onClick`이 붙어 있고 애플·네이버는 핸들러가 없다. `disabled`도 아니라 정상 버튼으로 보이고,
+네이버는 카카오와 같은 방식으로 연결됐다 (`src/lib/naver/naverLogin.ts`, 2026-09-01). 백엔드에
+`/oauth2/authorization/naver`가 실제로 열려 있는지는 미검증 — 확인 필요.
+
+애플만 아직 핸들러가 없다. `disabled`도 아니라 정상 버튼으로 보이고,
 누르면 아무 일도 일어나지 않는다. **첫 화면의 죽은 버튼**이라 완성도 인상을 즉시 깎는다.
 
 - 구현 계획이 없으면: `disabled` + "준비 중" 표기 (1시간)
-- 구현한다면: 백엔드에 `/oauth2/authorization/apple`, `/oauth2/authorization/naver`가 열려 있는지 먼저 확인.
-  카카오와 같은 방식(`window.location.href`로 백엔드 도메인 직행)이면 각 3줄로 끝난다.
+- 구현한다면: 백엔드에 `/oauth2/authorization/apple`이 열려 있는지 먼저 확인.
+  카카오·네이버와 같은 방식(`window.location.href`로 백엔드 도메인 직행)이면 3줄로 끝난다.
   **프록시를 거치면 OAuth 세션 쿠키가 끊기므로 반드시 백엔드 직행이어야 한다.**
 
 > 상세는 [UX_BACKLOG.md](UX_BACKLOG.md) 1번과 동일 건이다.

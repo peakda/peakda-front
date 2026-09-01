@@ -58,7 +58,15 @@ export const useNotificationListInfinite = (segment: NotificationSegment) =>
   })
 
 export const useUnreadNotificationCount = () =>
-  useGetNotificationsUnreadCount({ query: { select: (res) => res.data.data ?? null } })
+  useGetNotificationsUnreadCount({
+    query: {
+      select: (res) => res.data.data ?? null,
+      // SSE 대신 앱이 전경에 있을 때만 주기적으로 갱신한다.
+      staleTime: 0,
+      refetchInterval: 60_000,
+      refetchOnWindowFocus: true,
+    },
+  })
 
 // mutate({ id }) 형태로 호출 → 성공 시 알림 캐시 무효화
 export const useMarkNotificationRead = () => {

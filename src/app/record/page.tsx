@@ -153,6 +153,13 @@ function RecordPageContent() {
   const handlePublish = async () => {
     if (!selectedSpot || selectedStatus === '') return
 
+    // 매칭 실패로 attractionId 를 못 받은 상태에서 사용자가 유명 명소로 수동 전환하면
+    // ATTRACTION 타입인데 attractionId 가 없는 조합이 되어 서버가 거부한다.
+    if (category === '유명명소' && !selectedSpot.existingSpotId && !selectedSpot.attractionId) {
+      toast.error('유명 명소로 등록된 위치가 아니에요. 동네 스팟으로 저장해주세요.')
+      return
+    }
+
     try {
       // 서버가 한 요청에 1~5장을 받는다. 장당 한 번씩 보내면 모바일 네트워크에서
       // 실패 지점이 장수만큼 늘어나므로 한 번에 올린다(업로드 순서 = 응답 순서).

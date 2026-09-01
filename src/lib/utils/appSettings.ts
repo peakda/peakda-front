@@ -1,17 +1,21 @@
 // 앱 설정 localStorage 키. 서버에 저장하지 않고 클라이언트에서만 관리하는 값이다.
 export const APP_SETTINGS_KEY = 'peakda:app-settings'
+export const APP_SETTINGS_CHANGED_EVENT = 'peakda:app-settings-changed'
 
 export interface AppSettings {
   // 위치 정보 활용 (내 위치 기반 추천)
   locationEnabled: boolean
   // EXIF 데이터 자동 추출 (사진에서 위치·날짜 자동 입력)
   exifEnabled: boolean
+  // 네이티브 앱 푸시 알림 수신
+  pushEnabled: boolean
 }
 
 // 저장된 값이 없으면 둘 다 켜짐
 export const DEFAULT_APP_SETTINGS: AppSettings = {
   locationEnabled: true,
   exifEnabled: true,
+  pushEnabled: false,
 }
 
 const readFlag = (source: Record<string, unknown>, key: keyof AppSettings): boolean => {
@@ -31,6 +35,7 @@ export const readAppSettings = (raw: string | null): AppSettings => {
     return {
       locationEnabled: readFlag(source, 'locationEnabled'),
       exifEnabled: readFlag(source, 'exifEnabled'),
+      pushEnabled: readFlag(source, 'pushEnabled'),
     }
   } catch {
     return DEFAULT_APP_SETTINGS

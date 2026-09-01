@@ -1466,6 +1466,127 @@ export interface SignupCompleteRequest {
 }
 
 /**
+ * 인증 상태
+ */
+export type AppTokenResponseStatus = typeof AppTokenResponseStatus[keyof typeof AppTokenResponseStatus];
+
+
+export const AppTokenResponseStatus = {
+  AUTHENTICATED: 'AUTHENTICATED',
+  SIGNUP_REQUIRED: 'SIGNUP_REQUIRED',
+} as const;
+
+/**
+ * 앱 인증 토큰. status 에 따라 채워지는 필드가 다르다.
+ */
+export interface AppTokenResponse {
+  /** 인증 상태 */
+  status: AppTokenResponseStatus;
+  /**
+     * 토큰 타입
+     * @nullable
+     */
+  tokenType?: string | null;
+  /**
+     * 액세스 토큰. Authorization: Bearer 로 보낸다.
+     * @nullable
+     */
+  accessToken?: string | null;
+  /**
+     * 리프레시 토큰
+     * @nullable
+     */
+  refreshToken?: string | null;
+  /**
+     * 액세스 토큰 유효 시간(초)
+     * @nullable
+     */
+  accessTokenExpiresIn?: number | null;
+  /**
+     * 리프레시 토큰 유효 시간(초)
+     * @nullable
+     */
+  refreshTokenExpiresIn?: number | null;
+  /**
+     * 가입 세션 토큰. 회원가입 API 에 Authorization: Bearer 로 보낸다.
+     * @nullable
+     */
+  signupToken?: string | null;
+  /**
+     * 가입 세션 토큰 남은 시간(초)
+     * @nullable
+     */
+  signupTokenExpiresIn?: number | null;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseAppTokenResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: AppTokenResponse | null;
+}
+
+/**
+ * Apple 네이티브 로그인 요청
+ */
+export interface AppleLoginRequest {
+  /**
+     * iOS Apple 로그인 SDK 가 발급한 identity token (JWT)
+     * @minLength 1
+     */
+  identityToken: string;
+}
+
+/**
+ * Apple 로그인 결과
+ */
+export interface AppleLoginResponse {
+  /** 추가 회원가입이 필요한지 여부. true 면 signup-token 쿠키가 발급되어 회원가입 완료(/api/auth/signup/complete)가 필요하고, false 면 access-token·refresh-token 쿠키가 발급되어 로그인이 완료된 상태다. */
+  signupRequired: boolean;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseAppleLoginResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: AppleLoginResponse | null;
+}
+
+/**
+ * 일회성 코드 교환 요청
+ */
+export interface AppTokenExchangeRequest {
+  /**
+     * 딥링크로 받은 일회성 코드
+     * @minLength 1
+     */
+  code: string;
+}
+
+/**
+ * 앱 토큰 재발급 요청
+ */
+export interface AppTokenRefreshRequest {
+  /**
+     * 발급받은 리프레시 토큰
+     * @minLength 1
+     */
+  refreshToken: string;
+}
+
+/**
  * 큐레이션 이미지 업로드 multipart form
  */
 export interface CurationImageUploadForm {
@@ -1591,6 +1712,7 @@ export type UserAdminResponseProvider = typeof UserAdminResponseProvider[keyof t
 export const UserAdminResponseProvider = {
   KAKAO: 'KAKAO',
   NAVER: 'NAVER',
+  GOOGLE: 'GOOGLE',
   APPLE: 'APPLE',
 } as const;
 
