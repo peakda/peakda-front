@@ -23,12 +23,12 @@
 
 - [ ] 카카오 개발자 콘솔 JavaScript 키 허용 목록에 정식 프런트 오리진 등록
 - [x] 카카오·네이버 OAuth의 현재 웹 callback이 Android WebView에서도 왕복하는지 실기기 확인 — **2026-08-20 백엔드 회신: 지금 구조로는 안 됨.** 성공 핸들러가 웹 URL 한 곳으로만 리다이렉트하고, 인증이 HttpOnly 쿠키 전용이라 Custom Tab에서 받은 쿠키가 앱 WebView로 안 넘어온다. 딥링크로 돌아와도 앱엔 세션이 없다.
-- [x] 외부 브라우저로 이탈해 앱 복귀가 안 될 경우 App Links 도입 여부 결정 — **App Links가 아니라 일회성 코드 교환 방식으로 결정.** Custom Tab 인증 → `peakda://auth/callback?code=...` 로 복귀 → 앱이 code를 토큰과 교환 → 이후 Bearer 헤더로 호출. 엔드포인트 경로·딥링크 스킴·요청/응답 스키마는 **아직 미확정** — 백엔드가 확정되는 대로 공유 예정.
+- [x] 외부 브라우저로 이탈해 앱 복귀가 안 될 경우 App Links 도입 여부 결정 — **App Links가 아니라 일회성 코드 교환 방식으로 결정.** Custom Tab 인증 → `peakda://auth/callback?code=...` 로 복귀 → 앱이 `POST /api/auth/app/token`으로 code를 교환 → 이후 Bearer 헤더로 호출. refresh는 `POST /api/auth/app/token/refresh`를 사용한다.
 - [ ] App Links가 필요하면 백엔드 OAuth redirect URI와 각 소셜 콘솔 설정 변경 — 코드 교환 방식 확정 시 재검토
 - [x] 네이버 개발자센터 앱은 백엔드에서 관리. dev callback: `https://api-dev.peakda.com/login/oauth2/code/naver`, `https://api-dev.peakda.com/login/oauth2/code/kakao`. 운영 도메인 확정 시 동일 패턴으로 추가 등록 예정
 - [x] 애플 로그인은 **미지원 확정** — 추후 구글 로그인으로 교체 예정. `SocialLoginBtns`의 애플 버튼은 당분간 무반응 상태로 둔다([UX_BACKLOG.md](UX_BACKLOG.md) 1번)
 
-**코드 교환 스펙이 나오기 전까지 로그인은 기존 웹 방식(`/oauth2/authorization/{provider}` 직행) 그대로 두고, 앱 전용 분기는 스펙 확정 후에 붙인다.** 카카오·네이버 버튼은 이미 이 방식으로 연결돼 있다(`src/lib/auth/socialLogin.ts`).
+**앱 전용 로그인은 `/oauth2/authorization/{provider}?client=app`으로 시작한다.** 웹은 기존 쿠키 방식(`/oauth2/authorization/{provider}` 직행)을 유지하며, Android는 Custom Tab·딥링크·Bearer 토큰 교환 경로를 사용한다.
 
 ## P0 — 푸시 구현 전 백엔드 답변 필요 (2026-08-20 회신 받음)
 

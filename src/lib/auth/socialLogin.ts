@@ -1,10 +1,19 @@
-// 프론트(Vercel)·백엔드(AWS) 도메인이 달라, 프록시 경유 시 OAuth 세션 쿠키가 끊긴다.
-// 인가 시작~콜백을 모두 백엔드 도메인에서 처리하도록 백엔드 OAuth 로 직접 진입한다.
-export type SocialLoginProvider = 'kakao' | 'naver'
+import { Browser } from '@capacitor/browser'
+import { isNativeAndroid } from '@/lib/auth/nativeAuth'
 
-function redirectToSocialLogin(provider: SocialLoginProvider): void {
-  window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/oauth2/authorization/${provider}`
+// 웹은 백엔드가 HttpOnly 쿠키를 심는 기존 OAuth 흐름을 유지한다. Android는 Custom Tab을
+// 열고, 백엔드가 peakda://auth/callback?code=... 로 복귀시키는 앱 전용 흐름을 사용한다.
+export type SocialLoginProvider = 'google' | 'kakao' | 'naver'
+
+async function redirectToSocialLogin(provider: SocialLoginProvider): Promise<void> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? ''
+  if (isNativeAndroid()) {
+    await Browser.open({ url: `${baseUrl}/oauth2/authorization/${provider}?client=app` })
+    return
+  }
+  window.location.href = `${baseUrl}/oauth2/authorization/${provider}`
 }
 
 export const handleKakaoLogin = () => redirectToSocialLogin('kakao')
 export const handleNaverLogin = () => redirectToSocialLogin('naver')
+export const handleGoogleLogin = () => redirectToSocialLogin('google')

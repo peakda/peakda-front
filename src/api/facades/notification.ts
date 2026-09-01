@@ -61,8 +61,7 @@ export const useUnreadNotificationCount = () =>
   useGetNotificationsUnreadCount({
     query: {
       select: (res) => res.data.data ?? null,
-      // SSE 대신 앱이 전경에 있을 때만 주기적으로 갱신한다. React Query 기본값은
-      // 5분이므로, 헤더의 알림 배지는 별도로 짧은 주기를 사용한다.
+      // SSE 대신 앱이 전경에 있을 때만 주기적으로 갱신한다.
       staleTime: 0,
       refetchInterval: 60_000,
       refetchOnWindowFocus: true,
