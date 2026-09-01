@@ -10,8 +10,16 @@ export function SocialLoginBtns() {
         onClick={handleGoogleLogin}
         size="lg"
         variant="filled"
-        className="rounded-3xl border border-[#DADCE0] bg-white text-[#3C4043] hover:bg-[#F8F9FA]"
-        leftIcon={<Image src="/images/Google.svg" alt="구글 로고" width={20} height={20} />}
+        className="rounded-3xl border border-[#DADCE0] bg-white pr-10 text-[#3C4043] hover:bg-[#F8F9FA]"
+        leftIcon={
+          <Image
+            src="/images/Google.svg"
+            alt="구글 로고"
+            width={28}
+            height={28}
+            className="ml-1.5"
+          />
+        }
       >
         구글로 시작하기
       </Button>
@@ -20,7 +28,7 @@ export function SocialLoginBtns() {
         size="lg"
         className="rounded-3xl bg-[#FEE500] text-black hover:bg-[#FEE500]"
         variant="filled"
-        leftIcon={<Image src="/images/Kakao.png" alt="애플 로고" width={24} height={24} />}
+        leftIcon={<Image src="/images/Kakao.png" alt="카카오 로고" width={24} height={24} />}
       >
         카카오로 시작하기
       </Button>
