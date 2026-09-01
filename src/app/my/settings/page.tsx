@@ -11,11 +11,17 @@ import { useDrawerStore } from '@/stores/useDrawerStore'
 import { BlockedUsersSection } from '@/app/my/settings/_components/BlockedUsersSection'
 import {
   APP_SETTINGS_KEY,
+  APP_SETTINGS_CHANGED_EVENT,
   DEFAULT_APP_SETTINGS,
   readAppSettings,
   type AppSettings,
 } from '@/lib/utils/appSettings'
 import type { LegalSlug } from '@/app/Terms/_data/legal-content'
+import {
+  isNativeAndroid,
+  requestAndStartPushNotifications,
+  stopPushNotifications,
+} from '@/lib/push/pushNotifications'
 
 const INFO_LINKS: { label: string; slug: LegalSlug }[] = [
   { label: '이용약관', slug: 'terms-of-service' },
@@ -47,6 +53,24 @@ export default function SettingsPage() {
     window.localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(next))
   }
 
+  const updatePushSetting = async (isOn: boolean) => {
+    try {
+      const enabled = isOn ? await requestAndStartPushNotifications() : false
+      if (!isOn) await stopPushNotifications()
+
+      const next = { ...settings, pushEnabled: enabled }
+      setSettings(next)
+      window.localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(next))
+      window.dispatchEvent(new Event(APP_SETTINGS_CHANGED_EVENT))
+    } catch (error) {
+      console.error('푸시 알림 설정 변경 실패', error)
+      const next = { ...settings, pushEnabled: false }
+      setSettings(next)
+      window.localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(next))
+      window.dispatchEvent(new Event(APP_SETTINGS_CHANGED_EVENT))
+    }
+  }
+
   return (
     <div className="bg-bg-primary relative flex min-h-screen flex-col pb-12">
       <div className="h-14">
@@ -70,6 +94,21 @@ export default function SettingsPage() {
           />
         )}
       </div>
+      {isNativeAndroid() && (
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex flex-col">
+            <span className="text-text-primary text-base">푸시 알림</span>
+            <span className="text-text-tertiary text-sm">개화 소식과 활동 알림</span>
+          </div>
+          {settingsLoaded && (
+            <Toggle
+              initialStatus={settings.pushEnabled}
+              status={settings.pushEnabled}
+              onChange={updatePushSetting}
+            />
+          )}
+        </div>
+      )}
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex flex-col">
           <span className="text-text-primary text-base">EXIF 데이터 자동 추출</span>

@@ -56,8 +56,10 @@ const INTERNAL_PREFIX: Record<NotificationResponse['type'], string | null> = {
   NOTICE: null,
 }
 
+type NotificationLinkSource = Pick<NotificationResponse, 'type' | 'linkType' | 'targetId' | 'linkUrl'>
+
 // 알림 탭 시 이동할 링크. 이동할 수 없으면 null(읽음 처리만 한다).
-export function toNotificationHref(n: NotificationResponse): NotificationLink | null {
+export function toNotificationHref(n: NotificationLinkSource): NotificationLink | null {
   if (n.linkType === 'EXTERNAL') {
     // http(s) 만 허용 — javascript: 같은 스킴이 내려와도 열지 않는다.
     if (!n.linkUrl || !/^https?:\/\//i.test(n.linkUrl)) return null
@@ -67,6 +69,46 @@ export function toNotificationHref(n: NotificationResponse): NotificationLink | 
   const prefix = INTERNAL_PREFIX[n.type]
   if (!prefix || n.targetId == null) return null
   return { href: `${prefix}/${n.targetId}`, isExternal: false }
+}
+
+function isNotificationType(v: unknown): v is NotificationResponse['type'] {
+  return typeof v === 'string' && v in TYPE_MAP
+}
+
+function isLinkType(v: unknown): v is NotificationResponse['linkType'] {
+  return v === 'INTERNAL' || v === 'EXTERNAL'
+}
+
+function parseIntField(value: unknown): number | null {
+  if (typeof value !== 'string' || value === '') return null
+  const n = Number(value)
+  return Number.isNaN(n) ? null : n
+}
+
+export interface PushNotificationTarget {
+  notificationId: number | null
+  link: NotificationLink | null
+}
+
+// FCM data 페이로드는 값이 전부 문자열이다 (백엔드 규격: notificationId, type, linkType, targetId, linkUrl).
+// GET /api/notifications 응답과 같은 필드 세트라 toNotificationHref 를 그대로 재사용한다.
+export function resolvePushNotificationTarget(data: unknown): PushNotificationTarget {
+  const record = typeof data === 'object' && data !== null ? (data as Record<string, unknown>) : {}
+  const notificationId = parseIntField(record.notificationId)
+  const { type, linkType, linkUrl } = record
+
+  if (!isNotificationType(type) || !isLinkType(linkType)) {
+    return { notificationId, link: null }
+  }
+
+  const link = toNotificationHref({
+    type,
+    linkType,
+    targetId: parseIntField(record.targetId),
+    linkUrl: typeof linkUrl === 'string' ? linkUrl : null,
+  })
+
+  return { notificationId, link }
 }
 
 // 탭 value → 알림 세그먼트

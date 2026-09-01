@@ -4,6 +4,7 @@
 
 export const AUTH_MARKER = 'peakda_auth'
 export const RETURN_TO = 'peakda_return_to'
+export const AUTH_MARKER_SET_EVENT = 'peakda:auth-marker-set'
 
 const MARKER_MAX_AGE = 2592000 // 30일
 const RETURN_TO_MAX_AGE = 600 // 10분
@@ -11,6 +12,12 @@ const RETURN_TO_MAX_AGE = 600 // 10분
 export function setAuthMarker(): void {
   if (typeof document === 'undefined') return
   document.cookie = `${AUTH_MARKER}=1; path=/; max-age=${MARKER_MAX_AGE}; samesite=lax`
+  window.dispatchEvent(new Event(AUTH_MARKER_SET_EVENT))
+}
+
+export function hasAuthMarker(): boolean {
+  if (typeof document === 'undefined') return false
+  return document.cookie.split('; ').some((cookie) => cookie === `${AUTH_MARKER}=1`)
 }
 
 export function clearAuthMarker(): void {

@@ -93,6 +93,7 @@ export default function ProfileEditPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+    const previousPreview = preview
     setPreview(URL.createObjectURL(file))
     uploadImage(
       { data: { image: file } },
@@ -100,6 +101,11 @@ export default function ProfileEditPage() {
         onSuccess: (res) => {
           const data = res.data.data
           if (data) setPreview(data.profileImageUrl)
+          toast.success('프로필 사진이 변경되었어요.')
+        },
+        onError: () => {
+          setPreview(previousPreview)
+          toast.error('프로필 사진 등록에 실패했어요.')
         },
       }
     )

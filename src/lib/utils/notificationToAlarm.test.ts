@@ -3,6 +3,7 @@ import type { NotificationResponse } from '@/api/facades/generated/peakdaApi.sch
 import { GetNotificationsSegment } from '@/api/facades/generated/peakdaApi.schemas'
 import {
   formatUnreadBadge,
+  resolvePushNotificationTarget,
   segmentFromTab,
   toAlarmItem,
   toNotificationHref,
@@ -130,6 +131,48 @@ describe('toNotificationHref', () => {
     expect(
       toNotificationHref(baseNotification({ linkType: 'EXTERNAL', linkUrl: 'javascript:alert(1)' }))
     ).toBeNull()
+  })
+})
+
+describe('resolvePushNotificationTarget', () => {
+  it('FCM data(전부 문자열)를 파싱해 notificationId 와 링크를 반환한다', () => {
+    expect(
+      resolvePushNotificationTarget({
+        notificationId: '42',
+        type: 'TIMING',
+        linkType: 'INTERNAL',
+        targetId: '7',
+      })
+    ).toEqual({ notificationId: 42, link: { href: '/spot/7', isExternal: false } })
+  })
+
+  it('EXTERNAL 은 linkUrl 을 그대로 사용한다', () => {
+    expect(
+      resolvePushNotificationTarget({
+        notificationId: '1',
+        type: 'NOTICE',
+        linkType: 'EXTERNAL',
+        linkUrl: 'https://peakda.example/notice/1',
+      })
+    ).toEqual({
+      notificationId: 1,
+      link: { href: 'https://peakda.example/notice/1', isExternal: true },
+    })
+  })
+
+  it('type·linkType 이 알 수 없는 값이면 link 는 null 이지만 notificationId 는 유지한다', () => {
+    expect(
+      resolvePushNotificationTarget({ notificationId: '5', type: 'UNKNOWN', linkType: 'INTERNAL' })
+    ).toEqual({ notificationId: 5, link: null })
+  })
+
+  it('data 가 객체가 아니거나 비어 있으면 둘 다 null 을 반환한다', () => {
+    expect(resolvePushNotificationTarget(undefined)).toEqual({ notificationId: null, link: null })
+    expect(resolvePushNotificationTarget({})).toEqual({ notificationId: null, link: null })
+  })
+
+  it('notificationId 가 숫자로 파싱되지 않으면 null 이다', () => {
+    expect(resolvePushNotificationTarget({ notificationId: 'abc' }).notificationId).toBeNull()
   })
 })
 

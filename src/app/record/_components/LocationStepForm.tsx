@@ -74,6 +74,58 @@ export function LocationStepForm({
           </p>
         </div>
 
+        {/* 사진 */}
+        <div className="flex flex-col gap-2 px-4">
+          <div>
+            <p className="text-sm font-medium">
+              사진 <span className="text-brand-primary">*</span>
+            </p>
+            <p className="text-text-secondary text-xs">최대 5장, 첫 사진이 대표 이미지</p>
+          </div>
+          {photoItems.length > 0 && (
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {photoItems.map((item, i) => (
+                <div
+                  key={i}
+                  className="bg-bg-secondary relative h-24 w-24 shrink-0 overflow-hidden rounded-xl"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={item.previewUrl}
+                    alt={`사진 ${i + 1}`}
+                    className="h-full w-full object-cover"
+                  />
+                  <button
+                    onClick={() => onRemovePhoto(i)}
+                    className="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60"
+                  >
+                    <X size={12} color="white" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={onPhotoAdd}
+          />
+          {photoItems.length < 5 && (
+            <Button
+              variant="outlined"
+              size="md"
+              leftIcon={<Plus size={16} />}
+              onClick={() => fileInputRef.current?.click()}
+              className="w-fit rounded-2xl py-5"
+            >
+              사진 추가
+            </Button>
+          )}
+        </div>
+
         {/* 위치 */}
         <div className="flex flex-col gap-2">
           <p className="px-4 text-sm font-medium">
@@ -137,58 +189,6 @@ export function LocationStepForm({
               placeholder="주소 또는 장소명 검색"
               onFocus={onOpenSearch}
             />
-          )}
-        </div>
-
-        {/* 사진 */}
-        <div className="flex flex-col gap-2 px-4">
-          <div>
-            <p className="text-sm font-medium">
-              사진 <span className="text-brand-primary">*</span>
-            </p>
-            <p className="text-text-secondary text-xs">최대 5장, 첫 사진이 대표 이미지</p>
-          </div>
-          {photoItems.length > 0 && (
-            <div className="flex gap-2 overflow-x-auto pb-1">
-              {photoItems.map((item, i) => (
-                <div
-                  key={i}
-                  className="bg-bg-secondary relative h-24 w-24 shrink-0 overflow-hidden rounded-xl"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={item.previewUrl}
-                    alt={`사진 ${i + 1}`}
-                    className="h-full w-full object-cover"
-                  />
-                  <button
-                    onClick={() => onRemovePhoto(i)}
-                    className="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60"
-                  >
-                    <X size={12} color="white" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            onChange={onPhotoAdd}
-          />
-          {photoItems.length < 5 && (
-            <Button
-              variant="outlined"
-              size="md"
-              leftIcon={<Plus size={16} />}
-              onClick={() => fileInputRef.current?.click()}
-              className="w-fit rounded-2xl py-5"
-            >
-              사진 추가
-            </Button>
           )}
         </div>
 

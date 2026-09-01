@@ -1,4 +1,10 @@
 import { clearAuthMarker, setReturnTo } from '@/lib/auth/session'
+import {
+  clearNativeAuthSession,
+  getNativeAuthorizationHeader,
+  isNativeAndroid,
+  refreshNativeAuthSession,
+} from '@/lib/auth/nativeAuth'
 
 // 프론트(Vercel)·백엔드(AWS) 도메인이 달라, 브라우저/서버 모두 백엔드를 직접 호출하고
 // 크로스사이트 쿠키(SameSite=None; Secure)를 credentials: 'include' 로 주고받는다.
@@ -25,16 +31,30 @@ async function runRefresh(): Promise<void> {
 }
 
 export const customInstance = async <T>(url: string, options?: RequestInit): Promise<T> => {
-  const request = () => fetch(`${getBaseUrl()}${url}`, { credentials: 'include', ...options })
+  const native = isNativeAndroid()
+  const request = async () => {
+    const authorization = native ? await getNativeAuthorizationHeader(url) : null
+    const headers = new Headers(options?.headers)
+    if (authorization) headers.set('Authorization', authorization)
+
+    return fetch(`${getBaseUrl()}${url}`, {
+      ...options,
+      credentials: native ? 'omit' : 'include',
+      headers,
+    })
+  }
 
   let res = await request()
 
-  // 액세스 토큰 만료(401) → refresh 1회 후 원요청 재시도. refresh 엔드포인트 자체는 제외(무한 루프 방지).
-  if (res.status === 401 && !url.includes('/api/auth/refresh')) {
+  // 네이티브는 앱 refresh 토큰, 웹은 HttpOnly 쿠키 refresh 토큰을 각각 한 번만 시도한다.
+  const refreshUrl = native ? '/api/auth/app/token/refresh' : '/api/auth/refresh'
+  if (res.status === 401 && !url.includes(refreshUrl)) {
     try {
-      await runRefresh()
+      if (native) await refreshNativeAuthSession()
+      else await runRefresh()
       res = await request()
     } catch {
+      if (native) await clearNativeAuthSession()
       if (typeof window !== 'undefined') {
         // 인증이 확정적으로 끊긴 상태 — 마커를 지워 미들웨어가 다시 로그인으로 보내게 하고,
         // 로그인 후 돌아올 위치를 남긴다.
