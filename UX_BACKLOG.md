@@ -6,18 +6,15 @@
 이미 처리한 항목은 여기서 지운다. git log 참고.
 2026-08-18 에 해소된 것: **지역(권역) 필터 무반응** — 서버 `region` 파라미터가 생겨 실제로 결과에 반영된다.
 2026-08-19 에 해소된 것: **핀 프리뷰·스팟 카드의 하트/종 무반응** — `spotId` 배선이 끊겨 있었고 종은 아예 버튼이 아니었다. `BellBtn` 을 만들어 둘 다 연결했다(찜 안 된 스팟에서는 종 비활성).
-2026-09-01 에 해소된 것: **네이버 로그인 버튼 무반응** — 카카오와 같은 방식(`src/lib/naver/naverLogin.ts`, `window.location.href` 로 `${NEXT_PUBLIC_API_URL}/oauth2/authorization/naver` 직행)으로 연결. 단, 백엔드에 `/oauth2/authorization/naver` 가 실제로 열려 있는지는 미검증 — 확인 필요.
+2026-08-20 에 해소된 것: **네이버 로그인 버튼 무반응** — 백엔드가 `/oauth2/authorization/naver` 오픈과 callback 등록을 확인해줘 카카오와 같은 방식으로 연결했다 (`src/lib/auth/socialLogin.ts`).
 
 ---
 
-## 1. 애플 로그인 버튼이 무반응
+## 1. 소셜 로그인 후 네이티브 앱 세션 연결
 
 **파일**: `src/app/login/_components/SocialLoginBtns.tsx`
 
-애플만 아직 핸들러가 없다. `disabled` 도 아니라 정상 버튼으로 보이고, 누르면 아무 일도 일어나지 않는다. **첫 화면에서 사용자가 가장 먼저 만지는 지점**이라 체감이 크다.
-
-- 구현 계획이 없으면: `disabled` + "준비 중" 표기로 최소 방어
-- 구현한다면: 백엔드에 `/oauth2/authorization/apple` 이 열려 있는지 먼저 확인. 카카오·네이버와 같은 방식(`window.location.href` 로 백엔드 도메인 직행)이면 3줄로 끝난다 — 프런트/백엔드 도메인이 달라 프록시를 거치면 OAuth 세션 쿠키가 끊기므로 반드시 백엔드 직행이어야 한다 (`src/lib/kakao/kakaoLogin.ts` 주석 참고)
+애플 버튼은 구글 로그인으로 교체했다. 웹은 백엔드 OAuth URL로 직접 이동하고, Capacitor Android는 Custom Tab 인증 뒤 `peakda://auth/callback?code=...` 딥링크로 돌아와 앱 토큰으로 교환한다.
 
 ## 2. 가입 도중 뒤로가기가 막다른 길
 

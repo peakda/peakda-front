@@ -1,0 +1,49 @@
+:root {
+  color-scheme: light;
+  font-family: Pretendard, system-ui, sans-serif;
+  background: #fff;
+  color: #222;
+}
+
+body {
+  display: grid;
+  min-height: 100vh;
+  margin: 0;
+  place-items: center;
+}
+
+main {
+  max-width: 24rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+h1 {
+  color: #f7576b;
+}
+
+code {
+  overflow-wrap: anywhere;
+}
+
+button {
+  margin-top: 1rem;
+  padding: 0.75rem 1.25rem;
+  border: 0;
+  border-radius: 9999px;
+  background: #f7576b;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:focus-visible {
+  outline: 3px solid #222;
+  outline-offset: 3px;
+}
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}

@@ -1,8 +1,7 @@
 'use client'
 import { Button } from '@/components/ui/button/Button'
 import { handleGoogleLogin } from '@/lib/google/googleLogin'
-import { handleKakaoLogin } from '@/lib/kakao/kakaoLogin'
-import { handleNaverLogin } from '@/lib/naver/naverLogin'
+import { handleKakaoLogin, handleNaverLogin } from '@/lib/auth/socialLogin'
 import Image from 'next/image'
 
 export function SocialLoginBtns() {

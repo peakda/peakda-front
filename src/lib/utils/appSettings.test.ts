@@ -3,8 +3,12 @@ import { DEFAULT_APP_SETTINGS, readAppSettings } from './appSettings'
 
 describe('utils/appSettings', () => {
   describe('readAppSettings', () => {
-    it('null 이면 기본값(둘 다 켜짐)', () => {
-      expect(readAppSettings(null)).toEqual({ locationEnabled: true, exifEnabled: true })
+    it('null 이면 기본값', () => {
+      expect(readAppSettings(null)).toEqual({
+        locationEnabled: true,
+        exifEnabled: true,
+        pushEnabled: false,
+      })
     })
     it('빈 문자열이면 기본값', () => {
       expect(readAppSettings('')).toEqual(DEFAULT_APP_SETTINGS)
@@ -25,24 +29,28 @@ describe('utils/appSettings', () => {
       expect(readAppSettings('{"locationEnabled":false,"exifEnabled":false}')).toEqual({
         locationEnabled: false,
         exifEnabled: false,
+        pushEnabled: false,
       })
     })
     it('일부 키만 있으면 없는 키는 기본값', () => {
       expect(readAppSettings('{"locationEnabled":false}')).toEqual({
         locationEnabled: false,
         exifEnabled: true,
+        pushEnabled: false,
       })
     })
     it('불리언이 아닌 값은 기본값으로 대체', () => {
       expect(readAppSettings('{"locationEnabled":"false","exifEnabled":0}')).toEqual({
         locationEnabled: true,
         exifEnabled: true,
+        pushEnabled: false,
       })
     })
     it('모르는 키는 무시한다', () => {
       expect(readAppSettings('{"exifEnabled":false,"unknown":1}')).toEqual({
         locationEnabled: true,
         exifEnabled: false,
+        pushEnabled: false,
       })
     })
   })
