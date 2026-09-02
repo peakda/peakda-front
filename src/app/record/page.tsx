@@ -222,7 +222,13 @@ function RecordPageContent() {
   if (isComplete) {
     return (
       <RecordCompleteView
-        onGoToMap={() => router.push('/map')}
+        onGoToMap={() =>
+          router.push(
+            selectedSpot
+              ? `/map?lat=${selectedSpot.latitude}&lng=${selectedSpot.longitude}`
+              : '/map'
+          )
+        }
         onRecordAgain={handleRecordAgain}
         onExit={() => router.back()}
       />
