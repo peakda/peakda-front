@@ -88,7 +88,7 @@ function RecordPageContent() {
 
   const hasLocation = location.trim().length > 0
   const hasSearchQuery = searchQuery.trim().length > 0
-  const isValid = hasLocation && photoItems.length > 0
+  const isValid = hasLocation && photoItems.length > 0 && date.trim().length > 0
   const isSubmitting = matchSpot.isPending || uploadPhotos.isPending || createRecord.isPending
 
   const handlePhotoAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
