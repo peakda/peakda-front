@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Header } from '@/components/ui/layout/Header'
@@ -18,7 +18,6 @@ import { useDrawerStore } from '@/stores/useDrawerStore'
 import { detailToFeedCardProps } from '@/lib/utils/spotRecordToFeed'
 import { buildReportRequest } from '@/lib/utils/feed'
 import type { CreateReportRequestReason } from '@/api/facades/generated/peakdaApi.schemas'
-import { hasAuthMarker } from '@/lib/auth/session'
 
 // 피드(공개) 상세. 게시된(PUBLISHED) 기록만 조회되며, DRAFT·없음이면 get1 이 404 → record 없음 처리.
 // 헤더는 사진 위에 겹쳐 뜨고, 더보기는 소유자면 수정/삭제, 아니면 신고하기를 노출한다.
@@ -26,10 +25,8 @@ export default function FeedDetailPage() {
   const router = useRouter()
   const { id } = useParams<{ id: string }>()
   const recordId = Number(id)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  useEffect(() => setIsAuthenticated(hasAuthMarker()), [])
   const { data: record, isLoading } = useFeedDetail(recordId)
-  const { data: currentUser } = useCurrentUser(isAuthenticated)
+  const { data: currentUser } = useCurrentUser()
   const { data: spot } = useSpotDetail(record?.spot.id)
   const deleteRecord = useDeleteSpotRecord()
   const report = useReport()

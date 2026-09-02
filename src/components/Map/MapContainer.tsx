@@ -26,7 +26,6 @@ import { REGION_MAP_CENTERS } from '@/constants/region'
 import { STAGE_LABEL } from '@/constants/map'
 import type { GetSeasonalBloomsParams } from '@/api/facades/generated/peakdaApi.schemas'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { hasAuthMarker } from '@/lib/auth/session'
 
 const Drawer = dynamic(
   () => import('@/components/ui/layout/Drawer').then((m) => ({ default: m.Drawer })),
@@ -125,10 +124,6 @@ export const MapContainer = () => {
   const draftCategories = useFilterStore((s) => s.draft.categories)
   const setPinType = useFilterStore((s) => s.setPinType)
   const setVisibleSpots = useFilterStore((s) => s.setVisibleSpots)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-
-  // 쿠키는 브라우저에서만 읽을 수 있다. 서버 첫 렌더에서는 인증 요청을 하지 않는다.
-  useEffect(() => setIsAuthenticated(hasAuthMarker()), [])
 
   const statuses = useMemo(() => timingToStatuses(applied.timing), [applied.timing])
 
@@ -226,8 +221,7 @@ export const MapContainer = () => {
     suggestion?.available && suggestion.message ? suggestion.message : '벚꽃 만개 지역'
 
   // 안 읽은 알림이 있을 때만 헤더 알림 버튼에 점 표시
-  // 지도는 비로그인 탐색을 지원한다. 인증이 필요한 알림 조회는 로그인 사용자만 요청한다.
-  const { data: unread } = useUnreadNotificationCount(isAuthenticated)
+  const { data: unread } = useUnreadNotificationCount()
   const hasUnreadNotification = (unread?.unreadCount ?? 0) > 0
 
   // 핀 하나든 필터 결과 목록이든 같은 preview API 로 채운다.
