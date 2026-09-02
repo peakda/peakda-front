@@ -8,6 +8,7 @@ import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { flattenPages } from '@/lib/utils/infinitePages'
 import { shouldLoadMore } from '@/lib/utils/myRecords'
 import { toBlockedRow } from '@/lib/utils/userProfile'
+import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
 
 export function BlockedUsersSection() {
   const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useBlockedListInfinite()
@@ -27,9 +28,9 @@ export function BlockedUsersSection() {
         rows.map((row) => (
           <div key={row.userId} className="flex items-center gap-3 px-4 py-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-200">
-              {row.profileImageUrl ? (
+              {toHttpsImageUrl(row.profileImageUrl) ? (
                 <Image
-                  src={row.profileImageUrl}
+                  src={toHttpsImageUrl(row.profileImageUrl)!}
                   alt="프로필"
                   width={40}
                   height={40}

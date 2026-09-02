@@ -11,6 +11,7 @@ import { useCarousel } from '@/hooks/useEmblaCarousel'
 import { SpotBloomSummary } from './SpotBloomSummary'
 import type { SpotBloomSummaryProps } from './SpotBloomSummary'
 import type { FeedCardProps } from '@/components/ui/card/FeedCard'
+import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
 
 type FeedDetailViewProps = Pick<
   FeedCardProps,
@@ -46,6 +47,7 @@ export function FeedDetailView({
   spotSummary,
 }: FeedDetailViewProps) {
   const { emblaRef, selectedIndex, scrollSnaps, scrollTo } = useCarousel({ loop: true })
+  const safeAuthorImageUrl = toHttpsImageUrl(authorImageUrl)
 
   return (
     <div className="flex flex-col gap-3">
@@ -89,8 +91,8 @@ export function FeedDetailView({
       <div className="flex items-center gap-2 px-4">
         <Link href={`/users/${authorId}`}>
           <IconBtn size="md" className="relative overflow-hidden">
-            {authorImageUrl ? (
-              <Image src={authorImageUrl} alt="프로필" fill className="object-cover" sizes="32px" />
+            {safeAuthorImageUrl ? (
+              <Image src={safeAuthorImageUrl} alt="프로필" fill className="object-cover" sizes="32px" />
             ) : (
               <Image src="/icons/person.svg" alt="프로필" width={16} height={16} />
             )}

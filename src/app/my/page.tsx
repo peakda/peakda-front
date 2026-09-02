@@ -18,6 +18,7 @@ import { useFavoriteList } from '@/api/facades/spot-favorite'
 import { toFavoriteSpotProps } from '@/lib/utils/spotFavorite'
 import { useUnreadNotificationCount } from '@/api/facades/notification'
 import { formatUnreadBadge } from '@/lib/utils/notificationToAlarm'
+import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
 
 export default function MyPage() {
   const router = useRouter()
@@ -29,6 +30,7 @@ export default function MyPage() {
   const unreadBadge = formatUnreadBadge(unread?.unreadCount ?? 0)
   const { data: favoriteData } = useFavoriteList()
   const savedSpots = (favoriteData?.favorites ?? []).slice(0, 3).map(toFavoriteSpotProps)
+  const safeProfileImageUrl = toHttpsImageUrl(myPage?.profileImageUrl)
 
   return (
     <div className="bg-bg-primary relative flex min-h-screen w-full flex-col pb-24">
@@ -61,9 +63,9 @@ export default function MyPage() {
       {/* 프로필 */}
       <div className="flex items-center gap-3 px-4 py-3">
         <IconBtn size="md" className="bg-bg-tertiary relative overflow-hidden">
-          {myPage?.profileImageUrl ? (
+          {safeProfileImageUrl ? (
             <Image
-              src={myPage.profileImageUrl}
+              src={safeProfileImageUrl}
               alt="프로필"
               fill
               className="object-cover"
