@@ -23,6 +23,7 @@ import { useUnreadNotificationCount } from '@/api/facades/notification'
 import { spotPreviewApi } from '@/api/facades/spot'
 import { toPinListItems } from '@/lib/utils/spotPreview'
 import { bloomToMapSpots } from '@/lib/utils/bloomToMapSpots'
+import { REGION_MAP_CENTERS } from '@/constants/region'
 import { STAGE_LABEL } from '@/constants/map'
 import type { GetSeasonalBloomsParams } from '@/api/facades/generated/peakdaApi.schemas'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -111,7 +112,9 @@ const initMap = (container: HTMLElement, center: { lat: number; lng: number }) =
 export const MapContainer = () => {
   const containerRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
+  const isRegionMovePendingRef = useRef(false)
   const searchParams = useSearchParams()
+  const [isRegionMovePending, setIsRegionMovePending] = useState(false)
   const mapRef = useRef<kakao.maps.Map | null>(null)
   const [mapInstance, setMapInstance] = useState<kakao.maps.Map | null>(null)
   const [bbox, setBbox] = useState<GetSeasonalBloomsParams | null>(null)
@@ -198,13 +201,21 @@ export const MapContainer = () => {
         .filter((id): id is number => id != null),
       center: center ? { lat: center.getLat(), lng: center.getLng() } : null,
       // 아직 이전 조건의 결과를 보고 있으면 목록 열기를 기다려야 한다.
-      isStale: isPlaceholderData,
+      isStale: isPlaceholderData || isRegionMovePending,
       draftCount: inView(draftSpots).filter((s) => s.spotId != null).length,
       // 어떤 조건으로 계산한 결과인지 함께 올린다. 드로어가 이걸로 최신 여부를 판단한다.
       appliedFor: applied,
     })
     // 드로어가 "이 결과가 어떤 applied 기준인지" 를 참조 비교로 판단하므로 applied 를 함께 넣는다.
-  }, [spots, draftSpots, mapInstance, isPlaceholderData, applied, setVisibleSpots])
+  }, [
+    spots,
+    draftSpots,
+    mapInstance,
+    isPlaceholderData,
+    isRegionMovePending,
+    applied,
+    setVisibleSpots,
+  ])
 
   // 시즌 추천어(홈 검색바 보조 카피). 절정 데이터 없으면(available=false) 기본 문구로 폴백.
   const { data: suggestion } = useHomeSuggestion()
@@ -289,7 +300,15 @@ export const MapContainer = () => {
     let timer: ReturnType<typeof setTimeout>
     const onIdle = () => {
       clearTimeout(timer)
-      timer = setTimeout(updateBbox, BBOX_DEBOUNCE_MS)
+      timer = setTimeout(() => {
+        updateBbox()
+        // 지역 이동 중에는 이전 bbox의 빈 응답이 먼저 도착할 수 있다. 새 bbox를 반영한 뒤에만
+        // 드로어가 결과 목록을 열도록 대기 상태를 해제한다.
+        if (isRegionMovePendingRef.current) {
+          isRegionMovePendingRef.current = false
+          setIsRegionMovePending(false)
+        }
+      }, BBOX_DEBOUNCE_MS)
     }
 
     updateBbox() // 첫 진입은 즉시 조회
@@ -305,6 +324,22 @@ export const MapContainer = () => {
       navigator.serviceWorker.register('/map-tile-sw.js').catch(console.error)
     }
   }, [])
+
+  // 권역은 현재 화면 bbox와 AND 조건으로 조회된다. 먼저 해당 권역의 중심으로 옮겨야
+  // 이전 화면 영역 때문에 결과가 비는 일을 막고, idle 이벤트가 새 bbox로 재조회한다.
+  useEffect(() => {
+    if (!mapInstance) return
+    if (!applied.region) {
+      isRegionMovePendingRef.current = false
+      setIsRegionMovePending(false)
+      return
+    }
+
+    const center = REGION_MAP_CENTERS[applied.region]
+    isRegionMovePendingRef.current = true
+    setIsRegionMovePending(true)
+    mapInstance.panTo(new kakao.maps.LatLng(center.lat, center.lng))
+  }, [mapInstance, applied.region])
 
   useEffect(() => {
     if (!error) return

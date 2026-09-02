@@ -20,3 +20,14 @@ export const REGIONS: RegionMeta[] = [
   { key: 'JEOLLA', label: '전라도', subLabel: '광주 · 전주 · 순천 등' },
   { key: 'JEJU', label: '제주도', subLabel: '제주 · 서귀포' },
 ]
+
+// 지역 필터를 적용할 때 지도를 옮길 권역별 대표 좌표.
+// 상세 좌표가 아니라 권역 전환의 출발점이므로, 이후 사용자가 자유롭게 탐색할 수 있다.
+export const REGION_MAP_CENTERS: Record<RegionKey, { lat: number; lng: number }> = {
+  CAPITAL: { lat: 37.5665, lng: 126.978 },
+  GANGWON: { lat: 37.8228, lng: 128.1555 },
+  CHUNGCHEONG: { lat: 36.6357, lng: 127.4913 },
+  GYEONGSANG: { lat: 35.8714, lng: 128.6014 },
+  JEOLLA: { lat: 35.7175, lng: 127.153 },
+  JEJU: { lat: 33.4996, lng: 126.5312 },
+}
