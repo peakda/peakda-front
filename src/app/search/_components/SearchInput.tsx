@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/form/Input'
 import { X } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Dispatch, SetStateAction } from 'react'
+import { Dispatch, SetStateAction, useEffect, useRef } from 'react'
 
 interface SearchBarProps {
   query?: string
@@ -18,6 +18,8 @@ interface SearchBarProps {
   onClick?: () => void
   // Enter 로 검색을 확정할 때 현재 입력값을 넘긴다 (최근 검색어 저장 등)
   onSubmit?: (value: string) => void
+  // 페이지 전환 직후 바로 입력할 수 있도록 검색창에 포커스한다.
+  autoFocus?: boolean
 }
 
 export function SearchInput({
@@ -30,12 +32,26 @@ export function SearchInput({
   readOnly,
   onClick,
   onSubmit,
+  autoFocus = false,
 }: SearchBarProps) {
   const router = useRouter()
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (!autoFocus) return
+
+    // 자동 포커스 후에도 라우트 전환 애니메이션 등이 포커스를 빼앗을 수 있어 한 프레임 뒤 확인한다.
+    inputRef.current?.focus()
+    const frame = requestAnimationFrame(() => inputRef.current?.focus())
+    return () => cancelAnimationFrame(frame)
+  }, [autoFocus])
+
   return (
     <div className="flex items-center gap-4 px-4 pt-2 pb-2">
       <div className="flex-1">
         <Input
+          ref={inputRef}
+          autoFocus={autoFocus}
           value={query}
           variant="none"
           leftIcon={

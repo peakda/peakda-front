@@ -74,6 +74,7 @@ export default function SearchPage() {
         hasQuery={hasQuery}
         setQuery={setQuery}
         isCancle
+        autoFocus
         placeholder={searchPlaceholder}
         onSubmit={submitSearch}
       />

@@ -170,12 +170,23 @@ export function Drawer() {
             : type === 'delete-confirm'
               ? '삭제 확인'
               : '찜 추가'
+    const description =
+      type === 'logout'
+        ? '현재 계정에서 로그아웃합니다.'
+        : type === 'withdraw'
+          ? '계정 탈퇴에 관한 안내와 선택지를 제공합니다.'
+          : type === 'date-select'
+            ? '방문 기록에 사용할 촬영일자를 선택합니다.'
+            : type === 'delete-confirm'
+              ? '선택한 항목을 삭제할지 확인합니다.'
+              : '선택한 스팟을 찜 목록에 추가하고 개화 알림을 설정합니다.'
     return (
       <VaulDrawer.Root open={isOpen} onOpenChange={(open) => !open && closeDrawer()}>
         <VaulDrawer.Portal>
           <VaulDrawer.Overlay className="fixed inset-0 z-100 mx-auto max-w-[430px] bg-black/40" />
           <VaulDrawer.Content className="fixed right-0 bottom-0 left-0 z-100 mx-auto flex max-w-[430px] flex-col rounded-t-[20px] bg-white outline-none">
             <VaulDrawer.Title className="sr-only">{title}</VaulDrawer.Title>
+            <VaulDrawer.Description className="sr-only">{description}</VaulDrawer.Description>
             <div className="mx-auto mt-4 mb-2 h-1.5 w-12 shrink-0 rounded-full bg-zinc-300" />
             {type === 'logout' ? (
               <LogoutDrawerContent onClose={closeDrawer} />
@@ -202,6 +213,12 @@ export function Drawer() {
   }
 
   const snapPoints = ['400px', 0.9]
+  const description =
+    type === 'filter'
+      ? '지역, 시기, 꽃 종류로 지도에 표시할 명소를 필터링합니다.'
+      : type === 'flower-filter'
+        ? '꽃 종류로 표시할 명소를 필터링합니다.'
+        : '지도에서 선택한 명소 목록입니다.'
 
   function handleSnapChange(value: string | number | null) {
     setSnap(value)
@@ -230,6 +247,7 @@ export function Drawer() {
           <VaulDrawer.Title className="sr-only">
             {type === 'filter' ? '검색 필터' : '명소 정보'}
           </VaulDrawer.Title>
+          <VaulDrawer.Description className="sr-only">{description}</VaulDrawer.Description>
 
           <div className="bg-icon-quaternary mx-auto mt-4 mb-2 h-1 w-12 shrink-0 rounded-full" />
 

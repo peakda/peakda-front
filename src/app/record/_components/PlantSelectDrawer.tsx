@@ -92,6 +92,9 @@ export function PlantSelectDrawer({
 
         <VaulDrawer.Content className="fixed right-0 bottom-0 left-0 z-100 mx-auto flex max-h-[85vh] max-w-[430px] flex-col rounded-t-[20px] bg-white outline-none">
           <VaulDrawer.Title className="sr-only">식물 선택</VaulDrawer.Title>
+          <VaulDrawer.Description className="sr-only">
+            방문 기록에 추가할 식물 종류를 검색하고 선택합니다.
+          </VaulDrawer.Description>
 
           <div className="mx-auto mt-4 mb-2 h-1.5 w-12 shrink-0 rounded-full bg-zinc-300" />
 
