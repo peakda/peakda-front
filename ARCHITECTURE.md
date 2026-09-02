@@ -49,14 +49,15 @@ sequenceDiagram
 
 ```mermaid
 flowchart LR
-  MapUI["src/components/Map (dynamic import, ssr:false)"] --> Loader["src/lib/kakao/kakaoLoader"] --> SDK[("Kakao Maps SDK")]
+  MapPage["src/app/map"] -->|"script preload"| SDK[("Kakao Maps SDK")]
+  MapUI["src/components/Map (dynamic import, ssr:false)"] --> Loader["src/lib/kakao/kakaoLoader"] --> SDK
   Hooks["src/hooks (useKakaoPlaces, useMapPins, useLazyMapLoad)"] --> Loader
-  MapUI --> Prefetch["src/lib/kakao/tilePrefetch"]
-  MapUI -->|"navigator.serviceWorker.register"| SW["public/map-tile-sw.js"]
-  Prefetch --> SW --> SDK
+  SDK --> Map["Kakao Map"]
+  Map -->|"first tilesloaded"| LoadingUI["지도 스켈레톤 해제"]
 ```
 
-- 타일 캐싱: `src/components/Map/MapContainer.tsx`가 서비스워커(`public/map-tile-sw.js`)를 등록하고 `prefetchInitialTiles`로 초기 타일을 미리 받는다.
+- `/map` 서버 HTML에서 SDK를 preload하고, 클라이언트 진입 즉시 로더가 실행된다.
+- 수동 타일 prefetch와 Cache API 서비스워커는 카카오맵 자체 타일 요청과 경쟁하거나 요청마다 캐시 조회를 추가해 제거했다. `public/map-tile-sw.js`는 기존 설치본과 캐시를 정리하는 용도로만 남아 있다.
 
 ## 상태 관리 계층
 

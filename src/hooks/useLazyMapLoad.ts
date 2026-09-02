@@ -1,33 +1,16 @@
 'use client'
 
 import { kakaoLoader } from '@/lib/kakao/kakaoLoader'
-import { RefObject, useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
-export const useLazyMapLoad = (containerRef: RefObject<HTMLDivElement | null>) => {
-  const [shouldLoad, setShouldLoad] = useState(false)
+// 이 훅 자체가 /map 클라이언트 번들에서만 실행된다. 화면을 가득 채우는 지도를
+// IntersectionObserver로 다시 지연하면 SDK 요청이 최소 한 프레임 늦어지므로 즉시 로드한다.
+export const useLazyMapLoad = () => {
   const [isReady, setIsReady] = useState(false)
   const [error, setError] = useState<Error | null>(null)
   const [retryCount, setRetryCount] = useState(0)
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setShouldLoad(true)
-          observer.disconnect()
-        }
-      },
-      { rootMargin: '200px', threshold: 0 }
-    )
-
-    if (containerRef.current) observer.observe(containerRef.current)
-
-    return () => observer.disconnect()
-  }, [containerRef])
-
-  useEffect(() => {
-    if (!shouldLoad) return
-
     setError(null)
     kakaoLoader
       .load(process.env.NEXT_PUBLIC_KAKAO_MAP_KEY!)
@@ -36,7 +19,7 @@ export const useLazyMapLoad = (containerRef: RefObject<HTMLDivElement | null>) =
         setError(err)
         console.error(err)
       })
-  }, [shouldLoad, retryCount])
+  }, [retryCount])
 
   const retry = useCallback(() => setRetryCount((c) => c + 1), [])
 

@@ -6,7 +6,6 @@ import dynamic from 'next/dynamic'
 import { MapSkeleton } from '@/components/Map/MapSkeleton'
 import { Header } from '@/components/ui/layout/Header'
 import Image from 'next/image'
-import { prefetchInitialTiles } from '@/lib/kakao/tilePrefetch'
 import { Nav } from '@/components/ui/layout/Nav'
 import { LocationBtn } from '@/components/ui/button/LocationBtn'
 import { SearchBar } from '@/components/ui/form/SearchBar'
@@ -40,9 +39,6 @@ const DEFAULT_CENTER = {
 
 const NETWORK_TOAST_ID = 'map-network-error'
 
-// initMap 의 level 과 prefetchInitialTiles 에 넘기는 level 은 반드시 같아야 한다.
-// tilePrefetch 가 zoom = 14 - level 로 타일을 고르므로, 다르면 지도가 쓰지도 않을
-// 줌의 타일을 받아와 프리페치가 통째로 버려진다.
 const INITIAL_LEVEL = 8
 
 // bbox를 격자에 스냅해 미세 이동 시 동일 쿼리 키로 수렴시킨다(캐시 히트 + staleTime 작동).
@@ -91,7 +87,8 @@ function panToCurrentLocation(map: kakao.maps.Map, onPermissionDenied?: () => vo
     ({ coords }) => map.panTo(new kakao.maps.LatLng(coords.latitude, coords.longitude)),
     (err) => {
       if (err.code === err.PERMISSION_DENIED) onPermissionDenied?.()
-    }
+    },
+    { enableHighAccuracy: false, maximumAge: 5 * 60 * 1000, timeout: 8_000 }
   )
 }
 
@@ -117,8 +114,9 @@ export const MapContainer = () => {
   const [isRegionMovePending, setIsRegionMovePending] = useState(false)
   const mapRef = useRef<kakao.maps.Map | null>(null)
   const [mapInstance, setMapInstance] = useState<kakao.maps.Map | null>(null)
+  const [areTilesLoaded, setAreTilesLoaded] = useState(false)
   const [bbox, setBbox] = useState<GetSeasonalBloomsParams | null>(null)
-  const { isReady, error, retry } = useLazyMapLoad(containerRef)
+  const { isReady: isSdkReady, error, retry } = useLazyMapLoad()
   const openFilterDrawer = useDrawerStore((s) => s.openFilterDrawer)
   const openPinDrawer = useDrawerStore((s) => s.openPinDrawer)
   const pinType = useFilterStore((s) => s.pinType)
@@ -319,12 +317,6 @@ export const MapContainer = () => {
     }
   }, [mapInstance])
 
-  useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/map-tile-sw.js').catch(console.error)
-    }
-  }, [])
-
   // 권역은 현재 화면 bbox와 AND 조건으로 조회된다. 먼저 해당 권역의 중심으로 옮겨야
   // 이전 화면 영역 때문에 결과가 비는 일을 막고, idle 이벤트가 새 bbox로 재조회한다.
   useEffect(() => {
@@ -355,9 +347,9 @@ export const MapContainer = () => {
   }, [error, retry])
 
   useEffect(() => {
-    if (!isReady) return
+    if (!isSdkReady) return
     toast.dismiss(NETWORK_TOAST_ID)
-  }, [isReady])
+  }, [isSdkReady])
 
   const handleLocate = useCallback(() => {
     if (!mapRef.current) return
@@ -369,89 +361,92 @@ export const MapContainer = () => {
   }, [])
 
   useEffect(() => {
-    if (!isReady || !containerRef.current || mapRef.current) return
+    if (!isSdkReady || !containerRef.current) return
 
-    const center = initialCenter ?? DEFAULT_CENTER
-    prefetchInitialTiles(center, INITIAL_LEVEL)
-    mapRef.current = initMap(containerRef.current, center)
-    setMapInstance(mapRef.current)
-    // 쿼리 좌표로 들어온 경우엔 현재 위치로 튕기지 않는다.
-    if (!initialCenter) panToCurrentLocation(mapRef.current)
-  }, [isReady, initialCenter])
+    let map = mapRef.current
+    if (!map) {
+      const center = initialCenter ?? DEFAULT_CENTER
+      map = initMap(containerRef.current, center)
+      mapRef.current = map
+      setMapInstance(map)
+
+      // 쿼리 좌표로 들어온 경우엔 현재 위치로 튕기지 않는다.
+      if (!initialCenter) panToCurrentLocation(map)
+    }
+
+    // SDK 준비와 실제 지도 표시 완료는 다르다. 첫 타일이 모두 그려질 때까지
+    // 로딩 레이어를 유지해 느린 네트워크에서 흰 지도 영역이 노출되지 않게 한다.
+    let frameId: number | null = null
+    const handleTilesLoaded = () => {
+      kakao.maps.event.removeListener(map, 'tilesloaded', handleTilesLoaded)
+      frameId = window.requestAnimationFrame(() => setAreTilesLoaded(true))
+    }
+
+    kakao.maps.event.addListener(map, 'tilesloaded', handleTilesLoaded)
+    return () => {
+      kakao.maps.event.removeListener(map, 'tilesloaded', handleTilesLoaded)
+      if (frameId != null) window.cancelAnimationFrame(frameId)
+    }
+  }, [isSdkReady, initialCenter])
 
   return (
-    <div
-      ref={containerRef}
-      id="kakao-map"
-      className="relative py-11"
-      style={{ width: '100%', height: '100dvh', contain: 'strict' }}
-    >
-      {isReady && (
-        <Header
-          className="mt-2"
-          left={
-            <div className="flex items-center justify-center gap-2">
-              <Image
-                src={'/images/logo.png'}
-                alt="로고"
-                width={36}
-                height={32}
-                className="h-8 w-8.5"
-              />
-              <p className="font-advent text-center text-[30px] font-semibold! tracking-tight text-green-700">
-                Peakda
-              </p>
-            </div>
-          }
-          right={
-            <div
-              className="bg-bg-primary-80 border-border-primary relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-full p-1"
-              onClick={() => router.push('/notification')}
-            >
-              <Image
-                src={'/icons/alram.svg'}
-                alt="알람"
-                width={20}
-                height={20}
-                className="h-6 w-6"
-              />
-              {hasUnreadNotification && (
-                <div className="absolute top-2.5 right-2.5 h-1 w-1 rounded-full bg-pink-500"></div>
-              )}
-            </div>
-          }
-        />
-      )}
+    <div className="relative h-dvh w-full contain-strict">
+      <div ref={containerRef} id="kakao-map" className="absolute inset-0 z-0 bg-green-50" />
 
-      {!isReady && (
-        <div className="absolute inset-0">
+      {!areTilesLoaded && (
+        <div className="pointer-events-none absolute inset-0 z-[1]">
           <MapSkeleton />
         </div>
       )}
 
-      {isReady && (
-        <>
-          <Category
-            isMap
-            categories={PIN_TYPE_LABELS}
-            value={PIN_TYPE_LABEL[pinType]}
-            onChange={(label) => {
-              const next = PIN_TYPES.find((type) => PIN_TYPE_LABEL[type] === label)
-              if (next) setPinType(next)
-            }}
-          />
+      <Header
+        className="mt-2"
+        left={
+          <div className="flex items-center justify-center gap-2">
+            <Image
+              src={'/images/logo.png'}
+              alt="로고"
+              width={36}
+              height={32}
+              className="h-8 w-8.5"
+            />
+            <p className="font-advent text-center text-[30px] font-semibold! tracking-tight text-green-700">
+              Peakda
+            </p>
+          </div>
+        }
+        right={
+          <div
+            className="bg-bg-primary-80 border-border-primary relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-full p-1"
+            onClick={() => router.push('/notification')}
+          >
+            <Image src={'/icons/alram.svg'} alt="알람" width={20} height={20} className="h-6 w-6" />
+            {hasUnreadNotification && (
+              <div className="absolute top-2.5 right-2.5 h-1 w-1 rounded-full bg-pink-500"></div>
+            )}
+          </div>
+        }
+      />
 
-          <SearchBar
-            placeholder="지금 피크인 곳을 검색해보세요."
-            description={searchDescription}
-            onFilterClick={openFilterDrawer}
-            hasActiveFilter={hasActiveFilter(applied)}
-          />
-          <MapLocationBtn onLocate={handleLocate} />
-          <Nav activeTab="map" />
-          <Drawer />
-        </>
-      )}
+      <Category
+        isMap
+        categories={PIN_TYPE_LABELS}
+        value={PIN_TYPE_LABEL[pinType]}
+        onChange={(label) => {
+          const next = PIN_TYPES.find((type) => PIN_TYPE_LABEL[type] === label)
+          if (next) setPinType(next)
+        }}
+      />
+
+      <SearchBar
+        placeholder="지금 피크인 곳을 검색해보세요."
+        description={searchDescription}
+        onFilterClick={openFilterDrawer}
+        hasActiveFilter={hasActiveFilter(applied)}
+      />
+      <MapLocationBtn onLocate={handleLocate} />
+      <Nav activeTab="map" />
+      {isSdkReady && <Drawer />}
     </div>
   )
 }

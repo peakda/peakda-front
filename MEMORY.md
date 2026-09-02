@@ -22,6 +22,8 @@
 
 - **지도 꽃 필터는 일부러 서버로 안 보낸다** (2026-08-18): `GET /api/seasonal/blooms`에 `categories` 파라미터가 생겼지만 쓰지 않는다. 서버가 걸러 주면 ① 필터 드로어 하단 "N개의 명소 보기"를 **아직 적용 안 한 draft 기준으로 셀 수 없고** ② 응답에서 안 고른 꽃이 빠져 **핀 아이콘·색을 선택에 맞게 좁힐 수 없다.** 과다 조회는 bbox 한 화면 분량이고 격자 스냅 캐싱이 걸려 있어 그 대가가 더 싸다고 판단했다. 근거는 `MapContainer.tsx`의 `bloomParams` 주석에도 남겼다.
   - 반면 `status`·`region`은 서버로 보낸다. **단 클라이언트 status 필터도 함께 유지한다** — 서버 판정은 "그 상태인 꽃이 하나라도 있는 핀"이라 핀 단위인데, 꽃 종류를 함께 고르면 *고른 꽃이* 그 상태여야 한다. 그 판정은 꽃을 좁힌 뒤에만 가능해 `mapFilter.ts`가 맡는다.
+- **지도 초기 로딩은 SDK 준비가 아니라 첫 `tilesloaded`까지 가린다** (2026-09-02): SDK 콜백 직후에도 실제 타일은 수 초간 비어 있을 수 있어, 상단 UI는 먼저 표시하고 지도 영역의 CSS 스켈레톤만 첫 타일 완료까지 유지한다. `/map` HTML에서 SDK를 preload하며, 화면 전체 지도에 불필요했던 `IntersectionObserver` 지연은 제거했다.
+  - 수동 3×3 타일 prefetch는 카카오맵이 요청하는 타일과 경쟁할 수 있고, 기존 서비스워커는 cross-origin 응답을 캐시하지 못하면서 모든 타일에 Cache API 조회를 더할 수 있어 신규 등록을 제거했다. `public/map-tile-sw.js`는 기존 설치본/캐시 정리만 담당한다.
 - **`MapSpot`의 `flowers`/`statuses`/`categories`는 인덱스가 맞물린 병렬 배열**: 같은 꽃이 같은 위치에 들어간다. `mapFilter.ts`가 꽃 종류로 좁힐 때 이 정렬에 기대므로 한쪽만 따로 만들거나 정렬을 바꾸면 안 된다. 핀 색(`maxStage`)은 좁힌 뒤 `constants/map.ts`의 `toMaxStage()`로 다시 계산한다 — 변환(`bloomToMapSpots`)과 필터가 각자 계산하면 필터를 걸었을 때 색만 옛 기준으로 남는다.
 - **꽃 목록이 세 곳에 복제돼 있다**: `src/constants/flower.ts`(지도 필터)와 `app/profile/page.tsx`·`app/profile/edit/page.tsx`가 각자 `FLOWER_LIST`를 든다. 요청 DTO별로 orval enum 타입이 갈려서 하나로 못 합쳤다(`SignupCompleteRequestFavoriteCategoriesItem` vs `FavoriteCategoryUpdateRequestCategoriesItem` vs `BloomSlotCategory`). **라벨을 고칠 때 세 곳을 함께 봐야 한다.**
   - 실제로 2026-08-18에 `AZALEA`/`AZALEA_KR`이 세 곳 모두 서버와 반대로 매핑돼 있었다. 서버 `displayName` 기준은 **`AZALEA_KR`=진달래, `AZALEA`=철쭉**이다(enum 이름만 보면 반대로 읽힌다). 아이콘도 `constants/map.ts`에서 함께 맞춰야 한다(`royal-azalea.svg`=철쭉).
