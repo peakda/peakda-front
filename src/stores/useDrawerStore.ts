@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { MultiImageProps } from '@/types/types'
+import type { FeedReactionSummaryResponseMyReactionsItem } from '@/api/facades/generated/peakdaApi.schemas'
 
 type DrawerType =
   | 'filter'
@@ -10,6 +11,7 @@ type DrawerType =
   | 'save-spot'
   | 'date-select'
   | 'delete-confirm'
+  | 'reaction'
 
 export interface SaveSpotData {
   spotId: number
@@ -26,6 +28,12 @@ export interface DeleteConfirmData {
   onConfirm: () => void
 }
 
+export interface ReactionData {
+  /** 내가 이미 남긴 리액션 — 시트에서 선택 상태로 표시한다 */
+  selected: FeedReactionSummaryResponseMyReactionsItem[]
+  onSelect: (type: FeedReactionSummaryResponseMyReactionsItem) => void
+}
+
 interface DrawerState {
   isOpen: boolean
   type: DrawerType
@@ -34,6 +42,7 @@ interface DrawerState {
   saveSpotData: SaveSpotData | null
   dateSelectData: DateSelectData | null
   deleteConfirmData: DeleteConfirmData | null
+  reactionData: ReactionData | null
   openFilterDrawer: () => void
   openFlowerFilterDrawer: () => void
   openPinDrawer: (data: MultiImageProps[]) => void
@@ -42,6 +51,7 @@ interface DrawerState {
   openSaveSpotDrawer: (data: SaveSpotData) => void
   openDateSelectDrawer: (value: string, onSelect: (value: string) => void) => void
   openDeleteConfirmDrawer: (onConfirm: () => void) => void
+  openReactionDrawer: (data: ReactionData) => void
   closeDrawer: () => void
   setSnapHeight: (h: number) => void
 }
@@ -54,6 +64,7 @@ export const useDrawerStore = create<DrawerState>((set) => ({
   saveSpotData: null,
   dateSelectData: null,
   deleteConfirmData: null,
+  reactionData: null,
   openFilterDrawer: () => set({ isOpen: true, type: 'filter', snapHeight: 400 }),
   openFlowerFilterDrawer: () => set({ isOpen: true, type: 'flower-filter', snapHeight: 400 }),
   openPinDrawer: (data) => set({ isOpen: true, type: 'pin', pinListData: data, snapHeight: 400 }),
@@ -65,6 +76,8 @@ export const useDrawerStore = create<DrawerState>((set) => ({
     set({ isOpen: true, type: 'date-select', dateSelectData: { value, onSelect }, snapHeight: 0 }),
   openDeleteConfirmDrawer: (onConfirm) =>
     set({ isOpen: true, type: 'delete-confirm', deleteConfirmData: { onConfirm }, snapHeight: 0 }),
+  openReactionDrawer: (data) =>
+    set({ isOpen: true, type: 'reaction', reactionData: data, snapHeight: 0 }),
   closeDrawer: () => set({ isOpen: false, snapHeight: 0, pinListData: [] }),
   setSnapHeight: (h) => set({ snapHeight: h }),
 }))

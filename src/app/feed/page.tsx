@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Header } from '@/components/ui/layout/Header'
@@ -17,12 +17,16 @@ import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { filterFromTab } from '@/lib/utils/feed'
 import { flattenPages } from '@/lib/utils/infinitePages'
 import { shouldLoadMore } from '@/lib/utils/myRecords'
+import { hasAuthMarker } from '@/lib/auth/session'
 
 const FEED_CATEGORIES = ['전체', '관심 식물', '팔로잉']
 
 export default function FeedPage() {
   const router = useRouter()
   const [tab, setTab] = useState(FEED_CATEGORIES[0])
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  useEffect(() => setIsAuthenticated(hasAuthMarker()), [])
 
   const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } = useFeedListInfinite(
     filterFromTab(tab)
@@ -40,7 +44,7 @@ export default function FeedPage() {
     window.scrollTo({ top: 0 })
   }
 
-  const { data: currentUser } = useCurrentUser()
+  const { data: currentUser } = useCurrentUser(isAuthenticated)
   const { mutate: deleteRecord } = useDeleteSpotRecord()
   const openDeleteConfirmDrawer = useDrawerStore((s) => s.openDeleteConfirmDrawer)
 
