@@ -1,7 +1,9 @@
 'use client'
 
+import Image from 'next/image'
 import { REACTIONS } from '@/constants/reaction'
 import { cn } from '@/lib/utils/cn'
+import { toTwemojiUrl } from '@/lib/utils/emoji'
 import type { ReactionData } from '@/stores/useDrawerStore'
 
 interface ReactionDrawerContentProps extends ReactionData {
@@ -32,11 +34,11 @@ export function ReactionDrawerContent({ selected, onSelect, onClose }: ReactionD
               onClose()
             }}
             className={cn(
-              'flex aspect-square w-full cursor-pointer items-center justify-center rounded-full text-2xl leading-none',
+              'flex aspect-square w-full cursor-pointer items-center justify-center rounded-full',
               selected.includes(type) && 'bg-green-50'
             )}
           >
-            {emoji}
+            <Image src={toTwemojiUrl(emoji)} alt={label} width={28} height={28} />
           </button>
         ))}
       </div>

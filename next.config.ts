@@ -35,6 +35,8 @@ const nextConfig: NextConfig = {
       // next/image 가 서버에서 받아 최적화하므로 브라우저에는 https 로만 나가 mixed content 가 아니다.
       { protocol: 'https', hostname: 'tong.visitkorea.or.kr' },
       { protocol: 'http', hostname: 'tong.visitkorea.or.kr' },
+      // twemoji 이모지 SVG (리액션 바텀시트)
+      { protocol: 'https', hostname: 'cdn.jsdelivr.net' },
     ],
   },
 }
