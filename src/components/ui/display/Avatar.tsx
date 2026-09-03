@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils/cn'
+import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
 import Image from 'next/image'
 
 type AvatarSize = 'sm' | 'md' | 'lg'
@@ -29,6 +30,8 @@ const IMAGE_SIZES: Record<AvatarSize, string> = {
 }
 
 export function Avatar({ imageUrl, size = 'sm', className }: AvatarProps) {
+  const safeImageUrl = toHttpsImageUrl(imageUrl)
+
   return (
     <div
       className={cn(
@@ -37,8 +40,8 @@ export function Avatar({ imageUrl, size = 'sm', className }: AvatarProps) {
         className
       )}
     >
-      {imageUrl ? (
-        <Image src={imageUrl} alt="" fill sizes={IMAGE_SIZES[size]} className="object-cover" />
+      {safeImageUrl ? (
+        <Image src={safeImageUrl} alt="" fill sizes={IMAGE_SIZES[size]} className="object-cover" />
       ) : (
         <Image
           src="/icons/person.svg"

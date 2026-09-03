@@ -23,6 +23,9 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 't3.storageapi.dev' },
       // 카카오 소셜 로그인 프로필
       { protocol: 'https', hostname: 'k.kakaocdn.net' },
+      // 카카오 기본 프로필/리사이즈 이미지
+      { protocol: 'https', hostname: 'img1.kakaocdn.net' },
+      { protocol: 'https', hostname: 't1.kakaocdn.net' },
       // 네이버 소셜 로그인 프로필
       { protocol: 'https', hostname: 'phinf.pstatic.net' },
       // 백엔드 S3 미디어 (스팟 기록 사진 등, presigned URL)
@@ -32,6 +35,8 @@ const nextConfig: NextConfig = {
       // next/image 가 서버에서 받아 최적화하므로 브라우저에는 https 로만 나가 mixed content 가 아니다.
       { protocol: 'https', hostname: 'tong.visitkorea.or.kr' },
       { protocol: 'http', hostname: 'tong.visitkorea.or.kr' },
+      // twemoji 이모지 SVG (리액션 바텀시트)
+      { protocol: 'https', hostname: 'cdn.jsdelivr.net' },
     ],
   },
 }

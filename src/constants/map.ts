@@ -51,10 +51,9 @@ export const CATEGORY_ICON: Record<BloomSlotCategory, string> = {
   LOTUS: '/flowers/lotus.svg',
   SUNFLOWER: '/flowers/sunflower.svg',
   COSMOS: '/flowers/cosmos.svg',
-  // 국화 전용 에셋이 없어 형태가 가장 가까운 코스모스로 대체한다(핑크뮬리와 같은 처리).
-  CHRYSANTHEMUM: '/flowers/cosmos.svg',
+  CHRYSANTHEMUM: '/flowers/Chrysanthemum.svg',
   PINK_MUHLY: '/flowers/cosmos.svg',
-  SILVERGRASS: '/flowers/maple.svg',
+  SILVERGRASS: '/flowers/SilverGrass.svg',
   MAPLE: '/flowers/maple.svg',
   CAMELLIA: '/flowers/camellia.svg',
 }

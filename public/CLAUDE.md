@@ -11,7 +11,7 @@
 | `flowers/` | 계절 명소(벚꽃·단풍 등) 관련 이미지 에셋 |
 | `icons/` | 아이콘 SVG/이미지 |
 | `images/` | 그 외 일반 이미지 에셋 |
-| `map-tile-sw.js` | 카카오맵 타일 캐싱용 Service Worker |
+| `map-tile-sw.js` | 예전 카카오맵 타일 캐시와 Service Worker 등록을 정리하는 마이그레이션 스크립트 |
 
 ## 루트 파일
 
@@ -26,4 +26,4 @@
 
 ## 규칙
 
-- `map-tile-sw.js`는 브라우저가 직접 서빙하는 서비스워커라 번들링 대상이 아님 — 수정 시 등록 스코프(`self.addEventListener`)를 건드리지 않도록 주의.
+- `map-tile-sw.js`는 더 이상 앱에서 신규 등록하지 않는다. 기존 설치본을 정리하기 위한 파일이므로 타일 fetch 핸들러를 다시 추가하지 않는다.

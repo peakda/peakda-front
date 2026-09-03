@@ -1,9 +1,10 @@
 'use client'
+import Image from 'next/image'
 import { cn } from '@/lib/utils/cn'
-import { ReactNode } from 'react'
+import { toTwemojiUrl } from '@/lib/utils/emoji'
 
 interface EmojiBtnProps {
-  emoji: ReactNode
+  emoji: string
   label?: string
   selected?: boolean
   onClick?: () => void
@@ -22,7 +23,7 @@ export function EmojiBtn({ emoji, label, selected = false, onClick, className }:
         className
       )}
     >
-      <span>{emoji}</span>
+      <Image src={toTwemojiUrl(emoji)} alt={emoji} width={16} height={16} />
       {label && <span>{label}</span>}
     </button>
   )
