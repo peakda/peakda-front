@@ -255,7 +255,12 @@ export default function SpotDetailPage() {
         ) : (
           <div className="divide-border-primary divide-y">
             {previewRecords.map((record) => (
-              <FeedCard key={record.id} {...toFeedCardProps(record)} />
+              <FeedCard
+                key={record.id}
+                {...toFeedCardProps(record, {
+                  onOpen: () => router.push(`/feed/${record.id}`),
+                })}
+              />
             ))}
           </div>
         )}
