@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { Bell, Heart, MapPin } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
 import { Header } from '@/components/ui/layout/Header'
@@ -41,6 +42,10 @@ export default function SpotDetailPage() {
   const updateNotify = useUpdateFavoriteNotify()
 
   const { data: spot, isLoading, isError, refetch } = useSpotDetail(Number(id))
+
+  useEffect(() => {
+    if (spot?.name) document.title = `Peakda | ${spot.name}`
+  }, [spot?.name])
   // 명소 연결이 없는 동네 스팟이거나 개화 정보가 없으면 캘린더를 조회하지 않는다.
   const { data: calendar } = useBloomCalendar(
     spot?.attractionId && spot.bloom

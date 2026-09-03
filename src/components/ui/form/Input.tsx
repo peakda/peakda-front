@@ -16,32 +16,38 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   rightIcon?: React.ReactNode
 }
 
-export const Input = ({ variant = 'none', error, leftIcon, rightIcon, className, ...props }: InputProps) => {
-  const hasValue = typeof props.value === 'string' && props.value.length > 0
+export const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ variant = 'none', error, leftIcon, rightIcon, className, ...props }, ref) => {
+    const hasValue = typeof props.value === 'string' && props.value.length > 0
 
-  return (
-    <div className="relative w-full">
-      {leftIcon && (
-        <span className="absolute top-1/2 left-3 -translate-y-1/2 text-slate-400">{leftIcon}</span>
-      )}
-      {rightIcon && (
-        <span className="absolute top-1/2 right-3 -translate-y-1/2">{rightIcon}</span>
-      )}
-      <input
-        className={cn(
-          'bg-bg-secondary focus:border-brand-secondary h-12 w-full rounded-3xl border p-3 transition-all focus:outline-none',
-          'placeholder:text-text-tertiary placeholder:text-base',
-          borderVariantClass[variant],
-          hasValue && 'border-border-secondary',
-          error && 'border-rose-400 focus:ring-rose-100',
-          props.disabled && 'bg-slate-100 text-slate-400',
-          leftIcon && 'pl-10',
-          rightIcon && 'pr-10',
-          className
+    return (
+      <div className="relative w-full">
+        {leftIcon && (
+          <span className="absolute top-1/2 left-3 -translate-y-1/2 text-slate-400">
+            {leftIcon}
+          </span>
         )}
-        {...props}
-      />
-    </div>
-  )
-}
+        {rightIcon && (
+          <span className="absolute top-1/2 right-3 -translate-y-1/2">{rightIcon}</span>
+        )}
+        <input
+          ref={ref}
+          className={cn(
+            'bg-bg-secondary focus:border-brand-secondary h-12 w-full rounded-3xl border p-3 transition-all focus:outline-none',
+            'placeholder:text-text-tertiary placeholder:text-base',
+            borderVariantClass[variant],
+            hasValue && 'border-border-secondary',
+            error && 'border-rose-400 focus:ring-rose-100',
+            props.disabled && 'bg-slate-100 text-slate-400',
+            leftIcon && 'pl-10',
+            rightIcon && 'pr-10',
+            className
+          )}
+          {...props}
+        />
+      </div>
+    )
+  }
+)
 
+Input.displayName = 'Input'

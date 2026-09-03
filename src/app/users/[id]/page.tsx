@@ -14,6 +14,7 @@ import { useUserProfile } from '@/api/facades/user-profile'
 import { useBlockUser, useUnblockUser } from '@/api/facades/user-block'
 import { toProfileStats, toFavoriteFlowerLabels } from '@/lib/utils/userProfile'
 import { toMyRecordThumb } from '@/lib/utils/spotRecordToFeed'
+import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
 
 export default function UserProfilePage() {
   const params = useParams<{ id: string }>()
@@ -40,6 +41,7 @@ export default function UserProfilePage() {
   const stats = profile ? toProfileStats(profile.stats) : null
   const flowers = profile ? toFavoriteFlowerLabels(profile.favoriteCategories) : []
   const records = (profile?.recordPreview ?? []).map(toMyRecordThumb)
+  const safeProfileImageUrl = toHttpsImageUrl(profile?.profileImageUrl)
 
   return (
     <div className="bg-bg-primary relative flex min-h-screen w-full flex-col pb-12">
@@ -74,9 +76,9 @@ export default function UserProfilePage() {
       {/* 프로필 */}
       <div className="flex items-center gap-3 px-4 py-3">
         <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-200">
-          {profile?.profileImageUrl ? (
+          {safeProfileImageUrl ? (
             <Image
-              src={profile.profileImageUrl}
+              src={safeProfileImageUrl}
               alt="프로필"
               width={56}
               height={56}

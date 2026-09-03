@@ -7,6 +7,7 @@ import { InputFiled } from '@/components/ui/form/InputFiled'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { useCheckNickname } from '@/hooks/useCheckNickname'
 import { cn } from '@/lib/utils/cn'
+import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
 import { isValidNickname } from '@/lib/utils/nickname'
 import { useCurrentUser } from '@/api/facades/auth'
 import {
@@ -66,6 +67,7 @@ export default function ProfileEditPage() {
 
   // 검증 통과 여부는 저장된 닉네임과 현재 입력의 일치로 파생 — 입력이 바뀌면 자동 무효화
   const isNicknameVerified = checkedNickname !== null && checkedNickname === nickname
+  const safePreview = toHttpsImageUrl(preview)
 
   const toggleBadge = useCallback((value: FavoriteCategoryUpdateRequestCategoriesItem) => {
     setSelected((prev) =>
@@ -137,7 +139,7 @@ export default function ProfileEditPage() {
           disabled={isUploading}
         >
           <Image
-            src={preview ?? '/images/Profile.png'}
+            src={safePreview ?? '/images/Profile.png'}
             alt="프로필 이미지"
             width={100}
             height={100}

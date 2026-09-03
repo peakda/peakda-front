@@ -88,7 +88,7 @@ function RecordPageContent() {
 
   const hasLocation = location.trim().length > 0
   const hasSearchQuery = searchQuery.trim().length > 0
-  const isValid = hasLocation && photoItems.length > 0
+  const isValid = hasLocation && photoItems.length > 0 && date.trim().length > 0
   const isSubmitting = matchSpot.isPending || uploadPhotos.isPending || createRecord.isPending
 
   const handlePhotoAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -222,7 +222,13 @@ function RecordPageContent() {
   if (isComplete) {
     return (
       <RecordCompleteView
-        onGoToMap={() => router.push('/map')}
+        onGoToMap={() =>
+          router.push(
+            selectedSpot
+              ? `/map?lat=${selectedSpot.latitude}&lng=${selectedSpot.longitude}`
+              : '/map'
+          )
+        }
         onRecordAgain={handleRecordAgain}
         onExit={() => router.back()}
       />

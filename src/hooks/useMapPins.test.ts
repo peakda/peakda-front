@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
-import { clusterSpots } from './useMapPins'
+import { clusterSlices, clusterSpots } from './useMapPins'
 import type { MapSpot } from './useMapPins'
+import type { Stage } from '@/constants/map'
 
 // 모바일 기준 뷰포트 (서비스 주 타깃)
 const VIEWPORT_W = 390
@@ -54,6 +55,38 @@ const denseGrid = (level: number, n = 48, stepPx = VIEWPORT_W / 20) => {
 }
 
 const LEVELS = [2, 4, 6, 8, 10, 12]
+
+const stageSpot = (maxStage: Stage): MapSpot => ({ ...spot(37.5, 127.0), maxStage })
+const slices = (stages: Stage[]) => clusterSlices(stages.map(stageSpot))
+
+describe('clusterSlices', () => {
+  it('스팟이 많은 상태부터 정렬한다', () => {
+    expect(slices(['Start', 'Peak', 'Peak', 'Start', 'Peak'])).toEqual([
+      { stage: 'Peak', count: 3 },
+      { stage: 'Start', count: 2 },
+    ])
+  })
+
+  it('개수가 같으면 만개 > 피기시작 > 늦었다 > 개화전 순으로 둔다', () => {
+    expect(slices(['Before', 'End', 'Start', 'Peak'])).toEqual([
+      { stage: 'Peak', count: 1 },
+      { stage: 'Start', count: 1 },
+      { stage: 'End', count: 1 },
+      { stage: 'Before', count: 1 },
+    ])
+  })
+
+  it('5-3-3-1 이면 동률인 피기시작(3)이 개화전(3)보다 앞에 온다', () => {
+    const stages: Stage[] = [
+      ...Array<Stage>(5).fill('Peak'),
+      ...Array<Stage>(3).fill('Start'),
+      ...Array<Stage>(3).fill('Before'),
+      'End',
+    ]
+
+    expect(slices(stages).map((s) => s.stage)).toEqual(['Peak', 'Start', 'Before', 'End'])
+  })
+})
 
 describe('clusterSpots', () => {
   describe('기본 그룹핑', () => {

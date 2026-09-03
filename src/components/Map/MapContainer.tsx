@@ -6,7 +6,6 @@ import dynamic from 'next/dynamic'
 import { MapSkeleton } from '@/components/Map/MapSkeleton'
 import { Header } from '@/components/ui/layout/Header'
 import Image from 'next/image'
-import { prefetchInitialTiles } from '@/lib/kakao/tilePrefetch'
 import { Nav } from '@/components/ui/layout/Nav'
 import { LocationBtn } from '@/components/ui/button/LocationBtn'
 import { SearchBar } from '@/components/ui/form/SearchBar'
@@ -23,6 +22,7 @@ import { useUnreadNotificationCount } from '@/api/facades/notification'
 import { spotPreviewApi } from '@/api/facades/spot'
 import { toPinListItems } from '@/lib/utils/spotPreview'
 import { bloomToMapSpots } from '@/lib/utils/bloomToMapSpots'
+import { REGION_MAP_CENTERS } from '@/constants/region'
 import { STAGE_LABEL } from '@/constants/map'
 import type { GetSeasonalBloomsParams } from '@/api/facades/generated/peakdaApi.schemas'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -39,9 +39,6 @@ const DEFAULT_CENTER = {
 
 const NETWORK_TOAST_ID = 'map-network-error'
 
-// initMap 의 level 과 prefetchInitialTiles 에 넘기는 level 은 반드시 같아야 한다.
-// tilePrefetch 가 zoom = 14 - level 로 타일을 고르므로, 다르면 지도가 쓰지도 않을
-// 줌의 타일을 받아와 프리페치가 통째로 버려진다.
 const INITIAL_LEVEL = 8
 
 // bbox를 격자에 스냅해 미세 이동 시 동일 쿼리 키로 수렴시킨다(캐시 히트 + staleTime 작동).
@@ -90,7 +87,8 @@ function panToCurrentLocation(map: kakao.maps.Map, onPermissionDenied?: () => vo
     ({ coords }) => map.panTo(new kakao.maps.LatLng(coords.latitude, coords.longitude)),
     (err) => {
       if (err.code === err.PERMISSION_DENIED) onPermissionDenied?.()
-    }
+    },
+    { enableHighAccuracy: false, maximumAge: 5 * 60 * 1000, timeout: 8_000 }
   )
 }
 
@@ -111,11 +109,14 @@ const initMap = (container: HTMLElement, center: { lat: number; lng: number }) =
 export const MapContainer = () => {
   const containerRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
+  const isRegionMovePendingRef = useRef(false)
   const searchParams = useSearchParams()
+  const [isRegionMovePending, setIsRegionMovePending] = useState(false)
   const mapRef = useRef<kakao.maps.Map | null>(null)
   const [mapInstance, setMapInstance] = useState<kakao.maps.Map | null>(null)
+  const [areTilesLoaded, setAreTilesLoaded] = useState(false)
   const [bbox, setBbox] = useState<GetSeasonalBloomsParams | null>(null)
-  const { isReady, error, retry } = useLazyMapLoad(containerRef)
+  const { isReady: isSdkReady, error, retry } = useLazyMapLoad()
   const openFilterDrawer = useDrawerStore((s) => s.openFilterDrawer)
   const openPinDrawer = useDrawerStore((s) => s.openPinDrawer)
   const pinType = useFilterStore((s) => s.pinType)
@@ -198,13 +199,21 @@ export const MapContainer = () => {
         .filter((id): id is number => id != null),
       center: center ? { lat: center.getLat(), lng: center.getLng() } : null,
       // 아직 이전 조건의 결과를 보고 있으면 목록 열기를 기다려야 한다.
-      isStale: isPlaceholderData,
+      isStale: isPlaceholderData || isRegionMovePending,
       draftCount: inView(draftSpots).filter((s) => s.spotId != null).length,
       // 어떤 조건으로 계산한 결과인지 함께 올린다. 드로어가 이걸로 최신 여부를 판단한다.
       appliedFor: applied,
     })
     // 드로어가 "이 결과가 어떤 applied 기준인지" 를 참조 비교로 판단하므로 applied 를 함께 넣는다.
-  }, [spots, draftSpots, mapInstance, isPlaceholderData, applied, setVisibleSpots])
+  }, [
+    spots,
+    draftSpots,
+    mapInstance,
+    isPlaceholderData,
+    isRegionMovePending,
+    applied,
+    setVisibleSpots,
+  ])
 
   // 시즌 추천어(홈 검색바 보조 카피). 절정 데이터 없으면(available=false) 기본 문구로 폴백.
   const { data: suggestion } = useHomeSuggestion()
@@ -256,7 +265,35 @@ export const MapContainer = () => {
     [openPinDrawer, mapInstance, applied.categories, applied.timing]
   )
 
-  useMapCluster(mapInstance, spots, handlePinClick)
+  // 확대해도 갈라지지 않는 클러스터. 구성원 전체를 한 목록으로 연다.
+  const handleClusterClick = useCallback(
+    async (members: MapSpot[]) => {
+      const spotIds = members.map((s) => s.spotId).filter((id): id is number => id != null)
+
+      try {
+        const center = mapInstance?.getCenter()
+        const preview = await spotPreviewApi(spotIds, {
+          coords: center ? { lat: center.getLat(), lng: center.getLng() } : null,
+          categories: applied.categories,
+          status: timingToStatus(applied.timing),
+        })
+        const items = preview ? toPinListItems(preview.items) : []
+
+        if (items.length > 0) {
+          openPinDrawer(items)
+          return
+        }
+      } catch (e) {
+        console.error(e)
+      }
+
+      // 프리뷰가 비면 핀 하나를 탭했을 때와 같은 폴백을 쓴다.
+      handlePinClick(members[0])
+    },
+    [mapInstance, applied.categories, applied.timing, openPinDrawer, handlePinClick]
+  )
+
+  useMapCluster(mapInstance, spots, handlePinClick, handleClusterClick)
 
   // 지도 이동/줌이 멈출 때(idle) 현재 영역(bbox)으로 개화현황을 조회한다.
   // 좌표를 격자에 스냅해 캐시가 작동하게 하고, 연속 이동은 debounce로 마지막 정착만 조회한다.
@@ -289,7 +326,15 @@ export const MapContainer = () => {
     let timer: ReturnType<typeof setTimeout>
     const onIdle = () => {
       clearTimeout(timer)
-      timer = setTimeout(updateBbox, BBOX_DEBOUNCE_MS)
+      timer = setTimeout(() => {
+        updateBbox()
+        // 지역 이동 중에는 이전 bbox의 빈 응답이 먼저 도착할 수 있다. 새 bbox를 반영한 뒤에만
+        // 드로어가 결과 목록을 열도록 대기 상태를 해제한다.
+        if (isRegionMovePendingRef.current) {
+          isRegionMovePendingRef.current = false
+          setIsRegionMovePending(false)
+        }
+      }, BBOX_DEBOUNCE_MS)
     }
 
     updateBbox() // 첫 진입은 즉시 조회
@@ -300,11 +345,21 @@ export const MapContainer = () => {
     }
   }, [mapInstance])
 
+  // 권역은 현재 화면 bbox와 AND 조건으로 조회된다. 먼저 해당 권역의 중심으로 옮겨야
+  // 이전 화면 영역 때문에 결과가 비는 일을 막고, idle 이벤트가 새 bbox로 재조회한다.
   useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/map-tile-sw.js').catch(console.error)
+    if (!mapInstance) return
+    if (!applied.region) {
+      isRegionMovePendingRef.current = false
+      setIsRegionMovePending(false)
+      return
     }
-  }, [])
+
+    const center = REGION_MAP_CENTERS[applied.region]
+    isRegionMovePendingRef.current = true
+    setIsRegionMovePending(true)
+    mapInstance.panTo(new kakao.maps.LatLng(center.lat, center.lng))
+  }, [mapInstance, applied.region])
 
   useEffect(() => {
     if (!error) return
@@ -320,9 +375,9 @@ export const MapContainer = () => {
   }, [error, retry])
 
   useEffect(() => {
-    if (!isReady) return
+    if (!isSdkReady) return
     toast.dismiss(NETWORK_TOAST_ID)
-  }, [isReady])
+  }, [isSdkReady])
 
   const handleLocate = useCallback(() => {
     if (!mapRef.current) return
@@ -334,89 +389,92 @@ export const MapContainer = () => {
   }, [])
 
   useEffect(() => {
-    if (!isReady || !containerRef.current || mapRef.current) return
+    if (!isSdkReady || !containerRef.current) return
 
-    const center = initialCenter ?? DEFAULT_CENTER
-    prefetchInitialTiles(center, INITIAL_LEVEL)
-    mapRef.current = initMap(containerRef.current, center)
-    setMapInstance(mapRef.current)
-    // 쿼리 좌표로 들어온 경우엔 현재 위치로 튕기지 않는다.
-    if (!initialCenter) panToCurrentLocation(mapRef.current)
-  }, [isReady, initialCenter])
+    let map = mapRef.current
+    if (!map) {
+      const center = initialCenter ?? DEFAULT_CENTER
+      map = initMap(containerRef.current, center)
+      mapRef.current = map
+      setMapInstance(map)
+
+      // 쿼리 좌표로 들어온 경우엔 현재 위치로 튕기지 않는다.
+      if (!initialCenter) panToCurrentLocation(map)
+    }
+
+    // SDK 준비와 실제 지도 표시 완료는 다르다. 첫 타일이 모두 그려질 때까지
+    // 로딩 레이어를 유지해 느린 네트워크에서 흰 지도 영역이 노출되지 않게 한다.
+    let frameId: number | null = null
+    const handleTilesLoaded = () => {
+      kakao.maps.event.removeListener(map, 'tilesloaded', handleTilesLoaded)
+      frameId = window.requestAnimationFrame(() => setAreTilesLoaded(true))
+    }
+
+    kakao.maps.event.addListener(map, 'tilesloaded', handleTilesLoaded)
+    return () => {
+      kakao.maps.event.removeListener(map, 'tilesloaded', handleTilesLoaded)
+      if (frameId != null) window.cancelAnimationFrame(frameId)
+    }
+  }, [isSdkReady, initialCenter])
 
   return (
-    <div
-      ref={containerRef}
-      id="kakao-map"
-      className="relative py-11"
-      style={{ width: '100%', height: '100dvh', contain: 'strict' }}
-    >
-      {isReady && (
-        <Header
-          className="mt-2"
-          left={
-            <div className="flex items-center justify-center gap-2">
-              <Image
-                src={'/images/logo.png'}
-                alt="로고"
-                width={36}
-                height={32}
-                className="h-8 w-8.5"
-              />
-              <p className="font-advent text-center text-[30px] font-semibold! tracking-tight text-green-700">
-                Peakda
-              </p>
-            </div>
-          }
-          right={
-            <div
-              className="bg-bg-primary-80 border-border-primary relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-full p-1"
-              onClick={() => router.push('/notification')}
-            >
-              <Image
-                src={'/icons/alram.svg'}
-                alt="알람"
-                width={20}
-                height={20}
-                className="h-6 w-6"
-              />
-              {hasUnreadNotification && (
-                <div className="absolute top-2.5 right-2.5 h-1 w-1 rounded-full bg-pink-500"></div>
-              )}
-            </div>
-          }
-        />
-      )}
+    <div className="relative h-dvh w-full contain-strict">
+      <div ref={containerRef} id="kakao-map" className="absolute inset-0 z-0 bg-green-50" />
 
-      {!isReady && (
-        <div className="absolute inset-0">
+      {!areTilesLoaded && (
+        <div className="pointer-events-none absolute inset-0 z-[1]">
           <MapSkeleton />
         </div>
       )}
 
-      {isReady && (
-        <>
-          <Category
-            isMap
-            categories={PIN_TYPE_LABELS}
-            value={PIN_TYPE_LABEL[pinType]}
-            onChange={(label) => {
-              const next = PIN_TYPES.find((type) => PIN_TYPE_LABEL[type] === label)
-              if (next) setPinType(next)
-            }}
-          />
+      <Header
+        className="mt-2"
+        left={
+          <div className="flex items-center justify-center gap-2">
+            <Image
+              src={'/images/logo.png'}
+              alt="로고"
+              width={36}
+              height={32}
+              className="h-8 w-8.5"
+            />
+            <p className="font-advent text-center text-[30px] font-semibold! tracking-tight text-green-700">
+              Peakda
+            </p>
+          </div>
+        }
+        right={
+          <div
+            className="bg-bg-primary-80 border-border-primary relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-full p-1"
+            onClick={() => router.push('/notification')}
+          >
+            <Image src={'/icons/alram.svg'} alt="알람" width={20} height={20} className="h-6 w-6" />
+            {hasUnreadNotification && (
+              <div className="absolute top-2.5 right-2.5 h-1 w-1 rounded-full bg-pink-500"></div>
+            )}
+          </div>
+        }
+      />
 
-          <SearchBar
-            placeholder="지금 피크인 곳을 검색해보세요."
-            description={searchDescription}
-            onFilterClick={openFilterDrawer}
-            hasActiveFilter={hasActiveFilter(applied)}
-          />
-          <MapLocationBtn onLocate={handleLocate} />
-          <Nav activeTab="map" />
-          <Drawer />
-        </>
-      )}
+      <Category
+        isMap
+        categories={PIN_TYPE_LABELS}
+        value={PIN_TYPE_LABEL[pinType]}
+        onChange={(label) => {
+          const next = PIN_TYPES.find((type) => PIN_TYPE_LABEL[type] === label)
+          if (next) setPinType(next)
+        }}
+      />
+
+      <SearchBar
+        placeholder="지금 피크인 곳을 검색해보세요."
+        description={searchDescription}
+        onFilterClick={openFilterDrawer}
+        hasActiveFilter={hasActiveFilter(applied)}
+      />
+      <MapLocationBtn onLocate={handleLocate} />
+      <Nav activeTab="map" />
+      {isSdkReady && <Drawer />}
     </div>
   )
 }

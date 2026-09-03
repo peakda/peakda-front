@@ -14,6 +14,7 @@ import { useCarousel } from '@/hooks/useEmblaCarousel'
 import { Indecator } from '@/app/onboarding/_components/Indecator'
 import { useReport } from '@/api/facades/report'
 import { buildReportRequest } from '@/lib/utils/feed'
+import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
 import { ReportModal } from '@/components/ui/card/ReportModal'
 import type {
   CreateReportRequestReason,
@@ -81,6 +82,7 @@ export function FeedCard({
 
   const [isReportModalOpen, setReportModalOpen] = useState(false)
   const report = useReport()
+  const safeAuthorImageUrl = toHttpsImageUrl(authorImageUrl)
 
   const handleReportSubmit = (reason: CreateReportRequestReason, detail?: string) => {
     report.mutate(
@@ -113,8 +115,8 @@ export function FeedCard({
       <div className="flex items-center gap-2">
         <Link href={`/users/${authorId}`}>
           <IconBtn size="md" className="relative overflow-hidden">
-            {authorImageUrl ? (
-              <Image src={authorImageUrl} alt="프로필" fill className="object-cover" sizes="32px" />
+            {safeAuthorImageUrl ? (
+              <Image src={safeAuthorImageUrl} alt="프로필" fill className="object-cover" sizes="32px" />
             ) : (
               <Image src="/icons/person.svg" alt="프로필" width={16} height={16} />
             )}

@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { FollowButton } from '@/components/ui/button/FollowButton'
+import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
 
 interface Props {
   userId?: number
@@ -10,11 +11,12 @@ interface Props {
 }
 
 export function UserRow({ userId, name, profileImageUrl, initialFollowing = false }: Props) {
+  const safeProfileImageUrl = toHttpsImageUrl(profileImageUrl)
   const profile = (
     <>
       <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-200">
-        {profileImageUrl ? (
-          <Image src={profileImageUrl} alt={name} fill className="object-cover" sizes="40px" />
+        {safeProfileImageUrl ? (
+          <Image src={safeProfileImageUrl} alt={name} fill className="object-cover" sizes="40px" />
         ) : (
           <Image src="/icons/person.svg" alt="프로필" width={18} height={18} />
         )}
