@@ -39,7 +39,7 @@ function formatTimeAgo(iso: string): string {
 // 대표 사진이 없으면 placeholder 이미지를 사용한다.
 export function toFeedCardProps(
   record: SpotRecordSummaryResponse,
-  options?: Pick<FeedCardProps, 'isOwner' | 'onEdit' | 'onDelete' | 'onReport'>
+  options?: Pick<FeedCardProps, 'isOwner' | 'onEdit' | 'onDelete' | 'onReport' | 'onOpen'>
 ): FeedCardProps {
   return {
     recordId: record.id,

@@ -16,6 +16,7 @@ import { useReport } from '@/api/facades/report'
 import { buildReportRequest } from '@/lib/utils/feed'
 import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
 import { ReportModal } from '@/components/ui/card/ReportModal'
+import { cn } from '@/lib/utils/cn'
 import type {
   CreateReportRequestReason,
   ReactionSummary,
@@ -122,15 +123,9 @@ export function FeedCard({
             )}
           </IconBtn>
         </Link>
-        {onOpen ? (
-          <button type="button" onClick={onOpen} className="flex flex-1 flex-col text-left">
-            {authorInfo}
-          </button>
-        ) : (
-          <Link href={`/users/${authorId}`} className="flex flex-1 flex-col text-left">
-            {authorInfo}
-          </Link>
-        )}
+        <Link href={`/users/${authorId}`} className="flex flex-1 flex-col text-left">
+          {authorInfo}
+        </Link>
 
         {showMoreMenu && (
           <MoreMenu
@@ -142,8 +137,12 @@ export function FeedCard({
         )}
       </div>
 
-      {/* 이미지 캐러셀 */}
-      <div className="relative overflow-hidden rounded-2xl">
+      {/* 이미지 캐러셀 — 클릭 시 상세로 이동. 드래그(슬라이드) 중 발생한 클릭은
+          embla 가 자체적으로 preventDefault/stopPropagation 하므로 별도 드래그 판별이 필요 없다 */}
+      <div
+        onClick={onOpen}
+        className={cn('relative overflow-hidden rounded-2xl', onOpen && 'cursor-pointer')}
+      >
         <div ref={emblaRef} className="overflow-hidden">
           <div className="flex touch-pan-y">
             {images.map((src, i) => (
@@ -176,7 +175,10 @@ export function FeedCard({
 
         {/* 인디케이터 */}
         {scrollSnaps.length > 1 && (
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
+          <div
+            className="absolute bottom-3 left-1/2 -translate-x-1/2"
+            onClick={(e) => e.stopPropagation()}
+          >
             <Indecator
               scrollSnaps={scrollSnaps}
               selectedIndex={selectedIndex}
@@ -205,7 +207,7 @@ export function FeedCard({
 
       {/* 꽃 태그 */}
       {flowers.length > 0 && (
-        <div className="flex flex-wrap gap-2">
+        <div onClick={onOpen} className={cn('flex flex-wrap gap-2', onOpen && 'cursor-pointer')}>
           {flowers.map((flower, i) => (
             <Badge
               key={i}
@@ -219,7 +221,12 @@ export function FeedCard({
       )}
 
       {/* 본문 */}
-      <p className="text-text-primary text-sm leading-relaxed">{content}</p>
+      <p
+        onClick={onOpen}
+        className={cn('text-text-primary text-sm leading-relaxed', onOpen && 'cursor-pointer')}
+      >
+        {content}
+      </p>
 
       {/* 리액션 — 추가 버튼 + 남겨진 리액션만 카운트 칩으로 노출 */}
       <ReactionBar recordId={recordId} reactions={reactions} />
