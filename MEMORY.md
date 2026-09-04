@@ -22,6 +22,12 @@
 
 - **지도 꽃 필터는 일부러 서버로 안 보낸다** (2026-08-18): `GET /api/seasonal/blooms`에 `categories` 파라미터가 생겼지만 쓰지 않는다. 서버가 걸러 주면 ① 필터 드로어 하단 "N개의 명소 보기"를 **아직 적용 안 한 draft 기준으로 셀 수 없고** ② 응답에서 안 고른 꽃이 빠져 **핀 아이콘·색을 선택에 맞게 좁힐 수 없다.** 과다 조회는 bbox 한 화면 분량이고 격자 스냅 캐싱이 걸려 있어 그 대가가 더 싸다고 판단했다. 근거는 `MapContainer.tsx`의 `bloomParams` 주석에도 남겼다.
   - 반면 `status`·`region`은 서버로 보낸다. **단 클라이언트 status 필터도 함께 유지한다** — 서버 판정은 "그 상태인 꽃이 하나라도 있는 핀"이라 핀 단위인데, 꽃 종류를 함께 고르면 *고른 꽃이* 그 상태여야 한다. 그 판정은 꽃을 좁힌 뒤에만 가능해 `mapFilter.ts`가 맡는다.
+  - **⏳ `status`도 서버로 안 보낼 수 있는지 확인 대기** (2026-09-04): `mapFilter.ts`가 이미 status를 거르므로 서버 파라미터를 빼면 시기 탭 3개가 같은 캐시를 공유해 **탭 전환 요청이 0건**이 된다(지금은 bbox 하나당 캐시가 무필터+3탭 = 4종으로 갈린다). 서버가 **핀만** 거르는지 핀 안의 `blooms` 슬롯까지 거르는지에 따라 대응이 갈린다. 확인은 같은 bbox로 `status` 유무 두 번 호출해 **같은 `spotId` 핀의 `blooms.length`를 비교**한다 — 상태가 서로 다른 꽃이 2개 이상 달린 핀이 있어야 판정된다(꽃 1개이거나 상태가 같으면 두 경우의 결과가 같아 구분 불가).
+    - 길이가 **같으면** 핀 단위 → `MapContainer.tsx`의 `bloomParams`에서 `status`만 지우면 끝.
+    - 길이가 **줄면** 슬롯 단위 → `mapFilter.ts`는 status로 `flowers`를 좁히지 않으므로, 그냥 지우면 "절정" 필터에서 절정이 아닌 꽃 아이콘까지 핀에 뜬다. `narrowToCategories`와 대칭인 status narrow를 **먼저** 추가해야 한다.
+- **지도 `region`은 bbox state 안에 들어 있다 — 따로 빼지 말 것** (2026-09-04): `bloomParams`가 `applied.region`을 직접 읽으면, 권역을 고른 순간 React Query의 내부 effect(`useBloomMap` 호출 지점이라 훅 선언 순서상 아래쪽 권역 effect보다 **먼저** 돈다)가 **'옛 bbox + 새 region'으로 요청을 한 번 보내고 버린다.** 둘을 한 state에 담아 같은 `setState`로 바꿔야 그 중간 상태 자체가 안 생긴다. 같은 이유로 `idle` effect deps에 `applied.region`을 넣으면 안 된다 — effect가 재등록되며 아직 이동 전 bounds로 또 조회하므로 `appliedRegionRef`로 읽는다.
+  - bbox 격자는 `0.001 × 2^(level-1)`로 레벨에 비례한다(셀 = 화면 폭의 약 90%, 모든 레벨 동일). 고정 0.01°였을 때는 level 8 화면이 가로 14칸이라 화면 폭의 7%만 움직여도 매번 새 쿼리 키가 돼 캐시가 사실상 놀았다. 대가는 평균 1.8배 과조회다.
+  - 화면 안 개수('N개의 명소 보기')는 `bbox`가 아니라 `viewport` state로 센다. bbox는 격자에 스냅돼 화면보다 넓고 셀 안에서의 팬으로는 바뀌지 않아서, 지도에서 `getBounds()`를 직접 읽으면 그 값이 effect deps에 안 잡혀 개수가 옛 화면 기준으로 남는다.
 - **지도 초기 로딩은 SDK 준비가 아니라 첫 `tilesloaded`까지 가린다** (2026-09-02): SDK 콜백 직후에도 실제 타일은 수 초간 비어 있을 수 있어, 상단 UI는 먼저 표시하고 지도 영역의 CSS 스켈레톤만 첫 타일 완료까지 유지한다. `/map` HTML에서 SDK를 preload하며, 화면 전체 지도에 불필요했던 `IntersectionObserver` 지연은 제거했다.
   - 수동 3×3 타일 prefetch는 카카오맵이 요청하는 타일과 경쟁할 수 있고, 기존 서비스워커는 cross-origin 응답을 캐시하지 못하면서 모든 타일에 Cache API 조회를 더할 수 있어 신규 등록을 제거했다. `public/map-tile-sw.js`는 기존 설치본/캐시 정리만 담당한다.
 - **`MapSpot`의 `flowers`/`statuses`/`categories`는 인덱스가 맞물린 병렬 배열**: 같은 꽃이 같은 위치에 들어간다. `mapFilter.ts`가 꽃 종류로 좁힐 때 이 정렬에 기대므로 한쪽만 따로 만들거나 정렬을 바꾸면 안 된다. 핀 색(`maxStage`)은 좁힌 뒤 `constants/map.ts`의 `toMaxStage()`로 다시 계산한다 — 변환(`bloomToMapSpots`)과 필터가 각자 계산하면 필터를 걸었을 때 색만 옛 기준으로 남는다.

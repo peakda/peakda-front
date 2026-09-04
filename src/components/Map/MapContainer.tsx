@@ -41,14 +41,65 @@ const NETWORK_TOAST_ID = 'map-network-error'
 
 const INITIAL_LEVEL = 8
 
-// bbox를 격자에 스냅해 미세 이동 시 동일 쿼리 키로 수렴시킨다(캐시 히트 + staleTime 작동).
-// 소수점 2자리(≈ 1km) 격자. 뷰를 항상 덮도록 min은 내림, max는 올림.
-const BBOX_GRID = 100
-const snapDown = (v: number) => Math.floor(v * BBOX_GRID) / BBOX_GRID
-const snapUp = (v: number) => Math.ceil(v * BBOX_GRID) / BBOX_GRID
+// 화면 그대로의 영역. bbox 는 격자에 스냅돼 화면보다 넓어 개수 계산에는 쓸 수 없다.
+interface Viewport {
+  minLat: number
+  minLng: number
+  maxLat: number
+  maxLng: number
+}
 
-// 지도 정착 후 실제 조회까지의 지연. 연속 이동 중엔 마지막 정착만 조회한다.
-const BBOX_DEBOUNCE_MS = 1000
+// bbox를 격자에 스냅해 이동 시 동일 쿼리 키로 수렴시킨다(캐시 히트 + staleTime 작동).
+// 셀 크기를 level 에 비례시켜 화면 폭의 약 90% 로 고정한다. 예전처럼 0.01°(≈880m)로
+// 고정하면 level 8 화면이 가로 14칸이라, 화면 폭의 7%만 움직여도 매번 새 키가 됐다.
+const BBOX_GRID_UNIT = 0.001
+const bboxGridSize = (level: number) => BBOX_GRID_UNIT * Math.pow(2, level - 1)
+
+// 뷰를 항상 덮도록 min은 내림, max는 올림. 부동소수 꼬리는 잘라 URL·쿼리 키를 안정시킨다.
+const snapDown = (v: number, unit: number) => Number((Math.floor(v / unit) * unit).toFixed(6))
+const snapUp = (v: number, unit: number) => Number((Math.ceil(v / unit) * unit).toFixed(6))
+
+// region 을 여기서 함께 확정하는 게 핵심이다. bloomParams 가 applied.region 을 직접 읽으면
+// 권역을 고른 순간 React Query 의 내부 effect(useBloomMap 호출 지점이라 훅 순서상 아래
+// 권역 effect보다 먼저 돈다)가 '옛 bbox + 새 region' 으로 요청을 한 번 보내고 버린다.
+// 둘을 한 state 에 담아 같은 setState 로 바꾸면 그 중간 상태 자체가 생기지 않는다.
+const snapBbox = (
+  box: Viewport,
+  level: number,
+  region: GetSeasonalBloomsParams['region']
+): GetSeasonalBloomsParams => {
+  const unit = bboxGridSize(level)
+  return {
+    minLat: snapDown(box.minLat, unit),
+    minLng: snapDown(box.minLng, unit),
+    maxLat: snapUp(box.maxLat, unit),
+    maxLng: snapUp(box.maxLng, unit),
+    region,
+  }
+}
+
+const sameBbox = (a: GetSeasonalBloomsParams, b: GetSeasonalBloomsParams) =>
+  a.minLat === b.minLat &&
+  a.minLng === b.minLng &&
+  a.maxLat === b.maxLat &&
+  a.maxLng === b.maxLng &&
+  a.region === b.region
+
+const mapBox = (map: kakao.maps.Map): Viewport => {
+  const bounds = map.getBounds()
+  const sw = bounds.getSouthWest()
+  const ne = bounds.getNorthEast()
+  return {
+    minLat: sw.getLat(),
+    minLng: sw.getLng(),
+    maxLat: ne.getLat(),
+    maxLng: ne.getLng(),
+  }
+}
+
+// 지도 정착 후 실제 조회까지의 지연. idle 자체가 이동 종료 후에만 발화하므로
+// 여기서는 '드래그 → 짧은 멈춤 → 드래그' 연타만 흡수하면 된다.
+const BBOX_DEBOUNCE_MS = 300
 
 // 상단 칩. 서버 파라미터가 없어 응답의 pin.type 으로 클라이언트에서 거른다.
 const PIN_TYPES: PinTypeFilter[] = ['ALL', 'ATTRACTION', 'LOCAL']
@@ -116,6 +167,10 @@ export const MapContainer = () => {
   const [mapInstance, setMapInstance] = useState<kakao.maps.Map | null>(null)
   const [areTilesLoaded, setAreTilesLoaded] = useState(false)
   const [bbox, setBbox] = useState<GetSeasonalBloomsParams | null>(null)
+  const [viewport, setViewport] = useState<Viewport | null>(null)
+  // idle 은 mapInstance 당 한 번만 등록한다. region 을 deps 에 넣으면 권역이 바뀔 때 effect 가
+  // 다시 돌면서 '아직 이동 전 bounds + 새 region' 으로 조회해 버리므로 ref 로 읽는다.
+  const appliedRegionRef = useRef<GetSeasonalBloomsParams['region']>(undefined)
   const { isReady: isSdkReady, error, retry } = useLazyMapLoad()
   const openFilterDrawer = useDrawerStore((s) => s.openFilterDrawer)
   const openPinDrawer = useDrawerStore((s) => s.openPinDrawer)
@@ -124,6 +179,12 @@ export const MapContainer = () => {
   const draftCategories = useFilterStore((s) => s.draft.categories)
   const setPinType = useFilterStore((s) => s.setPinType)
   const setVisibleSpots = useFilterStore((s) => s.setVisibleSpots)
+
+  // 격자 스냅 덕에 셀 안에서의 이동은 같은 값으로 수렴한다. 값이 같으면 객체를 갈지 않아
+  // 조회도 리렌더도 일어나지 않게 한다(새 객체로 setState 하면 값이 같아도 리렌더된다).
+  const applyBbox = useCallback((next: GetSeasonalBloomsParams) => {
+    setBbox((prev) => (prev && sameBbox(prev, next) ? prev : next))
+  }, [])
 
   const statuses = useMemo(() => timingToStatuses(applied.timing), [applied.timing])
 
@@ -141,12 +202,10 @@ export const MapContainer = () => {
   // 꽃 종류(categories)는 일부러 보내지 않는다. 서버가 걸러 주면 ①드로어 하단의
   // 'N개의 명소 보기' 를 draft 기준으로 셀 수 없고 ②응답에서 안 고른 꽃이 빠져
   // 핀 아이콘을 선택에 맞게 좁힐 수 없다. 대신 응답의 category 로 클라에서 거른다.
+  // region 은 bbox 와 원자적으로 바뀌어야 해서 bbox state 안에 들어 있다(snapBbox 주석 참고).
   const bloomParams = useMemo(
-    () =>
-      bbox
-        ? { ...bbox, status: timingToStatus(applied.timing), region: applied.region ?? undefined }
-        : null,
-    [bbox, applied.timing, applied.region]
+    () => (bbox ? { ...bbox, status: timingToStatus(applied.timing) } : null),
+    [bbox, applied.timing]
   )
   const { data: bloomData, isPlaceholderData } = useBloomMap(bloomParams)
   const allSpots = useMemo(() => (bloomData ? bloomToMapSpots(bloomData) : []), [bloomData])
@@ -177,27 +236,30 @@ export const MapContainer = () => {
   // 프리뷰는 spotId 로만 조회하므로 아직 Spot 행이 없는 명소(spotId=null)는 제외한다.
   useEffect(() => {
     // bbox 는 캐시 히트를 위해 격자에 스냅돼 화면보다 넓다. 개수는 실제 화면 기준이어야 하므로
-    // 여기서 현재 bounds 로 한 번 더 거른다.
-    const bounds = mapInstance?.getBounds()
+    // idle 마다 갱신되는 viewport 로 한 번 더 거른다. (지도에서 직접 getBounds 를 읽으면
+    // 그 값이 deps 에 안 잡혀, 재조회 없이 끝나는 팬에서 개수가 옛 화면 기준으로 남는다)
     const inView = (list: MapSpot[]) => {
-      if (!bounds) return list
-      const sw = bounds.getSouthWest()
-      const ne = bounds.getNorthEast()
+      if (!viewport) return list
       return list.filter(
         (s) =>
-          s.lat >= sw.getLat() &&
-          s.lat <= ne.getLat() &&
-          s.lng >= sw.getLng() &&
-          s.lng <= ne.getLng()
+          s.lat >= viewport.minLat &&
+          s.lat <= viewport.maxLat &&
+          s.lng >= viewport.minLng &&
+          s.lng <= viewport.maxLng
       )
     }
 
-    const center = mapInstance?.getCenter()
+    const center = viewport
+      ? {
+          lat: (viewport.minLat + viewport.maxLat) / 2,
+          lng: (viewport.minLng + viewport.maxLng) / 2,
+        }
+      : null
     setVisibleSpots({
       spotIds: inView(spots)
         .map((s) => s.spotId)
         .filter((id): id is number => id != null),
-      center: center ? { lat: center.getLat(), lng: center.getLng() } : null,
+      center,
       // 아직 이전 조건의 결과를 보고 있으면 목록 열기를 기다려야 한다.
       isStale: isPlaceholderData || isRegionMovePending,
       draftCount: inView(draftSpots).filter((s) => s.spotId != null).length,
@@ -208,7 +270,7 @@ export const MapContainer = () => {
   }, [
     spots,
     draftSpots,
-    mapInstance,
+    viewport,
     isPlaceholderData,
     isRegionMovePending,
     applied,
@@ -300,31 +362,15 @@ export const MapContainer = () => {
   useEffect(() => {
     if (!mapInstance) return
 
-    const updateBbox = () => {
-      const bounds = mapInstance.getBounds()
-      const sw = bounds.getSouthWest()
-      const ne = bounds.getNorthEast()
-      const next = {
-        minLat: snapDown(sw.getLat()),
-        minLng: snapDown(sw.getLng()),
-        maxLat: snapUp(ne.getLat()),
-        maxLng: snapUp(ne.getLng()),
-      }
-      // 격자 스냅 덕에 미세 이동은 같은 값으로 수렴한다. 값이 같으면 객체를 갈지 않아
-      // 조회도 리렌더도 일어나지 않게 한다(새 객체로 setState 하면 값이 같아도 리렌더된다).
-      setBbox((prev) =>
-        prev &&
-        prev.minLat === next.minLat &&
-        prev.minLng === next.minLng &&
-        prev.maxLat === next.maxLat &&
-        prev.maxLng === next.maxLng
-          ? prev
-          : next
-      )
-    }
+    // 화면 안 개수는 이미 받아 둔 데이터로 세므로 조회와 달리 지연시키지 않는다.
+    const syncViewport = () => setViewport(mapBox(mapInstance))
+
+    const updateBbox = () =>
+      applyBbox(snapBbox(mapBox(mapInstance), mapInstance.getLevel(), appliedRegionRef.current))
 
     let timer: ReturnType<typeof setTimeout>
     const onIdle = () => {
+      syncViewport()
       clearTimeout(timer)
       timer = setTimeout(() => {
         updateBbox()
@@ -337,29 +383,56 @@ export const MapContainer = () => {
       }, BBOX_DEBOUNCE_MS)
     }
 
+    syncViewport()
     updateBbox() // 첫 진입은 즉시 조회
     kakao.maps.event.addListener(mapInstance, 'idle', onIdle)
     return () => {
       clearTimeout(timer)
       kakao.maps.event.removeListener(mapInstance, 'idle', onIdle)
     }
-  }, [mapInstance])
+  }, [mapInstance, applyBbox])
 
-  // 권역은 현재 화면 bbox와 AND 조건으로 조회된다. 먼저 해당 권역의 중심으로 옮겨야
-  // 이전 화면 영역 때문에 결과가 비는 일을 막고, idle 이벤트가 새 bbox로 재조회한다.
+  // 권역은 현재 화면 bbox와 AND 조건으로 조회된다. 이동이 끝나길 기다리면 옛 화면 영역
+  // 때문에 결과가 비므로, panTo 가 줌을 바꾸지 않는다는 점을 이용해 '새 중심 ± 지금의 반폭'
+  // 으로 bbox·region 을 먼저 확정한다. 이동 후 idle 이 계산하는 값과 같아(sameBbox) 두 번째
+  // 요청은 나가지 않는다 — 권역 전환에 조회 1건만 쓴다.
   useEffect(() => {
     if (!mapInstance) return
+
+    const region = applied.region ?? undefined
+    appliedRegionRef.current = region
+    const level = mapInstance.getLevel()
+
     if (!applied.region) {
       isRegionMovePendingRef.current = false
       setIsRegionMovePending(false)
+      // 권역을 풀 때는 지도를 옮기지 않고 파라미터만 뗀다.
+      applyBbox(snapBbox(mapBox(mapInstance), level, region))
       return
     }
 
     const center = REGION_MAP_CENTERS[applied.region]
+    const box = mapBox(mapInstance)
+    const halfLat = (box.maxLat - box.minLat) / 2
+    const halfLng = (box.maxLng - box.minLng) / 2
+
+    applyBbox(
+      snapBbox(
+        {
+          minLat: center.lat - halfLat,
+          minLng: center.lng - halfLng,
+          maxLat: center.lat + halfLat,
+          maxLng: center.lng + halfLng,
+        },
+        level,
+        region
+      )
+    )
+
     isRegionMovePendingRef.current = true
     setIsRegionMovePending(true)
     mapInstance.panTo(new kakao.maps.LatLng(center.lat, center.lng))
-  }, [mapInstance, applied.region])
+  }, [mapInstance, applied.region, applyBbox])
 
   useEffect(() => {
     if (!error) return

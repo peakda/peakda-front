@@ -104,6 +104,12 @@ export const useMySpotRecordsInfinite = (status: GetSpotsRecordsMeStatus) =>
     getNextPageParam: nextPageParam,
   })
 
+// 기록은 동네형 핀의 원천이라 지도 개화현황도 함께 낡는다. bbox·필터마다 키가 갈리므로
+// 프리픽스로 지운다. useBloomMap 의 staleTime 이 30분이라 무효화하지 않으면 내가 쓴 기록이
+// 그동안 지도에 안 나타난다.
+const invalidateBloomMap = (queryClient: ReturnType<typeof useQueryClient>) =>
+  queryClient.invalidateQueries({ queryKey: ['/api/seasonal/blooms'] })
+
 // 기록 변경 mutation — 성공 시 스팟별·본인 기록 리스트 캐시 무효화
 
 export const useCreateSpotRecord = () => {
@@ -113,6 +119,7 @@ export const useCreateSpotRecord = () => {
       onSuccess: (res) => {
         recordListKeys.forEach((queryKey) => queryClient.invalidateQueries({ queryKey }))
         invalidateSpotDetail(queryClient, res.data.data?.spot.id)
+        invalidateBloomMap(queryClient)
       },
     },
   })
@@ -127,6 +134,7 @@ export const useUpdateSpotRecord = () => {
         queryClient.invalidateQueries({ queryKey: getGetSpotsRecordsMeQueryKey() })
         queryClient.invalidateQueries({ queryKey: [`/api/spots/records/${id}`] })
         invalidateSpotDetail(queryClient, res.data.data?.spot.id)
+        invalidateBloomMap(queryClient)
       },
     },
   })
@@ -139,6 +147,7 @@ export const useDeleteSpotRecord = () => {
       onSuccess: () => {
         recordListKeys.forEach((queryKey) => queryClient.invalidateQueries({ queryKey }))
         invalidateSpotDetail(queryClient)
+        invalidateBloomMap(queryClient)
         // 게시된 기록이면 피드에도 노출되므로 '/api/feed' 프리픽스 캐시를 함께 무효화한다.
         queryClient.invalidateQueries({
           predicate: (q) =>
