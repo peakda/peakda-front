@@ -25,11 +25,11 @@ export function FollowButton({ userId, initialFollowing = false }: Props) {
   }
 
   return following ? (
-    <Button variant="outlined" color="primary" size="sm" onClick={handleToggle}>
+    <Button variant="outlined" color="primary" size="sm" onClick={handleToggle} className='rounded-xl'>
       팔로잉
     </Button>
   ) : (
-    <Button variant="filled" color="primary" size="sm" onClick={handleToggle}>
+    <Button variant="filled" color="primary" size="sm" onClick={handleToggle} className='rounded-xl'>
       팔로우
     </Button>
   )
