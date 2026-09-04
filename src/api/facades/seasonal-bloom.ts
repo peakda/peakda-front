@@ -35,6 +35,12 @@ export const useBloomMap = (params: GetSeasonalBloomsParams | null) =>
       enabled: params !== null,
       select: (res) => res.data.data ?? null,
       placeholderData: keepPreviousData,
+      // 개화 추정은 응답의 baseDate 기준 일 단위로 바뀐다. 전역 5분을 따르면 지도를
+      // 왕복할 때마다 같은 영역을 다시 조회한다. gcTime 을 더 길게 둬 30~60분 구간에서도
+      // 옛 핀을 즉시 그리고 뒤에서 갱신하게 한다(흰 지도 없음).
+      // 내 기록으로 생기는 동네형 핀은 spot-record 의 invalidateBloomMap 이 즉시 반영한다.
+      staleTime: 1000 * 60 * 30,
+      gcTime: 1000 * 60 * 60,
     },
   })
 
