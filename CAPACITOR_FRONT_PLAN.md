@@ -99,8 +99,8 @@ Peakda 는 순수 정적 웹앱이 아니라 **Next.js 15 SSR 앱**이다. 코�
 - [ ] 런처 아이콘 PNG 192 / 512 (현재 SVG 파비콘만 — 네이티브 아이콘에 필요)
 - [ ] 네이티브 스플래시
 - [x] **오프라인 폴백 화면** — `server.errorPath` 로 로컬 재시도 화면 제공
-- [ ] 서명 키(keystore) 생성 및 보관
-- [x] AAB 빌드 명령 및 unsigned release 번들 검증 (서명 설정은 별도)
+- [x] 서명 키(keystore) 생성 및 보관 — 업로드 키 생성 완료(RSA 2048, 2054-01-21 만료). 저장소 밖 로컬 경로에 보관하고 경로·비밀번호·alias는 `~/.gradle/gradle.properties`에서 Gradle 프로퍼티로 주입한다
+- [x] AAB 빌드 명령 및 release 번들 검증 — `pnpm android:build:bundle`로 **서명된** AAB 생성 확인(`jarsigner -verify` → `jar verified.`)
 
 ## Phase 5 — 릴리스
 

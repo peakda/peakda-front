@@ -1,7 +1,8 @@
 # Capacitor Android 외부 입력 및 백엔드 확인 사항
 
 프런트 코드만으로 결정하거나 검증할 수 없는 항목을 한곳에 정리한다. 아래 항목이
-확정되기 전까지 현재 Android 셸은 로컬 안내 화면과 unsigned 빌드까지만 보장한다.
+확정되기 전까지 현재 Android 셸은 로컬 안내 화면까지만 보장한다. release 서명은 연결돼
+있어 서명된 AAB는 이미 만들어지지만, 실제 서비스 화면은 오리진이 확정돼야 뜬다.
 
 ## P0 — 실사이트 실행 전 필수
 
@@ -76,9 +77,9 @@ FCM 발송 구현과 SSE 구독 엔드포인트는 Swagger에 노출되어 있�
 
 ## P1 — 릴리스·보안 결정
 
-- [ ] 업로드 키/keystore 생성 담당자와 보관 위치 확정
+- [x] 업로드 키/keystore 생성 담당자와 보관 위치 확정 — 프런트 담당자가 로컬에서 생성. 저장소 밖에 두고 `android/app/build.gradle`이 `PEAKDA_UPLOAD_*` Gradle 프로퍼티로 주입받는다(`~/.gradle/gradle.properties`). 키가 없는 환경에서는 경고 후 unsigned로 빌드된다
 - [ ] 키 alias 및 비밀번호를 GitHub Actions secrets로 관리할지 결정
-- [ ] Play App Signing 사용 여부 확정
+- [x] Play App Signing 사용 여부 확정 — **선택 불가, 필수.** 2021년 8월 이후 생성되는 앱은 AAB 제출이 의무이고 Play App Signing이 자동 적용된다. 우리가 만든 키는 배포 키가 아니라 **업로드 키**이며, 분실 시 Google에 재설정을 요청할 수 있다
 - [ ] 개인정보처리방침 공개 URL 확정
 - [ ] Play 데이터 보안 설문에 포함할 수집·공유 항목 확인
 - [ ] 앱 버전 정책 확정
