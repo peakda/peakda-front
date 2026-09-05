@@ -3,7 +3,6 @@ import { Header } from '@/components/ui/layout/Header'
 import { Drawer } from '@/components/ui/layout/Drawer'
 import { Button } from '@/components/ui/button/Button'
 import { TermsForm } from './_components/TermsForm'
-import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
@@ -15,7 +14,6 @@ export default function TermsPage() {
     <>
       <div className="relative flex h-dvh w-full flex-col py-11">
         <Header
-          left={<LeftArrow />}
           center={<div className="text-[15px] font-medium text-[#000000]">서비스 이용 동의</div>}
         />
 

@@ -101,7 +101,7 @@ export default function ProfilePage() {
     <div className="relative flex min-h-screen flex-col pb-12">
       <div className="h-14">
         <Header
-          left={<LeftArrow />}
+          left={<LeftArrow href="/Terms" />}
           center={<div className="text-[15px] font-medium text-[#000000]">프로필 설정</div>}
         />
       </div>

@@ -8,9 +8,6 @@ import { Tag } from './Tag'
 import { IconBtn } from '@/components/ui/button/IconBtn'
 import type { PinBadge } from '@/types/types'
 
-// 칩이 한 줄을 넘기면 카드가 깨진다. 더 있어도 3개까지만 보여준다.
-const MAX_BADGES = 3
-
 interface PinTextProps {
   title: string
   location: string
@@ -88,8 +85,8 @@ export function PinText({
 
       {/* 하단 태그 목록 */}
       {badges.length > 0 && (
-        <div className="mt-3 flex gap-2">
-          {badges.slice(0, MAX_BADGES).map((badge, index) => (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {badges.map((badge, index) => (
             <Badge
               leftIcon={
                 badge.icon ? <Image src={badge.icon} alt="" width={20} height={20} /> : undefined
