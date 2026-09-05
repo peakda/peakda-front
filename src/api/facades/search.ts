@@ -40,12 +40,14 @@ export const useSearchSpotsInfinite = (keyword: string) =>
     placeholderData: keepPreviousData,
   })
 
-export const useSearchUsersInfinite = (keyword: string) =>
+// 유저 탭은 스팟 탭 뒤에 숨어 있다. 열지도 않은 탭 때문에 타이핑마다 요청이 두 배로 나가지
+// 않도록, 화면이 실제로 유저 결과를 보여줄 때만 켠다.
+export const useSearchUsersInfinite = (keyword: string, enabled = true) =>
   useInfiniteQuery({
     queryKey: ['/api/search/users', 'infinite', keyword],
     queryFn: ({ pageParam }) => searchUsersApi(keyword, pageParam),
     initialPageParam: 0,
     getNextPageParam: nextPageParam,
-    enabled: keyword.length > 0,
+    enabled: enabled && keyword.length > 0,
     placeholderData: keepPreviousData,
   })

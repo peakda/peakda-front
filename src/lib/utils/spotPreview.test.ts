@@ -29,7 +29,7 @@ describe('lib/utils/spotPreview', () => {
           location: '서울 중구 남산공원길',
           description: '벚꽃',
           tagText: '만개',
-          badges: [{ label: '벚꽃', icon: '/flowers/cherry-blossom.svg' }],
+          badges: [{ label: '벚꽃', icon: '/flowers/cherry-blossom.webp' }],
           isFavorite: false,
           notifyEnabled: false,
           images: ['https://img/1.jpg'],
@@ -75,8 +75,8 @@ describe('lib/utils/spotPreview', () => {
       ]
       const result = toPinListItems([item({ badges })])[0]
       expect(result.badges).toEqual([
-        { label: '단풍', icon: '/flowers/maple.svg' },
-        { label: '코스모스', icon: '/flowers/cosmos.svg' },
+        { label: '단풍', icon: '/flowers/maple.webp' },
+        { label: '코스모스', icon: '/flowers/cosmos.webp' },
       ])
     })
 

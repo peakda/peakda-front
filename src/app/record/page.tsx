@@ -13,6 +13,7 @@ import { DetailsStepForm, type BloomStage } from '@/app/record/_components/Detai
 import { LocationSearchView } from '@/app/record/_components/LocationSearchView'
 import { RecordCompleteView } from '@/app/record/_components/RecordCompleteView'
 import { RecordSkeleton } from '@/app/record/_components/RecordSkeleton'
+import { compressImage } from '@/lib/utils/image'
 
 // 매칭/생성에 필요한 스팟 정보 (카카오 검색 + 스팟 매칭 결과)
 // kakaoPlaceId: 스팟 상세(?spotId=)에서 넘어오면 응답에 없으므로 null 이다.
@@ -91,11 +92,13 @@ function RecordPageContent() {
   const isValid = hasLocation && photoItems.length > 0 && date.trim().length > 0
   const isSubmitting = matchSpot.isPending || uploadPhotos.isPending || createRecord.isPending
 
-  const handlePhotoAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoAdd = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? [])
-    const newItems = files.map((file) => ({ file, previewUrl: URL.createObjectURL(file) }))
-    setPhotoItems((prev) => [...prev, ...newItems].slice(0, 5))
     e.target.value = ''
+    // 미리보기도 업로드에 쓸 파일 그대로 보여 준다(원본 수 MB 를 메모리에 들고 있지 않도록).
+    const compressed = await Promise.all(files.map(compressImage))
+    const newItems = compressed.map((file) => ({ file, previewUrl: URL.createObjectURL(file) }))
+    setPhotoItems((prev) => [...prev, ...newItems].slice(0, 5))
   }
 
   const handleRemovePhoto = (index: number) => {

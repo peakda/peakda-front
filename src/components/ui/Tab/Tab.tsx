@@ -10,6 +10,8 @@ interface TabsProps {
   children: ReactNode
   className?: string
   'aria-label'?: string
+  /** 활성 탭이 바뀔 때 알림. 바깥에서 탭별로 쿼리를 켜고 끌 때 쓴다(상태는 계속 Tabs 가 갖는다). */
+  onValueChange?: (value: string) => void
 }
 
 // 탭 정의 → defaultValue 지정 → TabPanels 자식 순서 = tabs 배열 순서
@@ -28,15 +30,20 @@ export function Tabs({
   children,
   className,
   'aria-label': ariaLabel = '탭 목록',
+  onValueChange,
 }: TabsProps) {
   const uid = useId()
   const [active, setActiveRaw] = useState(defaultValue)
   const mountedRef = useRef<Set<string>>(new Set([defaultValue]))
 
-  const setActive = useCallback((value: string) => {
-    mountedRef.current.add(value)
-    setActiveRaw(value)
-  }, [])
+  const setActive = useCallback(
+    (value: string) => {
+      mountedRef.current.add(value)
+      setActiveRaw(value)
+      onValueChange?.(value)
+    },
+    [onValueChange]
+  )
 
   return (
     <TabsContext.Provider value={{ active, setActive, uid, mounted: mountedRef.current }}>

@@ -17,6 +17,7 @@ import { useSignUpComplete } from '@/hooks/useSignUpComplete'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { toast } from 'sonner'
 import type { SignupCompleteRequestFavoriteCategoriesItem } from '@/api/facades/generated/peakdaApi.schemas'
+import { compressImage } from '@/lib/utils/image'
 
 const FLOWER_LIST: { label: string; value: SignupCompleteRequestFavoriteCategoriesItem }[] = [
   { label: '동백꽃', value: 'CAMELLIA' },
@@ -65,9 +66,10 @@ export default function ProfilePage() {
     )
   }, [])
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const original = e.target.files?.[0]
+    if (!original) return
+    const file = await compressImage(original)
     setPreview(URL.createObjectURL(file))
     uploadImage(
       { data: { image: file } },

@@ -14,6 +14,10 @@ export function SplashScreen() {
 
     const timers: ReturnType<typeof setTimeout>[] = []
 
+    // 스플래시가 떠 있는 2초를 다음 화면 청크를 받는 데 쓴다.
+    // 이게 없으면 2초를 기다린 뒤에야 이동할 화면을 내려받기 시작한다.
+    router.prefetch(isOnboardingDone ? '/login' : '/onboarding')
+
     if (isOnboardingDone) {
       timers.push(setTimeout(() => setIsExiting(true), 1500))
       timers.push(setTimeout(() => router.replace('/login'), 2000))
