@@ -8,17 +8,16 @@
 
 ### 서비스·운영
 
-- [ ] **정식 프런트 오리진 확정**
-  - 필요한 값: 경로가 없는 HTTPS 오리진 하나(예: `https://app.example.com`)
-  - 사용처: `CAPACITOR_SERVER_URL`, 카카오 JavaScript 키 허용 도메인, OAuth 설정
-  - 확인 담당: 서비스 운영/프런트 배포 담당
-- [ ] **Android 패키지 ID 확정**
-  - 현재 임시값: `com.peakda.app`
-  - Play Console 앱 생성과 Firebase Android 앱 등록 전에 확정해야 한다.
-  - 변경 시 `capacitor.config.ts`, Android namespace/application ID, Java 패키지를 함께 바꿔야 한다.
-- [ ] **Google Play 개발자 계정 및 앱 소유 주체 확정**
-  - 개인/조직 계정, 결제 주체, 콘솔 관리자와 릴리스 담당자를 정한다.
-  - 비공개 테스트 인원·기간 등 실제 적용 요건은 계정 생성 시 Play Console 안내로 재확인한다.
+- [x] **정식 프런트 오리진 확정** — `https://peakda.com` (2026-09-06)
+  - 사용처: `CAPACITOR_SERVER_URL`, 카카오 JavaScript 키 허용 도메인, OAuth 설정, 개인정보처리방침 URL
+  - **남은 작업: apex DNS 연결.** `peakda.com`·`www.peakda.com` 모두 아직 레코드가 없어 접속되지 않는다.
+    Vercel 프로젝트에 도메인을 붙이기 전까지는 이 값을 빌드에 넣어도 앱이 사이트를 못 띄운다.
+  - 백엔드 `api.peakda.com`·`api-dev.peakda.com`은 응답하므로 도메인 소유 자체는 확인됨
+- [x] **Android 패키지 ID 확정** — `com.peakda.app` (2026-09-06)
+  - 보유 도메인 `peakda.com`의 역방향 표기라 관례에 맞는다.
+  - Play Console에 업로드하는 순간 영구 고정된다. 이후에는 새 앱으로 등록하는 것 말고 변경 수단이 없다.
+- [x] **Google Play 개발자 계정 및 앱 소유 주체 확정** — 계정 개설 완료 (2026-09-06)
+  - 비공개 테스트 인원·기간(개인 계정이면 테스터 12명 / 14일) 요건은 Play Console 안내로 재확인할 것.
 
 ### 인증·지도
 
@@ -65,22 +64,25 @@ FCM 발송 구현과 SSE 구독 엔드포인트는 Swagger에 노출되어 있�
 
 ## P1 — 디자인·스토어 자료
 
-- [ ] Adaptive launcher icon 원본
-  - 전경 레이어
-  - 배경색 또는 배경 레이어
-  - Play 스토어용 512×512 PNG
-- [ ] 네이티브 스플래시 원본과 배경색
+- [x] Adaptive launcher icon — `public/images/appIcon.png`(854x796)에서 생성
+  - 전경 레이어: 밀도별 5종. 기기 마스크에 꽃잎이 잘리지 않도록 세이프존 안쪽 62%로 축소 배치
+  - 배경색: `#FFFFFF` (`ic_launcher_background`, `capacitor.config.ts`와 동일). 디자이너 최종 확인 대기
+  - Play 스토어용 512×512: `android/store/play-icon-512.png` (알파 없음)
+- [x] 네이티브 스플래시 — 같은 원본으로 세로/가로 11종 생성, 배경 `#FFFFFF`
+  - 텍스트는 넣지 않는다. 인앱 `SplashScreen.tsx`가 로고+문구를 담당하는데 양쪽에 다 넣으면
+    실행 시 비슷한 화면이 3단계로 바뀌어 어수선해진다
 - [ ] 스토어 스크린샷과 feature graphic
 - [ ] 앱 이름, 짧은 설명, 전체 설명 최종 문구
 
-현재 저장소의 Android 아이콘과 스플래시는 Capacitor 기본 플레이스홀더다.
+벡터 원본(SVG/Figma)을 받으면 더 선명하게 다시 뽑을 수 있으나, 필요한 최대 크기가 432px라
+현재 PNG 원본으로도 전부 축소 변환이어서 화질 문제는 없다.
 
 ## P1 — 릴리스·보안 결정
 
 - [x] 업로드 키/keystore 생성 담당자와 보관 위치 확정 — 프런트 담당자가 로컬에서 생성. 저장소 밖에 두고 `android/app/build.gradle`이 `PEAKDA_UPLOAD_*` Gradle 프로퍼티로 주입받는다(`~/.gradle/gradle.properties`). 키가 없는 환경에서는 경고 후 unsigned로 빌드된다
 - [ ] 키 alias 및 비밀번호를 GitHub Actions secrets로 관리할지 결정
 - [x] Play App Signing 사용 여부 확정 — **선택 불가, 필수.** 2021년 8월 이후 생성되는 앱은 AAB 제출이 의무이고 Play App Signing이 자동 적용된다. 우리가 만든 키는 배포 키가 아니라 **업로드 키**이며, 분실 시 Google에 재설정을 요청할 수 있다
-- [ ] 개인정보처리방침 공개 URL 확정
+- [ ] 개인정보처리방침 공개 URL 확정 — 오리진은 `https://peakda.com`으로 정해졌으므로 DNS 연결 후 경로만 확정하면 된다
 - [ ] Play 데이터 보안 설문에 포함할 수집·공유 항목 확인
 - [ ] 앱 버전 정책 확정
   - `ANDROID_VERSION_CODE`: Play 업로드마다 증가하는 정수

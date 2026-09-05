@@ -52,11 +52,11 @@ Peakda 는 순수 정적 웹앱이 아니라 **Next.js 15 SSR 앱**이다. 코�
 
 ## Phase 0 — 전제 확정 (코드 전, 지금 병렬 시작)
 
-- [ ] 프로덕션 **실도메인 확정** (vercel.app 프리뷰 말고 정식 도메인) — assetlinks·OAuth·`server.url` 이 전부 여기에 묶임
+- [x] 프로덕션 **실도메인 확정** — `https://peakda.com` (2026-09-06). 다만 apex·www 모두 아직 DNS 레코드가 없어 Vercel 연결이 남았다. 백엔드 `api.peakda.com`·`api-dev.peakda.com`은 이미 응답하므로 도메인 소유는 확인됨
 - [ ] 백엔드 확인: 푸시 인프라 **FCM 여부 + 일정** ([ANDROID_APP_DECISION.md](ANDROID_APP_DECISION.md) 92번). 발송단 없으면 Phase 3 차단
-- [ ] **Google Play 개발자 계정 개설**
+- [x] **Google Play 개발자 계정 개설** — 완료 (2026-09-06)
 - [ ] **비공개 테스트 착수 준비** (테스터 12명 / 14일) — 리드타임이 가장 길어 지금 시작해야 안 밀림
-- [ ] `appId` 확정 (예: `com.peakda.app`)
+- [x] `appId` 확정 — `com.peakda.app` (2026-09-06). Play 업로드 후에는 변경 불가
 
 ## Phase 1 — Capacitor 셸 골격 (앱이 뜨기만, ~1일)
 
@@ -96,8 +96,8 @@ Peakda 는 순수 정적 웹앱이 아니라 **Next.js 15 SSR 앱**이다. 코�
 
 ## Phase 4 — Play 제출 준비
 
-- [ ] 런처 아이콘 PNG 192 / 512 (현재 SVG 파비콘만 — 네이티브 아이콘에 필요)
-- [ ] 네이티브 스플래시
+- [x] 런처 아이콘 — `public/images/appIcon.png`에서 밀도별 15종 생성(adaptive 전경·레거시 사각·원형). Play 등록용 512x512는 `android/store/play-icon-512.png`
+- [x] 네이티브 스플래시 — 같은 원본으로 세로/가로 11종 생성. 텍스트는 넣지 않고 인앱 `SplashScreen.tsx`가 담당
 - [x] **오프라인 폴백 화면** — `server.errorPath` 로 로컬 재시도 화면 제공
 - [x] 서명 키(keystore) 생성 및 보관 — 업로드 키 생성 완료(RSA 2048, 2054-01-21 만료). 저장소 밖 로컬 경로에 보관하고 경로·비밀번호·alias는 `~/.gradle/gradle.properties`에서 Gradle 프로퍼티로 주입한다
 - [x] AAB 빌드 명령 및 release 번들 검증 — `pnpm android:build:bundle`로 **서명된** AAB 생성 확인(`jarsigner -verify` → `jar verified.`)
@@ -114,7 +114,7 @@ Peakda 는 순수 정적 웹앱이 아니라 **Next.js 15 SSR 앱**이다. 코�
 
 1. **Firebase 서비스 계정 키 미발급** — Phase 3 발송 검증 차단(구현 자체는 완료). FCM 여부·발송 방식·payload·정책은 2026-08-20 전부 회신받아 더 이상 추측이 아니다
 2. **소셜 로그인 코드 교환 스펙 미확정** — Phase 2 신규 차단 요인. Custom Tab 방식은 백엔드가 안 된다고 확정했고, 대체할 일회성 코드 교환 방식의 엔드포인트·딥링크 스킴·스키마가 아직 안 나왔다. 그 전까지 앱은 기존 웹 로그인 방식으로만 동작
-3. **실도메인 미확정** — Phase 0~1 못 시작
+3. **실도메인 DNS 미연결** — 값은 `peakda.com`으로 확정됐지만 apex에 레코드가 없어 아직 `CAPACITOR_SERVER_URL`로 못 쓴다. Vercel에 도메인을 붙여야 Phase 1 실기기 검증이 시작된다
 4. **Play 14일 비공개 테스트** — 착수 늦으면 그대로 밀림
 5. **`server.url` 프로덕션 사용** — Capacitor 공식은 비권장(원래 live-reload 용). Phase 1 실기기 검증이 실사용 가능 여부를 조기에 판정하는 안전장치
 6. **오프라인 / Play 최소기능** — B안의 대표 약점. Phase 4 폴백 화면으로 완화
