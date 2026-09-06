@@ -28,6 +28,8 @@ export const useCarousel = (options: UseCarouselOptions = {}, initialCount = 0) 
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return
+    // 슬라이드 수가 바뀌면(reInit) 도트 개수도 같이 갱신돼야 한다.
+    setScrollSnaps(emblaApi.scrollSnapList())
     setSelectedIndex(emblaApi.selectedScrollSnap())
     setCanScrollPrev(emblaApi.canScrollPrev())
     setCanScrollNext(emblaApi.canScrollNext())

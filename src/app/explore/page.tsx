@@ -7,6 +7,7 @@ import { Header } from '@/components/ui/layout/Header'
 import { SearchInput } from '@/app/search/_components/SearchInput'
 import { ExplorCard } from '@/components/ui/card/ExplorCard'
 import { SpotCard } from '@/components/ui/card/SpotCard'
+import { Carousel, CarouselItem } from '@/components/ui/display/Carousel'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import { useFilterStore } from '@/stores/useFilterStore'
 import { Drawer } from '@/components/ui/layout/Drawer'
@@ -112,22 +113,21 @@ export default function ExplorePage() {
         {peakNow.length === 0 ? (
           !isLoading && <EmptySection text="지금 절정인 명소가 없어요" />
         ) : (
-          <div className="flex gap-3 overflow-x-auto px-4 pb-4 [&::-webkit-scrollbar]:hidden">
+          <Carousel showDots className="px-4 pb-4">
             {peakNow.map((item) => (
-              <Link
-                key={`${item.attractionId}-${item.category}`}
-                href={`/spot/${item.spotId}`}
-                className="shrink-0"
-              >
-                <ExplorCard
-                  type="peak"
-                  image={item.thumbnailUrl ?? PLACEHOLDER_IMAGE}
-                  name={item.name}
-                  description={toPeakDescription(item)}
-                />
-              </Link>
+              <CarouselItem key={`${item.attractionId}-${item.category}`}>
+                <Link href={`/spot/${item.spotId}`} className="block">
+                  <ExplorCard
+                    type="peak"
+                    className="w-full"
+                    image={item.thumbnailUrl ?? PLACEHOLDER_IMAGE}
+                    name={item.name}
+                    description={toPeakDescription(item)}
+                  />
+                </Link>
+              </CarouselItem>
             ))}
-          </div>
+          </Carousel>
         )}
       </section>
 
@@ -160,28 +160,27 @@ export default function ExplorePage() {
         {festivals.length === 0 ? (
           !isLoading && <EmptySection text="진행 중인 축제가 없어요" />
         ) : (
-          <div className="flex gap-3 overflow-x-auto px-4 pb-4 [&::-webkit-scrollbar]:hidden">
+          <Carousel showDots className="px-4 pb-4">
             {festivals.map((item) => {
               const status = toFestivalStatus(item)
               return (
-                <Link
-                  key={item.festivalId}
-                  href={`/festivals/${item.festivalId}`}
-                  className="shrink-0"
-                >
-                  <ExplorCard
-                    type="festival"
-                    image={item.thumbnailUrl ?? PLACEHOLDER_IMAGE}
-                    name={item.name}
-                    description={toFestivalDescription(item)}
-                    dateRange={toFestivalDateRange(item)}
-                    status={status.label}
-                    statusVariant={status.variant}
-                  />
-                </Link>
+                <CarouselItem key={item.festivalId}>
+                  <Link href={`/festivals/${item.festivalId}`} className="block">
+                    <ExplorCard
+                      type="festival"
+                      className="w-full"
+                      image={item.thumbnailUrl ?? PLACEHOLDER_IMAGE}
+                      name={item.name}
+                      description={toFestivalDescription(item)}
+                      dateRange={toFestivalDateRange(item)}
+                      status={status.label}
+                      statusVariant={status.variant}
+                    />
+                  </Link>
+                </CarouselItem>
               )
             })}
-          </div>
+          </Carousel>
         )}
       </section>
 
@@ -191,18 +190,22 @@ export default function ExplorePage() {
         {curations.length === 0 ? (
           !isLoading && <EmptySection text="아직 발행된 큐레이션이 없어요" />
         ) : (
-          <div className="flex gap-3 overflow-x-auto px-4 pb-4 [&::-webkit-scrollbar]:hidden">
+          // 카드가 잘려 보여 더 있는지 모르는 문제가 있어 한 장씩 넘기는 슬라이더로 보여준다.
+          <Carousel showDots className="px-4 pb-4">
             {curations.map((item) => (
-              <Link key={item.id} href={`/creators/${item.id}`} className="shrink-0">
-                <ExplorCard
-                  type="course"
-                  image={item.heroImageUrl ?? PLACEHOLDER_IMAGE}
-                  title={item.title}
-                  subtitle={item.subtitle ?? item.weekLabel}
-                />
-              </Link>
+              <CarouselItem key={item.id}>
+                <Link href={`/creators/${item.id}`} className="block">
+                  <ExplorCard
+                    type="course"
+                    className="w-full"
+                    image={item.heroImageUrl ?? PLACEHOLDER_IMAGE}
+                    title={item.title}
+                    subtitle={item.subtitle ?? item.weekLabel}
+                  />
+                </Link>
+              </CarouselItem>
             ))}
-          </div>
+          </Carousel>
         )}
       </section>
 
