@@ -2,7 +2,7 @@
 
 import { useCarousel } from '@/hooks/useEmblaCarousel'
 import { cn } from '@/lib/utils/cn'
-import { ComponentPropsWithoutRef } from 'react'
+import { Children, ComponentPropsWithoutRef, useEffect } from 'react'
 
 interface CarouselProps extends ComponentPropsWithoutRef<'div'> {
   loop?: boolean
@@ -24,6 +24,7 @@ export const Carousel = ({
 }: CarouselProps) => {
   const {
     emblaRef,
+    emblaApi,
     selectedIndex,
     scrollSnaps,
     canScrollPrev,
@@ -32,6 +33,12 @@ export const Carousel = ({
     scrollNext,
     scrollTo,
   } = useCarousel({ loop, align, dragFree })
+
+  // 필터 변경 등으로 슬라이드 수가 바뀌면 embla 가 다시 측정해야 한다.
+  const slideCount = Children.count(children)
+  useEffect(() => {
+    emblaApi?.reInit()
+  }, [emblaApi, slideCount])
 
   return (
     <div className={cn('relative', className)} {...props}>
@@ -87,8 +94,8 @@ export const Carousel = ({
               className={cn(
                 'size-1.5 rounded-full transition-all duration-200',
                 index === selectedIndex
-                  ? 'w-4 bg-[var(--color-brand-500)]'
-                  : 'bg-[var(--color-surface-3)]'
+                  ? 'bg-brand-secondary w-4'
+                  : 'bg-bg-quaternary'
               )}
             />
           ))}

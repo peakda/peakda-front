@@ -5,6 +5,8 @@ import { cn } from '@/lib/utils/cn'
 // 카드 클릭 시 이동은 호출부에서 넘긴다(카드 내부에서 라우터를 쓰지 않는다).
 interface ExplorCardBaseProps {
   onClick?: () => void
+  // 슬라이더처럼 카드 폭을 바깥에서 정해야 하는 곳에서만 넘긴다.
+  className?: string
 }
 
 interface PeakCardProps extends ExplorCardBaseProps {
@@ -41,7 +43,7 @@ export function ExplorCard(props: ExplorCardProps) {
 
   return (
     <div
-      className={cn('w-60 shrink-0', props.onClick && 'cursor-pointer')}
+      className={cn('w-60 shrink-0', props.onClick && 'cursor-pointer', props.className)}
       onClick={props.onClick}
     >
       {/* 이미지 영역 */}
