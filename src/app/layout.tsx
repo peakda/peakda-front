@@ -1,15 +1,11 @@
 import type { Metadata, Viewport } from 'next'
 import { Advent_Pro } from 'next/font/google'
-import localFont from 'next/font/local'
 import './globals.css'
 import { Providers } from '@/app/_components/Providers'
 
-const pretendard = localFont({
-  src: './fonts/PretendardVariable.woff2',
-  variable: '--font-pretendard',
-  display: 'swap',
-  weight: '45 920',
-})
+// Pretendard 는 next/font/local 을 쓰지 않는다 — 통짜 woff2 가 2MB 라 한 글자만 써도 전부 받는다.
+// globals.css 가 unicode-range 로 쪼갠 dynamic subset 을 import 하고,
+// --font-pretendard 도 거기서 정의한다.
 
 const adventPro = Advent_Pro({
   subsets: ['latin'],
@@ -25,9 +21,9 @@ export const metadata: Metadata = {
   description: '벚꽃·단풍 등 20여 개 계절 명소의 실시간 개화 상태를 확인하세요.',
   keywords: ['벚꽃', '단풍', '꽃구경', '계절여행', '개화시기', '피크다'],
   icons: {
-    icon: '/icons/favicon.svg',
-    shortcut: '/icons/favicon.svg',
-    apple: '/icons/favicon.svg',
+    icon: '/icons/favicon-32.png',
+    shortcut: '/icons/favicon-32.png',
+    apple: '/icons/apple-touch-icon.png',
   },
   openGraph: {
     title: 'Peakda | 계절 여행 타이밍',
@@ -49,7 +45,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="ko" className={`${pretendard.variable} ${adventPro.variable}`}>
+    <html lang="ko" className={adventPro.variable}>
       <head>
         {/* DNS 미리 해석 */}
         <link rel="dns-prefetch" href="//dapi.kakao.com" />

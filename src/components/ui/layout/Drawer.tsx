@@ -2,15 +2,14 @@
 
 import { Drawer as VaulDrawer } from 'vaul'
 import { useCallback, useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { useShallow } from 'zustand/react/shallow'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import { Button } from '@/components/ui/button/Button'
-import { FilterDrawerContent } from './FilterDrawerContent'
 import { LogoutDrawerContent } from './LogoutDrawerContent'
 import { WithdrawDrawerContent } from './WithdrawDrawerContent'
 import { SaveSpotDrawerContent } from './SaveSpotDrawerContent'
-import { DateSelectDrawerContent } from './DateSelectDrawerContent'
 import { DeleteConfirmDrawerContent } from './DeleteConfirmDrawerContent'
 import { ReactionDrawerContent } from './ReactionDrawerContent'
 import { PinList } from '@/components/ui/display/PinList'
@@ -19,6 +18,17 @@ import { spotPreviewApi } from '@/api/facades/spot'
 import { toPinListItems } from '@/lib/utils/spotPreview'
 import { timingToStatus } from '@/lib/utils/timing'
 import { toast } from 'sonner'
+
+// 필터 시트와 날짜 선택 달력은 드로어 중 가장 무거운 두 덩어리인데, <Drawer /> 를 올리는
+// 화면 대부분은 이 둘을 열지 않는다(약관·기록 상세 등). 실제로 열 때 받아 온다.
+const FilterDrawerContent = dynamic(
+  () => import('./FilterDrawerContent').then((m) => ({ default: m.FilterDrawerContent })),
+  { ssr: false }
+)
+const DateSelectDrawerContent = dynamic(
+  () => import('./DateSelectDrawerContent').then((m) => ({ default: m.DateSelectDrawerContent })),
+  { ssr: false }
+)
 
 // 닫힘 애니메이션이 끝난 뒤 목록 드로어를 띄우기 위한 대기 시간(vaul 슬라이드 아웃 기준).
 const DRAWER_CLOSE_MS = 350

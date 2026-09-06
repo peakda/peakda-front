@@ -3,6 +3,10 @@ apply plugin: 'com.android.application'
 def appVersionCode = (System.getenv('ANDROID_VERSION_CODE') ?: '1') as Integer
 def appVersionName = System.getenv('ANDROID_VERSION_NAME') ?: '0.1.0'
 
+// 업로드 키는 저장소 밖(~/.gradle/gradle.properties 등)에서 주입한다. 없으면 unsigned 로 빌드된다.
+def uploadStoreFile = project.findProperty('PEAKDA_UPLOAD_STORE_FILE')
+def hasUploadKey = uploadStoreFile != null && file(uploadStoreFile).exists()
+
 android {
     namespace = "com.peakda.app"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -19,10 +23,25 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        if (hasUploadKey) {
+            release {
+                storeFile file(uploadStoreFile)
+                storePassword project.findProperty('PEAKDA_UPLOAD_STORE_PASSWORD')
+                keyAlias project.findProperty('PEAKDA_UPLOAD_KEY_ALIAS')
+                keyPassword project.findProperty('PEAKDA_UPLOAD_KEY_PASSWORD')
+            }
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (hasUploadKey) {
+                signingConfig signingConfigs.release
+            } else {
+                logger.warn('PEAKDA_UPLOAD_STORE_FILE 이 없어 release 빌드가 서명되지 않는다. Play 업로드 불가.')
+            }
         }
     }
 }
