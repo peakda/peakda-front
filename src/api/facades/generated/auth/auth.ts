@@ -26,12 +26,10 @@ import type {
 
 import type {
   ApiResponseAppTokenResponse,
-  ApiResponseAppleLoginResponse,
   ApiResponseNicknameCheckResponse,
   ApiResponseProfileImageResponse,
   ApiResponseUnit,
   ApiResponseUserInfoResponse,
-  AppleLoginRequest,
   GetAuthSignupNicknameCheckParams,
   SignupCompleteRequest,
   SignupProfileImageUploadForm
@@ -291,88 +289,6 @@ export const usePostAuthRefresh = <TError = unknown,
         TContext
       > => {
       return useMutation(getPostAuthRefreshMutationOptions(options), queryClient);
-    }
-    export type postAuthOauthAppleResponse200 = {
-  data: ApiResponseAppleLoginResponse
-  status: 200
-}
-
-export type postAuthOauthAppleResponseSuccess = (postAuthOauthAppleResponse200) & {
-  headers: Headers;
-};
-;
-
-export type postAuthOauthAppleResponse = (postAuthOauthAppleResponseSuccess)
-
-export const getPostAuthOauthAppleUrl = () => {
-
-
-
-
-  return `/api/auth/oauth/apple`
-}
-
-/**
- * iOS Apple 로그인 SDK 가 발급한 identity token 을 검증한다. 기존 회원이면 access-token·refresh-token 쿠키를 발급(signupRequired=false)하고, 신규 사용자면 signup-token 쿠키를 발급(signupRequired=true)하여 회원가입 완료가 필요함을 알린다.
- * @summary Apple 네이티브 로그인
- */
-export const postAuthOauthApple = async (appleLoginRequest: AppleLoginRequest, options?: RequestInit): Promise<postAuthOauthAppleResponse> => {
-
-  return customInstance<postAuthOauthAppleResponse>(getPostAuthOauthAppleUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(appleLoginRequest)
-  }
-);}
-
-
-
-
-export const getPostAuthOauthAppleMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAuthOauthApple>>, TError,{data: AppleLoginRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof postAuthOauthApple>>, TError,{data: AppleLoginRequest}, TContext> => {
-
-const mutationKey = ['postAuthOauthApple'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAuthOauthApple>>, {data: AppleLoginRequest}> = (props) => {
-          const {data} = props ?? {};
-
-          return  postAuthOauthApple(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostAuthOauthAppleMutationResult = NonNullable<Awaited<ReturnType<typeof postAuthOauthApple>>>
-    export type PostAuthOauthAppleMutationBody = AppleLoginRequest
-    export type PostAuthOauthAppleMutationError = unknown
-
-    /**
- * @summary Apple 네이티브 로그인
- */
-export const usePostAuthOauthApple = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAuthOauthApple>>, TError,{data: AppleLoginRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postAuthOauthApple>>,
-        TError,
-        {data: AppleLoginRequest},
-        TContext
-      > => {
-      return useMutation(getPostAuthOauthAppleMutationOptions(options), queryClient);
     }
     export type postAuthLogoutResponse200 = {
   data: ApiResponseUnit

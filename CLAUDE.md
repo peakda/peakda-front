@@ -95,6 +95,7 @@ pnpm generate:facades   # 없는 도메인만 파사드 스텁 생성
 | [BACKEND_API_REQUESTS.md](BACKEND_API_REQUESTS.md) | **백엔드에 전달하는 요청서** — 요청 내용만. 백엔드와 공유하는 문서 |
 | [API_CHANGE_REQUESTS.md](API_CHANGE_REQUESTS.md) | 위 요청들의 프론트 대응 현황과 경위 (내부용) |
 | [UNLINKED_ROUTES.md](UNLINKED_ROUTES.md) | 생성됐지만 아직 화면에 연결되지 않은 라우트 목록 |
+| [TODO.md](TODO.md) | **Google Play 출시까지 남은 일과 확인된 사실** — 블로커, 담당, 실기기 체크리스트 |
 | [UX_BACKLOG.md](UX_BACKLOG.md) | 동작은 하지만 사용자 흐름이 어색해 고쳐야 하는 것 (보류 중인 건만) |
 | [CONTEST_ACTION_PLAN.md](CONTEST_ACTION_PLAN.md) | 공모전 1차 심사 대응 — 심사 기준별 현재 점수와 실행 우선순위 |
 | [ANDROID_APP_DECISION.md](ANDROID_APP_DECISION.md) | Google Play 배포 방식(TWA vs Capacitor) 논의용 — 아직 미정 |
