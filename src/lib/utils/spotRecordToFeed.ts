@@ -1,4 +1,5 @@
 ﻿import type {
+  PhotoEntry,
   SpotRecordResponse,
   SpotRecordSummaryResponse,
 } from '@/api/facades/generated/peakdaApi.schemas'
@@ -34,11 +35,15 @@ function formatTimeAgo(iso: string): string {
   return toDot(iso)
 }
 
+// 백엔드가 요약 응답에 photos 를 추가하는 중이라 아직 안 내려올 수 있다.
+// generate:api 로 생성 타입에 photos 가 들어오면 이 확장은 지운다.
+type SummaryWithPhotos = SpotRecordSummaryResponse & { photos?: PhotoEntry[] }
+
 // SpotRecordSummaryResponse → FeedCard props
 // 한계: 요약 응답에는 식물 이모지가 없어 기본값(🌸)을 사용한다.
-// 대표 사진이 없으면 placeholder 이미지를 사용한다.
+// photos 가 오면 전부, 아니면 대표 사진 한 장, 그것도 없으면 placeholder 를 쓴다.
 export function toFeedCardProps(
-  record: SpotRecordSummaryResponse,
+  record: SummaryWithPhotos,
   options?: Pick<FeedCardProps, 'isOwner' | 'onEdit' | 'onDelete' | 'onReport' | 'onOpen'>
 ): FeedCardProps {
   return {
@@ -51,12 +56,18 @@ export function toFeedCardProps(
     visitDate: toDot(record.visitedDate ?? record.createdAt),
     statusLabel: record.bloomStage ? BLOOM_LABEL[record.bloomStage] : '상태 미정',
     statusVariant: record.bloomStage ? BLOOM_VARIANT[record.bloomStage] : 'secondary',
-    images: record.coverPhoto?.url ? [record.coverPhoto.url] : ['/images/explore.png'],
+    images: toSummaryImages(record),
     flowers: record.plants.map((plant) => ({ emoji: '🌸', label: plant.name })),
     content: record.memo ?? '',
     reactions: record.reactions,
     ...options,
   }
+}
+
+function toSummaryImages(record: SummaryWithPhotos): string[] {
+  const urls = record.photos?.map((photo) => photo.url) ?? []
+  if (urls.length > 0) return urls
+  return record.coverPhoto?.url ? [record.coverPhoto.url] : ['/images/explore.png']
 }
 
 // SpotRecordResponse(상세) → FeedCard props
