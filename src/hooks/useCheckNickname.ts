@@ -10,7 +10,7 @@ interface ApiError {
 }
 
 export const useCheckNickname = (nickname: string) => {
-  const { data, isPending, refetch, isError, error } = useQuery<
+  const { data, isFetching, refetch, isError, error } = useQuery<
     Awaited<ReturnType<typeof checkNicknameApi>>,
     ApiError
   >({
@@ -25,7 +25,10 @@ export const useCheckNickname = (nickname: string) => {
   return {
     isAvailable: data?.data?.available,
     message: data?.message ?? error?.response?.data?.message,
-    isPending,
+    // enabled:false 쿼리는 첫 fetch 전까지 status 가 'pending' 이라 isPending 이 계속 true 다.
+    // 그대로 내보내면 중복확인 버튼이 영구 disabled 되어 refetch 자체를 못 한다.
+    // 실제 요청이 도는 동안만 잠기도록 isFetching 을 쓴다.
+    isPending: isFetching,
     check: refetch,
     isError,
   }
