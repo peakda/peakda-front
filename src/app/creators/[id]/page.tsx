@@ -75,10 +75,10 @@ export default function CreatorDetailPage() {
         {chapters.map((chapter) => (
           <div
             key={chapter.sortOrder}
-            className="border-border-primary flex flex-col gap-3 rounded-2xl border p-4"
+            className="border-border-primary flex flex-col gap-4 rounded-2xl border p-4"
           >
             {/* 컨텐츠 헤더 — 번호와 소제목 모두 포인트 컬러 */}
-            <div className="text-brand-warning flex items-baseline gap-1.5">
+            <div className="text-brand-primary flex items-baseline gap-1.5">
               <span className="text-xl font-extrabold">
                 {String(chapter.sortOrder).padStart(2, '0')}
               </span>
@@ -117,21 +117,21 @@ export default function CreatorDetailPage() {
               </>
             )}
 
-            {/* 풀쿼트 — 사진 바로 아래 굵은 두 줄 */}
+            {/* 풀쿼트 — 사진 바로 아래 굵은 두 줄 (Title/1 18px) */}
             {chapter.pullQuote && (
-              <p className="text-text-primary text-base leading-[1.5] font-bold">
+              <p className="text-text-primary text-lg leading-[1.6] font-bold">
                 {chapter.pullQuote}
               </p>
             )}
 
-            {/* 본문 텍스트 */}
-            <p className="text-text-secondary text-sm leading-[1.6] whitespace-pre-line">
+            {/* 본문 텍스트 (Body 3/Regular 14px) */}
+            <p className="text-text-secondary text-sm leading-[1.5] whitespace-pre-line">
               {chapter.body}
             </p>
 
-            {/* 운영기간·입장료·주의사항 */}
+            {/* 운영기간·입장료·주의사항 (Body 4/Regular 13px) */}
             {chapter.factNote && (
-              <p className="text-text-tertiary text-xs leading-[1.5] whitespace-pre-line">
+              <p className="text-text-tertiary text-[13px] leading-[1.5] whitespace-pre-line">
                 {chapter.factNote}
               </p>
             )}
@@ -147,7 +147,7 @@ export default function CreatorDetailPage() {
 
       {/* 당일치기 추천 */}
       {recommendations.length > 0 && (
-        <div className="border-border-primary flex flex-col gap-3 border-t px-4 py-6">
+        <div className="border-border-primary flex flex-col gap-4 border-t px-4 py-6">
           <h2 className="text-text-primary text-base font-semibold">당일치기 추천</h2>
           {recommendations.map((item) => (
             <RecommendationCard
@@ -168,7 +168,7 @@ export default function CreatorDetailPage() {
       {(curation.nextTeaserOverline || curation.nextTeaserBody) && (
         <div className="bg-brand-secondary/10 mx-4 mb-6 flex flex-col gap-1 rounded-xl p-4">
           {curation.nextTeaserOverline && (
-            <span className="text-brand-warning text-xs font-bold">
+            <span className="text-brand-primary text-xs font-bold">
               {curation.nextTeaserOverline}
             </span>
           )}
@@ -206,7 +206,7 @@ function PhotoCaption({ placeName, leadText }: { placeName: string; leadText?: s
   return (
     <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0.5 bg-gradient-to-t from-black/70 to-transparent p-3 pt-8">
       <span className="text-base font-bold text-white">{placeName}</span>
-      {leadText && <span className="text-xs text-white/80">{leadText}</span>}
+      {leadText && <span className="text-[11px] text-white/80">{leadText}</span>}
     </div>
   )
 }
@@ -235,8 +235,8 @@ function MapLinkButton({
     <Button
       variant="outlined"
       color="default"
-      size="lg"
-      className="w-full gap-2"
+      size="md"
+      className="h-10 w-full gap-2 rounded-full"
       rightIcon={<ArrowRight className="h-4 w-4" />}
       onClick={() => router.push(href)}
     >
@@ -263,8 +263,8 @@ function RecommendationCard({
   longitude?: number | null
 }) {
   return (
-    <div className="border-border-primary flex flex-col gap-3 rounded-2xl border p-4">
-      <p className="border-text-primary text-text-primary border-l-2 pl-3 text-base leading-[1.5] font-bold">
+    <div className="border-border-primary flex flex-col gap-4 rounded-2xl border p-4">
+      <p className="border-text-primary text-text-primary border-l-2 pl-3 text-lg leading-[1.6] font-bold">
         {title}
       </p>
 
