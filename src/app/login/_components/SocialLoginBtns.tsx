@@ -1,6 +1,6 @@
 'use client'
 import { Button } from '@/components/ui/button/Button'
-import { handleGoogleLogin, handleKakaoLogin, handleNaverLogin } from '@/lib/auth/socialLogin'
+import { handleGoogleLogin, handleKakaoLogin } from '@/lib/auth/socialLogin'
 import Image from 'next/image'
 
 export function SocialLoginBtns() {
@@ -32,6 +32,7 @@ export function SocialLoginBtns() {
       >
         카카오로 시작하기
       </Button>
+      {/* 테스트 단계라 네이버 로그인은 임시로 비활성화합니다.
       <Button
         onClick={handleNaverLogin}
         size="lg"
@@ -40,7 +41,7 @@ export function SocialLoginBtns() {
         leftIcon={<Image src="/images/Naver.png" alt="네이버 로고" width={24} height={24} />}
       >
         네이버로 시작하기
-      </Button>
+      </Button> */}
     </div>
   )
 }
