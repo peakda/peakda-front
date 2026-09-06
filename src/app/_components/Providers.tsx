@@ -4,6 +4,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Toaster } from '@/components/ui/sonner'
 import { NativeAuthManager } from '@/app/_components/NativeAuthManager'
+import { NativeBackButton } from '@/app/_components/NativeBackButton'
+import { NativeSplash } from '@/app/_components/NativeSplash'
 import { PushNotificationManager } from '@/app/_components/PushNotificationManager'
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -20,6 +22,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
   )
   return (
     <QueryClientProvider client={queryClient}>
+      <NativeSplash />
+      <NativeBackButton />
       <NativeAuthManager />
       <PushNotificationManager />
       {children}
