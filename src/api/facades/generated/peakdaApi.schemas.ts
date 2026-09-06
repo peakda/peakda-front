@@ -1533,38 +1533,6 @@ export interface ApiResponseAppTokenResponse {
 }
 
 /**
- * Apple 네이티브 로그인 요청
- */
-export interface AppleLoginRequest {
-  /**
-     * iOS Apple 로그인 SDK 가 발급한 identity token (JWT)
-     * @minLength 1
-     */
-  identityToken: string;
-}
-
-/**
- * Apple 로그인 결과
- */
-export interface AppleLoginResponse {
-  /** 추가 회원가입이 필요한지 여부. true 면 signup-token 쿠키가 발급되어 회원가입 완료(/api/auth/signup/complete)가 필요하고, false 면 access-token·refresh-token 쿠키가 발급되어 로그인이 완료된 상태다. */
-  signupRequired: boolean;
-}
-
-/**
- * 공통 응답 envelope
- */
-export interface ApiResponseAppleLoginResponse {
-  /** HTTP status code */
-  status: number;
-  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
-  code: string;
-  /** 사람이 읽는 메시지 */
-  message: string;
-  data?: AppleLoginResponse | null;
-}
-
-/**
  * 일회성 코드 교환 요청
  */
 export interface AppTokenExchangeRequest {
@@ -1713,7 +1681,6 @@ export const UserAdminResponseProvider = {
   KAKAO: 'KAKAO',
   NAVER: 'NAVER',
   GOOGLE: 'GOOGLE',
-  APPLE: 'APPLE',
 } as const;
 
 /**
@@ -2131,7 +2098,7 @@ export const SpotRecordSummaryResponseStatus = {
 } as const;
 
 /**
- * 스팟 기록 목록용 요약 — 대표 사진 1장만 포함
+ * 스팟 기록 목록용 요약 — 대표 사진과 전체 사진 목록을 포함
  */
 export interface SpotRecordSummaryResponse {
   id: number;
@@ -2146,6 +2113,8 @@ export interface SpotRecordSummaryResponse {
   memo?: string | null;
   plants: PlantSummary[];
   coverPhoto?: PhotoEntry | null;
+  /** 첨부 사진 전체 목록 (sortOrder 오름차순, 사진이 없으면 빈 배열) */
+  photos: PhotoEntry[];
   status: SpotRecordSummaryResponseStatus;
   /** @nullable */
   publishedAt?: string | null;
