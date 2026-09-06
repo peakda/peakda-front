@@ -2,13 +2,14 @@
 
 import Image from 'next/image'
 import { useParams, useRouter } from 'next/navigation'
-import { ArrowRight } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { Button } from '@/components/ui/button/Button'
 import { Badge } from '@/components/ui/display/Badge'
 import { CardBadge } from '@/components/ui/card/CardBadge'
 import { useCurationDetail } from '@/api/facades/curation'
+import { cn } from '@/lib/utils/cn'
 
 // BloomBadge.status → 스팟 상세와 동일한 표기를 쓴다.
 const BLOOM_STATUS_LABEL: Record<string, string> = {
@@ -25,8 +26,10 @@ const BLOOM_STATUS_VARIANT: Record<string, 'green' | 'starting' | 'bloom'> = {
 
 const HERO_PLACEHOLDER = '/images/explore.png'
 
+// 챕터 번호·소제목 포인트 컬러. 시안 기준 01 핑크 · 02 초록 · 03 옐로 순으로 돌려 쓴다.
+const CHAPTER_ACCENTS = ['text-brand-primary', 'text-brand-secondary', 'text-yellow-500']
+
 export default function CreatorDetailPage() {
-  const router = useRouter()
   const { id } = useParams<{ id: string }>()
   // lat/lng 를 넘기지 않으므로 distanceMeters 는 항상 null 이다(현재 위치를 받는 UI 가 없다).
   const { data: curation } = useCurationDetail(Number(id))
@@ -37,7 +40,7 @@ export default function CreatorDetailPage() {
   const recommendations = [...curation.recommendations].sort((a, b) => a.sortOrder - b.sortOrder)
 
   return (
-    <div className="bg-bg-primary relative flex min-h-screen flex-col pb-28">
+    <div className="bg-bg-primary relative flex min-h-screen flex-col">
       {/* 히어로 이미지 */}
       <div className="relative h-[411px] w-full">
         <Header left={<LeftArrow />} />
@@ -72,13 +75,18 @@ export default function CreatorDetailPage() {
 
       {/* 챕터 리스트 */}
       <div className="flex flex-col gap-4 px-4 py-6">
-        {chapters.map((chapter) => (
+        {chapters.map((chapter, index) => (
           <div
             key={chapter.sortOrder}
             className="border-border-primary flex flex-col gap-4 rounded-2xl border p-4"
           >
             {/* 컨텐츠 헤더 — 번호와 소제목 모두 포인트 컬러 */}
-            <div className="text-brand-primary flex items-baseline gap-1.5">
+            <div
+              className={cn(
+                'flex items-baseline gap-1.5',
+                CHAPTER_ACCENTS[index % CHAPTER_ACCENTS.length]
+              )}
+            >
               <span className="text-xl font-extrabold">
                 {String(chapter.sortOrder).padStart(2, '0')}
               </span>
@@ -185,18 +193,6 @@ export default function CreatorDetailPage() {
         PEAKDA · 이번 주말, 가장 반짝하는 순간을 찾아드려요
       </p>
 
-      {/* 하단 CTA → 큐레이션 지도 뷰 (라우트 미정) */}
-      <div className="fixed right-0 bottom-0 left-0 z-10 mx-auto flex max-w-107.5 items-center gap-3 border-t border-gray-100 bg-white px-4 py-3">
-        <Button
-          variant="filled"
-          color="primary"
-          size="lg"
-          className="flex-1"
-          onClick={() => router.push('/map')}
-        >
-          큐레이션 지도 보기
-        </Button>
-      </div>
     </div>
   )
 }
@@ -236,8 +232,8 @@ function MapLinkButton({
       variant="outlined"
       color="default"
       size="md"
-      className="h-10 w-full gap-2 rounded-full"
-      rightIcon={<ArrowRight className="h-4 w-4" />}
+      className="text-text-primary h-11 w-full gap-2.5 rounded-full border-gray-200 font-semibold"
+      rightIcon={<ChevronRight className="h-4 w-4" />}
       onClick={() => router.push(href)}
     >
       지도에서 보기
