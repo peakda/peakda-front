@@ -21,6 +21,7 @@ import { Camera } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { compressImage } from '@/lib/utils/image'
 
 const FLOWER_LIST: { label: string; value: FavoriteCategoryUpdateRequestCategoriesItem }[] = [
   { label: '동백꽃', value: 'CAMELLIA' },
@@ -92,9 +93,10 @@ export default function ProfileEditPage() {
     )
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const original = e.target.files?.[0]
+    if (!original) return
+    const file = await compressImage(original)
     const previousPreview = preview
     setPreview(URL.createObjectURL(file))
     uploadImage(

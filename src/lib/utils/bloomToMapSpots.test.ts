@@ -110,8 +110,8 @@ describe('lib/utils/bloomToMapSpots', () => {
       attractionId: 7,
       spotId: 3,
       flowers: [
-        { src: '/flowers/cherry-blossom.svg', alt: '벚꽃' },
-        { src: '/flowers/maple.svg', alt: '단풍' },
+        { src: '/flowers/cherry-blossom.webp', alt: '벚꽃' },
+        { src: '/flowers/maple.webp', alt: '단풍' },
       ],
     })
   })

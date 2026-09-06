@@ -60,4 +60,13 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- 지도의 "현재 위치" 는 WebView 의 navigator.geolocation 을 쓴다.
+         Capacitor 브리지가 이 두 권한을 런타임 요청하므로 선언이 없으면 즉시 거부된다. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <!-- FINE_LOCATION 선언은 GPS 하드웨어를 암묵적으로 필수로 만들어 Play 배포 대상 기기를
+         걸러낸다. 위치는 부가 기능이므로 required=false 로 되돌린다. -->
+    <uses-feature android:name="android.hardware.location.gps" android:required="false" />
 </manifest>

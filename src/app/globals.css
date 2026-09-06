@@ -1,8 +1,27 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
+/* 통짜 2MB woff2 대신 unicode-range 로 쪼갠 dynamic subset.
+   브라우저가 화면에 실제로 쓰인 글리프의 shard 만 내려받는다. */
+@import 'pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css';
 
 @custom-variant dark (&:is(.dark *));
+
+/* next/font/local 이 <html> 에 심어 주던 변수를 직접 정의한다. */
+:root {
+  --font-pretendard: 'Pretendard Variable', 'Pretendard Fallback', system-ui, -apple-system, sans-serif;
+}
+
+/* next/font/local 이 만들어 주던 metric override fallback. 폰트가 swap 될 때 줄바꿈이
+   밀리지 않게(CLS) 잡아 준다. 값은 Next 가 PretendardVariable.woff2 로 계산했던 것 그대로다. */
+@font-face {
+  font-family: 'Pretendard Fallback';
+  src: local('Arial');
+  ascent-override: 93.76%;
+  descent-override: 23.75%;
+  line-gap-override: 0%;
+  size-adjust: 101.55%;
+}
 
 @keyframes bounce-smooth {
   0% {

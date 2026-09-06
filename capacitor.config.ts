@@ -28,7 +28,9 @@ const config: CapacitorConfig = {
     : undefined,
   plugins: {
     SplashScreen: {
-      launchShowDuration: 800,
+      // 원격 URL 이 그려지기 전에 스플래시가 걷히면 흰 화면이 보인다. 평소에는
+      // NativeSplash 가 첫 프레임 직후 hide() 를 부르고, 이 값은 그게 실패했을 때의 상한선이다.
+      launchShowDuration: 3000,
       launchAutoHide: true,
       backgroundColor: '#ffffff',
       androidSplashResourceName: 'splash',

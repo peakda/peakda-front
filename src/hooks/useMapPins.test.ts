@@ -17,7 +17,7 @@ const M_PER_DEG_LNG = 88_300
 const spot = (lat: number, lng: number): MapSpot => ({
   lat,
   lng,
-  flowers: [{ src: '/flowers/cherry-blossom.svg', alt: '벚꽃' }],
+  flowers: [{ src: '/flowers/cherry-blossom.webp', alt: '벚꽃' }],
   maxStage: 'Peak',
   type: 'ATTRACTION',
   statuses: ['PEAK'],
