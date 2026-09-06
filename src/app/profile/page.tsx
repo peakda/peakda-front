@@ -11,6 +11,7 @@ import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
 import { isValidNickname } from '@/lib/utils/nickname'
 import { useUploadSignupProfileImage } from '@/api/facades/auth'
 import Image from 'next/image'
+import { Camera } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useRef, useState } from 'react'
 import { useSignUpComplete } from '@/hooks/useSignUpComplete'
@@ -133,6 +134,13 @@ export default function ProfilePage() {
             height={100}
             className={cn('object-cover', preview && 'rounded-full')}
           />
+          {/* 기본 이미지(Profile.png)에는 카메라 뱃지가 그려져 있다. 사진을 올리면 그 이미지가
+              통째로 교체되므로, 이때만 같은 자리에 뱃지를 덧그려 '사진 바꾸기'를 계속 보여준다. */}
+          {preview && (
+            <span className="bg-brand-secondary absolute right-1 bottom-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white">
+              <Camera className="h-3.5 w-3.5 text-white" />
+            </span>
+          )}
           {isUploading && (
             <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/30">
               <span className="text-xs text-white">업로드 중...</span>

@@ -15,6 +15,7 @@ function summary(overrides: Partial<SpotRecordSummaryResponse> = {}): SpotRecord
     spotName: '남산',
     user: { id: 100, nickname: '피크다' },
     plants: [],
+    photos: [],
     status: 'PUBLISHED',
     createdAt: '2026-09-01T00:00:00Z',
     updatedAt: '2026-09-01T00:00:00Z',
