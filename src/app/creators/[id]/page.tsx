@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { useParams, useRouter } from 'next/navigation'
-import { ArrowRight } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { Button } from '@/components/ui/button/Button'
@@ -232,8 +232,8 @@ function MapLinkButton({
       variant="outlined"
       color="default"
       size="md"
-      className="h-10 w-full gap-2 rounded-full"
-      rightIcon={<ArrowRight className="h-4 w-4" />}
+      className="text-text-primary h-11 w-full gap-2.5 rounded-full border-gray-200 font-semibold"
+      rightIcon={<ChevronRight className="h-4 w-4" />}
       onClick={() => router.push(href)}
     >
       지도에서 보기
