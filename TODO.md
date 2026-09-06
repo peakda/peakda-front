@@ -1,6 +1,6 @@
 # TODO — Google Play 출시
 
-최종 갱신: 2026-09-06
+최종 갱신: 2026-09-06 20:00
 
 출시까지 남은 일과 확인된 사실을 모아둔다. 완료된 항목은 근거(파일·명령·측정값)를 함께 적어
 "됐다고 들었다"와 "확인했다"를 구분한다.
@@ -50,11 +50,12 @@
 
 ## 2. 오늘 배포 예정 (2026-09-06)
 
-| 항목 | 담당 | 배포 후 프런트 작업 |
+| 항목 | 담당 | 상태 |
 | --- | --- | --- |
-| 로그인 수정 | 백엔드 | 브라우저로 재검증 (아래 절차) |
-| 피드 `photos` 배열 | 백엔드 | `pnpm generate:api` → 임시 타입 제거 |
-| FCM (`google-services.json`) | Firebase 콘솔 | 파일 배치 → 재빌드 |
+| 로그인 수정 | 백엔드 | 대기 — 배포 후 브라우저 재검증 (아래 절차) |
+| 피드 `photos` 배열 | 백엔드 | 대기 — 배포 후 `pnpm generate:api` → 임시 타입 제거 |
+| `google-services.json` 배치 | 프런트 | ✅ 완료 (19:59 빌드, §4) |
+| FCM 발송 (Admin SDK) | 백엔드 | 대기 — 서버만 켜지면 앱 재빌드 없이 수신 시작 |
 
 ### 로그인 재검증 절차
 
@@ -87,13 +88,29 @@ type SummaryWithPhotos = SpotRecordSummaryResponse & { photos?: PhotoEntry[] }
 > 현재 코드는 `photos` 가 없어도 `coverPhoto` 로 폴백하므로 백엔드보다 먼저 배포해도 안전하다.
 > 작성 시점 `api-dev` 에는 아직 `photos` 가 없다.
 
-### FCM 후속
+### FCM — 앱 쪽 완료
 
-`google-services.json` 을 `android/app/` 에 넣고 재빌드하면 끝이다. **프런트 코드 수정은 없다.**
+`android/app/google-services.json` 배치 후 재빌드했다. **프런트 코드 수정은 없었다.**
 
-- Firebase 안드로이드 앱 등록 시 패키지 이름은 **`com.peakda.app`** — 오타 시 토큰이 발급되지 않는다
-- 이 파일은 커밋해도 된다. APK 에 그대로 들어가는 값이라 비밀이 아니다
-- **서비스 계정 키는 백엔드 전용이다. 프런트 저장소에 넣지 않는다**
+```
+project_id      peakda
+project_number  253103625526
+package_name    com.peakda.app   (gradle applicationId 와 일치 확인)
+```
+
+빌드에 실제로 반영됐는지 두 가지로 확인했다.
+
+- 빌드 로그의 `> Task :app:processReleaseGoogleServices` — 파일이 없으면 gradle 이 조용히
+  건너뛰므로(§4), 이 태스크가 도는 것이 플러그인 적용의 증거다
+- AAB 의 `base/resources.pb` 에 프로젝트 번호 `253103625526` 이 구워져 있다
+
+**남은 건 백엔드 발송뿐이다.** 서비스 계정 키는 Firebase 프로젝트 소유자인 백엔드가 콘솔에서
+직접 발급한다(설정 → 서비스 계정 → 새 비공개 키). **프런트 저장소·채팅에 두지 않는다.**
+서버가 켜지면 앱을 다시 만들지 않아도 수신이 시작된다.
+
+> `google-services.json` 은 `android/.gitignore:64` 에 걸려 있어 커밋되지 않는다.
+> 비밀이 아니라 APK 에 그대로 들어가는 값이라 커밋해도 되지만 지금은 로컬 빌드라 문제없다.
+> **CI 로 빌드하게 되면 그 줄을 빼야 한다.** 안 그러면 경고 없이 푸시 없는 앱이 나온다.
 
 ---
 
@@ -109,7 +126,10 @@ type SummaryWithPhotos = SpotRecordSummaryResponse & { photos?: PhotoEntry[] }
       (`www.peakda.com` 콜드 응답 실측 1922ms, 워밍 후 ~150ms)
 - [x] 피드 목록 사진 전체 노출 — PR #50, 백엔드 배포 전후 모두 동작
 - [x] 위치 권한 선언 — 지도 "현재 위치" 는 WebView `navigator.geolocation` 을 쓴다
-- [x] 푸시 토큰 등록 연동 — 코드는 완성. `google-services.json` 만 있으면 동작
+- [x] 푸시 알림 — 체인 전체 확인. 권한 요청 → 채널 생성(`peakda-default`) → 토큰 발급 →
+      `registerDeviceApi` → 수신 시 목록 무효화 → 탭 시 읽음 처리 후 이동 → 로그아웃 시 해제.
+      `POST_NOTIFICATIONS` 는 `AndroidManifest.xml` 에 직접 없지만 firebase-messaging 에서
+      병합돼 릴리스 manifest 37 행에 들어간다 (확인함)
 - [x] `NEXT_PUBLIC_API_URL` 프로덕션 값 `https://api.peakda.com` (라이브 청크에서 확인)
 
 ### 확인 안 된 것 (실기기 필요)
@@ -120,7 +140,7 @@ type SummaryWithPhotos = SpotRecordSummaryResponse & { photos?: PhotoEntry[] }
 - [ ] 로그인 왕복, 앱 재실행 후 세션 유지, 401 refresh 재시도
 - [ ] 사진 선택·촬영·업로드
 - [ ] 네트워크 단절 시 `error.html` 폴백과 재시도
-- [ ] 푸시 권한 요청 → 토큰 등록 → 알림 수신 → 탭 이동
+- [ ] 푸시: **마이 → 설정에서 켜야** 권한 팝업이 뜬다 → 토큰 등록 → 수신 → 탭 이동
 - [ ] 다양한 화면 크기, 시스템 글꼴 크기
 
 ---
@@ -131,11 +151,14 @@ type SummaryWithPhotos = SpotRecordSummaryResponse & { photos?: PhotoEntry[] }
 
 ```
 android/app/build/outputs/bundle/release/app-release.aab
-4,767,193 bytes
+4,767,388 bytes                    2026-09-06 19:59 빌드 (FCM 포함)
 jar verified.
 CN=Peakda, O=Peakda, L=Seoul, C=KR
 SHA1 53:A5:22:39:AF:E3:9F:8C:EF:64:29:06:98:44:C2:77:D4:16:B1:79
 ```
+
+> **직전 AAB(4,767,193 bytes, FCM 없음)와 파일명이 같고 크기도 195 바이트 차이다.**
+> 옛 파일을 올리면 푸시가 죽은 앱이 나간다. 이미 전달했다면 교체를 요청할 것.
 
 | 항목 | 값 |
 | --- | --- |
@@ -227,7 +250,7 @@ versionName 0.1.0 / versionCode 1
 
 ## 7. 결정 대기
 
-- [ ] Firebase 프로젝트 생성·관리 주체, 개발/운영 분리 여부
+- [ ] Firebase 개발/운영 프로젝트 분리 여부 (현재 `peakda` 하나, 소유·관리는 백엔드)
 - [ ] 업로드 키를 GitHub Actions secrets 로 관리할지
 - [ ] 버전 정책 — versionCode 수동 증가 vs CI 자동 증가
 
@@ -238,5 +261,10 @@ versionName 0.1.0 / versionCode 1
 - **`src/lib/naver/naverLogin.ts` 는 아무데서도 임포트하지 않는 사용되지 않는 파일이다.**
   로그인은 `src/lib/auth/socialLogin.ts` 를 쓴다. 네이버를 되살릴 때 헷갈리지 않도록 기록해둔다
 - 원격 저장소 Dependabot 경고 90건 (high 40, moderate 42, low 8). 출시 블로커는 아니다
-- FCM 실제 발송은 백엔드 스텁 상태다. `google-services.json` 을 넣어도
-  **토큰 등록까지만 동작하고 알림은 오지 않는다.** 발송에는 서비스 계정 키가 필요하다
+- FCM 실제 발송은 백엔드 스텁 상태다. 앱은 준비됐지만 **서버가 붙기 전까지 알림은 오지 않는다**
+- **웹(브라우저) 푸시는 구현돼 있지 않다.** `pushNotifications.ts` 의 모든 함수가
+  `isNativeAndroid()` 로 막혀 브라우저에서는 `false` 만 반환한다. firebase-js-sdk 도
+  서비스워커도 없다. 웹 푸시는 별개 작업(서비스워커 + VAPID)이며 현재 스펙에 없다
+- **푸시 기본값은 꺼짐이다** (`appSettings.ts` 의 `pushEnabled: false`). 사용자가 설정에서
+  켜야 권한 팝업이 뜬다. 첫 실행에 묻지 않으므로 설정에 안 들어간 사용자는 알림을 못 받는다.
+  옵트인 정책이면 그대로 두고, 아니면 첫 실행 프롬프트를 붙여야 한다
