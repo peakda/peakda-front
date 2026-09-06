@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { useParams, useRouter } from 'next/navigation'
-import { MapPin } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { Button } from '@/components/ui/button/Button'
@@ -71,9 +71,12 @@ export default function CreatorDetailPage() {
       )}
 
       {/* 챕터 리스트 */}
-      <div className="flex flex-col gap-8 px-4 py-6">
+      <div className="flex flex-col gap-4 px-4 py-6">
         {chapters.map((chapter) => (
-          <div key={chapter.sortOrder} className="flex flex-col gap-3">
+          <div
+            key={chapter.sortOrder}
+            className="border-border-primary flex flex-col gap-3 rounded-2xl border p-4"
+          >
             {/* 컨텐츠 헤더 */}
             <div className="flex items-center gap-2">
               <span className="bg-brand-secondary flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white">
@@ -81,11 +84,10 @@ export default function CreatorDetailPage() {
               </span>
               <span className="text-text-tertiary text-xs">{chapter.heading}</span>
             </div>
-            <h2 className="text-text-primary text-lg font-extrabold">{chapter.placeName}</h2>
 
             {/* 사진 카드 */}
             {chapter.photoUrl ? (
-              <div className="relative h-45 w-full overflow-hidden rounded-2xl">
+              <div className="relative aspect-[3/2] w-full overflow-hidden rounded-2xl">
                 <Image
                   src={chapter.photoUrl}
                   alt={chapter.placeName}
@@ -110,6 +112,9 @@ export default function CreatorDetailPage() {
                 />
               )
             )}
+
+            {/* 장소명 */}
+            <h2 className="text-text-primary text-lg font-extrabold">{chapter.placeName}</h2>
 
             {/* 리드 텍스트 */}
             {chapter.leadText && (
@@ -137,17 +142,11 @@ export default function CreatorDetailPage() {
               </p>
             )}
 
-            {/* 지도에서 보기 — 연결된 스팟이 있을 때만 */}
-            {chapter.spotId && (
-              <button
-                type="button"
-                className="text-text-secondary flex w-fit items-center gap-1 text-sm"
-                onClick={() => router.push(`/spot/${chapter.spotId}`)}
-              >
-                <MapPin className="h-3.5 w-3.5" />
-                지도에서 보기
-              </button>
-            )}
+            <MapLinkButton
+              spotId={chapter.spotId}
+              latitude={chapter.latitude}
+              longitude={chapter.longitude}
+            />
           </div>
         ))}
       </div>
@@ -163,7 +162,9 @@ export default function CreatorDetailPage() {
               placeName={item.placeName}
               photoUrl={item.photoUrl}
               body={item.body}
-              onClick={item.spotId ? () => router.push(`/spot/${item.spotId}`) : undefined}
+              spotId={item.spotId}
+              latitude={item.latitude}
+              longitude={item.longitude}
             />
           ))}
         </div>
@@ -199,34 +200,78 @@ export default function CreatorDetailPage() {
   )
 }
 
+// 좌표가 있으면 그 위치의 지도로, 없으면 연결된 스팟 상세로 보낸다.
+// 둘 다 없는 카드도 시안대로 버튼은 노출하고 큐레이션 지도로 보낸다.
+function MapLinkButton({
+  spotId,
+  latitude,
+  longitude,
+}: {
+  spotId?: number | null
+  latitude?: number | null
+  longitude?: number | null
+}) {
+  const router = useRouter()
+
+  const href =
+    latitude != null && longitude != null
+      ? `/map?lat=${latitude}&lng=${longitude}`
+      : spotId
+        ? `/spot/${spotId}`
+        : '/map'
+
+  return (
+    <Button
+      variant="outlined"
+      color="default"
+      className="w-full justify-between rounded-xl"
+      rightIcon={<ChevronRight className="h-4 w-4" />}
+      onClick={() => router.push(href)}
+    >
+      지도에서 보기
+    </Button>
+  )
+}
+
 function RecommendationCard({
   title,
   placeName,
   photoUrl,
   body,
-  onClick,
+  spotId,
+  latitude,
+  longitude,
 }: {
   title: string
   placeName: string
   photoUrl?: string | null
   body: string
-  onClick?: () => void
+  spotId?: number | null
+  latitude?: number | null
+  longitude?: number | null
 }) {
   return (
-    <div
-      className={onClick ? 'flex cursor-pointer items-center gap-3' : 'flex items-center gap-3'}
-      onClick={onClick}
-    >
-      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-gray-200">
-        {photoUrl && (
-          <Image src={photoUrl} alt={placeName} fill sizes="80px" className="object-cover" />
-        )}
-      </div>
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="text-text-primary text-sm font-semibold">{title}</span>
+    <div className="border-border-primary flex flex-col gap-3 rounded-2xl border p-4">
+      <div className="flex flex-col gap-0.5">
+        <span className="text-text-primary text-base font-bold">{title}</span>
         <span className="text-text-tertiary text-xs">{placeName}</span>
-        <span className="text-text-secondary text-xs leading-[1.5]">{body}</span>
       </div>
+
+      {photoUrl && (
+        <div className="relative aspect-[3/2] w-full overflow-hidden rounded-2xl">
+          <Image
+            src={photoUrl}
+            alt={placeName}
+            fill
+            sizes="(max-width: 430px) 100vw, 430px"
+            className="object-cover"
+          />
+        </div>
+      )}
+
+      <p className="text-text-secondary text-sm leading-[1.5]">{body}</p>
+
+      <MapLinkButton spotId={spotId} latitude={latitude} longitude={longitude} />
     </div>
   )
 }
