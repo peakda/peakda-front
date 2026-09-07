@@ -225,7 +225,7 @@ export default function ProfilePage() {
           variant="filled"
           size="lg"
           className="w-full cursor-pointer bg-[#98C96D] text-white hover:bg-[#98C96D]"
-          disabled={isUploading || signupPending || !isNicknameVerified}
+          disabled={isUploading || signupPending || !isNicknameVerified || selected.length === 0}
           onClick={() => submit()}
         >
           PEAKDA 시작하기
