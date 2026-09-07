@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button/Button'
 import { Badge } from '@/components/ui/display/Badge'
 import { CardBadge } from '@/components/ui/card/CardBadge'
 import { useCurationDetail } from '@/api/facades/curation'
+import { cn } from '@/lib/utils/cn'
 
 // BloomBadge.status → 스팟 상세와 동일한 표기를 쓴다.
 const BLOOM_STATUS_LABEL: Record<string, string> = {
@@ -25,8 +26,10 @@ const BLOOM_STATUS_VARIANT: Record<string, 'green' | 'starting' | 'bloom'> = {
 
 const HERO_PLACEHOLDER = '/images/explore.png'
 
+// 챕터 번호·소제목 포인트 컬러. 시안 기준 01 핑크 · 02 초록 · 03 옐로 순으로 돌려 쓴다.
+const CHAPTER_ACCENTS = ['text-brand-primary', 'text-brand-secondary', 'text-yellow-500']
+
 export default function CreatorDetailPage() {
-  const router = useRouter()
   const { id } = useParams<{ id: string }>()
   // lat/lng 를 넘기지 않으므로 distanceMeters 는 항상 null 이다(현재 위치를 받는 UI 가 없다).
   const { data: curation } = useCurationDetail(Number(id))
@@ -37,7 +40,7 @@ export default function CreatorDetailPage() {
   const recommendations = [...curation.recommendations].sort((a, b) => a.sortOrder - b.sortOrder)
 
   return (
-    <div className="bg-bg-primary relative flex min-h-screen flex-col pb-28">
+    <div className="bg-bg-primary relative flex min-h-screen flex-col">
       {/* 히어로 이미지 */}
       <div className="relative h-[411px] w-full">
         <Header left={<LeftArrow />} />
@@ -72,22 +75,27 @@ export default function CreatorDetailPage() {
 
       {/* 챕터 리스트 */}
       <div className="flex flex-col gap-4 px-4 py-6">
-        {chapters.map((chapter) => (
+        {chapters.map((chapter, index) => (
           <div
             key={chapter.sortOrder}
-            className="border-border-primary flex flex-col gap-3 rounded-2xl border p-4"
+            className="border-border-primary flex flex-col gap-4 rounded-2xl border p-4"
           >
-            {/* 컨텐츠 헤더 */}
-            <div className="flex items-center gap-2">
-              <span className="bg-brand-secondary flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white">
+            {/* 컨텐츠 헤더 — 번호와 소제목 모두 포인트 컬러 */}
+            <div
+              className={cn(
+                'flex items-baseline gap-1.5',
+                CHAPTER_ACCENTS[index % CHAPTER_ACCENTS.length]
+              )}
+            >
+              <span className="text-xl font-extrabold">
                 {String(chapter.sortOrder).padStart(2, '0')}
               </span>
-              <span className="text-text-tertiary text-xs">{chapter.heading}</span>
+              <span className="text-sm font-bold">{chapter.heading}</span>
             </div>
 
-            {/* 사진 카드 */}
+            {/* 사진 카드 — 개화 뱃지는 좌상단, 장소명은 하단 그라데이션 위에 */}
             {chapter.photoUrl ? (
-              <div className="relative aspect-[3/2] w-full overflow-hidden rounded-2xl">
+              <div className="relative h-45 w-full overflow-hidden rounded-2xl">
                 <Image
                   src={chapter.photoUrl}
                   alt={chapter.placeName}
@@ -102,42 +110,36 @@ export default function CreatorDetailPage() {
                     className="absolute top-2 left-2"
                   />
                 )}
+                <PhotoCaption placeName={chapter.placeName} leadText={chapter.leadText} />
               </div>
             ) : (
-              chapter.badge && (
-                <CardBadge
-                  label={`${chapter.badge.displayName} ${BLOOM_STATUS_LABEL[chapter.badge.status] ?? ''}`.trim()}
-                  variant={BLOOM_STATUS_VARIANT[chapter.badge.status] ?? 'secondary'}
-                  className="w-fit"
-                />
-              )
+              <>
+                {chapter.badge && (
+                  <CardBadge
+                    label={`${chapter.badge.displayName} ${BLOOM_STATUS_LABEL[chapter.badge.status] ?? ''}`.trim()}
+                    variant={BLOOM_STATUS_VARIANT[chapter.badge.status] ?? 'secondary'}
+                    className="w-fit"
+                  />
+                )}
+                <h2 className="text-text-primary text-lg font-extrabold">{chapter.placeName}</h2>
+              </>
             )}
 
-            {/* 장소명 */}
-            <h2 className="text-text-primary text-lg font-extrabold">{chapter.placeName}</h2>
-
-            {/* 리드 텍스트 */}
-            {chapter.leadText && (
-              <p className="text-text-primary text-sm leading-[1.6] font-medium">
-                {chapter.leadText}
-              </p>
-            )}
-
-            {/* 본문 텍스트 */}
-            <p className="text-text-secondary text-sm leading-[1.5] whitespace-pre-line">
-              {chapter.body}
-            </p>
-
-            {/* 풀쿼트 */}
+            {/* 풀쿼트 — 사진 바로 아래 굵은 두 줄 (Title/1 18px) */}
             {chapter.pullQuote && (
-              <p className="border-brand-secondary text-text-primary border-l-2 pl-3 text-sm leading-[1.6] italic">
+              <p className="text-text-primary text-lg leading-[1.6] font-bold">
                 {chapter.pullQuote}
               </p>
             )}
 
-            {/* 운영기간·입장료·주의사항 */}
+            {/* 본문 텍스트 (Body 3/Regular 14px) */}
+            <p className="text-text-secondary text-sm leading-[1.5] whitespace-pre-line">
+              {chapter.body}
+            </p>
+
+            {/* 운영기간·입장료·주의사항 (Body 4/Regular 13px) */}
             {chapter.factNote && (
-              <p className="bg-bg-secondary text-text-tertiary rounded-xl p-3 text-xs leading-[1.5] whitespace-pre-line">
+              <p className="text-text-tertiary text-[13px] leading-[1.5] whitespace-pre-line">
                 {chapter.factNote}
               </p>
             )}
@@ -153,7 +155,7 @@ export default function CreatorDetailPage() {
 
       {/* 당일치기 추천 */}
       {recommendations.length > 0 && (
-        <div className="border-border-primary flex flex-col gap-3 border-t px-4 py-6">
+        <div className="border-border-primary flex flex-col gap-4 border-t px-4 py-6">
           <h2 className="text-text-primary text-base font-semibold">당일치기 추천</h2>
           {recommendations.map((item) => (
             <RecommendationCard
@@ -172,9 +174,11 @@ export default function CreatorDetailPage() {
 
       {/* 다음 주 예고 */}
       {(curation.nextTeaserOverline || curation.nextTeaserBody) && (
-        <div className="bg-bg-secondary mx-4 mb-6 flex flex-col gap-1 rounded-xl p-4">
+        <div className="bg-brand-secondary/10 mx-4 mb-6 flex flex-col gap-1 rounded-xl p-4">
           {curation.nextTeaserOverline && (
-            <span className="text-text-tertiary text-xs">{curation.nextTeaserOverline}</span>
+            <span className="text-brand-primary text-xs font-bold">
+              {curation.nextTeaserOverline}
+            </span>
           )}
           {curation.nextTeaserBody && (
             <p className="text-text-primary text-sm leading-[1.5] whitespace-pre-line">
@@ -184,18 +188,21 @@ export default function CreatorDetailPage() {
         </div>
       )}
 
-      {/* 하단 CTA → 큐레이션 지도 뷰 (라우트 미정) */}
-      <div className="fixed right-0 bottom-0 left-0 z-10 mx-auto flex max-w-107.5 items-center gap-3 border-t border-gray-100 bg-white px-4 py-3">
-        <Button
-          variant="filled"
-          color="primary"
-          size="lg"
-          className="flex-1"
-          onClick={() => router.push('/map')}
-        >
-          큐레이션 지도 보기
-        </Button>
-      </div>
+      {/* 에디토리얼 푸터 */}
+      <p className="text-text-tertiary pb-6 text-center text-[11px]">
+        PEAKDA · 이번 주말, 가장 반짝하는 순간을 찾아드려요
+      </p>
+
+    </div>
+  )
+}
+
+// 사진 하단 그라데이션 위에 얹는 장소명 + 위치 설명(leadText).
+function PhotoCaption({ placeName, leadText }: { placeName: string; leadText?: string | null }) {
+  return (
+    <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0.5 bg-gradient-to-t from-black/70 to-transparent p-3 pt-8">
+      <span className="text-base font-bold text-white">{placeName}</span>
+      {leadText && <span className="text-[11px] text-white/80">{leadText}</span>}
     </div>
   )
 }
@@ -224,7 +231,8 @@ function MapLinkButton({
     <Button
       variant="outlined"
       color="default"
-      className="w-full justify-between rounded-xl"
+      size="md"
+      className="text-text-primary h-11 w-full gap-2.5 rounded-full border-gray-200 font-semibold"
       rightIcon={<ChevronRight className="h-4 w-4" />}
       onClick={() => router.push(href)}
     >
@@ -251,14 +259,13 @@ function RecommendationCard({
   longitude?: number | null
 }) {
   return (
-    <div className="border-border-primary flex flex-col gap-3 rounded-2xl border p-4">
-      <div className="flex flex-col gap-0.5">
-        <span className="text-text-primary text-base font-bold">{title}</span>
-        <span className="text-text-tertiary text-xs">{placeName}</span>
-      </div>
+    <div className="border-border-primary flex flex-col gap-4 rounded-2xl border p-4">
+      <p className="border-text-primary text-text-primary border-l-2 pl-3 text-lg leading-[1.6] font-bold">
+        {title}
+      </p>
 
-      {photoUrl && (
-        <div className="relative aspect-[3/2] w-full overflow-hidden rounded-2xl">
+      {photoUrl ? (
+        <div className="relative h-45 w-full overflow-hidden rounded-2xl">
           <Image
             src={photoUrl}
             alt={placeName}
@@ -266,10 +273,13 @@ function RecommendationCard({
             sizes="(max-width: 430px) 100vw, 430px"
             className="object-cover"
           />
+          <PhotoCaption placeName={placeName} />
         </div>
+      ) : (
+        <span className="text-text-tertiary text-xs">{placeName}</span>
       )}
 
-      <p className="text-text-secondary text-sm leading-[1.5]">{body}</p>
+      <p className="text-text-secondary text-sm leading-[1.6]">{body}</p>
 
       <MapLinkButton spotId={spotId} latitude={latitude} longitude={longitude} />
     </div>

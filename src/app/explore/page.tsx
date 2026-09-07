@@ -113,9 +113,12 @@ export default function ExplorePage() {
         {peakNow.length === 0 ? (
           !isLoading && <EmptySection text="지금 절정인 명소가 없어요" />
         ) : (
-          <Carousel showDots className="px-4 pb-4">
+          <Carousel className="px-4 pb-4">
             {peakNow.map((item) => (
-              <CarouselItem key={`${item.attractionId}-${item.category}`}>
+              <CarouselItem
+                key={`${item.attractionId}-${item.category}`}
+                className="flex-[0_0_72%] pr-3"
+              >
                 <Link href={`/spot/${item.spotId}`} className="block">
                   <ExplorCard
                     type="peak"
@@ -160,11 +163,11 @@ export default function ExplorePage() {
         {festivals.length === 0 ? (
           !isLoading && <EmptySection text="진행 중인 축제가 없어요" />
         ) : (
-          <Carousel showDots className="px-4 pb-4">
+          <Carousel className="px-4 pb-4">
             {festivals.map((item) => {
               const status = toFestivalStatus(item)
               return (
-                <CarouselItem key={item.festivalId}>
+                <CarouselItem key={item.festivalId} className="flex-[0_0_72%] pr-3">
                   <Link href={`/festivals/${item.festivalId}`} className="block">
                     <ExplorCard
                       type="festival"
@@ -190,10 +193,10 @@ export default function ExplorePage() {
         {curations.length === 0 ? (
           !isLoading && <EmptySection text="아직 발행된 큐레이션이 없어요" />
         ) : (
-          // 카드가 잘려 보여 더 있는지 모르는 문제가 있어 한 장씩 넘기는 슬라이더로 보여준다.
-          <Carousel showDots className="px-4 pb-4">
+          // 시안대로 다음 카드가 살짝 보이게 두어 더 있다는 걸 알린다(슬라이드 폭 72%).
+          <Carousel className="px-4 pb-4">
             {curations.map((item) => (
-              <CarouselItem key={item.id}>
+              <CarouselItem key={item.id} className="flex-[0_0_72%] pr-3">
                 <Link href={`/creators/${item.id}`} className="block">
                   <ExplorCard
                     type="course"
