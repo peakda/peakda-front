@@ -15,6 +15,7 @@ import { useSpotDetail } from '@/api/facades/spot'
 import { useDeleteSpotRecord } from '@/api/facades/spot-record'
 import { useReport } from '@/api/facades/report'
 import { useDrawerStore } from '@/stores/useDrawerStore'
+import { useRequireLogin } from '@/hooks/useRequireLogin'
 import { detailToFeedCardProps } from '@/lib/utils/spotRecordToFeed'
 import { buildReportRequest } from '@/lib/utils/feed'
 import type { CreateReportRequestReason } from '@/api/facades/generated/peakdaApi.schemas'
@@ -32,6 +33,7 @@ export default function FeedDetailPage() {
   const report = useReport()
   const openDeleteConfirmDrawer = useDrawerStore((s) => s.openDeleteConfirmDrawer)
   const [isReportModalOpen, setReportModalOpen] = useState(false)
+  const requireLogin = useRequireLogin()
 
   const isOwner = !!record && !!currentUser && record.user.id === currentUser.id
 
@@ -61,7 +63,7 @@ export default function FeedDetailPage() {
             isOwner={isOwner}
             onEdit={() => router.push(`/record/${recordId}/edit`)}
             onDelete={() => openDeleteConfirmDrawer(handleDelete)}
-            onReport={() => setReportModalOpen(true)}
+            onReport={() => requireLogin(() => setReportModalOpen(true))}
           />
         }
       />

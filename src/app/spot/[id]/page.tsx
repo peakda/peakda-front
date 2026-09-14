@@ -14,6 +14,7 @@ import { CardBadge } from '@/components/ui/card/CardBadge'
 import { FeedCard } from '@/components/ui/card/FeedCard'
 import { Drawer } from '@/components/ui/layout/Drawer'
 import { useDrawerStore } from '@/stores/useDrawerStore'
+import { useRequireLogin } from '@/hooks/useRequireLogin'
 import { toFeedCardProps } from '@/lib/utils/spotRecordToFeed'
 import { useSpotDetail } from '@/api/facades/spot'
 import { useBloomCalendar } from '@/api/facades/seasonal-bloom'
@@ -40,6 +41,7 @@ export default function SpotDetailPage() {
   const queryClient = useQueryClient()
   const removeFavorite = useRemoveFavorite()
   const updateNotify = useUpdateFavoriteNotify()
+  const requireLogin = useRequireLogin()
 
   const { data: spot, isLoading, isError, refetch } = useSpotDetail(Number(id))
 
@@ -171,7 +173,7 @@ export default function SpotDetailPage() {
               <button
                 type="button"
                 aria-label="찜하기"
-                onClick={handleSave}
+                onClick={() => requireLogin(handleSave)}
                 disabled={removeFavorite.isPending}
               >
                 <Heart
@@ -185,7 +187,7 @@ export default function SpotDetailPage() {
                 type="button"
                 aria-label="만개 알림 받기"
                 aria-pressed={favorited && notifyEnabled}
-                onClick={handleNotify}
+                onClick={() => requireLogin(handleNotify)}
                 disabled={updateNotify.isPending}
               >
                 <Bell
@@ -271,7 +273,7 @@ export default function SpotDetailPage() {
         <button
           type="button"
           aria-label="찜하기"
-          onClick={handleSave}
+          onClick={() => requireLogin(handleSave)}
           disabled={removeFavorite.isPending}
           className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-gray-200"
         >
@@ -284,7 +286,7 @@ export default function SpotDetailPage() {
           color="primary"
           size="lg"
           className="flex-1"
-          onClick={() => router.push(buildRecordUrl(spot.id))}
+          onClick={() => requireLogin(() => router.push(buildRecordUrl(spot.id)))}
         >
           방문 기록 남기기
         </Button>

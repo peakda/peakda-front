@@ -12,6 +12,8 @@ import { SearchInput } from './_components/SearchInput'
 import { useHomeSuggestion } from '@/api/facades/home'
 import { useSearchSpotsInfinite, useSearchUsersInfinite } from '@/api/facades/search'
 import { useDebounce } from '@/hooks/useDebounce'
+import { useIsLoggedIn } from '@/hooks/useIsLoggedIn'
+import { useRequireLogin } from '@/hooks/useRequireLogin'
 import { flattenPages } from '@/lib/utils/infinitePages'
 import {
   RECENT_SEARCH_KEY,
@@ -42,9 +44,16 @@ export default function SearchPage() {
 
   // 스팟 결과 건수는 유저 탭에서도 헤더에 계속 보여주므로 스팟 쿼리는 항상 켜 둔다.
   // 유저 쿼리는 유저 탭을 실제로 연 뒤에만 나간다.
+  // 유저 검색 API 는 인증이 필요해 비로그인은 유저 탭을 열면 로그인 시트를 띄우고 조회하지 않는다.
   const [activeTab, setActiveTab] = useState(SEARCH_TABS[0].value)
+  const isLoggedIn = useIsLoggedIn()
+  const requireLogin = useRequireLogin()
+  const handleTabChange = (value: string) => {
+    setActiveTab(value)
+    if (value === 'user') requireLogin(() => {})
+  }
   const spotQuery = useSearchSpotsInfinite(keyword)
-  const userQuery = useSearchUsersInfinite(keyword, activeTab === 'user')
+  const userQuery = useSearchUsersInfinite(keyword, activeTab === 'user' && isLoggedIn)
   const spots = flattenPages(spotQuery.data).map(toSpotProps)
   const users = flattenPages(userQuery.data).map(toUserProps)
   // 로드된 개수가 아니라 전체 건수를 보여준다(스크롤해도 숫자가 늘지 않도록)
@@ -97,7 +106,7 @@ export default function SearchPage() {
       ) : (
         /* 검색 결과 */
         <div onClickCapture={() => submitSearch(query)}>
-          <Tabs tabs={SEARCH_TABS} defaultValue={SEARCH_TABS[0].value} onValueChange={setActiveTab}>
+          <Tabs tabs={SEARCH_TABS} defaultValue={SEARCH_TABS[0].value} onValueChange={handleTabChange}>
             <span className="px-4 pt-2 pb-2 text-xs text-gray-400">
               스팟 결과 <span className="text-text-secondary font-medium">{spotTotal}</span>개
             </span>

@@ -7,6 +7,7 @@ import { EmojiBtn } from '@/components/ui/button/EmojiBtn'
 import { useAddReaction, useRemoveReaction } from '@/api/facades/feed'
 import { REACTIONS } from '@/constants/reaction'
 import { useDrawerStore } from '@/stores/useDrawerStore'
+import { useRequireLogin } from '@/hooks/useRequireLogin'
 import { reactionToggleAction, toReactionSummary } from '@/lib/utils/feed'
 import { cn } from '@/lib/utils/cn'
 import type {
@@ -45,6 +46,7 @@ export function ReactionBar({ recordId, reactions, className }: ReactionBarProps
   const openReactionDrawer = useDrawerStore((s) => s.openReactionDrawer)
   const addReaction = useAddReaction()
   const removeReaction = useRemoveReaction()
+  const requireLogin = useRequireLogin()
 
   const handleReaction = (type: FeedReactionSummaryResponseMyReactionsItem) => {
     const action = reactionToggleAction(myReactions, type)
@@ -68,7 +70,9 @@ export function ReactionBar({ recordId, reactions, className }: ReactionBarProps
       <button
         type="button"
         aria-label="리액션 추가"
-        onClick={() => openReactionDrawer({ selected: myReactions, onSelect: handleReaction })}
+        onClick={() =>
+          requireLogin(() => openReactionDrawer({ selected: myReactions, onSelect: handleReaction }))
+        }
         className="border-border-primary text-icon-quaternary flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full border"
       >
         <SmilePlus className="h-4 w-4" />
@@ -81,7 +85,7 @@ export function ReactionBar({ recordId, reactions, className }: ReactionBarProps
             emoji={emoji}
             label={`+${countOf(type)}`}
             selected={myReactions.includes(type)}
-            onClick={() => handleReaction(type)}
+            onClick={() => requireLogin(() => handleReaction(type))}
           />
         )
       )}
