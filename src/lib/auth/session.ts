@@ -14,7 +14,8 @@ export const LOGIN_SHEET_QUERY = 'login'
 // - /users·/festivals·/creators: 백엔드 조회 API(/api/users/{id}, /api/festivals/{id}, /api/curations/{id})가
 //   아직 인증을 요구한다. 공개되면 여기서 빼면 된다 (BACKEND_API_REQUESTS.md)
 // /profile(가입 중 프로필 설정)은 signup-token 만 있어 마커가 없는 상태로 거치므로 넣지 않는다.
-const PROTECTED_PATHS = [
+// robots.ts 도 이 목록으로 크롤링을 막는다.
+export const PROTECTED_PATHS = [
   '/my',
   '/record',
   '/notification',

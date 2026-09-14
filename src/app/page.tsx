@@ -1,9 +1,12 @@
 import type { Metadata } from 'next'
 import { SplashScreen } from '@/app/_components/SplashScreen'
+import { SITE_DESCRIPTION, SITE_TITLE } from '@/constants/site'
 
 export const metadata: Metadata = {
-  title: 'Peakda | 계절 여행 타이밍',
-  description: '벚꽃·단풍 등 20여 개 계절 명소의 실시간 개화 상태를 확인하세요.',
+  // 레이아웃 템플릿('Peakda | %s')을 타면 'Peakda | Peakda | …' 가 되므로 그대로 쓴다.
+  title: { absolute: SITE_TITLE },
+  description: SITE_DESCRIPTION,
+  alternates: { canonical: '/' },
 }
 
 export default function Home() {

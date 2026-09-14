@@ -2,6 +2,13 @@ import type { Metadata, Viewport } from 'next'
 import { Advent_Pro } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/app/_components/Providers'
+import {
+  BASE_OPEN_GRAPH,
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  SITE_TITLE,
+  SITE_URL,
+} from '@/constants/site'
 
 // Pretendard 는 next/font/local 을 쓰지 않는다 — 통짜 woff2 가 2MB 라 한 글자만 써도 전부 받는다.
 // globals.css 가 unicode-range 로 쪼갠 dynamic subset 을 import 하고,
@@ -13,12 +20,16 @@ const adventPro = Advent_Pro({
   display: 'swap',
 })
 
+// canonical 은 여기서 정하지 않는다 — 전역에 두면 모든 페이지가 루트를 canonical 로 가리킨다. 페이지별로 둔다.
+// 기본 공유 이미지는 app/opengraph-image.tsx 가 자동으로 붙는다.
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  applicationName: SITE_NAME,
   title: {
-    default: 'Peakda | 계절 여행 타이밍',
+    default: SITE_TITLE,
     template: 'Peakda | %s',
   },
-  description: '벚꽃·단풍 등 20여 개 계절 명소의 실시간 개화 상태를 확인하세요.',
+  description: SITE_DESCRIPTION,
   keywords: ['벚꽃', '단풍', '꽃구경', '계절여행', '개화시기', '피크다'],
   icons: {
     icon: '/icons/favicon-32.png',
@@ -26,10 +37,12 @@ export const metadata: Metadata = {
     apple: '/icons/apple-touch-icon.png',
   },
   openGraph: {
-    title: 'Peakda | 계절 여행 타이밍',
-    description: '벚꽃·단풍 등 20여 개 계절 명소의 실시간 개화 상태를 확인하세요.',
-    locale: 'ko_KR',
-    type: 'website',
+    ...BASE_OPEN_GRAPH,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
+  twitter: {
+    card: 'summary_large_image',
   },
   // 검색엔진 소유 확인. 페이지 HTML 에 공개되는 값이라 비밀이 아니다.
   // 네이버 서치어드바이저는 https://www.peakda.com 으로 등록했다 (구글은 Route 53 DNS TXT 로 확인).
