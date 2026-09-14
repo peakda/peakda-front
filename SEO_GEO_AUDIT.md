@@ -360,8 +360,10 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 | api-dev swagger 기준 API 재생성 | 커밋 `5ac49c5` | ❌ 미배포 (`fix/profileSelect`) |
 | 비로그인 둘러보기 허용 — 첫 진입 스플래시 → 온보딩 → `/map`, 로그인 강제 제거 | 커밋 `7691b04` | ❌ 미배포 |
 | 로그인이 필요한 곳은 로그인 페이지 대신 바텀시트 (링크는 `LoginGuard` 가 전역으로 가로챔, 직접 접근은 `/map?login=1`) | 커밋 `7691b04`, `1e39b2a` | ❌ 미배포 |
-| 네이버 서치어드바이저 인증 meta 태그 (`src/app/layout.tsx` `verification`) | **미커밋** | ❌ |
-| Phase 3 SEO — 전역 metadata·기본 OG 이미지, robots, sitemap, noindex 헤더, 스팟 상세 서버 렌더링(metadata·404·JSON-LD·예측 기준일 표시), 피드 상세 metadata·404 | **미커밋** (2026-09-14 로컬 빌드·curl 검증) | ❌ |
+| 네이버 서치어드바이저 인증 meta 태그 (`src/app/layout.tsx` `verification`) — 이 커밋만 먼저 배포 가능 | 커밋 `d189c9a` | ❌ 미배포 |
+| Phase 3 SEO — 전역 metadata·기본 OG 이미지, robots, sitemap, noindex 헤더 | 커밋 `83f2a92` | ❌ 미배포 |
+| Phase 3 SEO — 스팟 상세 서버 렌더링(metadata·404·JSON-LD·예측 기준일 표시) | 커밋 `42848ee` | ❌ 미배포 |
+| Phase 3 SEO — 피드 상세 metadata·404 | 커밋 `c2ff423` | ❌ 미배포 |
 
 > 비로그인 공개 경로: `/`, `/map`, `/explore`, `/feed`, `/feed/[id]`, `/search`, `/spot/[id]`, `/spot/[id]/feed`
 > 로그인 필요(바텀시트): `/my`, `/record`, `/notification`, `/profile/edit`, `/followers`, `/following`, `/users`, `/festivals`, `/creators` — 목록은 `src/lib/auth/session.ts` `PROTECTED_PATHS`
@@ -424,7 +426,8 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 
 #### 1) 네이버 인증 태그 배포 → 소유 확인
 
-- [ ] `src/app/layout.tsx` 인증 태그 커밋 → 운영(Production) 배포
+- [x] `src/app/layout.tsx` 인증 태그 커밋 (`d189c9a`)
+- [ ] 운영(Production) 배포
 - [ ] `https://www.peakda.com` 페이지 소스에 `naver-site-verification` 확인
 - [ ] 네이버 서치어드바이저 → 웹마스터 도구 → `https://www.peakda.com` → **소유 확인** 클릭
 
@@ -443,7 +446,7 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 - [ ] 로그아웃·탈퇴 후 `/map`
 - [ ] PR 생성 → `main` 머지 → 운영 배포
 
-#### 3) Phase 3 — SEO/GEO 구현 (2026-09-14 구현, 미커밋)
+#### 3) Phase 3 — SEO/GEO 구현 (2026-09-14 구현, 커밋 `83f2a92`·`42848ee`·`c2ff423`)
 
 - [x] `src/app/layout.tsx`: `metadataBase`, `applicationName`, `openGraph.siteName`, Twitter 카드. 공통값은 `src/constants/site.ts`
 - [x] 기본 OG 이미지 `src/app/opengraph-image.tsx` (next/og + 로고. 기본 폰트에 한글이 없어 문구는 영문)
@@ -455,7 +458,8 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 - [x] 개화 정보 최신성: 응답의 `bloom.baseDate` 로 "M.D 기준 개화 예측이에요" 화면 표시 + 설명문에 포함 (백엔드 요청 불필요)
 - [x] `/`·`/map` canonical, `/` 제목이 "Peakda | Peakda | …" 로 중복되던 것 수정
 - [x] 로컬 빌드(api-dev) 후 curl 검증: `/spot/166`·`/feed/7` 200 + 제목·설명·canonical·og:image·JSON-LD / 없는 id·`/spot/abc` 404 / `/robots.txt`·`/sitemap.xml`(317 URL)·`/opengraph-image` 200 / 앱 전용 화면 noindex 헤더
-- [ ] 커밋 → 브라우저에서 스팟 상세 화면 확인(서버 렌더링 전환 후 찜·기록 동작) → 배포
+- [x] 커밋
+- [ ] 브라우저에서 스팟 상세·피드 상세 화면 확인(서버 렌더링 전환 후 찜·반응·기록 남기기, 로그인 사용자 찜 상태 반영) → 배포
 - [ ] 배포 후 Rich Results Test / Schema Markup Validator 로 스팟 상세 JSON-LD 검증
 - [ ] (범위 밖) `/explore`, `/feed` 목록은 클라이언트 페이지라 페이지별 제목·canonical 없음 — 필요하면 서버 페이지로 감싸기
 
