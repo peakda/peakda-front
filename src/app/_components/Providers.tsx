@@ -31,7 +31,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       {children}
       <LoginGuard />
       <LoginSheet />
-      <Toaster position="bottom-center" />
+      <Toaster position="top-center" />
     </QueryClientProvider>
   )
 }
