@@ -13,6 +13,7 @@ import {
 } from '@/api/facades/generated/auth/auth'
 import type { SignupCompleteRequest } from '@/api/facades/generated/peakdaApi.schemas'
 import { applyAppTokenResponse, isNativeAndroid } from '@/lib/auth/nativeAuth'
+import { useIsLoggedIn } from '@/hooks/useIsLoggedIn'
 
 // ?몃옒??洹쒖튃: res.data (Orval ?섑띁) ??res.data.data (諛깆뿏???ㅼ젣 payload)
 
@@ -54,10 +55,13 @@ export async function logoutApi() {
 
 // ??? React Query hooks (罹먯떛 / ?곹깭 愿由? ????????????????????????????????????
 
-export const useCurrentUser = () =>
-  useGetAuthMe({
-    query: { select: (res) => res.data.data ?? null },
+// 공개 화면(피드 등)에서도 소유자 판정에 쓰므로, 비로그인이면 요청하지 않는다(data 는 undefined).
+export const useCurrentUser = () => {
+  const isLoggedIn = useIsLoggedIn()
+  return useGetAuthMe({
+    query: { enabled: isLoggedIn, select: (res) => res.data.data ?? null },
   })
+}
 
 // mutate({ data: { image } }) ?뺥깭濡??몄텧
 // ?뚯썝媛???꾩떆 ?낅줈?????묐떟??profileImageKey 瑜?completeSignup ??profileImageUrl 濡??꾨떖

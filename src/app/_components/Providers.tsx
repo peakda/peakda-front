@@ -3,6 +3,8 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Toaster } from '@/components/ui/sonner'
+import { LoginGuard } from '@/components/auth/LoginGuard'
+import { LoginSheet } from '@/components/auth/LoginSheet'
 import { NativeAuthManager } from '@/app/_components/NativeAuthManager'
 import { NativeBackButton } from '@/app/_components/NativeBackButton'
 import { NativeSplash } from '@/app/_components/NativeSplash'
@@ -27,6 +29,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <NativeAuthManager />
       <PushNotificationManager />
       {children}
+      <LoginGuard />
+      <LoginSheet />
       <Toaster position="bottom-center" />
     </QueryClientProvider>
   )

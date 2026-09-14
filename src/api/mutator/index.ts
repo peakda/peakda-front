@@ -1,4 +1,5 @@
-import { clearAuthMarker, setReturnTo } from '@/lib/auth/session'
+import { clearAuthMarker, hasAuthMarker, setReturnTo } from '@/lib/auth/session'
+import { useLoginSheetStore } from '@/stores/useLoginSheetStore'
 import {
   clearNativeAuthSession,
   getNativeAuthorizationHeader,
@@ -49,18 +50,23 @@ export const customInstance = async <T>(url: string, options?: RequestInit): Pro
   // 네이티브는 앱 refresh 토큰, 웹은 HttpOnly 쿠키 refresh 토큰을 각각 한 번만 시도한다.
   const refreshUrl = native ? '/api/auth/app/token/refresh' : '/api/auth/refresh'
   if (res.status === 401 && !url.includes(refreshUrl)) {
+    // 비로그인 둘러보기 중인 웹 사용자는 갱신할 쿠키가 없다. refresh 없이 401 만 던지고
+    // 로그인 화면으로 보내지 않는다 — 공개 화면에서 튕기면 안 된다. (서버 렌더링도 여기로 온다)
+    if (!native && !hasAuthMarker()) throw { response: { status: 401, data: null } }
+
     try {
       if (native) await refreshNativeAuthSession()
       else await runRefresh()
       res = await request()
     } catch {
       if (native) await clearNativeAuthSession()
-      if (typeof window !== 'undefined') {
-        // 인증이 확정적으로 끊긴 상태 — 마커를 지워 미들웨어가 다시 로그인으로 보내게 하고,
-        // 로그인 후 돌아올 위치를 남긴다.
+      // 로그인했던 사용자의 세션이 끊긴 경우에만 알린다. 네이티브 비로그인은 여기서 마커가 없다.
+      if (typeof window !== 'undefined' && hasAuthMarker()) {
+        // 인증이 확정적으로 끊긴 상태 — 마커를 지워 비로그인으로 되돌리고, 로그인 페이지로 보내는 대신
+        // 지금 화면 위에 로그인 바텀시트를 연다. 로그인 후 돌아올 위치를 남긴다.
         clearAuthMarker()
         setReturnTo(`${window.location.pathname}${window.location.search}`)
-        window.location.href = '/login'
+        useLoginSheetStore.getState().openLoginSheet()
       }
       throw { response: { status: 401, data: null } }
     }

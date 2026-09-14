@@ -16,11 +16,12 @@ export function SplashScreen() {
 
     // 스플래시가 떠 있는 2초를 다음 화면 청크를 받는 데 쓴다.
     // 이게 없으면 2초를 기다린 뒤에야 이동할 화면을 내려받기 시작한다.
-    router.prefetch(isOnboardingDone ? '/login' : '/onboarding')
+    // 로그인은 강제하지 않는다 — 비로그인도 지도부터 둘러보고, 로그인이 필요한 기능에서 /login 으로 간다.
+    router.prefetch(isOnboardingDone ? '/map' : '/onboarding')
 
     if (isOnboardingDone) {
       timers.push(setTimeout(() => setIsExiting(true), 1500))
-      timers.push(setTimeout(() => router.replace('/login'), 2000))
+      timers.push(setTimeout(() => router.replace('/map'), 2000))
     } else {
       timers.push(setTimeout(() => setIsExiting(true), 1500))
       timers.push(setTimeout(() => router.replace('/onboarding'), 2000))

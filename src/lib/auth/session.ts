@@ -6,6 +6,30 @@ export const AUTH_MARKER = 'peakda_auth'
 export const RETURN_TO = 'peakda_return_to'
 export const AUTH_MARKER_SET_EVENT = 'peakda:auth-marker-set'
 
+// 이 쿼리가 붙은 주소로 오면 로그인 바텀시트를 연다 (미들웨어가 막힌 경로를 /map?login=1 로 보낸다).
+export const LOGIN_SHEET_QUERY = 'login'
+
+// 비로그인은 홈·지도·탐색·검색·스팟·공개 피드를 둘러볼 수 있다. 아래 경로만 로그인이 필요하다.
+// - 기록 작성·마이·알림·팔로우 목록·프로필 수정: 내 계정이 있어야 의미가 있는 화면
+// - /users·/festivals·/creators: 백엔드 조회 API(/api/users/{id}, /api/festivals/{id}, /api/curations/{id})가
+//   아직 인증을 요구한다. 공개되면 여기서 빼면 된다 (BACKEND_API_REQUESTS.md)
+// /profile(가입 중 프로필 설정)은 signup-token 만 있어 마커가 없는 상태로 거치므로 넣지 않는다.
+const PROTECTED_PATHS = [
+  '/my',
+  '/record',
+  '/notification',
+  '/profile/edit',
+  '/followers',
+  '/following',
+  '/users',
+  '/festivals',
+  '/creators',
+]
+
+export function isProtectedPath(pathname: string): boolean {
+  return PROTECTED_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`))
+}
+
 const MARKER_MAX_AGE = 2592000 // 30일
 const RETURN_TO_MAX_AGE = 600 // 10분
 
