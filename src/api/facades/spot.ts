@@ -1,4 +1,5 @@
 import {
+  getSpotsById,
   getSpotsPreview,
   useGetSpotsPreview,
   usePostSpotsMatch as useMatchGen,
@@ -12,6 +13,12 @@ import type {
 // 기록 작성에서 카카오 장소를 고르면 그 좌표로 Spot 을 찾거나 만든다.
 // 지도 핀 클릭에는 더 이상 쓰지 않는다 — 서버가 노출 명소의 Spot 행을 미리 만들어 준다.
 export const useMatchSpot = () => useMatchGen()
+
+// 서버 컴포넌트(스팟 상세 metadata·첫 HTML)용. 서버 요청에는 사용자 쿠키가 없어 찜 상태는 항상 false 다.
+export async function spotDetailApi(id: number, options?: RequestInit) {
+  const res = await getSpotsById(id, options)
+  return res.data.data ?? null
+}
 
 // id 가 아직 없으면(선행 조회 대기) 요청하지 않는다.
 export const useSpotDetail = (id: number | undefined) =>
