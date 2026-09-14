@@ -31,6 +31,11 @@ export const metadata: Metadata = {
     locale: 'ko_KR',
     type: 'website',
   },
+  // 검색엔진 소유 확인. 페이지 HTML 에 공개되는 값이라 비밀이 아니다.
+  // 네이버 서치어드바이저는 https://www.peakda.com 으로 등록했다 (구글은 Route 53 DNS TXT 로 확인).
+  verification: {
+    other: { 'naver-site-verification': '6a10777ffdd994d5c943c8f8c43fbc6008c8a6cb' },
+  },
 }
 
 export const viewport: Viewport = {
