@@ -408,8 +408,8 @@ export const getGetAuthSignupNicknameCheckUrl = (params: GetAuthSignupNicknameCh
 }
 
 /**
- * 소셜 로그인 후 발급된 signup-token 쿠키로 닉네임 사용 가능 여부를 확인합니다.
- * @summary 회원가입 닉네임 중복 확인
+ * 가입 중인 사용자와 가입을 완료한 사용자 모두 닉네임 사용 가능 여부를 확인할 수 있습니다. 웹은 signup-token 또는 access-token 쿠키, 앱은 가입 세션 토큰 또는 accessToken을 Bearer 헤더로 보냅니다. 현재 본인의 닉네임을 포함하여 이미 사용 중인 닉네임은 available=false를 반환합니다.
+ * @summary 닉네임 중복 확인
  */
 export const getAuthSignupNicknameCheck = async (params: GetAuthSignupNicknameCheckParams, options?: RequestInit): Promise<getAuthSignupNicknameCheckResponse> => {
 
@@ -480,7 +480,7 @@ export function useGetAuthSignupNicknameCheck<TData = Awaited<ReturnType<typeof 
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary 회원가입 닉네임 중복 확인
+ * @summary 닉네임 중복 확인
  */
 
 export function useGetAuthSignupNicknameCheck<TData = Awaited<ReturnType<typeof getAuthSignupNicknameCheck>>, TError = unknown>(

@@ -79,7 +79,7 @@ export const getGetSpotsRecordsUrl = (params: GetSpotsRecordsParams,) => {
 }
 
 /**
- * 특정 스팟의 모든 기록(DRAFT 포함)을 페이지 단위로 조회한다.
+ * 특정 스팟의 게시된 기록을 페이지 단위로 조회한다.
  * @summary 스팟별 기록 리스트
  */
 export const getSpotsRecords = async (params: GetSpotsRecordsParams, options?: RequestInit): Promise<getSpotsRecordsResponse> => {
@@ -440,6 +440,7 @@ export const getGetSpotsRecordsByIdUrl = (id: number,) => {
 }
 
 /**
+ * 비로그인은 게시된 기록만 조회 가능하며 내 반응은 빈 목록이다. 인증된 작성자는 본인의 비공개 기록도 조회할 수 있다.
  * @summary 스팟 기록 상세 조회
  */
 export const getSpotsRecordsById = async (id: number, options?: RequestInit): Promise<getSpotsRecordsByIdResponse> => {

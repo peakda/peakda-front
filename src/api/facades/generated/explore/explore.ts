@@ -72,7 +72,7 @@ export const getGetExploreUrl = (params?: GetExploreParams,) => {
 }
 
 /**
- * 지금이 절정(최신 산출일 status=PEAK), 다음 주에 가면 좋을 곳(status=STARTED, 기본 5건), 지금 열리는 축제(오늘 진행 중인 꽃축제, 종료 임박순), 큐레이션 카드(발행된 최신 주차순)를 조회한다. 개화 추정이 없으면 두 스팟 섹션은 빈 목록이다. 명소 노출 여부는 개화 추정과 다른 도메인에서 관리하므로 비노출 명소가 포함된 페이지는 응답 카드 수가 페이지 명소 수보다 적을 수 있다.
+ * 지금이 절정(최신 산출일 status=PEAK), 다음 주에 가면 좋을 곳(status=STARTED, 기본 5건), 지금 열리는 축제(오늘 진행 중인 꽃축제, 종료 임박순), 큐레이션 카드(발행된 최신 주차순)를 조회한다. 개화 추정이 없으면 두 스팟 섹션은 빈 목록이다. 비로그인은 찜·알림 상태가 false이다. 명소 노출 여부는 개화 추정과 다른 도메인에서 관리하므로 비노출 명소가 포함된 페이지는 응답 카드 수가 페이지 명소 수보다 적을 수 있다.
  * @summary 탐색 큐레이션 조회
  */
 export const getExplore = async (params?: GetExploreParams, options?: RequestInit): Promise<getExploreResponse> => {
