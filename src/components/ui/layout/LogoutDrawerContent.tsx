@@ -24,7 +24,8 @@ export function LogoutDrawerContent({ onClose }: Props) {
     await clearNativeAuthSession()
     clearAuthMarker()
     onClose()
-    router.push('/login')
+    // 로그아웃해도 비로그인으로 계속 둘러볼 수 있다.
+    router.push('/map')
   }
 
   return (

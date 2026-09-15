@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { useLazyMapLoad } from '@/hooks/useLazyMapLoad'
+import { useRequireLogin } from '@/hooks/useRequireLogin'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { MapSkeleton } from '@/components/Map/MapSkeleton'
@@ -284,6 +285,7 @@ export const MapContainer = () => {
 
   // 안 읽은 알림이 있을 때만 헤더 알림 버튼에 점 표시
   const { data: unread } = useUnreadNotificationCount()
+  const requireLogin = useRequireLogin()
   const hasUnreadNotification = (unread?.unreadCount ?? 0) > 0
 
   // 핀 하나든 필터 결과 목록이든 같은 preview API 로 채운다.
@@ -519,7 +521,7 @@ export const MapContainer = () => {
         right={
           <div
             className="bg-bg-primary-80 border-border-primary relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-full p-1"
-            onClick={() => router.push('/notification')}
+            onClick={() => requireLogin(() => router.push('/notification'))}
           >
             <Image src={'/icons/alram.svg'} alt="알람" width={20} height={20} className="h-6 w-6" />
             {hasUnreadNotification && (

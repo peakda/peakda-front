@@ -13,6 +13,7 @@ import type {
   GetNotificationsSegment as NotificationSegment,
 } from '@/api/facades/generated/peakdaApi.schemas'
 import { PAGE_SIZE, nextPageParam } from '@/api/facades/pagination'
+import { useIsLoggedIn } from '@/hooks/useIsLoggedIn'
 
 // 트레이드 규칙: res.data (Orval 래퍼) → res.data.data (백엔드 실제 payload)
 
@@ -57,9 +58,12 @@ export const useNotificationListInfinite = (segment: NotificationSegment) =>
     staleTime: 0,
   })
 
-export const useUnreadNotificationCount = () =>
-  useGetNotificationsUnreadCount({
+// 지도(공개 화면) 헤더에서도 쓰므로 비로그인이면 요청하지 않는다.
+export const useUnreadNotificationCount = () => {
+  const isLoggedIn = useIsLoggedIn()
+  return useGetNotificationsUnreadCount({
     query: {
+      enabled: isLoggedIn,
       select: (res) => res.data.data ?? null,
       // SSE 대신 앱이 전경에 있을 때만 주기적으로 갱신한다.
       staleTime: 0,
@@ -67,6 +71,7 @@ export const useUnreadNotificationCount = () =>
       refetchOnWindowFocus: true,
     },
   })
+}
 
 // mutate({ id }) 형태로 호출 → 성공 시 알림 캐시 무효화
 export const useMarkNotificationRead = () => {

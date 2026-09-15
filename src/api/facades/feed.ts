@@ -32,8 +32,9 @@ export async function feedListApi(params: GetFeedParams) {
   return res.data.data ?? null
 }
 
-export async function feedDetailApi(id: number) {
-  const res = await getFeedById(id)
+// options 는 서버 컴포넌트에서 캐시 설정(next.revalidate)을 넘길 때 쓴다.
+export async function feedDetailApi(id: number, options?: RequestInit) {
+  const res = await getFeedById(id, options)
   return res.data.data ?? null
 }
 

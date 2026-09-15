@@ -34,7 +34,7 @@ export function WithdrawDrawerContent({ onClose }: Props) {
     }
     clearAuthMarker()
     onClose()
-    router.replace('/login')
+    router.replace('/map')
   }
 
   return (

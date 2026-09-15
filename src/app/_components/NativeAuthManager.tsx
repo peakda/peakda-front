@@ -12,6 +12,8 @@ import {
   isNativeAndroid,
 } from '@/lib/auth/nativeAuth'
 import { setAuthMarker, takeReturnTo } from '@/lib/auth/session'
+import { useLoginSheetStore } from '@/stores/useLoginSheetStore'
+import { toast } from 'sonner'
 
 function codeFromAppUrl(value: string): string | null {
   try {
@@ -38,6 +40,8 @@ export function NativeAuthManager() {
           const session = await exchangeNativeAuthorizationCode(code)
           await Browser.close()
 
+          // 로그인 바텀시트에서 Custom Tab 을 열었으므로 돌아오면 시트를 닫는다.
+          useLoginSheetStore.getState().closeLoginSheet()
           if (session.accessToken) {
             setAuthMarker()
             router.replace(takeReturnTo() ?? '/map')
@@ -46,7 +50,8 @@ export function NativeAuthManager() {
           }
         } catch (error) {
           console.error('앱 로그인 코드 교환 실패', error)
-          router.replace('/login')
+          toast.error('로그인하지 못했어요. 다시 시도해 주세요.')
+          useLoginSheetStore.getState().openLoginSheet()
         }
       })()
     }

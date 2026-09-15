@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { AUTH_MARKER, RETURN_TO } from '@/lib/auth/session'
+import { AUTH_MARKER, LOGIN_SHEET_QUERY, RETURN_TO, isProtectedPath } from '@/lib/auth/session'
 
 // 인증 쿠키는 백엔드(AWS) 도메인에 SameSite=None 으로 심겨 프런트(Vercel)로 오지 않는다.
 // 그래서 미들웨어는 프런트 도메인에 따로 심는 마커 쿠키만 보고 라우팅한다.
@@ -7,17 +7,6 @@ import { AUTH_MARKER, RETURN_TO } from '@/lib/auth/session'
 
 // 마커가 있으면 /map 으로 보내는 진입 화면들 (/auth/callback 은 제외 — 콜백이 스스로 분기해야 한다)
 const ENTRY_PATHS = ['/', '/onboarding', '/login']
-
-// 마커가 없어도 통과시키는 경로.
-// /Terms 와 /profile 을 공개로 두는 이유: 신규 가입자는 signup-token 만 있어 /auth/me 가 401 이라
-// 아직 마커가 없는 상태로 약관 동의(/Terms) → 프로필 설정(/profile) 을 거친다.
-// 이 두 화면을 보호에 넣으면 가입 플로우가 통째로 막힌다. (/profile/edit 은 가입 후 화면이라 보호 대상)
-const PUBLIC_PATHS = [...ENTRY_PATHS, '/auth/callback', '/profile']
-
-function isPublic(pathname: string): boolean {
-  if (PUBLIC_PATHS.includes(pathname)) return true
-  return pathname === '/Terms' || pathname.startsWith('/Terms/')
-}
 
 export function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl
@@ -30,10 +19,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  if (isPublic(pathname)) return NextResponse.next()
+  if (!isProtectedPath(pathname)) return NextResponse.next()
 
+  // 로그인 페이지로 보내지 않는다. 앱 안의 링크는 LoginGuard 가 이동 전에 막으므로
+  // 여기 오는 건 주소 직접 입력·새로고침·외부 링크다. 지도를 띄우고 그 위에 로그인 바텀시트를 연다.
   // 로그인 후 원래 가려던 곳으로 돌아가도록 현재 위치를 one-shot 쿠키로 남긴다.
-  const response = NextResponse.redirect(new URL('/login', request.url))
+  const response = NextResponse.redirect(new URL(`/map?${LOGIN_SHEET_QUERY}=1`, request.url))
   response.cookies.set(RETURN_TO, `${pathname}${search}`, {
     path: '/',
     maxAge: 600,

@@ -1,104 +1,62 @@
-'use client'
+import type { Metadata } from 'next'
+import { cache } from 'react'
+import { notFound } from 'next/navigation'
+import { feedDetailApi } from '@/api/facades/feed'
+import { BASE_OPEN_GRAPH, DEFAULT_OG_IMAGE } from '@/constants/site'
+import { isApiErrorStatus } from '@/lib/utils/apiError'
+import { FeedDetailClient } from './_components/FeedDetailClient'
 
-import { useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import { toast } from 'sonner'
-import { Header } from '@/components/ui/layout/Header'
-import { LeftArrow } from '@/components/ui/button/LeftArrow'
-import { MoreMenu } from '@/components/ui/button/MoreMenu'
-import { Drawer } from '@/components/ui/layout/Drawer'
-import { ReportModal } from '@/components/ui/card/ReportModal'
-import { FeedDetailView } from './_components/FeedDetailView'
-import { useFeedDetail } from '@/api/facades/feed'
-import { useCurrentUser } from '@/api/facades/auth'
-import { useSpotDetail } from '@/api/facades/spot'
-import { useDeleteSpotRecord } from '@/api/facades/spot-record'
-import { useReport } from '@/api/facades/report'
-import { useDrawerStore } from '@/stores/useDrawerStore'
-import { detailToFeedCardProps } from '@/lib/utils/spotRecordToFeed'
-import { buildReportRequest } from '@/lib/utils/feed'
-import type { CreateReportRequestReason } from '@/api/facades/generated/peakdaApi.schemas'
+interface FeedDetailPageProps {
+  params: Promise<{ id: string }>
+}
 
-// 피드(공개) 상세. 게시된(PUBLISHED) 기록만 조회되며, DRAFT·없음이면 get1 이 404 → record 없음 처리.
-// 헤더는 사진 위에 겹쳐 뜨고, 더보기는 소유자면 수정/삭제, 아니면 신고하기를 노출한다.
-export default function FeedDetailPage() {
-  const router = useRouter()
-  const { id } = useParams<{ id: string }>()
-  const recordId = Number(id)
-  const { data: record, isLoading } = useFeedDetail(recordId)
-  const { data: currentUser } = useCurrentUser()
-  const { data: spot } = useSpotDetail(record?.spot.id)
-  const deleteRecord = useDeleteSpotRecord()
-  const report = useReport()
-  const openDeleteConfirmDrawer = useDrawerStore((s) => s.openDeleteConfirmDrawer)
-  const [isReportModalOpen, setReportModalOpen] = useState(false)
+const DESCRIPTION_MAX_LENGTH = 120
 
-  const isOwner = !!record && !!currentUser && record.user.id === currentUser.id
-
-  const handleDelete = () => {
-    deleteRecord.mutate({ id: recordId }, { onSuccess: () => router.back() })
+// 페이지별 metadata 와 실제 404 만 서버에서 처리한다. 본문은 기존대로 클라이언트가 그린다.
+// generateMetadata 와 페이지가 한 요청 안에서 한 번만 조회하도록 cache 로 묶는다.
+const getRecord = cache(async (rawId: string) => {
+  const id = Number(rawId)
+  if (!Number.isInteger(id) || id <= 0) return null
+  try {
+    return await feedDetailApi(id, { next: { revalidate: 60 } })
+  } catch (error) {
+    if (isApiErrorStatus(error, 404)) return null
+    throw error
   }
+})
 
-  const handleReportSubmit = (reason: CreateReportRequestReason, detail?: string) => {
-    report.mutate(
-      { data: buildReportRequest(recordId, reason, detail) },
-      {
-        onSuccess: () => {
-          setReportModalOpen(false)
-          toast.success('신고가 접수되었어요')
-        },
-      }
-    )
+export async function generateMetadata({ params }: FeedDetailPageProps): Promise<Metadata> {
+  const record = await getRecord((await params).id)
+  if (!record) return {}
+
+  const title = `${record.spot.name} 방문 기록`
+  const memo = record.memo?.trim()
+  const description = memo
+    ? memo.length > DESCRIPTION_MAX_LENGTH
+      ? `${memo.slice(0, DESCRIPTION_MAX_LENGTH - 1)}…`
+      : memo
+    : `${record.user.nickname}님이 남긴 ${record.spot.name} 방문 기록이에요.`
+  const path = `/feed/${record.id}`
+
+  return {
+    title,
+    description,
+    alternates: { canonical: path },
+    // 기록 사진은 만료되는 presigned URL 이라 공유 카드에 쓰면 나중에 깨진다.
+    // 기본 카드를 쓴다 (영구 URL 은 백엔드 요청 대기).
+    openGraph: {
+      ...BASE_OPEN_GRAPH,
+      title: `Peakda | ${title}`,
+      description,
+      url: path,
+      images: [DEFAULT_OG_IMAGE],
+    },
   }
+}
 
-  return (
-    <div className="bg-bg-primary relative flex min-h-screen flex-col pb-12">
-      <Header
-        className="mt-3"
-        left={<LeftArrow />}
-        right={
-          <MoreMenu
-            isOwner={isOwner}
-            onEdit={() => router.push(`/record/${recordId}/edit`)}
-            onDelete={() => openDeleteConfirmDrawer(handleDelete)}
-            onReport={() => setReportModalOpen(true)}
-          />
-        }
-      />
+export default async function FeedDetailPage({ params }: FeedDetailPageProps) {
+  const record = await getRecord((await params).id)
+  if (!record) notFound()
 
-      {isLoading ? (
-        <p className="text-text-tertiary pt-20 pb-10 text-center text-sm">불러오는 중...</p>
-      ) : !record ? (
-        <p className="text-text-tertiary pt-20 pb-10 text-center text-sm">
-          게시글을 찾을 수 없어요
-        </p>
-      ) : (
-        <FeedDetailView
-          {...detailToFeedCardProps(record)}
-          spotSummary={
-            spot
-              ? {
-                  spotId: record.spot.id,
-                  name: record.spot.name,
-                  recordCount: spot.recordCount,
-                  address: spot.address ?? '',
-                  attractionId: spot.attractionId,
-                  category: spot.bloom?.category,
-                }
-              : undefined
-          }
-        />
-      )}
-
-      {isReportModalOpen && (
-        <ReportModal
-          onSubmit={handleReportSubmit}
-          onCancel={() => setReportModalOpen(false)}
-          isSubmitting={report.isPending}
-        />
-      )}
-
-      <Drawer />
-    </div>
-  )
+  return <FeedDetailClient />
 }

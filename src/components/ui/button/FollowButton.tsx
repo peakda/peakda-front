@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button/Button'
 import { useFollow, useUnfollow } from '@/api/facades/user-follow'
+import { useRequireLogin } from '@/hooks/useRequireLogin'
 
 interface Props {
   userId?: number
@@ -13,6 +14,7 @@ export function FollowButton({ userId, initialFollowing = false }: Props) {
   const [following, setFollowing] = useState(initialFollowing)
   const followMutation = useFollow()
   const unfollowMutation = useUnfollow()
+  const requireLogin = useRequireLogin()
 
   // 낙관적 토글 + userId 가 있으면 실제 mutation 호출(실패 시 원복). userId 없으면 로컬 토글만.
   const handleToggle = () => {
@@ -25,11 +27,11 @@ export function FollowButton({ userId, initialFollowing = false }: Props) {
   }
 
   return following ? (
-    <Button variant="outlined" color="primary" size="sm" onClick={handleToggle} className='rounded-xl'>
+    <Button variant="outlined" color="primary" size="sm" onClick={() => requireLogin(handleToggle)} className='rounded-xl'>
       팔로잉
     </Button>
   ) : (
-    <Button variant="filled" color="primary" size="sm" onClick={handleToggle} className='rounded-xl'>
+    <Button variant="filled" color="primary" size="sm" onClick={() => requireLogin(handleToggle)} className='rounded-xl'>
       팔로우
     </Button>
   )

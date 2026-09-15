@@ -142,7 +142,7 @@ export const getGetSpotsByIdUrl = (id: number,) => {
 }
 
 /**
- * 스팟 단위 상세 화면 정보를 반환한다. 대표 사진, 올해 만개 시기 배너(개화 추정 연동), 게시된 방문 기록 수와 최신 프리뷰, 현재 사용자의 찜 상태를 포함한다.
+ * 스팟 단위 상세 화면 정보를 반환한다. 대표 사진, 올해 만개 시기 배너(개화 추정 연동), 게시된 방문 기록 수와 최신 프리뷰, 현재 사용자의 찜 상태를 포함한다. 비로그인은 찜·알림이 false이고 내 반응은 빈 목록이다.
  * @summary 스팟 상세 조회
  */
 export const getSpotsById = async (id: number, options?: RequestInit): Promise<getSpotsByIdResponse> => {
@@ -270,7 +270,7 @@ export const getGetSpotsPreviewUrl = (params: GetSpotsPreviewParams,) => {
 }
 
 /**
- * 지도 핀 탭 시 보여줄 카드(주소/사진/개화 단계 뱃지/찜/알림/거리)를 조회한다. spotIds 1건이면 단일 프리뷰(SCR-011e), 여러 건이면 클러스터 리스트(SCR-011d)로 그대로 쓸 수 있다. lat/lng 을 함께 주면 각 스팟까지의 거리(m)를 계산해 채운다. items 는 요청한 spotIds 순서를 보존하며 서버 정렬 옵션은 제공하지 않는다.
+ * 지도 핀 탭 시 보여줄 카드(주소/사진/개화 단계 뱃지/찜/알림/거리)를 조회한다. spotIds 1건이면 단일 프리뷰(SCR-011e), 여러 건이면 클러스터 리스트(SCR-011d)로 그대로 쓸 수 있다. lat/lng 을 함께 주면 각 스팟까지의 거리(m)를 계산해 채운다. items 는 요청한 spotIds 순서를 보존하며 서버 정렬 옵션은 제공하지 않는다. 비로그인은 찜·알림 상태가 false이다.
  * @summary 핀 클릭 프리뷰
  */
 export const getSpotsPreview = async (params: GetSpotsPreviewParams, options?: RequestInit): Promise<getSpotsPreviewResponse> => {

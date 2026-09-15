@@ -27,7 +27,7 @@ export function OnboardingCarousel({ steps }: Props) {
 
   const completeOnboarding = () => {
     localStorage.setItem('is_onboarding_done', 'true')
-    router.replace('/login')
+    router.replace('/map')
   }
 
   const handleNext = () => {
