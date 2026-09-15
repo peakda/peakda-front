@@ -148,19 +148,6 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
             <div className="flex shrink-0 items-center gap-3 pt-1">
               <button
                 type="button"
-                aria-label="찜하기"
-                onClick={() => requireLogin(handleSave, '해당 장소를 찜하고 싶다면 로그인이 필요해요.')}
-                disabled={removeFavorite.isPending}
-              >
-                <Heart
-                  className={cn(
-                    'h-5 w-5 cursor-pointer',
-                    favorited ? 'fill-brand-primary text-brand-primary' : 'text-gray-400'
-                  )}
-                />
-              </button>
-              <button
-                type="button"
                 aria-label="만개 알림 받기"
                 aria-pressed={favorited && notifyEnabled}
                 onClick={() => requireLogin(handleNotify, '알림 설정을 하고 싶다면 로그인이 필요해요.')}
