@@ -312,7 +312,7 @@ export const getGetSearchSpotsUrl = (params: GetSearchSpotsParams,) => {
 }
 
 /**
- * 스팟명 부분일치(대소문자 무시)로 검색한다. 비공개(visible=false) 스팟은 제외된다.
+ * 스팟명 부분일치(대소문자 무시)로 검색한다. 비공개(visible=false) 스팟은 제외된다. 비로그인 조회가 가능하며 찜·알림 상태는 false이다.
  * @summary 스팟 검색
  */
 export const getSearchSpots = async (params: GetSearchSpotsParams, options?: RequestInit): Promise<getSearchSpotsResponse> => {

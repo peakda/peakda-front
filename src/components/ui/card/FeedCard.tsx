@@ -11,6 +11,7 @@ import { CardBadge } from '@/components/ui/card/CardBadge'
 import { Badge } from '@/components/ui/display/Badge'
 import { ReactionBar } from '@/components/ui/card/ReactionBar'
 import { useCarousel } from '@/hooks/useEmblaCarousel'
+import { useRequireLogin } from '@/hooks/useRequireLogin'
 import { Indecator } from '@/app/onboarding/_components/Indecator'
 import { useReport } from '@/api/facades/report'
 import { buildReportRequest } from '@/lib/utils/feed'
@@ -83,6 +84,7 @@ export function FeedCard({
 
   const [isReportModalOpen, setReportModalOpen] = useState(false)
   const report = useReport()
+  const requireLogin = useRequireLogin()
   const safeAuthorImageUrl = toHttpsImageUrl(authorImageUrl)
 
   const handleReportSubmit = (reason: CreateReportRequestReason, detail?: string) => {
@@ -132,7 +134,7 @@ export function FeedCard({
             isOwner={isOwner}
             onEdit={onEdit}
             onDelete={onDelete}
-            onReport={onReport ?? (() => setReportModalOpen(true))}
+            onReport={() => requireLogin(onReport ?? (() => setReportModalOpen(true)))}
           />
         )}
       </div>

@@ -19,9 +19,14 @@ import { toFavoriteSpotProps } from '@/lib/utils/spotFavorite'
 import { useUnreadNotificationCount } from '@/api/facades/notification'
 import { formatUnreadBadge } from '@/lib/utils/notificationToAlarm'
 import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
+import { useIsLoggedIn } from '@/hooks/useIsLoggedIn'
+import { useRequireLogin } from '@/hooks/useRequireLogin'
 
 export default function MyPage() {
   const router = useRouter()
+  // 비로그인도 이 화면은 볼 수 있다. 하위 화면으로 가는 링크는 LoginGuard 가 바텀시트로 막는다.
+  const isLoggedIn = useIsLoggedIn()
+  const requireLogin = useRequireLogin()
   const { data: myPage } = useMyPage()
   const records = (myPage?.recordPreview ?? []).map(toMyRecordThumb)
   const stats = myPage ? toProfileStats(myPage.stats) : null
@@ -43,7 +48,7 @@ export default function MyPage() {
                 type="button"
                 aria-label="알림"
                 className="relative cursor-pointer"
-                onClick={() => router.push('/notification')}
+                onClick={() => requireLogin(() => router.push('/notification'))}
               >
                 <Image src="/icons/alram.svg" alt="알림" width={22} height={22} />
                 {unreadBadge && (
@@ -75,14 +80,34 @@ export default function MyPage() {
             <Image src="/icons/person.svg" alt="프로필" width={26} height={26} />
           )}
         </IconBtn>
-        <span className="text-text-primary flex-1 text-lg font-semibold">
-          {myPage?.nickname ?? ''}
-        </span>
-        <Link href="/profile/edit">
-          <Button variant="outlined" size="sm" className="rounded-lg py-3.5">
-            프로필 편집
-          </Button>
-        </Link>
+        {isLoggedIn ? (
+          <>
+            <span className="text-text-primary flex-1 text-lg font-semibold">
+              {myPage?.nickname ?? ''}
+            </span>
+            <Link href="/profile/edit">
+              <Button variant="outlined" size="sm" className="rounded-lg py-3.5">
+                프로필 편집
+              </Button>
+            </Link>
+          </>
+        ) : (
+          <>
+            <span className="text-text-primary flex-1 text-base font-semibold">
+              로그인하고 시작해보세요
+            </span>
+            {/* 비로그인 전용 버튼이라 requireLogin 은 항상 바텀시트를 연다 (로그인 후 /my 로 복귀) */}
+            <Button
+              variant="filled"
+              color="primary"
+              size="sm"
+              className="rounded-lg py-3.5"
+              onClick={() => requireLogin(() => {})}
+            >
+              로그인
+            </Button>
+          </>
+        )}
       </div>
 
       {/* 통계 */}
@@ -93,10 +118,17 @@ export default function MyPage() {
       />
 
       {/* 관심 식물 */}
-      <InterestFlowerSection flowers={flowers} />
+      <InterestFlowerSection
+        flowers={flowers}
+        emptyDescription={isLoggedIn ? undefined : '로그인하고 관심 있는 식물을 등록해보세요'}
+      />
 
       {/* 내 기록 */}
-      <MyRecordSection records={records} count={myPage?.stats.recordCount} />
+      <MyRecordSection
+        records={records}
+        count={myPage?.stats.recordCount}
+        emptyDescription={isLoggedIn ? undefined : '로그인하고 나의 계절 기록을 남겨보세요'}
+      />
 
       {/* 저장한 스팟 — 미리보기 3건만 노출하므로 전체 개수는 응답의 count 를 쓴다 */}
       <SavedSpotSection spots={savedSpots} count={favoriteData?.count} />

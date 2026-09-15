@@ -7,6 +7,8 @@ import { getKakaoMapSdkUrl } from '@/lib/kakao/kakaoLoader'
 export const metadata: Metadata = {
   title: '지도',
   description: '지도에서 내 주변 계절 명소와 실시간 개화 상태를 확인하세요.',
+  // ?lat/?lng, ?login=1 이 붙은 주소가 따로 색인되지 않게 한다.
+  alternates: { canonical: '/map' },
 }
 
 // MapContainer 가 useSearchParams(?lat/?lng)를 쓰므로 App Router 에서 Suspense 경계가 필요하다.

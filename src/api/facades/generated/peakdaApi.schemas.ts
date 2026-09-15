@@ -5602,7 +5602,7 @@ export type GetFeedParams = {
 /**
  * 피드 필터
  */
-filter: GetFeedFilter;
+filter?: GetFeedFilter;
 pageRequest: PageRequest;
 };
 

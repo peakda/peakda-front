@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { MainMessage } from '@/components/ui/message/MainMessage'
 import { SocialLoginBtns } from './_components/SocialLoginBtns'
 
@@ -14,6 +15,9 @@ export default function LoginPage() {
         <MainMessage />
       </div>
       <SocialLoginBtns />
+      <Link href="/map" className="text-text-tertiary pb-10 text-sm underline underline-offset-2">
+        로그인 없이 둘러보기
+      </Link>
     </div>
   )
 }

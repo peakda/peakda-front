@@ -11,6 +11,7 @@ import {
   usePatchSpotsFavoritesBySpotIdNotify as useUpdateNotifyGen,
 } from '@/api/facades/generated/spot-favorite/spot-favorite'
 import type { UpdateFavoriteNotifyRequest } from '@/api/facades/generated/peakdaApi.schemas'
+import { useIsLoggedIn } from '@/hooks/useIsLoggedIn'
 
 // ?몃옒??洹쒖튃: res.data (Orval ?섑띁) ??res.data.data (諛깆뿏???ㅼ젣 payload)
 
@@ -40,8 +41,13 @@ export async function favoriteListApi() {
 
 // ??? React Query hooks (罹먯떛 / ?곹깭 愿由? ????????????????????????????????????
 
-export const useFavoriteList = () =>
-  useGetSpotsFavorites({ query: { select: (res) => res.data.data ?? null } })
+// 비로그인은 /my 를 둘러볼 수 있으므로 401 로 끝날 요청을 보내지 않는다.
+export const useFavoriteList = () => {
+  const isLoggedIn = useIsLoggedIn()
+  return useGetSpotsFavorites({
+    query: { enabled: isLoggedIn, select: (res) => res.data.data ?? null },
+  })
+}
 
 // mutate({ spotId }) ?뺥깭濡??몄텧 ???깃났 ??李?紐⑸줉 罹먯떆 臾댄슚??
 

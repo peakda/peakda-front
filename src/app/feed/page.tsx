@@ -14,6 +14,7 @@ import { useCurrentUser } from '@/api/facades/auth'
 import { useDeleteSpotRecord } from '@/api/facades/spot-record'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
+import { useRequireLogin } from '@/hooks/useRequireLogin'
 import { filterFromTab } from '@/lib/utils/feed'
 import { flattenPages } from '@/lib/utils/infinitePages'
 import { shouldLoadMore } from '@/lib/utils/myRecords'
@@ -35,9 +36,15 @@ export default function FeedPage() {
 
   // 탭마다 무한 쿼리 키가 달라 목록이 처음부터 다시 쌓인다.
   // 깊이 스크롤한 상태로 탭을 바꾸면 짧아진 목록의 sentinel 이 곧바로 보여 다음 페이지가 연쇄 로드되므로 맨 위로 올린다.
+  // 비로그인은 전체 탭만 볼 수 있다(관심 식물·팔로잉은 서버가 401).
+  const requireLogin = useRequireLogin()
   const handleTabClick = (cate: string) => {
-    setTab(cate)
-    window.scrollTo({ top: 0 })
+    const select = () => {
+      setTab(cate)
+      window.scrollTo({ top: 0 })
+    }
+    if (cate === FEED_CATEGORIES[0]) select()
+    else requireLogin(select)
   }
 
   const { data: currentUser } = useCurrentUser()
