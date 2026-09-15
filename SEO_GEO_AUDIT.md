@@ -370,19 +370,18 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 
 ### 9.2 외부 답변 대기 — 답이 오면 할 일
 
-#### A. [백엔드] Route 53 TXT 레코드 추가 — 2026-09-14 요청함
+#### A. [백엔드] Route 53 TXT 레코드 추가 — 2026-09-14 요청, 2026-09-16 새 값으로 재요청 예정
 
-요청 내용: `peakda.com` 호스팅 영역에 레코드 이름 빈칸(루트) · 유형 TXT · TTL 300 · 값
+- 2026-09-15: 첫 값(`E1TcUP-...`)은 반영됐지만 Search Console 에서 새 값을 받아 다시 요청한다.
+
+요청 내용: `peakda.com` 루트 TXT 레코드를 **편집해** 아래 줄을 추가 (Route 53 은 같은 이름의 TXT 레코드를 둘 만들 수 없다). 예전 값은 새 값으로 확인이 끝나면 지워도 된다.
 
 ```
-"google-site-verification=E1TcUP-9vltQZAGQO4EL_bjQ2DW_MWfFYuSHAeK6HqM"
+"google-site-verification=cPND8sbP0ERYniDG0s9MXLQgWe6lwMocT5NsY-KKo9Y"
 ```
-
-- 이미 루트에 TXT 레코드(SPF 등)가 있으면 새로 만들 수 없으므로 **기존 레코드를 편집해 줄을 추가**해야 한다.
-- 2026-09-14 조회 시점에는 루트 TXT 레코드가 **없음**.
 
 답변 오면:
-- [ ] 반영 확인 — 아래 결과의 `Answer` 에 `google-site-verification=E1TcUP...` 가 보이는지
+- [ ] 반영 확인 — 아래 결과의 `Answer` 에 `google-site-verification=cPND8...` 가 보이는지
   ```
   curl -s "https://dns.google/resolve?name=peakda.com&type=TXT"
   ```
@@ -430,7 +429,6 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 - [ ] 운영(Production) 배포
 - [ ] `https://www.peakda.com` 페이지 소스에 `naver-site-verification` 확인
 - [ ] 네이버 서치어드바이저 → 웹마스터 도구 → `https://www.peakda.com` → **소유 확인** 클릭
-
 #### 2) 비로그인 모드 운영 반영
 
 배포 전 브라우저 확인 (아직 **curl 로 리다이렉트만 확인**, 화면 동작은 미확인):
@@ -462,7 +460,9 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 - [x] 커밋
 - [ ] 브라우저에서 스팟 상세·피드 상세 화면 확인(서버 렌더링 전환 후 찜·반응·기록 남기기, 로그인 사용자 찜 상태 반영) → 배포
 - [ ] 배포 후 Rich Results Test / Schema Markup Validator 로 스팟 상세 JSON-LD 검증
-- [ ] (범위 밖) `/explore`, `/feed` 목록은 클라이언트 페이지라 페이지별 제목·canonical 없음 — 필요하면 서버 페이지로 감싸기
+- [x] 2026-09-15 `/explore`, `/explore/spots`, `/explore/festivals`, `/feed` 목록 — 각 `layout.tsx` 로 제목·설명·canonical (`/explore/spots` 는 `?section` 마다 목록이 달라 canonical 비움)
+- [x] 2026-09-15 홈 `Organization`(+인스타 `sameAs`)·`WebSite` JSON-LD (`src/app/page.tsx`)
+- [ ] 목록 페이지 og:title 은 여전히 전역 기본값 (`/map` 과 같은 방식)
 
 #### 4) Phase 4 — 문서
 
