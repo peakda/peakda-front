@@ -31,7 +31,7 @@ export function LoginGuard() {
 
       e.preventDefault()
       setReturnTo(`${anchor.pathname}${anchor.search}`)
-      openLoginSheet()
+      openLoginSheet(anchor.pathname === '/record' ? '기록을 남기려면 로그인이 필요해요.' : undefined)
     }
 
     document.addEventListener('click', handleClick, true)

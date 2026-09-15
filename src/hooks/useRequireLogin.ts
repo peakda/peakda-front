@@ -10,13 +10,13 @@ export function useRequireLogin() {
   const openLoginSheet = useLoginSheetStore((s) => s.openLoginSheet)
 
   return useCallback(
-    (action: () => void) => {
+    (action: () => void, message?: string) => {
       if (isLoggedIn) {
         action()
         return
       }
       setReturnTo(`${window.location.pathname}${window.location.search}`)
-      openLoginSheet()
+      openLoginSheet(message)
     },
     [isLoggedIn, openLoginSheet]
   )

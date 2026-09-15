@@ -40,7 +40,7 @@ export function HeartBtn({ InitFavorite, className, spotId, onToggle }: HeartBtn
 
   // spotId 가 없으면 찜할 대상이 없다. 눌러도 서버에 저장되지 않으므로 비활성 처리한다.
   return (
-    <button onClick={() => requireLogin(toggleHeart)}disabled={spotId === undefined} aria-label="찜하기">
+    <button onClick={() => requireLogin(toggleHeart, '해당 장소를 찜하고 싶다면 로그인이 필요해요.')}disabled={spotId === undefined} aria-label="찜하기">
       <Heart
         className={cn(
           isFavorite ? 'fill-brand-primary text-brand-primary' : 'text-gray-300',

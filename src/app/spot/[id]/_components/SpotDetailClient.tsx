@@ -149,7 +149,7 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
               <button
                 type="button"
                 aria-label="찜하기"
-                onClick={() => requireLogin(handleSave)}
+                onClick={() => requireLogin(handleSave, '해당 장소를 찜하고 싶다면 로그인이 필요해요.')}
                 disabled={removeFavorite.isPending}
               >
                 <Heart
@@ -163,7 +163,7 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
                 type="button"
                 aria-label="만개 알림 받기"
                 aria-pressed={favorited && notifyEnabled}
-                onClick={() => requireLogin(handleNotify)}
+                onClick={() => requireLogin(handleNotify, '알림 설정을 하고 싶다면 로그인이 필요해요.')}
                 disabled={updateNotify.isPending}
               >
                 <Bell
@@ -253,7 +253,7 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
         <button
           type="button"
           aria-label="찜하기"
-          onClick={() => requireLogin(handleSave)}
+          onClick={() => requireLogin(handleSave, '해당 장소를 찜하고 싶다면 로그인이 필요해요.')}
           disabled={removeFavorite.isPending}
           className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-gray-200"
         >
@@ -266,7 +266,12 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
           color="primary"
           size="lg"
           className="flex-1"
-          onClick={() => requireLogin(() => router.push(buildRecordUrl(spot.id)))}
+          onClick={() =>
+            requireLogin(
+              () => router.push(buildRecordUrl(spot.id)),
+              '스팟 기록을 남기려면 로그인이 필요해요.'
+            )
+          }
         >
           방문 기록 남기기
         </Button>

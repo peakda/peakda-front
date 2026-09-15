@@ -21,7 +21,7 @@ export function SocialLoginBtns() {
           />
         }
       >
-        구글로 시작하기
+        구글로 계속하기
       </Button>
       <Button
         onClick={handleKakaoLogin}

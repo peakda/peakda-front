@@ -71,7 +71,10 @@ export function ReactionBar({ recordId, reactions, className }: ReactionBarProps
         type="button"
         aria-label="리액션 추가"
         onClick={() =>
-          requireLogin(() => openReactionDrawer({ selected: myReactions, onSelect: handleReaction }))
+          requireLogin(
+            () => openReactionDrawer({ selected: myReactions, onSelect: handleReaction }),
+            '반응을 남기고 싶다면 로그인이 필요해요.'
+          )
         }
         className="border-border-primary text-icon-quaternary flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full border"
       >
@@ -85,7 +88,9 @@ export function ReactionBar({ recordId, reactions, className }: ReactionBarProps
             emoji={emoji}
             label={`+${countOf(type)}`}
             selected={myReactions.includes(type)}
-            onClick={() => requireLogin(() => handleReaction(type))}
+            onClick={() =>
+              requireLogin(() => handleReaction(type), '반응을 남기고 싶다면 로그인이 필요해요.')
+            }
           />
         )
       )}
