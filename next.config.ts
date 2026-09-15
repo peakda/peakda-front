@@ -2,7 +2,7 @@ import type { NextConfig } from 'next'
 
 // 비로그인에게도 200 으로 열리지만 검색 결과에 나올 가치가 없는 앱 전용 화면.
 // robots.txt 로 막으면 크롤러가 이 헤더를 읽지 못하므로 크롤링은 허용하고 noindex 만 붙인다.
-const NOINDEX_PATHS = ['/login', '/onboarding', '/search', '/profile', '/auth/:path*']
+const NOINDEX_PATHS = ['/login', '/onboarding', '/search', '/profile', '/my', '/auth/:path*']
 
 const nextConfig: NextConfig = {
   async headers() {

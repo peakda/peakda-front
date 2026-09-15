@@ -1,5 +1,6 @@
+import Image from 'next/image'
 import Link from 'next/link'
-import { Heart, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button/Button'
 import { IconBtn } from '@/components/ui/button/IconBtn'
 
@@ -7,7 +8,7 @@ export function SavedSpotEmpty() {
   return (
     <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
       <IconBtn className="h-16 w-16">
-        <Heart className="text-icon-secondary h-8 w-8" strokeWidth={1.5} />
+        <Image src="/icons/Pin.svg" alt="" width={32} height={32} />
       </IconBtn>
       <p className="text-text-primary text-base font-semibold">아직 저장한 스팟이 없어요</p>
       <p className="text-text-tertiary text-sm">

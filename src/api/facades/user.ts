@@ -10,6 +10,7 @@ import {
   usePostUsersMeProfileImage as useUploadProfileImageGen,
   deleteUsersMe,
 } from '@/api/facades/generated/user/user'
+import { useIsLoggedIn } from '@/hooks/useIsLoggedIn'
 
 // ?몃옒??洹쒖튃: res.data (Orval ?섑띁) ??res.data.data (諛깆뿏???ㅼ젣 payload)
 
@@ -40,8 +41,11 @@ export async function myPageApi() {
 // mutate({ data: { image } }) ?뺥깭濡??몄텧
 // ?깃났 ???좎? ?뺣낫 罹먯떆 臾댄슚??
 // 마이페이지 집계 조회
-export const useMyPage = () =>
-  useGetUsersMe({ query: { select: (res) => res.data.data ?? null } })
+// 비로그인은 /my 를 둘러볼 수 있으므로 401 로 끝날 요청을 보내지 않는다.
+export const useMyPage = () => {
+  const isLoggedIn = useIsLoggedIn()
+  return useGetUsersMe({ query: { enabled: isLoggedIn, select: (res) => res.data.data ?? null } })
+}
 
 export const useUploadProfileImage = () => {
   const queryClient = useQueryClient()

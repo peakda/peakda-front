@@ -365,8 +365,8 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 | Phase 3 SEO — 스팟 상세 서버 렌더링(metadata·404·JSON-LD·예측 기준일 표시) | 커밋 `42848ee` | ❌ 미배포 |
 | Phase 3 SEO — 피드 상세 metadata·404 | 커밋 `c2ff423` | ❌ 미배포 |
 
-> 비로그인 공개 경로: `/`, `/map`, `/explore`, `/feed`, `/feed/[id]`, `/search`, `/spot/[id]`, `/spot/[id]/feed`
-> 로그인 필요(바텀시트): `/my`, `/record`, `/notification`, `/profile/edit`, `/followers`, `/following`, `/users`, `/festivals`, `/creators` — 목록은 `src/lib/auth/session.ts` `PROTECTED_PATHS`
+> 비로그인 공개 경로: `/`, `/map`, `/explore`, `/feed`, `/feed/[id]`, `/search`, `/spot/[id]`, `/spot/[id]/feed`, `/my`(비로그인용 빈 화면, noindex)
+> 로그인 필요(바텀시트): `/my/settings`, `/my/records`, `/my/saved`, `/record`, `/notification`, `/profile/edit`, `/followers`, `/following`, `/users`, `/festivals`, `/creators` — 목록은 `src/lib/auth/session.ts` `PROTECTED_PATHS`
 
 ### 9.2 외부 답변 대기 — 답이 오면 할 일
 
@@ -439,7 +439,8 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 - [ ] 스팟 상세 찜·알림·방문 기록 남기기 → 바텀시트
 - [ ] 피드 반응·신고, 관심 식물·팔로잉 탭 → 바텀시트
 - [ ] 하단 탭 `+`·`My`, 탐색 축제·큐레이션 카드, 작성자 프로필 링크 → 이동 없이 바텀시트
-- [ ] 주소창에 `/my` 직접 입력 → `/map` + 바텀시트 (새로고침 시 다시 안 뜸)
+- [ ] 하단 탭 `My` → 비로그인용 마이 화면 ("로그인하고 시작해보세요"), 알림·설정·편집·전체·기록하기·팔로워 → 바텀시트
+- [ ] 주소창에 `/my/settings` 직접 입력 → `/map` + 바텀시트 (새로고침 시 다시 안 뜸)
 - [ ] 시트에서 구글·카카오·네이버 로그인 → 원래 가려던 화면으로 복귀
 - [ ] Android 앱: Custom Tab 로그인 후 시트 닫힘 / 실패 시 토스트 + 시트
 - [ ] 로그인 사용자 세션 만료 → 현재 화면 위에 바텀시트
