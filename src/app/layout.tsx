@@ -78,7 +78,7 @@ export default function RootLayout({
         <link rel="preconnect" href="//t1.daumcdn.net" crossOrigin="anonymous" />
       </head>
       <body vaul-drawer-wrapper="" className="bg-gray-100" suppressHydrationWarning>
-        <div className="relative mx-auto flex min-h-dvh w-full flex-col overflow-hidden bg-[#FFFFFF] sm:max-w-107.5">
+        <div className="relative mx-auto flex min-h-dvh w-full max-w-107.5 flex-col overflow-hidden bg-[#FFFFFF]">
           <Providers>
             <main className="flex flex-1 flex-col">{children}</main>
           </Providers>
