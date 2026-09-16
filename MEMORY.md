@@ -1,6 +1,6 @@
 # MEMORY.md
 
-코드만 봐서는 알기 어려운 결정과 이유. 세부 흐름은 `ARCHITECTURE.md`, 디렉터리별 규칙은 `src/CLAUDE.md`/`public/CLAUDE.md` 참고.
+코드만 봐서는 알기 어려운 결정과 이유. 세부 흐름은 `ARCHITECTURE.md`, 디렉터리별 규칙은 `src/CLAUDE.md` 참고.
 
 ## 결정과 이유
 
@@ -35,6 +35,7 @@
   - 실제로 2026-08-18에 `AZALEA`/`AZALEA_KR`이 세 곳 모두 서버와 반대로 매핑돼 있었다. 서버 `displayName` 기준은 **`AZALEA_KR`=진달래, `AZALEA`=철쭉**이다(enum 이름만 보면 반대로 읽힌다). 아이콘도 `constants/map.ts`에서 함께 맞춰야 한다(`royal-azalea.svg`=철쭉).
   - 프로필 **조회**는 서버 `displayName`을 쓰고 **편집**은 이 하드코딩을 쓴다. 그래서 매핑이 틀리면 같은 유저의 관심 꽃이 두 화면에서 다르게 보인다. 그 시기에 잘못 저장된 데이터는 프론트 수정으로 되돌아가지 않는다.
 - **꽃 필터 목록은 서버 enum의 부분집합**: 서버는 15종인데 Figma 필터는 14종이다. 핑크뮬리는 필터에서 뺐지만 서버가 핀으로는 계속 내려주므로 `CATEGORY_ICON`에는 남겨야 한다(지도에는 정상 표시, 필터 항목으로만 안 뜸).
+- **`public/`에는 문서를 두지 않는다** (2026-09-16): `public/` 안의 파일은 Next가 그대로 서빙해서 `https://www.peakda.com/CLAUDE.md`, `/terms-prompt.md` 등이 운영에서 누구나 열리고 검색에 잡힐 수 있었다. 디렉터리 안내였던 public/CLAUDE.md 는 없앴고(`map-tile-sw.js` 규칙은 위 지도 로딩 항목과 `ARCHITECTURE.md`에 이미 있다), 약관 생성 프롬프트는 `src/app/Terms/_prompts/`로 옮겼다(`_` 폴더라 라우트도 안 된다).
 
 ## 자주 하는 작업
 
