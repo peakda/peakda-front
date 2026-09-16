@@ -195,7 +195,14 @@ export default function ProfileEditPage() {
             }
           }}
           disabled={!isValidNickname(nickname) || isPending}
-          message="닉네임을 작성해주세요"
+          // 형식이 틀리면 버튼이 잠기므로 안내하지 않는다 (규칙은 description 에 이미 노출)
+          message={
+            isNicknameVerified
+              ? '사용 가능한 닉네임이에요.'
+              : isValidNickname(nickname)
+                ? '중복확인을 해주세요.'
+                : undefined
+          }
           error={message}
           isAvailable={isNicknameVerified}
           isError={isError}

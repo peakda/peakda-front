@@ -103,7 +103,11 @@ export const InputFiled = ({
       </div>
 
       {error && !isAvailable && <p className="text-sm text-rose-500">{error}</p>}
-      {!error && message && isMesssage && <p className="text-sm text-[#4E5666]">{message}</p>}
+      {!error && message && isMesssage && (
+        <p className={cn('text-sm', isAvailable ? 'text-green-500' : 'text-[#4E5666]')}>
+          {message}
+        </p>
+      )}
     </div>
   )
 }
