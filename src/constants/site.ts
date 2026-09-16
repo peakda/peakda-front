@@ -4,7 +4,8 @@ import type { Metadata } from 'next'
 export const SITE_URL = 'https://www.peakda.com'
 export const SITE_NAME = 'Peakda'
 export const SITE_TITLE = 'Peakda | 계절 여행 타이밍'
-export const SITE_DESCRIPTION = '벚꽃·단풍 등 20여 개 계절 명소의 실시간 개화 상태를 확인하세요.'
+export const SITE_DESCRIPTION =
+  '계절 명소의 타이밍을 한눈에. 벚꽃·유채꽃·철쭉·수국·단풍·억새까지, 지금 이 순간 가장 예쁜 곳을 Peakda에서 확인하세요.'
 
 // app/opengraph-image.tsx 가 만드는 기본 공유 카드 주소 (metadataBase 기준으로 절대 URL 이 된다).
 // 페이지가 openGraph 를 직접 정의하면 이 파일 기반 이미지를 상속하지 않아 og:image 가 빠지므로 명시해서 쓴다.

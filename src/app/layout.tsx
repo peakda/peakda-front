@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   applicationName: SITE_NAME,
   title: {
     default: SITE_TITLE,
-    template: 'Peakda | %s',
+    template: '%s | Peakda',
   },
   description: SITE_DESCRIPTION,
   keywords: ['벚꽃', '단풍', '꽃구경', '계절여행', '개화시기', '피크다'],

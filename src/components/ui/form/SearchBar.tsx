@@ -25,7 +25,7 @@ export const SearchBar = ({
     <div className={cn('absolute top-12 z-10 w-full px-4 py-1', className)}>
       <div className="border-border-primary bg-bg-primary-80 flex items-center gap-2 rounded-4xl border px-4 py-1.5 backdrop-blur-[8px]">
         <Image src="/icons/search.svg" alt="검색" width={24} height={24} />
-        <div className="flex flex-1 flex-col gap-0.5">
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <input
             type="text"
             placeholder={placeholder}
@@ -33,8 +33,11 @@ export const SearchBar = ({
             onClick={() => router.push('/search')}
             className="placeholder:text-text-primary w-full cursor-pointer bg-transparent text-base leading-tight font-medium text-text-primary outline-none "
           />
+          {/* 서버 추천 문구는 명소명 길이에 따라 길어져, 검색바 높이가 흔들리지 않게 한 줄로 자른다 */}
           {description && (
-            <p className="text-xs leading-tight tracking-tight text-[#4E5666]">{description}</p>
+            <p className="truncate text-xs leading-tight tracking-tight text-[#4E5666]">
+              {description}
+            </p>
           )}
         </div>
         <button type="button" className="relative cursor-pointer" onClick={onFilterClick}>
