@@ -38,23 +38,31 @@ export function PinText({
 
   return (
     <div className="flex-1 p-4">
-      <div className="flex items-start justify-between">
-        <div>
-          {/* 메인 제목 */}
-          <div className="relative flex items-center gap-1">
-            {tag && <Tag text={tag} />}
-            <h3 className="text-base font-semibold text-gray-900">{title}</h3>
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          {/* 메인 제목. 명소·축제명이 길면 두 줄까지만 보이고, 태그는 첫 줄에 붙어 있게 한다. */}
+          <div className="relative flex items-start gap-1">
+            {tag && <Tag text={tag} className="mt-0.5 shrink-0 whitespace-nowrap" />}
+            <h3 className="line-clamp-2 min-w-0 text-base font-semibold wrap-anywhere break-keep text-gray-900">
+              {title}
+            </h3>
           </div>
 
           {/* 위치 정보 */}
           <div className="text-text-secondary mt-1 flex items-center gap-1">
-            <Image src={'/icons/Pin.svg'} alt="핀 이미지" width={20} height={20} />
-            <span className="text-text-secondary text-sm">{location}</span>
+            <Image
+              src={'/icons/Pin.svg'}
+              alt="핀 이미지"
+              width={20}
+              height={20}
+              className="shrink-0"
+            />
+            <span className="text-text-secondary truncate text-sm">{location}</span>
           </div>
         </div>
 
         {/* 찜/알림 버튼. 목록 행 전체가 상세로 가는 클릭 영역이라 버블링을 끊는다. */}
-        <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+        <div className="flex shrink-0 items-center gap-1" onClick={(e) => e.stopPropagation()}>
           <IconBtn size="md">
             <HeartBtn
               InitFavorite={isFavorite}

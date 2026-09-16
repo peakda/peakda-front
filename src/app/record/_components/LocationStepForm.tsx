@@ -139,22 +139,25 @@ export function LocationStepForm({
               >
                 {location}
               </button>
-              <div className="flex w-1/2 items-center justify-between rounded-2xl bg-green-50 p-1.5">
+              {/* 폭을 화면 비율로 고정하면 좁은 폰에서 문구·버튼이 세로로 꺾여 내용 폭에 맞춘다 */}
+              <div className="flex w-fit items-center gap-2 rounded-2xl bg-green-50 p-1.5">
                 <div className="flex items-center gap-1.5">
                   <span
                     className={cn(
-                      'h-2 w-2 rounded-full',
+                      'h-2 w-2 shrink-0 rounded-full',
                       category === '유명명소' ? 'bg-green-400' : 'bg-yellow-500'
                     )}
                   />
-                  <span className="text-text-secondary text-sm">{category}로 인식</span>
+                  <span className="text-text-secondary text-sm whitespace-nowrap">
+                    {category === '유명명소' ? '유명명소로' : '동네스팟으로'} 인식
+                  </span>
                 </div>
                 <Button
                   onClick={onToggleCategoryPicker}
                   size="sm"
                   variant="outlined"
                   color="default"
-                  className="bg-bg-primary text-text-secondary px-4 py-2 text-sm font-medium"
+                  className="bg-bg-primary text-text-secondary shrink-0 px-4 py-2 text-sm font-medium whitespace-nowrap"
                 >
                   변경
                 </Button>
