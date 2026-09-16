@@ -349,7 +349,7 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 
 ## 9. 진행 현황과 남은 일
 
-- 최종 갱신: 2026-09-14
+- 최종 갱신: 2026-09-16
 - 대표 도메인(canonical): `https://www.peakda.com`
 - DNS: AWS Route 53 (`peakda.com` 호스팅 영역, 백엔드 AWS 계정). `www` 는 Vercel CNAME
 
@@ -365,8 +365,8 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 | Phase 3 SEO — 스팟 상세 서버 렌더링(metadata·404·JSON-LD·예측 기준일 표시) | 커밋 `42848ee` | ❌ 미배포 |
 | Phase 3 SEO — 피드 상세 metadata·404 | 커밋 `c2ff423` | ❌ 미배포 |
 
-> 비로그인 공개 경로: `/`, `/map`, `/explore`, `/feed`, `/feed/[id]`, `/search`, `/spot/[id]`, `/spot/[id]/feed`, `/my`(비로그인용 빈 화면, noindex)
-> 로그인 필요(바텀시트): `/my/settings`, `/my/records`, `/my/saved`, `/record`, `/notification`, `/profile/edit`, `/followers`, `/following`, `/users`, `/festivals`, `/creators` — 목록은 `src/lib/auth/session.ts` `PROTECTED_PATHS`
+> 비로그인 공개 경로: `/`, `/map`, `/explore`, `/feed`, `/feed/[id]`, `/search`, `/spot/[id]`, `/spot/[id]/feed`, `/festivals/[id]`, `/creators/[id]`, `/my`(비로그인용 빈 화면, noindex)
+> 로그인 필요(바텀시트): `/my/settings`, `/my/records`, `/my/saved`, `/record`, `/notification`, `/profile/edit`, `/followers`, `/following`, `/users` — 목록은 `src/lib/auth/session.ts` `PROTECTED_PATHS`
 
 ### 9.2 외부 답변 대기 — 답이 오면 할 일
 
@@ -388,15 +388,13 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 - [ ] Google Search Console → 도메인 속성 `peakda.com` → **확인** 클릭
 - [ ] 백엔드에 "이 TXT 레코드는 지우면 소유권이 해제되니 유지" 전달
 
-#### B. [백엔드] 축제·큐레이션 상세 API 비로그인 허용 — ⚠️ 아직 요청 안 함
+#### B. [백엔드] 축제·큐레이션 상세 API 비로그인 허용 — dev 반영 확인 (2026-09-16), 운영 미확인
 
-`GET /api/festivals/{id}`, `GET /api/curations/{id}` 가 dev 스웨거에서 여전히 인증 필요. SEO 보고서 P0 대상인데 막혀 있다.
+요청은 `BACKEND_SEO_REQUESTS.md` 1번. 2026-09-16 dev 에 쿠키 없이 호출해 보니 이미 열려 있다 — `GET /api/festivals/1` `200`, `GET /api/curations` `200`, `GET /api/curations/1` `404 CURATION_NOT_FOUND`(dev 에 발행 큐레이션이 0건이라 실데이터 `200` 은 못 봤고, `401` 이 아니므로 인증은 통과한 것으로 판단).
+단 **dev 스웨거에는 `security` 표기가 그대로 남아 있어** `pnpm generate:api` 로는 바뀐 걸 알 수 없다.
 
-- [ ] `BACKEND_API_REQUESTS.md` 에 요청 추가 후 전달
-
-답변(공개 반영) 오면:
-- [ ] `pnpm generate:api` (api-dev 대상 — `MEMORY.md` 참고)로 `security` 제거 확인
-- [ ] `src/lib/auth/session.ts` `PROTECTED_PATHS` 에서 `/festivals`, `/creators` 제거
+- [ ] 백엔드에 확인: 의도된 공개인지, 운영(`api.peakda.com`) 반영 여부, 스웨거 `security` 표기 정리
+- [x] 2026-09-16 `src/lib/auth/session.ts` `PROTECTED_PATHS` 에서 `/festivals`, `/creators` 제거 — 운영 백엔드가 아직 막혀 있으면 비로그인 상세가 빈 화면이 되므로 **배포 전 위 확인 필요**
 - [ ] 축제 상세 서버 렌더링 + `generateMetadata` + `notFound()` + `Event` JSON-LD
 - [ ] 큐레이션 상세 서버 렌더링 + `generateMetadata`
 - [ ] sitemap 에 축제·큐레이션 URL 추가
@@ -436,7 +434,8 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 - [ ] 비로그인 첫 방문: `/` → 온보딩 → `/map`, 재방문: `/` → `/map`
 - [ ] 스팟 상세 찜·알림·방문 기록 남기기 → 바텀시트
 - [ ] 피드 반응·신고, 관심 식물·팔로잉 탭 → 바텀시트
-- [ ] 하단 탭 `+`·`My`, 탐색 축제·큐레이션 카드, 작성자 프로필 링크 → 이동 없이 바텀시트
+- [ ] 하단 탭 `+`·`My`, 작성자 프로필 링크 → 이동 없이 바텀시트
+- [ ] 탐색 축제·큐레이션 카드 → 바텀시트 없이 상세 화면으로 이동
 - [ ] 하단 탭 `My` → 비로그인용 마이 화면 ("로그인하고 시작해보세요"), 알림·설정·편집·전체·기록하기·팔로워 → 바텀시트
 - [ ] 주소창에 `/my/settings` 직접 입력 → `/map` + 바텀시트 (새로고침 시 다시 안 뜸)
 - [ ] 시트에서 구글·카카오·네이버 로그인 → 원래 가려던 화면으로 복귀

@@ -9,10 +9,9 @@ export const AUTH_MARKER_SET_EVENT = 'peakda:auth-marker-set'
 // 이 쿼리가 붙은 주소로 오면 로그인 바텀시트를 연다 (미들웨어가 막힌 경로를 /map?login=1 로 보낸다).
 export const LOGIN_SHEET_QUERY = 'login'
 
-// 비로그인은 홈·지도·탐색·검색·스팟·공개 피드를 둘러볼 수 있다. 아래 경로만 로그인이 필요하다.
+// 비로그인은 홈·지도·탐색·검색·스팟·공개 피드·축제·큐레이션을 둘러볼 수 있다. 아래 경로만 로그인이 필요하다.
 // - 기록 작성·마이 하위 화면·알림·팔로우 목록·프로필 수정: 내 계정이 있어야 의미가 있는 화면
-// - /users·/festivals·/creators: 백엔드 조회 API(/api/users/{id}, /api/festivals/{id}, /api/curations/{id})가
-//   아직 인증을 요구한다. 공개되면 여기서 빼면 된다 (BACKEND_API_REQUESTS.md)
+// - /users: 백엔드 조회 API(/api/users/{id})가 아직 인증을 요구한다. 공개되면 여기서 빼면 된다 (BACKEND_API_REQUESTS.md)
 // /my 자체는 비로그인에게 "로그인하고 시작해보세요" 화면을 보여주므로 넣지 않고 하위 화면만 막는다.
 // /profile(가입 중 프로필 설정)은 signup-token 만 있어 마커가 없는 상태로 거치므로 넣지 않는다.
 // robots.ts 도 이 목록으로 크롤링을 막는다.
@@ -26,8 +25,6 @@ export const PROTECTED_PATHS = [
   '/followers',
   '/following',
   '/users',
-  '/festivals',
-  '/creators',
 ]
 
 export function isProtectedPath(pathname: string): boolean {
