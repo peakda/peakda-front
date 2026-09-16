@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: FeedDetailPageProps): Promise
     // 기본 카드를 쓴다 (영구 URL 은 백엔드 요청 대기).
     openGraph: {
       ...BASE_OPEN_GRAPH,
-      title: `Peakda | ${title}`,
+      title: `${title} | Peakda`,
       description,
       url: path,
       images: [DEFAULT_OG_IMAGE],

@@ -4,7 +4,7 @@ import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from '@/constants/s
 import { toJsonLdScript } from '@/lib/utils/spotSeo'
 
 export const metadata: Metadata = {
-  // 레이아웃 템플릿('Peakda | %s')을 타면 'Peakda | Peakda | …' 가 되므로 그대로 쓴다.
+  // 레이아웃 템플릿('%s | Peakda')을 타면 'Peakda | … | Peakda' 로 브랜드가 두 번 붙으므로 그대로 쓴다.
   title: { absolute: SITE_TITLE },
   description: SITE_DESCRIPTION,
   alternates: { canonical: '/' },
@@ -21,7 +21,7 @@ const HOME_JSON_LD = {
       url: SITE_URL,
       logo: `${SITE_URL}/images/logo.png`,
       // 공식 SNS 계정. 검색엔진이 사이트와 같은 주체로 묶는다.
-      sameAs: ['https://www.instagram.com/peakda.official/'],
+      sameAs: ['https://www.instagram.com/peakda.official/', 'https://www.youtube.com/@peakda'],
     },
     {
       '@type': 'WebSite',

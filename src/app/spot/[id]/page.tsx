@@ -47,7 +47,7 @@ export async function generateMetadata({ params }: SpotDetailPageProps): Promise
     alternates: { canonical: path },
     openGraph: {
       ...BASE_OPEN_GRAPH,
-      title: `Peakda | ${title}`,
+      title: `${title} | Peakda`,
       description,
       url: path,
       images: [{ url: image ?? DEFAULT_OG_IMAGE, alt: spot.name }],
