@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Advent_Pro } from 'next/font/google'
+import { GoogleAnalytics } from '@next/third-parties/google'
 import './globals.css'
 import { Providers } from '@/app/_components/Providers'
 import {
@@ -19,6 +20,11 @@ const adventPro = Advent_Pro({
   variable: '--font-advent-pro',
   display: 'swap',
 })
+
+// GA4 측정 ID. 페이지 HTML 에 공개되는 값이라 비밀이 아니다.
+// 로컬·프리뷰 접속이 통계에 섞이지 않도록 Vercel 운영(Production) 배포에서만 태그를 넣는다.
+const GA_MEASUREMENT_ID = 'G-S4E3S38N32'
+const isProductionDeploy = process.env.VERCEL_ENV === 'production'
 
 // canonical 은 여기서 정하지 않는다 — 전역에 두면 모든 페이지가 루트를 canonical 로 가리킨다. 페이지별로 둔다.
 // 기본 공유 이미지는 app/opengraph-image.tsx 가 자동으로 붙는다.
@@ -83,6 +89,7 @@ export default function RootLayout({
             <main className="flex flex-1 flex-col">{children}</main>
           </Providers>
         </div>
+        {isProductionDeploy && <GoogleAnalytics gaId={GA_MEASUREMENT_ID} />}
       </body>
     </html>
   )
