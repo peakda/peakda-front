@@ -87,6 +87,8 @@ function parseIntField(value: unknown): number | null {
 
 export interface PushNotificationTarget {
   notificationId: number | null
+  /** 알 수 없는 값이면 null. 이동과 무관하고 푸시 클릭 집계(push_open)에 쓴다 */
+  type: NotificationResponse['type'] | null
   link: NotificationLink | null
 }
 
@@ -98,7 +100,7 @@ export function resolvePushNotificationTarget(data: unknown): PushNotificationTa
   const { type, linkType, linkUrl } = record
 
   if (!isNotificationType(type) || !isLinkType(linkType)) {
-    return { notificationId, link: null }
+    return { notificationId, type: isNotificationType(type) ? type : null, link: null }
   }
 
   const link = toNotificationHref({
@@ -108,7 +110,7 @@ export function resolvePushNotificationTarget(data: unknown): PushNotificationTa
     linkUrl: typeof linkUrl === 'string' ? linkUrl : null,
   })
 
-  return { notificationId, link }
+  return { notificationId, type, link }
 }
 
 // 탭 value → 알림 세그먼트

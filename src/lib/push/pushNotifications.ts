@@ -5,6 +5,7 @@ import {
   type PushNotificationSchema,
 } from '@capacitor/push-notifications'
 import { registerDeviceApi, unregisterDeviceApi } from '@/api/facades/device'
+import { track } from '@/lib/analytics'
 
 const CHANNEL_ID = 'peakda-default'
 
@@ -76,6 +77,8 @@ export async function requestAndStartPushNotifications(
   if (permission.receive === 'prompt' || permission.receive === 'prompt-with-rationale') {
     permission = await PushNotifications.requestPermissions()
   }
+  // 설정에서 푸시를 켤 때마다 보낸다 — 시스템에서 거부해 둔 사용자는 denied 로 남는다.
+  track('push_permission', { result: permission.receive })
   if (permission.receive !== 'granted') return false
 
   return register(callbacks)

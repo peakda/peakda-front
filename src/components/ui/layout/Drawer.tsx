@@ -17,6 +17,7 @@ import { useFilterStore } from '@/stores/useFilterStore'
 import { spotPreviewApi } from '@/api/facades/spot'
 import { toPinListItems } from '@/lib/utils/spotPreview'
 import { timingToStatus } from '@/lib/utils/timing'
+import { track } from '@/lib/analytics'
 import { toast } from 'sonner'
 
 // 필터 시트와 날짜 선택 달력은 드로어 중 가장 무거운 두 덩어리인데, <Drawer /> 를 올리는
@@ -124,6 +125,12 @@ export function Drawer() {
 
   // 하단 버튼 → 필터 커밋. 지도 조회가 끝나야 목록을 열 수 있어 대기 플래그를 세운다.
   const handleApplyFilter = () => {
+    const { draft } = useFilterStore.getState()
+    track('map_filter_apply', {
+      region: draft.region ?? 'all',
+      timing: draft.timing ?? 'all',
+      categories: draft.categories.length > 0 ? draft.categories.join(',') : 'all',
+    })
     applyDraft()
 
     // 탐색 화면의 꽃 필터는 뒤에 지도가 없어 보여줄 핀 목록이 없다. 적용만 하고 닫는다.

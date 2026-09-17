@@ -23,6 +23,7 @@ import { useUnreadNotificationCount } from '@/api/facades/notification'
 import { spotPreviewApi } from '@/api/facades/spot'
 import { toPinListItems } from '@/lib/utils/spotPreview'
 import { bloomToMapSpots } from '@/lib/utils/bloomToMapSpots'
+import { track } from '@/lib/analytics'
 import { REGION_MAP_CENTERS } from '@/constants/region'
 import { STAGE_LABEL } from '@/constants/map'
 import type { GetSeasonalBloomsParams } from '@/api/facades/generated/peakdaApi.schemas'
@@ -295,6 +296,7 @@ export const MapContainer = () => {
     async (spot: MapSpot) => {
       try {
         if (spot.spotId != null) {
+          track('map_pin_click', { spot_id: spot.spotId })
           const center = mapInstance?.getCenter()
           const preview = await spotPreviewApi([spot.spotId], {
             coords: center ? { lat: center.getLat(), lng: center.getLng() } : null,
