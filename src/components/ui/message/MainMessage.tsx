@@ -18,7 +18,7 @@ export function MainMessage() {
         Peakda
       </h1>
       <p className="text-text-secondary text-center font-sans text-base font-semibold tracking-tight">
-        피크다와 함께, 지금 이 순간 가장 예쁜 여행지
+        지금 이 순간 가장 예쁜 여행지
       </p>
     </div>
   )
