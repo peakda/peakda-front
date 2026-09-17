@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { Bell, Heart, MapPin } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
 import { Header } from '@/components/ui/layout/Header'
@@ -18,6 +19,7 @@ import { toFeedCardProps } from '@/lib/utils/spotRecordToFeed'
 import { useSpotDetail } from '@/api/facades/spot'
 import { useBloomCalendar } from '@/api/facades/seasonal-bloom'
 import { useRemoveFavorite, useUpdateFavoriteNotify } from '@/api/facades/spot-favorite'
+import { track } from '@/lib/analytics'
 import { getGetSpotsByIdQueryKey } from '@/api/facades/generated/spot/spot'
 import type { SpotDetailResponse } from '@/api/facades/generated/peakdaApi.schemas'
 import { buildRecordUrl } from '@/lib/utils/spotCta'
@@ -48,6 +50,20 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
   const removeFavorite = useRemoveFavorite()
   const updateNotify = useUpdateFavoriteNotify()
   const requireLogin = useRequireLogin()
+
+  // 상세 진입 1회. "지금 가기 좋은 곳"에 더 반응하는지 보려고 개화 단계를 같이 보낸다.
+  // 개화 정보는 사용자와 무관해 서버 응답(initialSpot) 값으로 충분하다.
+  const spotType = initialSpot.type
+  const bloomCategory = initialSpot.bloom?.category
+  const bloomStatus = initialSpot.bloom?.status
+  useEffect(() => {
+    track('spot_view', {
+      spot_id: id,
+      spot_type: spotType,
+      bloom_category: bloomCategory,
+      bloom_status: bloomStatus,
+    })
+  }, [id, spotType, bloomCategory, bloomStatus])
 
   // 서버 응답에는 사용자 쿠키가 없어 찜·알림이 항상 false 다. 클라이언트가 쿠키를 실어 다시 조회해 덮어쓰고,
   // 그 전까지(또는 재조회 실패 시)는 서버 값을 그대로 보여준다.

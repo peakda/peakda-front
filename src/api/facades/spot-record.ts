@@ -24,6 +24,7 @@ import type {
   UpdateSpotRecordRequest,
 } from '@/api/facades/generated/peakdaApi.schemas'
 import { PAGE_SIZE, nextPageParam } from '@/api/facades/pagination'
+import { track } from '@/lib/analytics'
 
 // 언랩 규칙: res.data (Orval 래퍼) → res.data.data (백엔드 실제 payload)
 
@@ -116,7 +117,13 @@ export const useCreateSpotRecord = () => {
   const queryClient = useQueryClient()
   return useCreateGen({
     mutation: {
-      onSuccess: (res) => {
+      onSuccess: (res, { data }) => {
+        track('record_create', {
+          spot_id: res.data.data?.spot.id,
+          spot_type: data.spotInput.type,
+          bloom_stage: data.bloomStage ?? undefined,
+          photo_count: data.photoKeys?.length ?? 0,
+        })
         recordListKeys.forEach((queryKey) => queryClient.invalidateQueries({ queryKey }))
         invalidateSpotDetail(queryClient, res.data.data?.spot.id)
         invalidateBloomMap(queryClient)

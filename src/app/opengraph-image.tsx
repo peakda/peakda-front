@@ -6,7 +6,7 @@ import { ImageResponse } from 'next/og'
 // next/og 기본 폰트에 한글 글리프가 없어 문구는 영문만 쓴다.
 // next/og(Satori)는 className 을 해석하지 못해 이 파일에서만 style 속성을 쓴다.
 
-export const alt = 'Peakda — 계절 여행 타이밍'
+export const alt = '피크다 Peakda — 계절 명소 개화·절정 타이밍'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 

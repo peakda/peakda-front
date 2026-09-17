@@ -2,6 +2,7 @@
 
 import { getGetAuthMeUrl } from '@/api/facades/generated/auth/auth'
 import { MainMessage } from '@/components/ui/message/MainMessage'
+import { track } from '@/lib/analytics'
 import { setAuthMarker, takeReturnTo } from '@/lib/auth/session'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
@@ -20,6 +21,8 @@ export default function AuthCallbackPage() {
           return
         }
         setAuthMarker()
+        // 신규 유저는 약관·가입을 마친 뒤 sign_up 으로 따로 잡힌다.
+        track('login', {})
         router.replace(takeReturnTo() ?? '/map')
       })
       .catch(() => router.replace('/Terms'))

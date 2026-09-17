@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQueryClient } from '@tanstack/react-query'
 import { markNotificationReadApi } from '@/api/facades/notification'
+import { track } from '@/lib/analytics'
 import { AUTH_MARKER_SET_EVENT, hasAuthMarker } from '@/lib/auth/session'
 import { APP_SETTINGS_CHANGED_EVENT, loadAppSettings } from '@/lib/utils/appSettings'
 import { startPushNotifications } from '@/lib/push/pushNotifications'
@@ -29,7 +30,11 @@ export function PushNotificationManager() {
           void invalidateNotifications()
         },
         onNotificationAction: (action) => {
-          const { notificationId, link } = resolvePushNotificationTarget(action.notification.data)
+          const { notificationId, type, link } = resolvePushNotificationTarget(
+            action.notification.data
+          )
+          // 발송 수는 GA 가 모르므로 클릭률은 백엔드 발송 수와 나눠 본다.
+          track('push_open', { notification_type: type ?? undefined })
 
           if (notificationId != null) {
             markNotificationReadApi(notificationId)

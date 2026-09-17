@@ -5,8 +5,10 @@ import './globals.css'
 import { Providers } from '@/app/_components/Providers'
 import {
   BASE_OPEN_GRAPH,
+  DEFAULT_OG_IMAGE,
+  SITE_BRAND_NAME,
   SITE_DESCRIPTION,
-  SITE_NAME,
+  SITE_KEYWORDS,
   SITE_TITLE,
   SITE_URL,
 } from '@/constants/site'
@@ -27,16 +29,16 @@ const GA_MEASUREMENT_ID = 'G-S4E3S38N32'
 const isProductionDeploy = process.env.VERCEL_ENV === 'production'
 
 // canonical 은 여기서 정하지 않는다 — 전역에 두면 모든 페이지가 루트를 canonical 로 가리킨다. 페이지별로 둔다.
-// 기본 공유 이미지는 app/opengraph-image.tsx 가 자동으로 붙는다.
+// 기본 공유 이미지는 모든 페이지가 같은 영구 URL 을 쓰도록 명시한다.
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  applicationName: SITE_NAME,
+  applicationName: SITE_BRAND_NAME,
   title: {
     default: SITE_TITLE,
-    template: '%s | Peakda',
+    template: `%s | ${SITE_BRAND_NAME}`,
   },
   description: SITE_DESCRIPTION,
-  keywords: ['벚꽃', '단풍', '꽃구경', '계절여행', '개화시기', '피크다'],
+  keywords: SITE_KEYWORDS,
   icons: {
     icon: '/icons/favicon-32.png',
     shortcut: '/icons/favicon-32.png',
@@ -46,6 +48,7 @@ export const metadata: Metadata = {
     ...BASE_OPEN_GRAPH,
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
+    images: [{ url: DEFAULT_OG_IMAGE, alt: `${SITE_BRAND_NAME} — 계절 명소 개화·절정 타이밍` }],
   },
   twitter: {
     card: 'summary_large_image',
