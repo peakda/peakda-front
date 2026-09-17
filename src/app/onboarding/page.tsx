@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
 import { STEPS } from '@/constants'
+import { SITE_DESCRIPTION } from '@/constants/site'
 import { OnboardingCarousel } from './_components/OnboardingCarousel'
 
 export const metadata: Metadata = {
-  title: '온보딩',
-  description: '피크다와 함께 계절 여행 타이밍을 놓치지 마세요.',
+  title: { absolute: '피크다 Peakda 시작하기' },
+  description: SITE_DESCRIPTION,
+  robots: { index: false, follow: false },
 }
 
 export default function OnboardingPage() {
