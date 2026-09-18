@@ -2,11 +2,12 @@
 
 import Image from 'next/image'
 import { useParams, useRouter } from 'next/navigation'
-import { Calendar, Clock, Globe, MapPin, Ticket } from 'lucide-react'
+import { AlertCircle, Calendar, Clock, Globe, MapPin, Ticket } from 'lucide-react'
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { Button } from '@/components/ui/button/Button'
 import { CardBadge } from '@/components/ui/card/CardBadge'
+import { cn } from '@/lib/utils/cn'
 import { useFestivalDetail } from '@/api/facades/festival'
 import { buildMapUrl } from '@/lib/utils/spotCta'
 import { FESTIVAL_PHASE_LABEL as PHASE_LABEL } from '@/lib/utils/explore'
@@ -97,12 +98,8 @@ export default function FestivalDetailPage() {
     : null
   const place = festival.roadAddress ?? festival.venue
   const highlights = [...(editorial?.highlights ?? [])].sort((a, b) => a.sortOrder - b.sortOrder)
-  const notices = [
-    ...toLines(editorial?.caution),
-    ...toLines(editorial?.cautionNote),
-    ...toLines(editorial?.directionsTransit),
-    ...toLines(editorial?.directionsCar),
-  ]
+  const transitLines = toLines(editorial?.directionsTransit)
+  const carLines = toLines(editorial?.directionsCar)
 
   return (
     <div className="bg-bg-primary relative flex min-h-screen flex-col pb-28">
@@ -119,16 +116,12 @@ export default function FestivalDetailPage() {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70" />
 
-        <div className="absolute top-3 right-3 left-3 flex items-center justify-between">
+        <div className="absolute right-0 bottom-0 left-0 flex flex-col gap-1.5 p-4">
           <div className="flex items-center gap-1">
+            {period && <CardBadge label={period} variant="dark" />}
             {phaseLabel && <CardBadge label={phaseLabel} variant="bloom" />}
-            {/* 축제명으로 판정한 꽃 카테고리 (없으면 null) */}
-            {festival.displayName && <CardBadge label={festival.displayName} variant="dark" />}
+            {dDayLabel && <CardBadge label={dDayLabel} variant="dark" />}
           </div>
-          {dDayLabel && <CardBadge label={dDayLabel} variant="dark" />}
-        </div>
-
-        <div className="absolute right-0 bottom-0 left-0 flex flex-col gap-1 p-4">
           <h1 className="text-xl font-bold text-white">{festival.name}</h1>
           <span className="flex items-center gap-1 text-sm text-white/80">
             <MapPin className="h-3.5 w-3.5 shrink-0" />
@@ -143,45 +136,57 @@ export default function FestivalDetailPage() {
           <p className="text-text-secondary text-sm leading-[1.5]">{editorial.hook}</p>
         )}
 
-        {/* 기간 / 장소 / 요금 / 시간 — 값이 없는 행은 렌더하지 않는다 */}
-        <div className="flex flex-col gap-3">
-          {period && (
+        {/* 핵심 정보: 기간 / 장소 / 요금 / 시간 / 주의사항 — 값이 없는 행은 렌더하지 않는다 */}
+        <div className="flex flex-col gap-2">
+          <h2 className="text-text-primary text-base font-semibold">핵심 정보</h2>
+          <div className="divide-border-primary flex flex-col divide-y divide-dashed">
+            {period && (
+              <InfoRow
+                icon={<Calendar className="h-4 w-4" />}
+                label="기간"
+                value={period}
+                note={editorial?.periodNote}
+              />
+            )}
             <InfoRow
-              icon={<Calendar className="h-4 w-4" />}
-              label="기간"
-              value={period}
-              note={editorial?.periodNote}
+              icon={<MapPin className="h-4 w-4" />}
+              label="장소"
+              value={place}
+              note={editorial?.placeNote}
             />
-          )}
-          <InfoRow
-            icon={<MapPin className="h-4 w-4" />}
-            label="장소"
-            value={place}
-            note={editorial?.placeNote}
-          />
-          {editorial?.admissionFee && (
-            <InfoRow
-              icon={<Ticket className="h-4 w-4" />}
-              label="요금"
-              value={editorial.admissionFee}
-              note={editorial.admissionFeeNote}
-            />
-          )}
-          {editorial?.operatingHours && (
-            <InfoRow
-              icon={<Clock className="h-4 w-4" />}
-              label="시간"
-              value={editorial.operatingHours}
-              note={editorial.operatingHoursNote}
-            />
-          )}
+            {editorial?.admissionFee && (
+              <InfoRow
+                icon={<Ticket className="h-4 w-4" />}
+                label="요금"
+                value={editorial.admissionFee}
+                note={editorial.admissionFeeNote}
+              />
+            )}
+            {editorial?.operatingHours && (
+              <InfoRow
+                icon={<Clock className="h-4 w-4" />}
+                label="시간"
+                value={editorial.operatingHours}
+                note={editorial.operatingHoursNote}
+              />
+            )}
+            {editorial?.caution && (
+              <InfoRow
+                icon={<AlertCircle className="h-4 w-4" />}
+                label="주의"
+                value={editorial.caution}
+                note={editorial.cautionNote}
+                tone="warning"
+              />
+            )}
+          </div>
         </div>
       </div>
 
-      {/* 주요 프로그램 */}
+      {/* 주요 볼거리 */}
       {highlights.length > 0 && (
         <div className="border-border-primary flex flex-col gap-2 border-t px-4 py-4">
-          <h2 className="text-text-primary text-base font-semibold">주요 프로그램</h2>
+          <h2 className="text-text-primary text-base font-semibold">주요 볼거리</h2>
           <ul className="flex flex-col gap-2">
             {highlights.map((highlight) => (
               <li key={highlight.sortOrder} className="flex items-start gap-2">
@@ -196,17 +201,30 @@ export default function FestivalDetailPage() {
         </div>
       )}
 
-      {/* 유의사항 */}
-      {notices.length > 0 && (
-        <div className="px-4 py-4">
-          <h2 className="text-text-primary mb-2 text-base font-semibold">유의사항</h2>
-          <div className="bg-bg-secondary flex flex-col gap-1 rounded-xl p-3">
-            {notices.map((line) => (
-              <p key={line} className="text-text-tertiary text-xs leading-[1.5]">
-                {line}
-              </p>
-            ))}
-          </div>
+      {/* 오시는 방법 */}
+      {(transitLines.length > 0 || carLines.length > 0) && (
+        <div className="border-border-primary flex flex-col gap-3 border-t px-4 py-4">
+          <h2 className="text-text-primary text-base font-semibold">오시는 방법</h2>
+          {transitLines.length > 0 && (
+            <div className="flex flex-col gap-1">
+              <span className="text-text-primary text-sm font-medium">대중교통</span>
+              {transitLines.map((line) => (
+                <p key={line} className="text-text-secondary text-sm leading-[1.5]">
+                  {line}
+                </p>
+              ))}
+            </div>
+          )}
+          {carLines.length > 0 && (
+            <div className="flex flex-col gap-1">
+              <span className="text-text-primary text-sm font-medium">자가 차량</span>
+              {carLines.map((line) => (
+                <p key={line} className="text-text-secondary text-sm leading-[1.5]">
+                  {line}
+                </p>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -247,18 +265,30 @@ function InfoRow({
   label,
   value,
   note,
+  tone = 'default',
 }: {
   icon: React.ReactNode
   label: string
   value: string
   note?: string | null
+  tone?: 'default' | 'warning'
 }) {
+  const isWarning = tone === 'warning'
   return (
-    <div className="flex items-start gap-2">
-      <span className="text-text-tertiary mt-0.5 shrink-0">{icon}</span>
+    <div className="flex items-start gap-2 py-3 first:pt-0 last:pb-0">
+      <span className={cn('mt-0.5 shrink-0', isWarning ? 'text-warning' : 'text-text-tertiary')}>
+        {icon}
+      </span>
       <span className="text-text-tertiary w-10 shrink-0 text-sm">{label}</span>
       <div className="flex flex-1 flex-col gap-0.5">
-        <span className="text-text-primary text-sm leading-[1.5]">{value}</span>
+        <span
+          className={cn(
+            'text-sm leading-[1.5]',
+            isWarning ? 'text-warning font-medium' : 'text-text-primary'
+          )}
+        >
+          {value}
+        </span>
         {note && <span className="text-text-tertiary text-xs leading-[1.5]">{note}</span>}
       </div>
     </div>
