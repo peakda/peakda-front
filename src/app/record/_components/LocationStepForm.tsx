@@ -16,16 +16,25 @@ export interface PhotoItem {
   previewUrl: string
 }
 
+// 수정 화면은 이미 올라간 사진(서버 url)과 새로 고른 사진(blob url)을 섞어 보여 준다.
+// 이 폼은 미리보기만 그리므로 previewUrl 만 있으면 된다.
+interface PhotoPreview {
+  previewUrl: string
+}
+
 interface LocationStepFormProps {
   location: string
-  hasLocation: boolean
   category: Category
-  showCategoryPicker: boolean
-  onToggleCategoryPicker: () => void
-  onSelectCategory: (category: Category) => void
-  onOpenSearch: () => void
-  onLocationChange: Dispatch<SetStateAction<string>>
-  photoItems: PhotoItem[]
+  // 수정 화면에서는 스팟을 바꿀 수 없다 — PATCH /api/spots/records/{id} 가 스팟 교체를 받지 않는다.
+  // 위치는 그대로 보여 주고 검색·분류 변경 입구만 닫으며, 헤더·안내 문구도 수정용으로 바뀐다.
+  // 아래 검색·분류 관련 props 는 작성 화면에서만 쓴다.
+  isEdit?: boolean
+  showCategoryPicker?: boolean
+  onToggleCategoryPicker?: () => void
+  onSelectCategory?: (category: Category) => void
+  onOpenSearch?: () => void
+  onLocationChange?: Dispatch<SetStateAction<string>>
+  photoItems: PhotoPreview[]
   onPhotoAdd: (e: React.ChangeEvent<HTMLInputElement>) => void
   onRemovePhoto: (index: number) => void
   fileInputRef: React.RefObject<HTMLInputElement | null>
@@ -37,13 +46,13 @@ interface LocationStepFormProps {
 
 export function LocationStepForm({
   location,
-  hasLocation,
   category,
-  showCategoryPicker,
-  onToggleCategoryPicker,
-  onSelectCategory,
-  onOpenSearch,
-  onLocationChange,
+  isEdit = false,
+  showCategoryPicker = false,
+  onToggleCategoryPicker = () => {},
+  onSelectCategory = () => {},
+  onOpenSearch = () => {},
+  onLocationChange = () => {},
   photoItems,
   onPhotoAdd,
   onRemovePhoto,
@@ -53,12 +62,16 @@ export function LocationStepForm({
   isValid,
   onNext,
 }: LocationStepFormProps) {
+  const hasLocation = location.trim().length > 0
+
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <div className="h-14">
         <Header
           left={<LeftArrow />}
-          center={<span className="text-[15px] font-medium">스팟 기록</span>}
+          center={
+            <span className="text-[15px] font-medium">{isEdit ? '기록 수정' : '스팟 기록'}</span>
+          }
         />
       </div>
 
@@ -68,9 +81,13 @@ export function LocationStepForm({
 
       <div className="flex flex-1 flex-col gap-6 pt-6">
         <div className="flex flex-col gap-1 px-4">
-          <h2 className="text-xl font-semibold">어디에 있는 스팟인가요?</h2>
+          <h2 className="text-xl font-semibold">
+            {isEdit ? '사진과 날짜를 확인해주세요' : '어디에 있는 스팟인가요?'}
+          </h2>
           <p className="text-text-tertiary text-sm">
-            스팟의 위치와 사진, 다녀온 날짜를 알려주세요.
+            {isEdit
+              ? '사진을 추가하거나 빼고, 다녀온 날짜를 고칠 수 있어요.'
+              : '스팟의 위치와 사진, 다녀온 날짜를 알려주세요.'}
           </p>
         </div>
 
@@ -135,6 +152,7 @@ export function LocationStepForm({
             <div className="flex flex-col gap-2 px-4">
               <button
                 onClick={onOpenSearch}
+                disabled={isEdit}
                 className="bg-bg-secondary border-border-secondary text-text-primary flex h-12 w-full items-center rounded-3xl border px-4 text-left text-base"
               >
                 {location}
@@ -152,15 +170,17 @@ export function LocationStepForm({
                     {category === '유명명소' ? '유명명소로' : '동네스팟으로'} 인식
                   </span>
                 </div>
-                <Button
-                  onClick={onToggleCategoryPicker}
-                  size="sm"
-                  variant="outlined"
-                  color="default"
-                  className="bg-bg-primary text-text-secondary shrink-0 px-4 py-2 text-sm font-medium whitespace-nowrap"
-                >
-                  변경
-                </Button>
+                {!isEdit && (
+                  <Button
+                    onClick={onToggleCategoryPicker}
+                    size="sm"
+                    variant="outlined"
+                    color="default"
+                    className="bg-bg-primary text-text-secondary shrink-0 px-4 py-2 text-sm font-medium whitespace-nowrap"
+                  >
+                    변경
+                  </Button>
+                )}
               </div>
               {showCategoryPicker && (
                 <div className="flex flex-col gap-2">

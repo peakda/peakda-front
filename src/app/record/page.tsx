@@ -282,7 +282,6 @@ function RecordPageContent() {
   return (
     <LocationStepForm
       location={location}
-      hasLocation={hasLocation}
       category={category}
       showCategoryPicker={showCategoryPicker}
       onToggleCategoryPicker={() => setShowCategoryPicker((v) => !v)}
