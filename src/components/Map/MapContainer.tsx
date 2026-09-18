@@ -23,6 +23,7 @@ import { useUnreadNotificationCount } from '@/api/facades/notification'
 import { spotPreviewApi } from '@/api/facades/spot'
 import { toPinListItems } from '@/lib/utils/spotPreview'
 import { bloomToMapSpots } from '@/lib/utils/bloomToMapSpots'
+import { readMapView, rememberMapView } from '@/lib/utils/mapViewHistory'
 import { track } from '@/lib/analytics'
 import { REGION_MAP_CENTERS } from '@/constants/region'
 import { STAGE_LABEL } from '@/constants/map'
@@ -145,10 +146,10 @@ function panToCurrentLocation(map: kakao.maps.Map, onPermissionDenied?: () => vo
   )
 }
 
-const initMap = (container: HTMLElement, center: { lat: number; lng: number }) => {
+const initMap = (container: HTMLElement, center: { lat: number; lng: number }, level: number) => {
   const map = new kakao.maps.Map(container, {
     center: new kakao.maps.LatLng(center.lat, center.lng),
-    level: INITIAL_LEVEL,
+    level,
     maxLevel: 13,
     draggable: true,
     scrollwheel: true,
@@ -369,12 +370,23 @@ export const MapContainer = () => {
     // 화면 안 개수는 이미 받아 둔 데이터로 세므로 조회와 달리 지연시키지 않는다.
     const syncViewport = () => setViewport(mapBox(mapInstance))
 
+    // 상세로 나갔다 뒤로 돌아왔을 때 보던 자리로 되살리기 위해, 정착할 때마다 남겨 둔다.
+    const saveView = () => {
+      const center = mapInstance.getCenter()
+      rememberMapView({
+        lat: center.getLat(),
+        lng: center.getLng(),
+        level: mapInstance.getLevel(),
+      })
+    }
+
     const updateBbox = () =>
       applyBbox(snapBbox(mapBox(mapInstance), mapInstance.getLevel(), appliedRegionRef.current))
 
     let timer: ReturnType<typeof setTimeout>
     const onIdle = () => {
       syncViewport()
+      saveView()
       clearTimeout(timer)
       timer = setTimeout(() => {
         updateBbox()
@@ -388,6 +400,7 @@ export const MapContainer = () => {
     }
 
     syncViewport()
+    saveView() // idle 전에 핀을 눌러 나가도 위치가 남아 있도록 한 번 기록
     updateBbox() // 첫 진입은 즉시 조회
     kakao.maps.event.addListener(mapInstance, 'idle', onIdle)
     return () => {
@@ -470,13 +483,16 @@ export const MapContainer = () => {
 
     let map = mapRef.current
     if (!map) {
-      const center = initialCenter ?? DEFAULT_CENTER
-      map = initMap(containerRef.current, center)
+      // 이 히스토리 엔트리에 값이 있다는 건 여기서 지도를 보다가 상세로 갔다 돌아왔다는 뜻이라
+      // 쿼리 좌표보다 우선한다. ?lat/?lng 는 그 화면에 '처음' 들어올 때만 의미가 있다.
+      const savedView = readMapView()
+      const center = savedView ?? initialCenter ?? DEFAULT_CENTER
+      map = initMap(containerRef.current, center, savedView?.level ?? INITIAL_LEVEL)
       mapRef.current = map
       setMapInstance(map)
 
-      // 쿼리 좌표로 들어온 경우엔 현재 위치로 튕기지 않는다.
-      if (!initialCenter) panToCurrentLocation(map)
+      // 보던 위치로 되살렸거나 쿼리 좌표로 들어온 경우엔 현재 위치로 튕기지 않는다.
+      if (!savedView && !initialCenter) panToCurrentLocation(map)
     }
 
     // SDK 준비와 실제 지도 표시 완료는 다르다. 첫 타일이 모두 그려질 때까지
