@@ -83,6 +83,106 @@ Capacitor 안드로이드 앱은 네이티브 FCM 토큰을 기존
 
 ---
 
+---
+
+## 2026-09-20 요청 2건
+
+| # | 내용 | 급한 정도 |
+|---|---|---|
+| 14 | 기록 `bloomStage` 에 '개화 전' 추가 (PR #104 후속) | 보통 — 프런트는 4개 버튼으로 동작 중 |
+| 15 | 사진 URL이 매번 바뀌어 이미지 CDN 요금 발생 | **긴급 — 이미 이미지가 깨졌습니다** |
+
+### 14. 기록 `bloomStage` 에도 '개화 전' 을 추가해 주실 수 있을까요 (PR #104 후속)
+
+PR #104 로 조회축 `BloomStatus` 가 `BEFORE_SEASON` 을 포함한 5단계가 됐습니다. 프론트도 지도 핀·카드 뱃지를 5단계로 넓히는 중입니다. 그런데 **기록축 `bloomStage` 는 4값 그대로**라 두 가지가 걸립니다.
+
+**1) 기록 폼에 '개화 전' 버튼을 만들 수 없습니다**
+
+디자인의 개화 단계는 5개인데 `CreateSpotRecordRequest.bloomStage` / `UpdateSpotRecordRequest.bloomStage` 가 `EARLY/STARTING/PEAK/LATE` 4값이라, 지도에서는 '개화 전'으로 보이는 명소를 사용자가 그대로 기록할 수 없습니다. 지금은 버튼을 4개만 두고 있습니다.
+
+```jsonc
+// 요청: 기존 4값 유지 + 1값 추가
+{ "bloomStage": "BEFORE_SEASON" }
+```
+
+**값 이름은 서버에서 정해 주세요.** 기록축은 `EARLY/STARTING/PEAK/LATE`, 조회축은 `BEFORE_SEASON/PREPARING/STARTED/PEAK/ENDED` 로 네이밍 축이 달라서, 기록축 컨벤션에 맞는 이름(`BEFORE` 등)이 나을 수도 있습니다. 저희는 `BloomStageStatusMapper` 와 1:1로 읽히는 쪽이면 어느 쪽이든 괜찮습니다.
+
+추가만 하는 변경이라 기존 클라이언트는 깨지지 않습니다. 다만 **응답 쪽(`SpotRecordResponse.bloomStage`, `SpotRecordSummaryResponse.bloomStage`)에도 같이 반영**되어야 기록 상세·피드 카드가 새 값을 받을 수 있습니다.
+
+**2) 그때까지 동네형 핀은 `BEFORE_SEASON` 이 나오지 않습니다 — 맞나요?**
+
+`LocalSpotBloomResolver` 가 `BloomStageStatusMapper.toStatus()` 만 거치고 `BloomStatusWindowResolver` 를 타지 않아서, 동네형 핀이 낼 수 있는 상태는 기록축 4값이 환산된 `PREPARING/STARTED/PEAK/ENDED` 뿐으로 보입니다. **같은 지도에서 명소형은 5단계, 동네형은 4단계**가 되는데 의도하신 게 맞는지 확인 부탁드립니다.
+
+맞다면 프론트는 그대로 두겠습니다 — 동네형에 '개화 전' 핀이 없을 뿐 잘못 그려지지는 않습니다.
+
+**3) `BloomStageStatusMapper` 주석 갱신 부탁드립니다**
+
+PR #104 기준으로 표의 두 줄이 낡았습니다.
+
+| 기록 `BloomStage` | 주석의 설명 | PR #104 이후 실제 |
+|---|---|---|
+| `EARLY` | "개화 전" → 핀 `Before` | `PREPARING` = **이르다**(D-14~D-8), 핀 `Early` |
+| `LATE` | `ENDED` → **미노출**(내부 전이) | `ENDED` = **늦었다**, 이제 지도·카드에 노출 |
+
+`EARLY` 를 프론트 기록 폼은 이미 '이르다'로 라벨링하고 있어서, PR #104 이후로는 오히려 주석 쪽만 고치면 양쪽 표기가 맞습니다.
+
+### 15. 사진 URL이 매번 바뀌어 이미지 CDN 요금이 나가고 있습니다 (긴급)
+
+**2026-09-20에 서비스 이미지가 실제로 깨졌습니다.** Vercel 이미지 변환 한도(Pro 월 5,000건)를 넘겨 `OPTIMIZED_IMAGE_REQUEST_PAYMENT_REQUIRED`(HTTP 402)가 반환됐습니다. 명소 20여 개짜리 서비스가 출시 전인데 한도를 넘긴 원인이 presigned URL입니다.
+
+**왜 presigned URL이 문제인가**
+
+이미지 CDN은 **URL 전체를 캐시 키**로 씁니다. 그런데 `PhotoEntry.url`은 응답 시점마다 서명(`X-Amz-Signature`)이 새로 발급됩니다.
+
+```
+같은 사진인데 —
+1번째 조회: .../photo.jpg?X-Amz-Signature=aaa  → 새 이미지로 인식, 변환 1건
+2번째 조회: .../photo.jpg?X-Amz-Signature=bbb  → 또 새 이미지, 변환 1건
+```
+
+**캐시가 구조적으로 절대 맞지 않습니다.** 조회 수만큼 변환이 쌓입니다. 프런트에서 캐시 TTL을 30일로 잡아 놨지만 키가 매번 달라 아무 효과가 없습니다.
+
+프런트에서 이미지 최적화를 끄는 우회도 검토했지만 되돌렸습니다. 끄면 **원본이 그대로 사용자에게 내려갑니다.** 프로필 이미지는 최대 5MB인데 피드 카드에서는 32px 아바타로 쓰여서, 모바일에서 피드가 심각하게 느려집니다. 서버 쪽에서 해결하는 게 맞다고 판단했습니다.
+
+**요청 1 — 만료 없는 공개 URL**
+
+[BACKEND_SEO_REQUESTS.md](BACKEND_SEO_REQUESTS.md)의 P1과 **같은 요청입니다.** 거기서는 og:image가 만료돼 공유 카드가 깨진다는 이유였는데, 이제 **비용이 나간다는 이유가 하나 더 붙었습니다.** 중복 요청이 아니라 같은 변경이 두 문제를 동시에 해결합니다.
+
+**요청 2 — 기록 사진에도 사이즈 variant를 주세요**
+
+백엔드에 이미 **사이즈별 URL을 만드는 로직이 있습니다.**
+
+```jsonc
+// ProfileImageResponse — 이미 이렇게 내려주고 계십니다
+{
+  "profileImageUrl": "...",
+  "profileImageKey": "...",
+  "variants": { "128": "...", "256": "..." }   // 사이즈 variant 별 URL
+}
+```
+
+그런데 정작 트래픽 대부분을 차지하는 기록 사진에는 원본 하나뿐입니다.
+
+```jsonc
+// PhotoEntry — 원본 url 하나뿐
+{ "objectKey": "...", "url": "https://...presigned...", "sortOrder": 1 }
+```
+
+**새 기능 개발이 아니라 기존 로직을 기록 사진에 붙여 주시는 요청입니다.** 프런트가 화면 크기에 맞는 variant를 직접 고르면 이미지 CDN 변환이 아예 필요 없어지고, 요금 문제가 근본적으로 사라집니다.
+
+프런트가 실제로 쓰는 크기는 아래와 같습니다. 이 중 2~3개만 있어도 충분합니다.
+
+| 쓰이는 곳 | 필요 폭 |
+|---|---|
+| 피드 카드 아바타 · 유저 목록 | 32~96px |
+| 스팟 카드 썸네일 | 80~256px |
+| 피드 상세 · 기록 사진 | 430~1080px |
+| 공유 카드(og:image) | 1200px |
+
+**함께 봐주실 필드**: `SpotRecordResponse.photos[].url`, `SpotRecordSummaryResponse.coverPhoto.url`, `SpotDetailResponse.representativeImageUrl`, `UserProfileResponse.profileImageUrl` — 조회 응답의 `profileImageUrl`에는 `variants`가 없어서 업로드 때 만든 사이즈를 화면에서 못 쓰고 있습니다.
+
+**당장은** Vercel 초과분 과금으로 버티고, 프런트는 AVIF 포맷을 빼 변환 수를 절반으로 줄여 뒀습니다. 근본 해결은 위 두 가지입니다.
+
 ## 요약 *(2026-08-10 요청 당시 원문 — 아래는 모두 처리 완료)*
 
 | # | 우선순위 | 대상 | 요청 |
