@@ -43,6 +43,10 @@ const nextConfig: NextConfig = {
       // 백엔드 S3 미디어 (스팟 기록 사진 등, presigned URL)
       { protocol: 'https', hostname: 'peakda-dev-media-421438965126.s3.ap-northeast-2.amazonaws.com' },
       { protocol: 'https', hostname: 'peakda-prod-media-421438965126.s3.ap-northeast-2.amazonaws.com' },
+      // 백엔드 이미지 CDN. presigned 는 조회할 때마다 서명이 바뀌어 캐시 키가 매번 달라졌다.
+      // 이쪽은 만료 없는 고정 주소라 minimumCacheTTL 이 실제로 동작한다.
+      { protocol: 'https', hostname: 'cdn.peakda.com' },
+      { protocol: 'https', hostname: 'cdn-dev.peakda.com' },
       // 한국관광공사 TourAPI 이미지 (명소 대표 이미지, 축제 썸네일)
       // firstimage 가 http 로 내려오는 경우가 있어 두 스킴을 모두 허용한다.
       // next/image 가 서버에서 받아 최적화하므로 브라우저에는 https 로만 나가 mixed content 가 아니다.
