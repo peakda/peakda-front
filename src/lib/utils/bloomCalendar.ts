@@ -3,6 +3,7 @@ import type {
   BloomCalendarResponse,
   BloomCalendarResponseCategory,
 } from '@/api/facades/generated/peakdaApi.schemas'
+import type { BloomStageStatus } from '@/lib/utils/bloomStatus'
 
 const WEEKDAY = ['일', '월', '화', '수', '목', '금', '토']
 
@@ -53,7 +54,7 @@ export function formatPeakPeriod(start?: string | null, end?: string | null): st
 
 // 타임라인에서 특정 날짜의 예상 상태를 찾는다. days 는 오늘부터 시작하지만
 // 응답 기준일이 밀릴 수 있어 날짜 매칭에 실패하면 첫 항목으로 대체한다.
-export function bloomStatusOn(days: BloomCalendarDay[], date: Date) {
+export function bloomStatusOn(days: BloomCalendarDay[], date: Date): BloomStageStatus | null {
   const key = toKey(date)
   return days.find((day) => day.date.slice(0, 10) === key)?.status ?? days[0]?.status ?? null
 }
@@ -94,5 +95,8 @@ export function peakHeadline(calendar: PeakHeadlineInput, today: Date = new Date
 
   if (status === 'ENDED') return '올해 절정은 지났어요'
   if (status === 'STARTED') return '이제 막 피기 시작했어요'
+  // peakStartDate 가 없어 D-day 를 못 쓰는 경우다. BEFORE_SEASON 까지 '곧'으로 묶으면
+  // 반년 남은 명소에도 임박한 문구가 나간다.
+  if (status === 'BEFORE_SEASON') return '아직 개화 전이에요'
   return '곧 피기 시작해요'
 }

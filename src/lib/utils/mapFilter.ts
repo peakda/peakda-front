@@ -1,11 +1,12 @@
-import type { BloomSlotCategory, BloomSlotStatus } from '@/api/facades/generated/peakdaApi.schemas'
+import type { BloomSlotCategory } from '@/api/facades/generated/peakdaApi.schemas'
+import type { BloomStageStatus } from '@/lib/utils/bloomStatus'
 import type { MapSpot } from '@/hooks/useMapPins'
 import type { PinTypeFilter } from '@/stores/useFilterStore'
 import { toMaxStage } from '@/constants/map'
 
 interface MapSpotFilter {
   pinType: PinTypeFilter
-  statuses: BloomSlotStatus[]
+  statuses: BloomStageStatus[]
   /** 서버 category 파라미터는 값 하나만 받으므로 복수 선택은 여기서 거른다 */
   categories: BloomSlotCategory[]
 }

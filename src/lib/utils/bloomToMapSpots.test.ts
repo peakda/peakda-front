@@ -116,6 +116,44 @@ describe('lib/utils/bloomToMapSpots', () => {
     })
   })
 
+  // 개화 전(BEFORE_SEASON)과 이르다(PREPARING)는 서로 다른 단계다. 둘을 한 단계로 접으면
+  // 절정이 코앞인 명소와 반년 남은 명소가 같은 회색 핀이 된다.
+  it('개화 전은 이르다보다 아래 단계다', () => {
+    const [spot] = bloomToMapSpots(
+      response([
+        {
+          type: 'ATTRACTION',
+          name: '진해',
+          latitude: 35.15,
+          longitude: 128.66,
+          blooms: [
+            bloom('MAPLE', 'BEFORE_SEASON' as BloomSlot['status'], '단풍'),
+            bloom('CHERRY', 'PREPARING', '벚꽃'),
+          ],
+        },
+      ])
+    )
+
+    expect(spot.maxStage).toBe('Early')
+  })
+
+  // 늦었다는 서버가 걸러 주던 값이라 예전에는 핀에 도달하지 않았다(백엔드 PR #104).
+  it('모든 꽃이 늦었다면 개화 전으로 접히지 않는다', () => {
+    const [spot] = bloomToMapSpots(
+      response([
+        {
+          type: 'ATTRACTION',
+          name: '진해',
+          latitude: 35.15,
+          longitude: 128.66,
+          blooms: [bloom('CHERRY', 'ENDED', '벚꽃')],
+        },
+      ])
+    )
+
+    expect(spot.maxStage).toBe('End')
+  })
+
   it('핀이 없으면 빈 배열', () => {
     expect(bloomToMapSpots(response([]))).toEqual([])
   })

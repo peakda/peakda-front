@@ -1,14 +1,14 @@
-import type {
-  BloomBannerStatus,
-  SpotDetailResponse,
-} from '@/api/facades/generated/peakdaApi.schemas'
+import type { SpotDetailResponse } from '@/api/facades/generated/peakdaApi.schemas'
+import type { BloomStageStatus } from '@/lib/utils/bloomStatus'
 import { SITE_NAME, SITE_URL } from '@/constants/site'
 import { formatPeakPeriod } from '@/lib/utils/bloomCalendar'
 import { formatMonthDay } from '@/lib/utils/explore'
 
 // 검색 결과 설명문용 상태 표기. 화면 뱃지('이르다', '이제 막요')는 문맥 없이 읽히면 뜻이 흐려서 따로 둔다.
-const STATUS_TEXT: Record<BloomBannerStatus, string> = {
-  PREPARING: '개화 전',
+// PREPARING 은 '개화 전'이었는데, 진짜 개화 전인 BEFORE_SEASON 이 생겨 '개화 임박'으로 비켰다.
+const STATUS_TEXT: Record<BloomStageStatus, string> = {
+  BEFORE_SEASON: '개화 전',
+  PREPARING: '개화 임박',
   STARTED: '개화 시작',
   PEAK: '절정',
   ENDED: '절정 지남',

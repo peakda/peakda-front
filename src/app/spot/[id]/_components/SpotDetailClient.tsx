@@ -21,14 +21,15 @@ import { useRemoveFavorite, useUpdateFavoriteNotify } from '@/api/facades/spot-f
 import { getGetSpotsByIdQueryKey } from '@/api/facades/generated/spot/spot'
 import type { SpotDetailResponse } from '@/api/facades/generated/peakdaApi.schemas'
 import { buildRecordUrl } from '@/lib/utils/spotCta'
-import { toStatusBadge } from '@/lib/utils/bloomStatus'
+import { type BloomStageStatus, toStatusBadge } from '@/lib/utils/bloomStatus'
 import { BLOOM_CATEGORY_EMOJI, formatPeakPeriod, peakHeadline } from '@/lib/utils/bloomCalendar'
 import { formatMonthDay } from '@/lib/utils/explore'
 import { cn } from '@/lib/utils/cn'
 
 // 캘린더(일별 타임라인)가 없으면 '이번 주말이 딱이에요' 판정을 못 하므로
 // 상세 응답 배너의 현재 상태만으로 문구를 대체한다.
-const BLOOM_BANNER_MESSAGE: Record<string, string> = {
+const BLOOM_BANNER_MESSAGE: Record<BloomStageStatus, string> = {
+  BEFORE_SEASON: '아직 개화 전이에요',
   PREPARING: '곧 피기 시작해요',
   STARTED: '이제 막 피기 시작했어요',
   PEAK: '지금이 절정이에요',
@@ -72,7 +73,9 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
   const durationDays = calendar?.peakDurationDays ?? spot.bloom?.peakDurationDays
   const headline = calendar
     ? peakHeadline(calendar)
-    : (BLOOM_BANNER_MESSAGE[spot.bloom?.status ?? ''] ?? '')
+    : spot.bloom
+      ? BLOOM_BANNER_MESSAGE[spot.bloom.status]
+      : ''
 
   // 추가는 "개화 알림 받기" 토글이라는 실제 선택지가 있어 시트가 필요하지만,
   // 해제는 선택지가 없어 시트가 순수 마찰이라 HeartBtn과 동일하게 즉시 토글한다.
