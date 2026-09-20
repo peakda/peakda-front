@@ -1,6 +1,10 @@
 import { describe, it, expect } from 'vitest'
 import { toPinListItems } from './spotPreview'
 import type { SpotPreviewItem } from '@/api/facades/generated/peakdaApi.schemas'
+import type { BloomStageStatus } from '@/lib/utils/bloomStatus'
+
+// BEFORE_SEASON 은 아직 생성 스펙에 없다(백엔드 PR #104 배포 대기). 배포 후엔 캐스팅을 지운다.
+type Badge = NonNullable<SpotPreviewItem['badges']>[number]
 
 const item = (over: Partial<SpotPreviewItem> = {}): SpotPreviewItem => ({
   spotId: 1,
@@ -90,12 +94,16 @@ describe('lib/utils/spotPreview', () => {
     })
 
     it('상태 라벨은 지도 핀과 같은 표기를 쓴다', () => {
-      const tagOf = (status: 'PREPARING' | 'STARTED') =>
-        toPinListItems([item({ badges: [{ category: 'MAPLE', displayName: '단풍', status }] })])[0]
-          .tagText
+      const tagOf = (status: BloomStageStatus) =>
+        toPinListItems([
+          item({ badges: [{ category: 'MAPLE', displayName: '단풍', status } as Badge] }),
+        ])[0].tagText
 
-      expect(tagOf('PREPARING')).toBe('개화 전')
+      // 개화 전과 이르다는 서로 다른 단계다 — PREPARING 을 '개화 전'으로 쓰던 시절과 갈린다.
+      expect(tagOf('BEFORE_SEASON')).toBe('개화 전')
+      expect(tagOf('PREPARING')).toBe('이르다')
       expect(tagOf('STARTED')).toBe('개화 시작')
+      expect(tagOf('ENDED')).toBe('개화 종료')
     })
 
     it('빈 목록은 빈 배열', () => {

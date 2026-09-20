@@ -3,8 +3,8 @@ import type { FlowerItem } from '@/components/Map/Pin'
 import type {
   BloomMapPinType,
   BloomSlotCategory,
-  BloomSlotStatus,
 } from '@/api/facades/generated/peakdaApi.schemas'
+import type { BloomStageStatus } from '@/lib/utils/bloomStatus'
 import { type Stage, STAGE_COLOR, STAGE_PRIORITY, STATUS_STAGE } from '@/constants/map'
 
 /**
@@ -27,7 +27,7 @@ export interface MapSpot {
   // 상단 칩(명소/동네) 필터용. 서버 파라미터가 없어 응답의 pin.type 을 그대로 들고 온다.
   type: BloomMapPinType
   // 시기 필터용. 이 핀에 달린 꽃들의 개화 상태(핀 하나에 여러 개 가능).
-  statuses: BloomSlotStatus[]
+  statuses: BloomStageStatus[]
   // 꽃 종류 필터용. 서버 category 가 단일 값이라 복수 선택은 클라에서 거른다.
   categories: BloomSlotCategory[]
 }
@@ -76,7 +76,7 @@ export interface ClusterSlice {
  * 클러스터의 상태 구성.
  *
  * 스팟이 많은 순으로 정렬하고, 개수가 같으면 STAGE_PRIORITY 가 높은 순
- * (만개 > 피기시작 > 늦었다 > 개화전)으로 둔다 — 동률이면 개화전이 항상 맨 뒤다.
+ * (만개 > 피기시작 > 이르다 > 늦었다 > 개화전)으로 둔다 — 동률이면 개화전이 항상 맨 뒤다.
  * 링은 이 순서 그대로 12시 방향부터 시계방향으로 그린다.
  */
 export function clusterSlices(spots: MapSpot[]): ClusterSlice[] {

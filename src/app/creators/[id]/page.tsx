@@ -9,19 +9,17 @@ import { Button } from '@/components/ui/button/Button'
 import { Badge } from '@/components/ui/display/Badge'
 import { CardBadge } from '@/components/ui/card/CardBadge'
 import { useCurationDetail } from '@/api/facades/curation'
+import { type BloomStageStatus, toStatusBadge } from '@/lib/utils/bloomStatus'
 import { cn } from '@/lib/utils/cn'
 
-// BloomBadge.status → 스팟 상세와 동일한 표기를 쓴다.
-const BLOOM_STATUS_LABEL: Record<string, string> = {
-  PREPARING: '이르다',
-  STARTED: '이제 막요',
-  PEAK: '절정',
-}
-
-const BLOOM_STATUS_VARIANT: Record<string, 'green' | 'starting' | 'bloom'> = {
-  PREPARING: 'green',
-  STARTED: 'starting',
-  PEAK: 'bloom',
+// BloomBadge.status → 스팟 상세·카드와 같은 표기(bloomStatus)를 쓴다.
+// 직접 표를 두면 ENDED·BEFORE_SEASON 처럼 나중에 늘어난 값이 여기만 빠진다.
+function toChapterBadge(badge: { displayName: string; status: BloomStageStatus }) {
+  const { status, statusVariant } = toStatusBadge(badge.status)
+  return {
+    label: `${badge.displayName} ${status}`.trim(),
+    variant: statusVariant ?? 'secondary',
+  }
 }
 
 const HERO_PLACEHOLDER = '/images/explore.png'
@@ -104,22 +102,14 @@ export default function CreatorDetailPage() {
                   className="object-cover"
                 />
                 {chapter.badge && (
-                  <CardBadge
-                    label={`${chapter.badge.displayName} ${BLOOM_STATUS_LABEL[chapter.badge.status] ?? ''}`.trim()}
-                    variant={BLOOM_STATUS_VARIANT[chapter.badge.status] ?? 'secondary'}
-                    className="absolute top-2 left-2"
-                  />
+                  <CardBadge {...toChapterBadge(chapter.badge)} className="absolute top-2 left-2" />
                 )}
                 <PhotoCaption placeName={chapter.placeName} leadText={chapter.leadText} />
               </div>
             ) : (
               <>
                 {chapter.badge && (
-                  <CardBadge
-                    label={`${chapter.badge.displayName} ${BLOOM_STATUS_LABEL[chapter.badge.status] ?? ''}`.trim()}
-                    variant={BLOOM_STATUS_VARIANT[chapter.badge.status] ?? 'secondary'}
-                    className="w-fit"
-                  />
+                  <CardBadge {...toChapterBadge(chapter.badge)} className="w-fit" />
                 )}
                 <h2 className="text-text-primary text-lg font-extrabold">{chapter.placeName}</h2>
               </>
