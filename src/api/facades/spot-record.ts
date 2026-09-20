@@ -24,6 +24,7 @@ import type {
   UpdateSpotRecordRequest,
 } from '@/api/facades/generated/peakdaApi.schemas'
 import { PAGE_SIZE, nextPageParam } from '@/api/facades/pagination'
+import { track } from '@/lib/analytics'
 
 // 언랩 규칙: res.data (Orval 래퍼) → res.data.data (백엔드 실제 payload)
 
@@ -110,13 +111,25 @@ export const useMySpotRecordsInfinite = (status: GetSpotsRecordsMeStatus) =>
 const invalidateBloomMap = (queryClient: ReturnType<typeof useQueryClient>) =>
   queryClient.invalidateQueries({ queryKey: ['/api/seasonal/blooms'] })
 
+// 게시된 기록은 피드에도 노출되므로 '/api/feed' 프리픽스 캐시를 함께 무효화한다.
+const invalidateFeed = (queryClient: ReturnType<typeof useQueryClient>) =>
+  queryClient.invalidateQueries({
+    predicate: (q) => typeof q.queryKey[0] === 'string' && q.queryKey[0].startsWith('/api/feed'),
+  })
+
 // 기록 변경 mutation — 성공 시 스팟별·본인 기록 리스트 캐시 무효화
 
 export const useCreateSpotRecord = () => {
   const queryClient = useQueryClient()
   return useCreateGen({
     mutation: {
-      onSuccess: (res) => {
+      onSuccess: (res, { data }) => {
+        track('record_create', {
+          spot_id: res.data.data?.spot.id,
+          spot_type: data.spotInput.type,
+          bloom_stage: data.bloomStage ?? undefined,
+          photo_count: data.photoKeys?.length ?? 0,
+        })
         recordListKeys.forEach((queryKey) => queryClient.invalidateQueries({ queryKey }))
         invalidateSpotDetail(queryClient, res.data.data?.spot.id)
         invalidateBloomMap(queryClient)
@@ -135,6 +148,9 @@ export const useUpdateSpotRecord = () => {
         queryClient.invalidateQueries({ queryKey: [`/api/spots/records/${id}`] })
         invalidateSpotDetail(queryClient, res.data.data?.spot.id)
         invalidateBloomMap(queryClient)
+        // 게시된 기록은 피드에도 그대로 노출된다. 사진·메모를 고쳐도 무효화하지 않으면
+        // 전역 staleTime(5분) 동안 피드에 옛 사진이 남는다(삭제와 같은 이유).
+        invalidateFeed(queryClient)
       },
     },
   })
@@ -148,11 +164,7 @@ export const useDeleteSpotRecord = () => {
         recordListKeys.forEach((queryKey) => queryClient.invalidateQueries({ queryKey }))
         invalidateSpotDetail(queryClient)
         invalidateBloomMap(queryClient)
-        // 게시된 기록이면 피드에도 노출되므로 '/api/feed' 프리픽스 캐시를 함께 무효화한다.
-        queryClient.invalidateQueries({
-          predicate: (q) =>
-            typeof q.queryKey[0] === 'string' && q.queryKey[0].startsWith('/api/feed'),
-        })
+        invalidateFeed(queryClient)
       },
     },
   })

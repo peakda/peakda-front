@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Tabs } from '@/components/ui/Tab/Tab'
 import { TabPanels } from '@/components/ui/Tab/TabPanel'
 import { TabItem } from '@/context/TabContext'
@@ -14,6 +14,7 @@ import { useSearchSpotsInfinite, useSearchUsersInfinite } from '@/api/facades/se
 import { useDebounce } from '@/hooks/useDebounce'
 import { useIsLoggedIn } from '@/hooks/useIsLoggedIn'
 import { useRequireLogin } from '@/hooks/useRequireLogin'
+import { track } from '@/lib/analytics'
 import { flattenPages } from '@/lib/utils/infinitePages'
 import {
   RECENT_SEARCH_KEY,
@@ -74,8 +75,19 @@ export default function SearchPage() {
     setRecentSearches((prev) => removeRecentSearch(prev, item))
   }
 
+  // 입력 중에는 글자마다 결과가 바뀌므로, 엔터나 결과 클릭으로 검색어를 확정했을 때만 search 를 보낸다.
+  // 결과 영역 클릭마다 불리므로 같은 검색어는 한 번만 보낸다.
+  const lastTrackedTermRef = useRef('')
+
   const submitSearch = (value: string) => {
     setRecentSearches((prev) => addRecentSearch(prev, value))
+
+    const term = value.trim()
+    if (!term || term === lastTrackedTermRef.current) return
+    lastTrackedTermRef.current = term
+    // 디바운스가 따라잡기 전에 엔터를 치면 결과 수가 직전 검색어 기준이라 이때는 빼고 보낸다.
+    const isCountReady = keyword === term && spotQuery.isSuccess && !spotQuery.isFetching
+    track('search', { search_term: term, result_count: isCountReady ? spotTotal : undefined })
   }
 
   return (

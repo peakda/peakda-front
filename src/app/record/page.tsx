@@ -14,6 +14,7 @@ import { LocationSearchView } from '@/app/record/_components/LocationSearchView'
 import { RecordCompleteView } from '@/app/record/_components/RecordCompleteView'
 import { RecordSkeleton } from '@/app/record/_components/RecordSkeleton'
 import { compressImage } from '@/lib/utils/image'
+import { track } from '@/lib/analytics'
 
 // 매칭/생성에 필요한 스팟 정보 (카카오 검색 + 스팟 매칭 결과)
 // kakaoPlaceId: 스팟 상세(?spotId=)에서 넘어오면 응답에 없으므로 null 이다.
@@ -55,6 +56,11 @@ function RecordPageContent() {
   const matchSpot = useMatchSpot()
   const uploadPhotos = useUploadSpotRecordPhotos()
   const createRecord = useCreateSpotRecord()
+
+  // 기록 작성 진입. 완료(record_create)는 파사드가 보내므로 둘의 비율이 작성 완료율이 된다.
+  useEffect(() => {
+    track('record_start', { spot_id: spotIdParam })
+  }, [spotIdParam])
 
   // ?spotId= 로 들어온 경우 스팟이 이미 특정돼 있어 matchSpot 이 필요 없다.
   // 최초 1회만 채우고, 이후 사용자가 장소를 바꾸거나 초기화하면 덮어쓰지 않는다.
@@ -276,7 +282,6 @@ function RecordPageContent() {
   return (
     <LocationStepForm
       location={location}
-      hasLocation={hasLocation}
       category={category}
       showCategoryPicker={showCategoryPicker}
       onToggleCategoryPicker={() => setShowCategoryPicker((v) => !v)}

@@ -14,6 +14,7 @@ import {
 import type { SignupCompleteRequest } from '@/api/facades/generated/peakdaApi.schemas'
 import { applyAppTokenResponse, isNativeAndroid } from '@/lib/auth/nativeAuth'
 import { useIsLoggedIn } from '@/hooks/useIsLoggedIn'
+import { track } from '@/lib/analytics'
 
 // ?몃옒??洹쒖튃: res.data (Orval ?섑띁) ??res.data.data (諛깆뿏???ㅼ젣 payload)
 
@@ -74,6 +75,7 @@ export const useCompleteSignup = () => {
   return useCompleteSignupGen({
     mutation: {
       onSuccess: async (res) => {
+        track('sign_up', {})
         // 앱 가입은 signup token을 Bearer로 보내며, 완료 응답의 새 토큰 쌍으로 즉시 교체한다.
         if (isNativeAndroid() && res.data.data) await applyAppTokenResponse(res.data.data)
         await queryClient.invalidateQueries({ queryKey: getGetAuthMeQueryKey() })

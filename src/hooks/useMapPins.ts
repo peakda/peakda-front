@@ -42,11 +42,15 @@ function createPinHTML(flowers: FlowerItem[], maxStage: Stage): string {
   const color = STAGE_COLOR[maxStage]
   const grayscale =
     maxStage === 'Before' || maxStage === 'End' ? 'opacity:0.4;filter:grayscale(1);' : ''
+  // max-width:none 은 Tailwind preflight 의 img { max-width:100% } 를 끄는 것이다.
+  // 카카오 오버레이는 폭 0 인 판 안에 absolute 로 붙어 min-content 폭으로 줄어드는데,
+  // Safari(WebKit)는 퍼센트 max-width 이미지의 min-content 를 0 으로 쳐서 이미지가 5px 로
+  // 찌그러지고 핀이 세로로 길쭉한 캡슐(21×40)이 된다. Chrome 은 영향 없음.
   const imgs = flowers
     .slice(0, 3)
     .map(
       (f) =>
-        `<img src="${f.src}" alt="${f.alt ?? ''}" width="24" height="24" style="width:24px;height:24px;flex-shrink:0;object-fit:contain;${grayscale}">`
+        `<img src="${f.src}" alt="${f.alt ?? ''}" width="24" height="24" style="width:24px;height:24px;max-width:none;flex-shrink:0;object-fit:contain;${grayscale}">`
     )
     .join('')
   const badge =

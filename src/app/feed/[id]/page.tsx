@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { cache } from 'react'
 import { notFound } from 'next/navigation'
 import { feedDetailApi } from '@/api/facades/feed'
-import { BASE_OPEN_GRAPH, DEFAULT_OG_IMAGE } from '@/constants/site'
+import { BASE_OPEN_GRAPH, DEFAULT_OG_IMAGE, SITE_BRAND_NAME } from '@/constants/site'
 import { isApiErrorStatus } from '@/lib/utils/apiError'
 import { FeedDetailClient } from './_components/FeedDetailClient'
 
@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: FeedDetailPageProps): Promise
     // 기본 카드를 쓴다 (영구 URL 은 백엔드 요청 대기).
     openGraph: {
       ...BASE_OPEN_GRAPH,
-      title: `Peakda | ${title}`,
+      title: `${title} | ${SITE_BRAND_NAME}`,
       description,
       url: path,
       images: [DEFAULT_OG_IMAGE],

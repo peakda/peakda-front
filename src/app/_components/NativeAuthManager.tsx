@@ -5,6 +5,7 @@ import { Browser } from '@capacitor/browser'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { getAuthMe } from '@/api/facades/generated/auth/auth'
+import { track } from '@/lib/analytics'
 import {
   clearNativeAuthSession,
   exchangeNativeAuthorizationCode,
@@ -44,6 +45,7 @@ export function NativeAuthManager() {
           useLoginSheetStore.getState().closeLoginSheet()
           if (session.accessToken) {
             setAuthMarker()
+            track('login', {})
             router.replace(takeReturnTo() ?? '/map')
           } else {
             router.replace('/Terms')

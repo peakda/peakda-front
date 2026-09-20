@@ -20,8 +20,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const bloomMap = await bloomMapApi(KOREA_BBOX)
     const lastModified = bloomMap?.baseDate ?? undefined
+    // 동네(LOCAL) 스팟은 사용자가 기록으로 만든 지점(아파트 정문 등)이라 검색 노출 대상에서 뺀다.
     const spotPages: MetadataRoute.Sitemap = (bloomMap?.pins ?? []).flatMap((pin) =>
-      pin.spotId == null
+      pin.spotId == null || pin.type === 'LOCAL'
         ? []
         : [{ url: `${SITE_URL}/spot/${pin.spotId}`, lastModified, changeFrequency: 'daily' }]
     )

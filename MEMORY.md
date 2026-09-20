@@ -1,6 +1,6 @@
 # MEMORY.md
 
-코드만 봐서는 알기 어려운 결정과 이유. 세부 흐름은 `ARCHITECTURE.md`, 디렉터리별 규칙은 `src/CLAUDE.md`/`public/CLAUDE.md` 참고.
+코드만 봐서는 알기 어려운 결정과 이유. 세부 흐름은 `ARCHITECTURE.md`, 디렉터리별 규칙은 `src/CLAUDE.md` 참고.
 
 ## 결정과 이유
 
@@ -21,12 +21,14 @@
     `.env.development`를 바꾸면 개발 서버가 붙는 API도 함께 바뀌므로 임의로 고치지 않았다.
   - 로컬 백엔드가 떠 있어도 **빌드가 낡으면 옛 스펙이 나온다.** 2026-08-18에 "재기동했다"는 서버가 PR 이전 코드를 그대로 서빙해 한참 헤맸다. 새 필드가 안 보이면 포트 확인보다 **재빌드 여부**를 먼저 의심할 것.
 - **파사드(facade)는 최초 1회만 자동 생성**: `pnpm generate:facades`는 `src/api/facades/{domain}.ts`가 이미 있으면 건드리지 않는다 (`scripts/generate-facades.mjs`). 기존 파사드 수정은 항상 수동.
+
 - **개화 단계는 조회축만 5단계다 — 기록축은 아직 4값** (2026-08-04 디자이너 확정 → 2026-09-20 조회축 해소): 확정된 색 스케일은 개화 전(gray-400 `#a8b0bc`) → 이르다(green-50 배경 + `brand-secondary` 텍스트) → 피기 시작(pink-200 `#ffa8b4`) → 절정(pink-400 `#f7576b`, 유일하게 솔리드 배경 + 흰 텍스트) → 늦었다(pink-600 `#c41f33`). 서버 enum이 **두 축으로 갈려 있다**는 게 핵심이다 — 기록 상태 `bloomStage`(`EARLY/STARTING/PEAK/LATE`)와 조회 상태 `BloomStatus` 계열(`BEFORE_SEASON/PREPARING/STARTED/PEAK/ENDED`)은 서로 다른 값 집합이고, 서버 `BloomStageStatusMapper`가 기록축 → 조회축으로 환산한다.
   - **조회축은 백엔드 PR #104로 5단계가 됐다.** 그 전까지 `BloomSlotStatus`에 '이르다'가 없어서 **지도 핀의 `PREPARING`을 '개화 전'(회색)으로 대신 그렸는데**, 이제 `PREPARING`은 본래 뜻인 초록 '이르다'(`Stage: 'Early'`)이고 회색은 `BEFORE_SEASON`이 가져간다. 카드 뱃지는 원래부터 `PREPARING`을 '이르다'로 그려서 **이제야 지도와 카드 표기가 같아졌다.**
   - **`BEFORE_SEASON`은 아직 dev 스펙에 없다(PR #104 미배포).** 그래서 `src/lib/utils/bloomStatus.ts`의 `BloomStageStatus = BloomStatus | 'BEFORE_SEASON'`로 프런트에서만 넓혀 두고 모든 상태 매핑이 이 타입을 쓴다. 배포 후 `pnpm generate:api`를 돌리면 생성 union에 값이 들어와 이 합집합이 저절로 같아지므로, **`| 'BEFORE_SEASON'` 한 줄과 `spotPreview.test.ts`의 `as Badge` 캐스팅만 지우면 정리 끝**이다. 서버가 엔드포인트마다 다른 이름(`BloomStatus`/`BloomBannerStatus`/`BloomBadgeStatus`/`BloomSlotStatus`/…)으로 같은 값을 내보내므로 프런트 매핑은 이 타입 하나로 덮는다.
   - 단계 색·라벨·우선순위는 전부 `src/constants/map.ts`(`Stage`/`STAGE_COLOR`/`STAGE_LABEL`/`STAGE_PRIORITY`/`STATUS_STAGE`)에서 파생된다 — `Pin.tsx`의 `BORDER_CLASS`만 별도 Tailwind 클래스 표라 함께 고쳐야 한다. 뱃지는 `src/lib/utils/bloomStatus.ts`의 `toStatusBadge`로 모으는 중이다(`creators/[id]/page.tsx`는 2026-09-20에 합류, `spotRecordToFeed.ts`는 기록축이라 별도).
   - **`ENDED`(늦었다)도 PR #104부터 응답에 나온다.** 그전엔 서버가 6곳에서 걸러내 화면에 도달하지 않았다 — "ENDED는 안 온다"를 전제로 짠 코드가 남아 있는지 의심할 것.
   - **스팟 기록의 '상태' 선택지에 '개화 전' 버튼을 추가하는 건 여전히 보류다.** 기록축 `bloomStage`는 PR #104가 건드리지 않아 4값 그대로라 프런트만으로는 전송할 수 없다 (`src/app/record/_components/DetailsStepForm.tsx`의 `STATUS_OPTIONS`, `src/app/record/[id]/edit/page.tsx`에 각각 정의됨). 2026-09-20에 [BACKEND_API_REQUESTS.md](BACKEND_API_REQUESTS.md) 14번으로 확장을 요청했고 회신 대기 중이다. 그때까지 **동네형 핀은 `BEFORE_SEASON`이 구조적으로 나오지 않는다** — 동네형은 기록축을 환산해 쓰므로 4단계뿐이고, 명소형만 5단계다.
+
 
 - **지도 꽃 필터는 일부러 서버로 안 보낸다** (2026-08-18): `GET /api/seasonal/blooms`에 `categories` 파라미터가 생겼지만 쓰지 않는다. 서버가 걸러 주면 ① 필터 드로어 하단 "N개의 명소 보기"를 **아직 적용 안 한 draft 기준으로 셀 수 없고** ② 응답에서 안 고른 꽃이 빠져 **핀 아이콘·색을 선택에 맞게 좁힐 수 없다.** 과다 조회는 bbox 한 화면 분량이고 격자 스냅 캐싱이 걸려 있어 그 대가가 더 싸다고 판단했다. 근거는 `MapContainer.tsx`의 `bloomParams` 주석에도 남겼다.
   - 반면 `status`·`region`은 서버로 보낸다. **단 클라이언트 status 필터도 함께 유지한다** — 서버 판정은 "그 상태인 꽃이 하나라도 있는 핀"이라 핀 단위인데, 꽃 종류를 함께 고르면 *고른 꽃이* 그 상태여야 한다. 그 판정은 꽃을 좁힌 뒤에만 가능해 `mapFilter.ts`가 맡는다.
@@ -43,6 +45,7 @@
   - 실제로 2026-08-18에 `AZALEA`/`AZALEA_KR`이 세 곳 모두 서버와 반대로 매핑돼 있었다. 서버 `displayName` 기준은 **`AZALEA_KR`=진달래, `AZALEA`=철쭉**이다(enum 이름만 보면 반대로 읽힌다). 아이콘도 `constants/map.ts`에서 함께 맞춰야 한다(`royal-azalea.svg`=철쭉).
   - 프로필 **조회**는 서버 `displayName`을 쓰고 **편집**은 이 하드코딩을 쓴다. 그래서 매핑이 틀리면 같은 유저의 관심 꽃이 두 화면에서 다르게 보인다. 그 시기에 잘못 저장된 데이터는 프론트 수정으로 되돌아가지 않는다.
 - **꽃 필터 목록은 서버 enum의 부분집합**: 서버는 15종인데 Figma 필터는 14종이다. 핑크뮬리는 필터에서 뺐지만 서버가 핀으로는 계속 내려주므로 `CATEGORY_ICON`에는 남겨야 한다(지도에는 정상 표시, 필터 항목으로만 안 뜸).
+- **`public/`에는 문서를 두지 않는다** (2026-09-16): `public/` 안의 파일은 Next가 그대로 서빙해서 `https://www.peakda.com/CLAUDE.md`, `/terms-prompt.md` 등이 운영에서 누구나 열리고 검색에 잡힐 수 있었다. 디렉터리 안내였던 public/CLAUDE.md 는 없앴고(`map-tile-sw.js` 규칙은 위 지도 로딩 항목과 `ARCHITECTURE.md`에 이미 있다), 약관 생성 프롬프트는 `src/app/Terms/_prompts/`로 옮겼다(`_` 폴더라 라우트도 안 된다).
 
 ## 자주 하는 작업
 

@@ -17,6 +17,7 @@ import { useFilterStore } from '@/stores/useFilterStore'
 import { spotPreviewApi } from '@/api/facades/spot'
 import { toPinListItems } from '@/lib/utils/spotPreview'
 import { timingToStatus } from '@/lib/utils/timing'
+import { track } from '@/lib/analytics'
 import { toast } from 'sonner'
 
 // 필터 시트와 날짜 선택 달력은 드로어 중 가장 무거운 두 덩어리인데, <Drawer /> 를 올리는
@@ -124,6 +125,12 @@ export function Drawer() {
 
   // 하단 버튼 → 필터 커밋. 지도 조회가 끝나야 목록을 열 수 있어 대기 플래그를 세운다.
   const handleApplyFilter = () => {
+    const { draft } = useFilterStore.getState()
+    track('map_filter_apply', {
+      region: draft.region ?? 'all',
+      timing: draft.timing ?? 'all',
+      categories: draft.categories.length > 0 ? draft.categories.join(',') : 'all',
+    })
     applyDraft()
 
     // 탐색 화면의 꽃 필터는 뒤에 지도가 없어 보여줄 핀 목록이 없다. 적용만 하고 닫는다.
@@ -201,7 +208,7 @@ export function Drawer() {
     return (
       <VaulDrawer.Root open={isOpen} onOpenChange={(open) => !open && closeDrawer()}>
         <VaulDrawer.Portal>
-          <VaulDrawer.Overlay className="fixed inset-0 z-100 mx-auto max-w-[430px] bg-black/40" />
+          <VaulDrawer.Overlay className="fixed inset-0 z-100 bg-black/40" />
           <VaulDrawer.Content className="fixed right-0 bottom-0 left-0 z-100 mx-auto flex max-w-[430px] flex-col rounded-t-[20px] bg-white outline-none">
             <VaulDrawer.Title className="sr-only">{title}</VaulDrawer.Title>
             <VaulDrawer.Description className="sr-only">{description}</VaulDrawer.Description>
@@ -265,7 +272,7 @@ export function Drawer() {
       setActiveSnapPoint={handleSnapChange}
     >
       <VaulDrawer.Portal>
-        <VaulDrawer.Overlay className="pointer-events-none fixed inset-0 z-100 mx-auto max-w-[430px] bg-black/10 opacity-100!" />
+        <VaulDrawer.Overlay className="pointer-events-none fixed inset-0 z-100 bg-black/10 opacity-100!" />
 
         <VaulDrawer.Content className="pointer-events-auto fixed right-0 bottom-0 left-0 z-100 mx-auto flex h-full max-w-[430px] flex-col overflow-hidden rounded-t-[20px] bg-white outline-none">
           <VaulDrawer.Title className="sr-only">
