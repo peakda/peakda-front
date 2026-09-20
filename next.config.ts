@@ -21,7 +21,9 @@ const nextConfig: NextConfig = {
     return config
   },
   images: {
-    formats: ['image/avif', 'image/webp'],
+    // AVIF 는 WebP 와 별도 변환이라 원본 하나당 변환 수가 두 배가 된다.
+    // 월 변환 한도를 넘겨 402 가 난 뒤로 WebP 만 쓴다 (2026-09-20). 체감 화질 차이는 거의 없다.
+    formats: ['image/webp'],
     minimumCacheTTL: 60 * 60 * 24 * 30, // 30일
     deviceSizes: [390, 430, 768, 1080],
     imageSizes: [16, 32, 48, 64, 96, 128, 256],
