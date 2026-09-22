@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { bloomMapApi } from '@/api/facades/seasonal-bloom'
 import { SITE_URL } from '@/constants/site'
+import { isSitemapSpotPin } from '@/lib/utils/spotSeo'
 
 // 개화 추정은 하루 단위로 산출되므로 sitemap 도 하루에 한 번 다시 만든다.
 export const revalidate = 86400
@@ -20,12 +21,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const bloomMap = await bloomMapApi(KOREA_BBOX)
     const lastModified = bloomMap?.baseDate ?? undefined
-    // 동네(LOCAL) 스팟은 사용자가 기록으로 만든 지점(아파트 정문 등)이라 검색 노출 대상에서 뺀다.
-    const spotPages: MetadataRoute.Sitemap = (bloomMap?.pins ?? []).flatMap((pin) =>
-      pin.spotId == null || pin.type === 'LOCAL'
-        ? []
-        : [{ url: `${SITE_URL}/spot/${pin.spotId}`, lastModified, changeFrequency: 'daily' }]
-    )
+    // 동네 스팟·오분류 의심 명소는 검색 노출 대상에서 뺀다 (기준은 isSitemapSpotPin).
+    const spotPages: MetadataRoute.Sitemap = (bloomMap?.pins ?? [])
+      .filter(isSitemapSpotPin)
+      .map((pin) => ({
+        url: `${SITE_URL}/spot/${pin.spotId}`,
+        lastModified,
+        changeFrequency: 'daily',
+      }))
     return [...staticPages, ...spotPages]
   } catch (error) {
     // 백엔드 장애로 sitemap 전체가 500 이 되면 고정 페이지까지 제출되지 않는다. 고정 페이지만이라도 낸다.
