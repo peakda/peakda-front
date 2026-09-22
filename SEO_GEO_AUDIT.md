@@ -349,7 +349,7 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 
 ## 9. 진행 현황과 남은 일
 
-- 최종 갱신: 2026-09-16 (운영 도메인 curl 점검 반영)
+- 최종 갱신: 2026-09-22 (운영 도메인 curl 재점검 — 9.1 배포 표시 갱신)
 - 대표 도메인(canonical): `https://www.peakda.com` — 루트 `peakda.com` 은 `308` 으로 www 리다이렉트
 - DNS: AWS Route 53 (`peakda.com` 호스팅 영역, 백엔드 AWS 계정). `www` 는 Vercel CNAME
 
@@ -367,15 +367,17 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 | Phase 3 SEO — 피드 상세 metadata·404 | 커밋 `c2ff423` | ✅ |
 | 탐색·피드 목록 metadata, 홈 `Organization`·`WebSite` JSON-LD | 커밋 `d60f57f` | ✅ |
 | Google Search Console 도메인 속성 `peakda.com` 소유 확인 (Route 53 TXT) | — | ✅ |
-| 축제·큐레이션 상세 비로그인 접근 허용 (`PROTECTED_PATHS` 에서 `/festivals`, `/creators` 제거) | 커밋 `b0548c3` | ❌ 미배포 (`fix/overlay-full-viewport`) |
-| sitemap 에서 동네(LOCAL) 스팟 제외 (`src/app/sitemap.ts`) | 커밋 `aacfc17` | ❌ 미배포 |
-| 홈 `Organization.sameAs` 에 유튜브 채널 추가 (`src/app/page.tsx`) | 커밋 `56c9779` | ❌ 미배포 |
-| 사이트 설명(`SITE_DESCRIPTION`) 교체, 제목에서 브랜드를 뒤로 (`layout.tsx` 템플릿) | 커밋 `56c9779` | ❌ 미배포 |
-| `public/` 내부 문서 정리 — 약관 프롬프트 → `src/app/Terms/_prompts/`, `public/CLAUDE.md` 제거 | 커밋 `695b9ba` | ❌ 미배포 |
+| 축제·큐레이션 상세 비로그인 접근 허용 (`PROTECTED_PATHS` 에서 `/festivals`, `/creators` 제거) | 커밋 `b0548c3` | ✅ |
+| sitemap 에서 동네(LOCAL) 스팟 제외 (`src/app/sitemap.ts`) | 커밋 `aacfc17` | ✅ |
+| 홈 `Organization.sameAs` 에 유튜브 채널 추가 (`src/app/page.tsx`) | 커밋 `56c9779` | ✅ |
+| 사이트 설명(`SITE_DESCRIPTION`) 교체, 제목에서 브랜드를 뒤로 (`layout.tsx` 템플릿) | 커밋 `56c9779` | ✅ |
+| `public/` 내부 문서 정리 — 약관 프롬프트 → `src/app/Terms/_prompts/`, `public/CLAUDE.md` 제거 | 커밋 `695b9ba` | ✅ |
 
-> 2026-09-16 운영 확인 (curl): `/robots.txt`·`/sitemap.xml` 200 (URL 341개) / `/spot/527` 등 200 + 제목·설명·canonical·JSON-LD / `/my/settings` → `307 /map?login=1` / `/search` `X-Robots-Tag: noindex` / 페이지 소스에 `naver-site-verification` 있음. `main` 반영 여부는 `git merge-base --is-ancestor <커밋> origin/main` 으로 확인.
+> 2026-09-16 운영 확인 (curl): `/robots.txt`·`/sitemap.xml` 200 (URL 341개) / `/spot/527` 등 200 + 제목·설명·canonical·JSON-LD / `/my/settings` → `307 /map?login=1` / `/search` `X-Robots-Tag: noindex` / 페이지 소스에 `naver-site-verification` 있음.
 >
-> 비로그인 공개 경로: `/`, `/map`, `/explore`, `/feed`, `/feed/[id]`, `/search`, `/spot/[id]`, `/spot/[id]/feed`, `/my`(비로그인용 빈 화면, noindex). `b0548c3` 배포 후 `/festivals/[id]`, `/creators/[id]` 추가 (운영은 아직 `/map?login=1` 리다이렉트)
+> 2026-09-22 재확인 (curl): `b0548c3`·`aacfc17`·`56c9779`·`695b9ba` 모두 `origin/main` 포함 / `/sitemap.xml` URL 350개 / 홈 설명문·`sameAs` 유튜브 운영 반영 / `/festivals/1`·`/creators/1` `200`(리다이렉트 없음) / `/CLAUDE.md`·`/terms-prompt.md` `404`. `main` 반영 여부는 `git merge-base --is-ancestor <커밋> origin/main` 으로 확인.
+>
+> 비로그인 공개 경로: `/`, `/map`, `/explore`, `/feed`, `/feed/[id]`, `/search`, `/spot/[id]`, `/spot/[id]/feed`, `/my`(비로그인용 빈 화면, noindex). `/festivals/[id]`, `/creators/[id]` (`b0548c3`)
 > 로그인 필요(바텀시트): `/my/settings`, `/my/records`, `/my/saved`, `/record`, `/notification`, `/profile/edit`, `/followers`, `/following`, `/users` — 목록은 `src/lib/auth/session.ts` `PROTECTED_PATHS`
 
 ### 9.2 외부 답변 대기 — 답이 오면 할 일
@@ -440,7 +442,7 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 #### 2) 비로그인 모드 운영 반영
 
 - [x] PR 생성 → `main` 머지 → 운영 배포
-- [ ] `b0548c3`(축제·큐레이션 상세 공개) 배포
+- [x] `b0548c3`(축제·큐레이션 상세 공개) 배포 — 2026-09-22 운영 `/festivals/1` `200` 확인
 
 운영 브라우저 확인 (배포 전 확인 기록 없음 — curl 로 리다이렉트만 확인):
 
