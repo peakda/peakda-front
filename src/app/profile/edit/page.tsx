@@ -22,6 +22,11 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { compressImage } from '@/lib/utils/image'
+import { OtherPlantPicker } from '../_components/OtherPlantPicker'
+import {
+  readCustomFavoritePlantIds,
+  saveCustomFavoritePlantIds,
+} from '@/lib/utils/customFavoritePlants'
 
 const FLOWER_LIST: { label: string; value: FavoriteCategoryUpdateRequestCategoriesItem }[] = [
   { label: '동백꽃', value: 'CAMELLIA' },
@@ -47,6 +52,7 @@ export default function ProfileEditPage() {
   // 중복확인을 통과한 닉네임 — 현재 입력값과 일치할 때만 검증된 것으로 본다
   const [checkedNickname, setCheckedNickname] = useState<string | null>(null)
   const [selected, setSelected] = useState<FavoriteCategoryUpdateRequestCategoriesItem[]>([])
+  const [customPlantIds, setCustomPlantIds] = useState<number[]>([])
   const [preview, setPreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -55,6 +61,7 @@ export default function ProfileEditPage() {
     if (!user) return
     setNickname(user.nickname ?? '')
     setPreview(user.profileImageUrl ?? null)
+    setCustomPlantIds(readCustomFavoritePlantIds(user.id))
     // 응답 카테고리(문자열)와 값이 일치하는 선택지만 초기 선택으로 반영
     setSelected(
       FLOWER_LIST.filter((f) => user.favoriteCategories.includes(f.value)).map((f) => f.value)
@@ -85,6 +92,7 @@ export default function ProfileEditPage() {
       { data: { categories: selected } },
       {
         onSuccess: () => {
+          if (user) saveCustomFavoritePlantIds(user.id, customPlantIds)
           toast.success('관심 꽃이 저장되었어요.')
           router.push('/my')
         },
@@ -215,6 +223,7 @@ export default function ProfileEditPage() {
           <h3 className="text-[16px] font-semibold tracking-tight text-gray-700">
             어떤 꽃·자연이 좋으세요?
           </h3>
+          <span className="text-brand-primary">*</span>
           <p className="text-gray-500">(복수 선택)</p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -234,7 +243,11 @@ export default function ProfileEditPage() {
               />
             )
           })}
+          <OtherPlantPicker selectedIds={customPlantIds} onChange={setCustomPlantIds} />
         </div>
+        {customPlantIds.length > 0 && selected.length === 0 && (
+          <p className="text-sm text-rose-500">기본 꽃·자연도 1개 이상 선택해 주세요.</p>
+        )}
       </div>
 
       {/* 저장 */}
