@@ -1,4 +1,4 @@
-import type { SpotDetailResponse } from '@/api/facades/generated/peakdaApi.schemas'
+import type { BloomMapPin, SpotDetailResponse } from '@/api/facades/generated/peakdaApi.schemas'
 import type { BloomStageStatus } from '@/lib/utils/bloomStatus'
 import { SITE_NAME, SITE_URL } from '@/constants/site'
 import { formatPeakPeriod } from '@/lib/utils/bloomCalendar'
@@ -76,4 +76,17 @@ export function toSpotJsonLd(spot: SpotDetailResponse) {
 // <script type="application/ld+json"> 본문. 값에 '</script>' 가 섞여도 스크립트가 끝나지 않게 '<' 를 이스케이프한다.
 export function toJsonLdScript(data: object): string {
   return JSON.stringify(data).replace(/</g, '\\u003c')
+}
+
+// 백엔드 개화 카테고리 오분류(SEO_GEO_AUDIT.md 9.2-F)가 정리될 때까지 sitemap 에서 빼는 임시 기준.
+// 억새만 달린 명소는 2026-09-22 운영 기준 208곳 중 대부분이 광주·강진의 호텔·식당·상점이라 통째로 뺀다.
+// 다른 꽃에 섞인 음식점·숙박·시장은 이름으로 거른다. 페이지 자체는 그대로 열린다.
+const NON_ATTRACTION_NAME = /식당|분식|떡볶이|갈비|한우|카페|커피|호텔|모텔|펜션|시장|마트|아울렛/
+
+// sitemap 에 넣을 스팟 핀인지. 동네(LOCAL) 스팟은 사용자가 기록으로 만든 지점(아파트 정문 등)이라 뺀다.
+export function isSitemapSpotPin(pin: BloomMapPin): boolean {
+  if (pin.spotId == null || pin.type === 'LOCAL') return false
+  const isSilvergrassOnly =
+    pin.blooms.length > 0 && pin.blooms.every((bloom) => bloom.category === 'SILVERGRASS')
+  return !isSilvergrassOnly && !NON_ATTRACTION_NAME.test(pin.name)
 }

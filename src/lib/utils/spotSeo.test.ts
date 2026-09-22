@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
-import type { SpotDetailResponse } from '@/api/facades/generated/peakdaApi.schemas'
+import type { BloomMapPin, SpotDetailResponse } from '@/api/facades/generated/peakdaApi.schemas'
 import {
+  isSitemapSpotPin,
   toJsonLdScript,
   toSpotJsonLd,
   toSpotSeoDescription,
@@ -98,6 +99,43 @@ describe('lib/utils/spotSeo', () => {
       expect(place['@type']).toBe('Place')
       expect(place).not.toHaveProperty('address')
       expect(place).not.toHaveProperty('image')
+    })
+  })
+
+  describe('isSitemapSpotPin', () => {
+    const pin = (overrides: Partial<BloomMapPin>): BloomMapPin => ({
+      spotId: 22,
+      attractionId: 490,
+      type: 'ATTRACTION',
+      name: '경인아라뱃길 매화동산',
+      blooms: [{ category: 'PLUM', displayName: '매화', status: 'BEFORE_SEASON', confidence: 0.4 }],
+      ...overrides,
+    })
+    const silvergrass = {
+      category: 'SILVERGRASS',
+      displayName: '억새',
+      status: 'BEFORE_SEASON',
+      confidence: 0.4,
+    } as const
+
+    it('꽃 명소는 넣는다', () => {
+      expect(isSitemapSpotPin(pin({}))).toBe(true)
+    })
+
+    it('spotId 가 없거나 동네 스팟이면 뺀다', () => {
+      expect(isSitemapSpotPin(pin({ spotId: null }))).toBe(false)
+      expect(isSitemapSpotPin(pin({ type: 'LOCAL' }))).toBe(false)
+    })
+
+    it('억새만 달린 명소는 빼고, 다른 꽃과 함께면 넣는다', () => {
+      expect(isSitemapSpotPin(pin({ name: '올리브영 광주상무역점', blooms: [silvergrass] }))).toBe(false)
+      expect(isSitemapSpotPin(pin({ blooms: [...pin({}).blooms, silvergrass] }))).toBe(true)
+    })
+
+    it('음식점·숙박·시장 이름은 뺀다', () => {
+      expect(isSitemapSpotPin(pin({ name: '미진분식' }))).toBe(false)
+      expect(isSitemapSpotPin(pin({ name: '호텔 라온제나' }))).toBe(false)
+      expect(isSitemapSpotPin(pin({ name: '동대구시장' }))).toBe(false)
     })
   })
 
