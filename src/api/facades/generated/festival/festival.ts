@@ -52,7 +52,7 @@ export const getGetFestivalsByIdUrl = (id: number,) => {
 }
 
 /**
- * 발행된 에디토리얼이 없으면 `editorial = null`이고 축제 기본 정보만 내려간다. 상태 뱃지·기간 일수는 정규화된 시작·종료일로 서버가 계산한다. 표시 문자열은 프론트가 포맷한다.
+ * 비로그인으로 조회할 수 있다. 검색엔진·SNS 크롤러가 쿠키 없이 요청하는 공개 상세 화면이다. 발행된 에디토리얼이 없으면 `editorial = null`이고 축제 기본 정보만 내려간다. 초안 에디토리얼은 노출하지 않는다. 상태 뱃지·기간 일수는 정규화된 시작·종료일로 서버가 계산한다. 표시 문자열은 프론트가 포맷한다.
  * @summary 축제 상세
  */
 export const getFestivalsById = async (id: number, options?: RequestInit): Promise<getFestivalsByIdResponse> => {

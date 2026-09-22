@@ -8,6 +8,7 @@ import { IconBtn } from '@/components/ui/button/IconBtn'
 import { CardBadge } from '@/components/ui/card/CardBadge'
 import { Tag } from '@/components/ui/display/Tag'
 import { SPOTProps } from '@/app/search/_components/SpotPanel'
+import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
 
 interface Props {
   spot: SPOTProps
@@ -24,7 +25,13 @@ export function SpotCard({ spot }: Props) {
     <>
       <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-gray-200">
         {spot.imageUrl && (
-          <Image src={spot.imageUrl} alt={spot.name} fill className="object-cover" sizes="80px" />
+          <Image
+            src={toHttpsImageUrl(spot.imageUrl) ?? spot.imageUrl}
+            alt={spot.name}
+            fill
+            className="object-cover"
+            sizes="80px"
+          />
         )}
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">

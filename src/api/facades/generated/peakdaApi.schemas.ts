@@ -823,12 +823,20 @@ export interface PlantSummary {
 }
 
 /**
- * 사진 항목 — url 은 응답 시점 발급 presigned URL
+ * 사이즈 variant 별 URL. thumbnail=256px(정사각 크롭), medium=1080px, main=1600px. 아직 보유하지 않은 variant 는 main URL 로 채워진다.
+ */
+export type PhotoEntryVariants = {[key: string]: string};
+
+/**
+ * 사진 항목
  */
 export interface PhotoEntry {
   objectKey: string;
+  /** 원본(1600px) URL. CDN 공개 주소가 설정돼 있으면 만료가 없고, 아니면 응답 시점 발급 presigned URL */
   url: string;
   sortOrder: number;
+  /** 사이즈 variant 별 URL. thumbnail=256px(정사각 크롭), medium=1080px, main=1600px. 아직 보유하지 않은 variant 는 main URL 로 채워진다. */
+  variants: PhotoEntryVariants;
 }
 
 /**
@@ -957,7 +965,7 @@ export interface SpotRecordPhotoUploadForm {
 export interface UploadedSpotRecordPhoto {
   /** ObjectStorage 저장 key. 기록 생성 시 photoKeys 로 그대로 전달 */
   objectKey: string;
-  /** 즉시 미리보기용 presigned URL (만료 있음, DB 저장 금지) */
+  /** 즉시 미리보기용 원본 URL. DB 에는 objectKey 만 저장한다. */
   previewUrl: string;
 }
 
@@ -1130,6 +1138,7 @@ export type BloomStatus = typeof BloomStatus[keyof typeof BloomStatus];
 
 
 export const BloomStatus = {
+  BEFORE_SEASON: 'BEFORE_SEASON',
   PREPARING: 'PREPARING',
   STARTED: 'STARTED',
   PEAK: 'PEAK',
@@ -1555,6 +1564,33 @@ export interface AppTokenRefreshRequest {
 }
 
 /**
+ * 기록 사진 variant 백필 실행 결과
+ */
+export interface SpotRecordPhotoBackfillResponse {
+  /** 이번 배치에서 처리를 시도한 사진 수 */
+  scanned: number;
+  /** variant 를 새로 만들어 채운 사진 수 */
+  updated: number;
+  /** 원본을 읽지 못하는 등의 이유로 건너뛴 사진 수 */
+  failed: number;
+  /** 아직 백필되지 않고 남은 사진 수. 0 이 되면 완료 */
+  remaining: number;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseSpotRecordPhotoBackfillResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: SpotRecordPhotoBackfillResponse | null;
+}
+
+/**
  * 큐레이션 이미지 업로드 multipart form
  */
 export interface CurationImageUploadForm {
@@ -1568,7 +1604,7 @@ export interface CurationImageUploadForm {
 export interface UploadedImageResponse {
   /** main 이미지 object key. 큐레이션 또는 축제 에디토리얼 저장 요청에 그대로 전달한다. */
   objectKey: string;
-  /** 화면 미리보기용 presigned URL. 만료되므로 DB에 저장하지 않는다. */
+  /** 화면 미리보기용 URL. DB에는 objectKey 만 저장한다. */
   previewUrl: string;
 }
 
@@ -2125,6 +2161,11 @@ export interface SpotRecordSummaryResponse {
 }
 
 /**
+ * 프로필 이미지의 사이즈 variant 별 URL. thumbnail=128px, main=512px. 외부 OAuth 제공자가 준 이미지는 고를 사이즈가 없어 빈 객체다.
+ */
+export type UserProfileResponseProfileImageVariants = {[key: string]: string};
+
+/**
  * 타인 프로필 조회 (SCR-024h/i)
  */
 export interface UserProfileResponse {
@@ -2137,6 +2178,8 @@ export interface UserProfileResponse {
      * @nullable
      */
   profileImageUrl?: string | null;
+  /** 프로필 이미지의 사이즈 variant 별 URL. thumbnail=128px, main=512px. 외부 OAuth 제공자가 준 이미지는 고를 사이즈가 없어 빈 객체다. */
+  profileImageVariants: UserProfileResponseProfileImageVariants;
   /** 통계 */
   stats: Stats;
   /** 관심 꽃 카테고리 (읽기전용) */
@@ -2163,6 +2206,11 @@ export interface ApiResponseUserProfileResponse {
 }
 
 /**
+ * 프로필 이미지의 사이즈 variant 별 URL. thumbnail=128px, main=512px. 외부 OAuth 제공자가 준 이미지는 고를 사이즈가 없어 빈 객체다.
+ */
+export type MyPageResponseProfileImageVariants = {[key: string]: string};
+
+/**
  * 마이페이지 집계 (SCR-024)
  */
 export interface MyPageResponse {
@@ -2175,6 +2223,8 @@ export interface MyPageResponse {
      * @nullable
      */
   profileImageUrl?: string | null;
+  /** 프로필 이미지의 사이즈 variant 별 URL. thumbnail=128px, main=512px. 외부 OAuth 제공자가 준 이미지는 고를 사이즈가 없어 빈 객체다. */
+  profileImageVariants: MyPageResponseProfileImageVariants;
   /** 통계 */
   stats: Stats;
   /** 관심 꽃 카테고리 */
@@ -2286,6 +2336,7 @@ export type BloomBannerStatus = typeof BloomBannerStatus[keyof typeof BloomBanne
 
 
 export const BloomBannerStatus = {
+  BEFORE_SEASON: 'BEFORE_SEASON',
   PREPARING: 'PREPARING',
   STARTED: 'STARTED',
   PEAK: 'PEAK',
@@ -2451,12 +2502,13 @@ export const BloomBadgeCategory = {
 } as const;
 
 /**
- * PREPARING/STARTED/PEAK 중 하나. ENDED 는 이 응답에서 제외된다
+ * BEFORE_SEASON=개화전, PREPARING=이르다, STARTED=시작, PEAK=절정, ENDED=늦었다
  */
 export type BloomBadgeStatus = typeof BloomBadgeStatus[keyof typeof BloomBadgeStatus];
 
 
 export const BloomBadgeStatus = {
+  BEFORE_SEASON: 'BEFORE_SEASON',
   PREPARING: 'PREPARING',
   STARTED: 'STARTED',
   PEAK: 'PEAK',
@@ -2471,7 +2523,7 @@ export interface BloomBadge {
   category: BloomBadgeCategory;
   /** 카테고리 표시명 */
   displayName: string;
-  /** PREPARING/STARTED/PEAK 중 하나. ENDED 는 이 응답에서 제외된다 */
+  /** BEFORE_SEASON=개화전, PREPARING=이르다, STARTED=시작, PEAK=절정, ENDED=늦었다 */
   status: BloomBadgeStatus;
   /**
      * 절정 지속일 (양 끝 포함). 날짜가 없으면 null
@@ -2599,12 +2651,13 @@ export const BloomSlotCategory = {
 } as const;
 
 /**
- * 현재 상태 (PREPARING/STARTED/PEAK)
+ * 현재 상태. BEFORE_SEASON=개화전, PREPARING=이르다, STARTED=시작, PEAK=절정, ENDED=늦었다
  */
 export type BloomSlotStatus = typeof BloomSlotStatus[keyof typeof BloomSlotStatus];
 
 
 export const BloomSlotStatus = {
+  BEFORE_SEASON: 'BEFORE_SEASON',
   PREPARING: 'PREPARING',
   STARTED: 'STARTED',
   PEAK: 'PEAK',
@@ -2619,7 +2672,7 @@ export interface BloomSlot {
   category: BloomSlotCategory;
   /** 카테고리 표시명 */
   displayName: string;
-  /** 현재 상태 (PREPARING/STARTED/PEAK) */
+  /** 현재 상태. BEFORE_SEASON=개화전, PREPARING=이르다, STARTED=시작, PEAK=절정, ENDED=늦었다 */
   status: BloomSlotStatus;
   /** 신뢰도 (0~1) */
   confidence: number;
@@ -2680,7 +2733,7 @@ export interface BloomMapItem {
 }
 
 /**
- * 지도 영역 내 Spot 핀별 개화 상태 (핀 3단계, ENDED 제외)
+ * 지도 영역 내 Spot 핀별 개화 상태 (핀 5단계)
  */
 export interface BloomMapResponse {
   /**
@@ -2836,6 +2889,7 @@ export type BloomCalendarDayStatus = typeof BloomCalendarDayStatus[keyof typeof 
 
 
 export const BloomCalendarDayStatus = {
+  BEFORE_SEASON: 'BEFORE_SEASON',
   PREPARING: 'PREPARING',
   STARTED: 'STARTED',
   PEAK: 'PEAK',
@@ -3506,6 +3560,7 @@ export type ExploreSpotItemStatus = typeof ExploreSpotItemStatus[keyof typeof Ex
 
 
 export const ExploreSpotItemStatus = {
+  BEFORE_SEASON: 'BEFORE_SEASON',
   PREPARING: 'PREPARING',
   STARTED: 'STARTED',
   PEAK: 'PEAK',
@@ -4025,6 +4080,11 @@ export const UserInfoResponseFavoriteCategoriesItem = {
 } as const;
 
 /**
+ * 프로필 이미지의 사이즈 variant 별 URL. thumbnail=128px, main=512px. 외부 OAuth 제공자가 준 이미지는 고를 사이즈가 없어 빈 객체다.
+ */
+export type UserInfoResponseProfileImageVariants = {[key: string]: string};
+
+/**
  * 현재 로그인한 사용자 정보
  */
 export interface UserInfoResponse {
@@ -4041,10 +4101,12 @@ export interface UserInfoResponse {
      */
   nickname?: string | null;
   /**
-     * 프로필 이미지 URL. OAuth2 제공자가 준 외부 URL 그대로이거나, 우리 버킷 객체의 presigned URL (만료 있음)
+     * 프로필 이미지 URL(512px). OAuth2 제공자가 준 외부 URL 그대로이거나, 우리 버킷 객체의 URL
      * @nullable
      */
   profileImageUrl?: string | null;
+  /** 프로필 이미지의 사이즈 variant 별 URL. thumbnail=128px, main=512px. 외부 OAuth 제공자가 준 이미지는 고를 사이즈가 없어 빈 객체다. */
+  profileImageVariants: UserInfoResponseProfileImageVariants;
   /** 사용자 상태 */
   status: UserInfoResponseStatus;
   /** 관심 꽃 카테고리 목록 */
@@ -5249,6 +5311,13 @@ export const DeleteFeedByIdReactionsReactionType = {
   SMILE: 'SMILE',
 } as const;
 
+export type PostAdminSpotRecordsPhotosBackfillVariantsParams = {
+/**
+ * 한 번에 처리할 사진 수 (1~200)
+ */
+batchSize?: number;
+};
+
 export type GetAdminNoticesParams = {
 /**
  * 공지 발송 상태
@@ -5307,7 +5376,7 @@ category?: GetSpotsPreviewCategory;
  */
 categories?: GetSpotsPreviewCategoriesItem[];
 /**
- * 지금 상태 필터 (PEAK=절정, STARTED=피기시작, PREPARING=이르다)
+ * 지금 상태 필터 (BEFORE_SEASON=개화전, PREPARING=이르다, STARTED=시작, PEAK=절정, ENDED=늦었다)
  */
 status?: GetSpotsPreviewStatus;
 /**
@@ -5366,6 +5435,7 @@ export type GetSpotsPreviewStatus = typeof GetSpotsPreviewStatus[keyof typeof Ge
 
 
 export const GetSpotsPreviewStatus = {
+  BEFORE_SEASON: 'BEFORE_SEASON',
   PREPARING: 'PREPARING',
   STARTED: 'STARTED',
   PEAK: 'PEAK',
@@ -5457,6 +5527,7 @@ export type GetSeasonalBloomsStatus = typeof GetSeasonalBloomsStatus[keyof typeo
 
 
 export const GetSeasonalBloomsStatus = {
+  BEFORE_SEASON: 'BEFORE_SEASON',
   PREPARING: 'PREPARING',
   STARTED: 'STARTED',
   PEAK: 'PEAK',

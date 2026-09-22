@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useQueryClient } from '@tanstack/react-query'
 import { markNotificationReadApi } from '@/api/facades/notification'
 import { track } from '@/lib/analytics'
-import { AUTH_MARKER_SET_EVENT, hasAuthMarker } from '@/lib/auth/session'
+import { AUTH_MARKER_CHANGED_EVENT, hasAuthMarker } from '@/lib/auth/session'
 import { APP_SETTINGS_CHANGED_EVENT, loadAppSettings } from '@/lib/utils/appSettings'
 import { startPushNotifications } from '@/lib/push/pushNotifications'
 import { resolvePushNotificationTarget } from '@/lib/utils/notificationToAlarm'
@@ -53,10 +53,10 @@ export function PushNotificationManager() {
     }
 
     start()
-    window.addEventListener(AUTH_MARKER_SET_EVENT, start)
+    window.addEventListener(AUTH_MARKER_CHANGED_EVENT, start)
     window.addEventListener(APP_SETTINGS_CHANGED_EVENT, start)
     return () => {
-      window.removeEventListener(AUTH_MARKER_SET_EVENT, start)
+      window.removeEventListener(AUTH_MARKER_CHANGED_EVENT, start)
       window.removeEventListener(APP_SETTINGS_CHANGED_EVENT, start)
     }
   }, [queryClient, router])

@@ -27,6 +27,7 @@ import { type BloomStageStatus, toStatusBadge } from '@/lib/utils/bloomStatus'
 import { BLOOM_CATEGORY_EMOJI, formatPeakPeriod, peakHeadline } from '@/lib/utils/bloomCalendar'
 import { formatMonthDay } from '@/lib/utils/explore'
 import { cn } from '@/lib/utils/cn'
+import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
 
 // 캘린더(일별 타임라인)가 없으면 '이번 주말이 딱이에요' 판정을 못 하므로
 // 상세 응답 배너의 현재 상태만으로 문구를 대체한다.
@@ -143,7 +144,7 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
       <div className="relative h-64 bg-gray-200">
         {spot.representativeImageUrl && (
           <Image
-            src={spot.representativeImageUrl}
+            src={toHttpsImageUrl(spot.representativeImageUrl) ?? spot.representativeImageUrl}
             alt={spot.name}
             fill
             priority
@@ -169,7 +170,9 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
                 type="button"
                 aria-label="만개 알림 받기"
                 aria-pressed={favorited && notifyEnabled}
-                onClick={() => requireLogin(handleNotify, '알림 설정을 하고 싶다면 로그인이 필요해요.')}
+                onClick={() =>
+                  requireLogin(handleNotify, '알림 설정을 하고 싶다면 로그인이 필요해요.')
+                }
                 disabled={updateNotify.isPending}
               >
                 <Bell
