@@ -4,7 +4,8 @@
 
 export const AUTH_MARKER = 'peakda_auth'
 export const RETURN_TO = 'peakda_return_to'
-export const AUTH_MARKER_SET_EVENT = 'peakda:auth-marker-set'
+// 마커가 심기거나 지워질 때 모두 발생한다 — 구독자(useIsLoggedIn 등)가 로그아웃도 알아야 한다.
+export const AUTH_MARKER_CHANGED_EVENT = 'peakda:auth-marker-changed'
 
 // 이 쿼리가 붙은 주소로 오면 로그인 바텀시트를 연다 (미들웨어가 막힌 경로를 /map?login=1 로 보낸다).
 export const LOGIN_SHEET_QUERY = 'login'
@@ -37,7 +38,7 @@ const RETURN_TO_MAX_AGE = 600 // 10분
 export function setAuthMarker(): void {
   if (typeof document === 'undefined') return
   document.cookie = `${AUTH_MARKER}=1; path=/; max-age=${MARKER_MAX_AGE}; samesite=lax`
-  window.dispatchEvent(new Event(AUTH_MARKER_SET_EVENT))
+  window.dispatchEvent(new Event(AUTH_MARKER_CHANGED_EVENT))
 }
 
 export function hasAuthMarker(): boolean {
@@ -48,6 +49,7 @@ export function hasAuthMarker(): boolean {
 export function clearAuthMarker(): void {
   if (typeof document === 'undefined') return
   document.cookie = `${AUTH_MARKER}=; path=/; max-age=0; samesite=lax`
+  window.dispatchEvent(new Event(AUTH_MARKER_CHANGED_EVENT))
 }
 
 export function setReturnTo(path: string): void {
