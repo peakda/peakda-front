@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { feedDetailApi } from '@/api/facades/feed'
 import { BASE_OPEN_GRAPH, DEFAULT_OG_IMAGE, SITE_BRAND_NAME } from '@/constants/site'
 import { isApiErrorStatus } from '@/lib/utils/apiError'
+import { recordPhotoUrl } from '@/lib/utils/recordPhotoUrl'
 import { FeedDetailClient } from './_components/FeedDetailClient'
 
 interface FeedDetailPageProps {
@@ -49,7 +50,7 @@ export async function generateMetadata({ params }: FeedDetailPageProps): Promise
       title: `${title} | ${SITE_BRAND_NAME}`,
       description,
       url: path,
-      images: [DEFAULT_OG_IMAGE],
+      images: [record.photos[0] ? recordPhotoUrl(record.photos[0], 'medium') : DEFAULT_OG_IMAGE],
     },
   }
 }

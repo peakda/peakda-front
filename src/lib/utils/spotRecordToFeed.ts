@@ -5,6 +5,7 @@
 } from '@/api/facades/generated/peakdaApi.schemas'
 import type { FeedCardProps } from '@/components/ui/card/FeedCard'
 import type { MyRecord } from '@/app/my/_components/MyRecordSection'
+import { recordPhotoUrl } from '@/lib/utils/recordPhotoUrl'
 
 const BLOOM_LABEL = {
   EARLY: '이르다',
@@ -65,9 +66,9 @@ export function toFeedCardProps(
 }
 
 function toSummaryImages(record: SummaryWithPhotos): string[] {
-  const urls = record.photos?.map((photo) => photo.url) ?? []
+  const urls = record.photos?.map((photo) => recordPhotoUrl(photo, 'medium')) ?? []
   if (urls.length > 0) return urls
-  return record.coverPhoto?.url ? [record.coverPhoto.url] : ['/images/explore.png']
+  return record.coverPhoto ? [recordPhotoUrl(record.coverPhoto, 'medium')] : ['/images/explore.png']
 }
 
 // SpotRecordResponse(상세) → FeedCard props
@@ -86,7 +87,10 @@ export function detailToFeedCardProps(
     visitDate: toDot(record.visitedDate ?? record.createdAt),
     statusLabel: record.bloomStage ? BLOOM_LABEL[record.bloomStage] : '상태 미정',
     statusVariant: record.bloomStage ? BLOOM_VARIANT[record.bloomStage] : 'secondary',
-    images: record.photos.length > 0 ? record.photos.map((p) => p.url) : ['/images/explore.png'],
+    images:
+      record.photos.length > 0
+        ? record.photos.map((p) => recordPhotoUrl(p, 'medium'))
+        : ['/images/explore.png'],
     flowers: record.plants.map((plant) => ({ emoji: '🌸', label: plant.name })),
     content: record.memo ?? '',
     reactions: record.reactions,
@@ -99,7 +103,9 @@ export function detailToFeedCardProps(
 export function toMyRecordThumb(record: SpotRecordSummaryResponse): MyRecord {
   return {
     id: record.id,
-    image: record.coverPhoto?.url ?? '/images/explore.png',
+    image: record.coverPhoto
+      ? recordPhotoUrl(record.coverPhoto, 'thumbnail')
+      : '/images/explore.png',
     date: toDot(record.visitedDate ?? record.createdAt),
   }
 }

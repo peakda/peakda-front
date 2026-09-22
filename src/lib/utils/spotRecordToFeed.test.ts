@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import type { PhotoEntry, SpotRecordSummaryResponse } from '@/api/facades/generated/peakdaApi.schemas'
-import { toFeedCardProps } from '@/lib/utils/spotRecordToFeed'
+import type {
+  PhotoEntry,
+  SpotRecordSummaryResponse,
+} from '@/api/facades/generated/peakdaApi.schemas'
+import { toFeedCardProps, toMyRecordThumb } from '@/lib/utils/spotRecordToFeed'
 
 const PLACEHOLDER = '/images/explore.png'
 
 function photo(url: string, sortOrder: number): PhotoEntry {
-  return { objectKey: `key-${sortOrder}`, url, sortOrder }
+  return { objectKey: `key-${sortOrder}`, url, sortOrder, variants: {} }
 }
 
 function summary(overrides: Partial<SpotRecordSummaryResponse> = {}): SpotRecordSummaryResponse {
@@ -24,6 +27,16 @@ function summary(overrides: Partial<SpotRecordSummaryResponse> = {}): SpotRecord
   }
 }
 
+it('record photo variants select medium for feed and thumbnail for grid', () => {
+  const cover = {
+    ...photo('main.jpg', 0),
+    variants: { thumbnail: 'thumbnail.jpg', medium: 'medium.jpg', main: 'main.jpg' },
+  }
+  const record = summary({ coverPhoto: cover, photos: [cover] })
+
+  expect(toFeedCardProps(record).images).toEqual(['medium.jpg'])
+  expect(toMyRecordThumb(record).image).toBe('thumbnail.jpg')
+})
 describe('toFeedCardProps 의 images', () => {
   // 백엔드가 photos 를 배포하기 전후 모두 동작해야 한다.
   it('photos 가 없는 기존 응답은 대표 사진 한 장을 쓴다', () => {

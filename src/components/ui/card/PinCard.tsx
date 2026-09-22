@@ -3,6 +3,7 @@ import { Tag } from '@/components/ui/display/Tag'
 import { PinText } from '@/components/ui/display/PinText'
 import { SingleImageProps } from '@/types/types'
 import Image from 'next/image'
+import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
 
 export function PinCard({
   imageUrl,
@@ -18,7 +19,13 @@ export function PinCard({
       {/* 상단 이미지 영역 */}
       <div className="relative h-48 bg-gray-200">
         {imageUrl && (
-          <Image src={imageUrl} alt={title} fill sizes="(max-width: 430px) 100vw, 430px" className="object-cover" />
+          <Image
+            src={toHttpsImageUrl(imageUrl) ?? imageUrl}
+            alt={title}
+            fill
+            sizes="(max-width: 430px) 100vw, 430px"
+            className="object-cover"
+          />
         )}
 
         {/* 우측 상단 품절/상태 배지 */}
