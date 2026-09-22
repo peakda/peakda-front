@@ -516,13 +516,13 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 
 선행: `b0548c3` 배포. 운영 API 는 쿠키 없이 `GET /api/festivals/{id}`·`/api/curations/{id}`·`/api/explore/festivals`·`/api/curations` 모두 `200` (2026-09-16).
 
-- [ ] `/festivals/[id]` — 스팟 상세(`src/app/spot/[id]/page.tsx`)와 같은 구조로 나눈다
+- [x] 2026-09-22 `/festivals/[id]` — 서버 조회·metadata·canonical·404·og:image(에디토리얼 대표 이미지, CDN 영구 URL) 적용. **JSON-LD(`Event`·`BreadcrumbList`)는 아직** — 스팟 상세(`src/app/spot/[id]/page.tsx`)와 같은 구조로 나눈다
   - `page.tsx` 서버: `cache` 로 묶은 조회 + `generateMetadata` + 없는 id 는 `notFound()`
   - 지금의 `'use client'` 본문은 `_components/FestivalDetailClient.tsx` 로 이동
   - 제목: `{축제명} 일정·장소` (템플릿으로 `… | Peakda`), 설명: 기간·장소·진행 상태
   - canonical `/festivals/{id}`. og:image 는 대표 이미지 URL 이 만료되지 않는지 확인 후 사용, 아니면 기본 카드 (9.2-E 와 같은 문제)
   - JSON-LD: `Event`(name, startDate, endDate, eventStatus, location = `Place`(name, address, geo), url) + `BreadcrumbList`(Peakda > 탐색 > 축제명)
-- [ ] `/creators/[id]` (큐레이션) — 같은 구조. 제목은 큐레이션 제목, 설명은 부제·주차 라벨
+- [x] 2026-09-22 `/creators/[id]` (큐레이션) — 같은 구조로 적용 (JSON-LD 없음). 제목은 큐레이션 제목, 설명은 부제·주차 라벨
 - [ ] `src/app/sitemap.ts` 에 추가 — 축제 id 는 `GET /api/explore/festivals`, 큐레이션 id 는 `GET /api/curations`. 목록 하나가 실패해도 나머지는 낸다 (스팟과 같은 방식)
 - [ ] 검증: 없는 id `404`, 로컬 빌드 후 curl 로 제목·설명·canonical·JSON-LD, Rich Results Test (Event 리치 결과는 한국에서 보장되지 않음 — 3.2)
 
