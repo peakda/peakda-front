@@ -73,6 +73,7 @@ export function Drawer() {
   const visibleAppliedFor = useFilterStore((s) => s.visibleAppliedFor)
   const applyDraft = useFilterStore((s) => s.applyDraft)
   const syncDraft = useFilterStore((s) => s.syncDraft)
+  const keepFirstDraftCategory = useFilterStore((s) => s.keepFirstDraftCategory)
 
   const [isLoadingPreview, setIsLoadingPreview] = useState(false)
   // 버튼을 눌러 필터를 적용한 뒤, 지도 조회가 끝나면 목록을 연다.
@@ -91,8 +92,11 @@ export function Drawer() {
 
   // 드로어를 열 때마다 applied 기준으로 되돌려, 지난번에 버리고 닫은 선택이 남지 않게 한다.
   useEffect(() => {
-    if (isOpen && isFilterMode) syncDraft()
-  }, [isOpen, isFilterMode, syncDraft])
+    if (isOpen && isFilterMode) {
+      syncDraft()
+      if (type === 'flower-filter') keepFirstDraftCategory()
+    }
+  }, [isOpen, isFilterMode, type, syncDraft, keepFirstDraftCategory])
 
   const openPreviewList = useCallback(async () => {
     setIsLoadingPreview(true)

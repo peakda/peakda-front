@@ -118,19 +118,29 @@ export default function SearchPage() {
       ) : (
         /* 검색 결과 */
         <div onClickCapture={() => submitSearch(query)}>
-          <Tabs tabs={SEARCH_TABS} defaultValue={SEARCH_TABS[0].value} onValueChange={handleTabChange}>
+          <Tabs
+            tabs={SEARCH_TABS}
+            defaultValue={SEARCH_TABS[0].value}
+            onValueChange={handleTabChange}
+          >
             <span className="px-4 pt-2 pb-2 text-xs text-gray-400">
               스팟 결과 <span className="text-text-secondary font-medium">{spotTotal}</span>개
             </span>
             <TabPanels tabs={SEARCH_TABS} className="mt-0">
               <SpotPanel
-                spots={spots}
+                spots={keyword === query.trim() ? spots : []}
+                isLoading={keyword !== query.trim() || spotQuery.isPending}
+                isError={spotQuery.isError}
+                onRetry={() => void spotQuery.refetch()}
                 onLoadMore={spotQuery.fetchNextPage}
                 hasMore={spotQuery.hasNextPage && !spotQuery.isFetchingNextPage}
                 isLoadingMore={spotQuery.isFetchingNextPage}
               />
               <UserPanel
-                users={users}
+                users={keyword === query.trim() ? users : []}
+                isLoading={isLoggedIn && (keyword !== query.trim() || userQuery.isPending)}
+                isError={userQuery.isError}
+                onRetry={() => void userQuery.refetch()}
                 onLoadMore={userQuery.fetchNextPage}
                 hasMore={userQuery.hasNextPage && !userQuery.isFetchingNextPage}
                 isLoadingMore={userQuery.isFetchingNextPage}

@@ -12,6 +12,7 @@ import { useDrawerStore } from '@/stores/useDrawerStore'
 import { useFilterStore } from '@/stores/useFilterStore'
 import { Drawer } from '@/components/ui/layout/Drawer'
 import { Nav } from '@/components/ui/layout/Nav'
+import { QueryFeedback } from '@/components/ui/display/QueryFeedback'
 import { useHomeSuggestion } from '@/api/facades/home'
 import { useExploreCuration } from '@/api/facades/explore'
 import type { ExploreSpotItem } from '@/api/facades/generated/peakdaApi.schemas'
@@ -71,7 +72,12 @@ export default function ExplorePage() {
   const category = useFilterStore((state) => state.applied.categories[0])
 
   // 절정/다음 주/축제/큐레이션 4개 섹션이 한 번에 내려온다.
-  const { data: explore, isLoading } = useExploreCuration({ category: category ?? undefined })
+  const {
+    data: explore,
+    isLoading,
+    isError,
+    refetch,
+  } = useExploreCuration({ category: category ?? undefined })
   const peakNow = explore?.peakNow ?? []
   const nextWeek = explore?.nextWeek ?? []
   const festivals = explore?.festivals ?? []
@@ -104,113 +110,120 @@ export default function ExplorePage() {
         placeholder={searchPlaceholder}
       />
 
-      {/* 지금이 절정이에요 */}
-      <section className="mt-2">
-        <SectionHeader
-          title="지금이 절정이에요"
-          href={peakNow.length > 0 ? '/explore/spots?section=PEAK_NOW' : undefined}
-        />
-        {peakNow.length === 0 ? (
-          !isLoading && <EmptySection text="지금 절정인 명소가 없어요" />
-        ) : (
-          <Carousel className="px-4 pb-4">
-            {peakNow.map((item) => (
-              <CarouselItem
-                key={`${item.attractionId}-${item.category}`}
-                className="flex-[0_0_72%] pr-3"
-              >
-                <Link href={`/spot/${item.spotId}`} className="block">
-                  <ExplorCard
-                    type="peak"
-                    className="w-full"
-                    image={item.thumbnailUrl ?? PLACEHOLDER_IMAGE}
-                    name={item.name}
-                    description={toPeakDescription(item)}
+      {isLoading && <QueryFeedback state="loading" />}
+      {isError && !explore && <QueryFeedback state="error" onRetry={() => void refetch()} />}
+
+      {!isLoading && (!isError || explore) && (
+        <>
+          {/* 지금이 절정이에요 */}
+          <section className="mt-2">
+            <SectionHeader
+              title="지금이 절정이에요"
+              href={peakNow.length > 0 ? '/explore/spots?section=PEAK_NOW' : undefined}
+            />
+            {peakNow.length === 0 ? (
+              <EmptySection text="지금 절정인 명소가 없어요" />
+            ) : (
+              <Carousel className="px-4 pb-4">
+                {peakNow.map((item) => (
+                  <CarouselItem
+                    key={`${item.attractionId}-${item.category}`}
+                    className="flex-[0_0_72%] pr-3"
+                  >
+                    <Link href={`/spot/${item.spotId}`} className="block">
+                      <ExplorCard
+                        type="peak"
+                        className="w-full"
+                        image={item.thumbnailUrl ?? PLACEHOLDER_IMAGE}
+                        name={item.name}
+                        description={toPeakDescription(item)}
+                      />
+                    </Link>
+                  </CarouselItem>
+                ))}
+              </Carousel>
+            )}
+          </section>
+
+          {/* 다음 주에 가면 좋을 곳 */}
+          <section className="mt-2">
+            <SectionHeader
+              title="다음 주에 가면 좋을 곳"
+              href={nextWeek.length > 0 ? '/explore/spots?section=NEXT_WEEK' : undefined}
+            />
+            {nextWeek.length === 0 ? (
+              <EmptySection text="다음 주에 개화가 예상되는 곳이 없어요" />
+            ) : (
+              <ul className="divide-y divide-gray-100">
+                {nextWeek.map((item) => (
+                  <SpotCard
+                    key={`${item.attractionId}-${item.category}`}
+                    spot={toExploreSpotProps(item)}
                   />
-                </Link>
-              </CarouselItem>
-            ))}
-          </Carousel>
-        )}
-      </section>
+                ))}
+              </ul>
+            )}
+          </section>
 
-      {/* 다음 주에 가면 좋을 곳 */}
-      <section className="mt-2">
-        <SectionHeader
-          title="다음 주에 가면 좋을 곳"
-          href={nextWeek.length > 0 ? '/explore/spots?section=NEXT_WEEK' : undefined}
-        />
-        {nextWeek.length === 0 ? (
-          !isLoading && <EmptySection text="다음 주에 개화가 예상되는 곳이 없어요" />
-        ) : (
-          <ul className="divide-y divide-gray-100">
-            {nextWeek.map((item) => (
-              <SpotCard
-                key={`${item.attractionId}-${item.category}`}
-                spot={toExploreSpotProps(item)}
-              />
-            ))}
-          </ul>
-        )}
-      </section>
+          {/* 요즘 뜨는 축제 */}
+          <section className="mt-2">
+            <SectionHeader
+              title="요즘 뜨는 축제"
+              href={festivals.length > 0 ? '/explore/festivals' : undefined}
+            />
+            {festivals.length === 0 ? (
+              <EmptySection text="진행 중인 축제가 없어요" />
+            ) : (
+              <Carousel className="px-4 pb-4">
+                {festivals.map((item) => {
+                  const status = toFestivalStatus(item)
+                  return (
+                    <CarouselItem key={item.festivalId} className="flex-[0_0_72%] pr-3">
+                      <Link href={`/festivals/${item.festivalId}`} className="block">
+                        <ExplorCard
+                          type="festival"
+                          className="w-full"
+                          image={item.thumbnailUrl ?? PLACEHOLDER_IMAGE}
+                          name={item.name}
+                          description={toFestivalDescription(item)}
+                          dateRange={toFestivalDateRange(item)}
+                          status={status.label}
+                          statusVariant={status.variant}
+                        />
+                      </Link>
+                    </CarouselItem>
+                  )
+                })}
+              </Carousel>
+            )}
+          </section>
 
-      {/* 요즘 뜨는 축제 */}
-      <section className="mt-2">
-        <SectionHeader
-          title="요즘 뜨는 축제"
-          href={festivals.length > 0 ? '/explore/festivals' : undefined}
-        />
-        {festivals.length === 0 ? (
-          !isLoading && <EmptySection text="진행 중인 축제가 없어요" />
-        ) : (
-          <Carousel className="px-4 pb-4">
-            {festivals.map((item) => {
-              const status = toFestivalStatus(item)
-              return (
-                <CarouselItem key={item.festivalId} className="flex-[0_0_72%] pr-3">
-                  <Link href={`/festivals/${item.festivalId}`} className="block">
-                    <ExplorCard
-                      type="festival"
-                      className="w-full"
-                      image={item.thumbnailUrl ?? PLACEHOLDER_IMAGE}
-                      name={item.name}
-                      description={toFestivalDescription(item)}
-                      dateRange={toFestivalDateRange(item)}
-                      status={status.label}
-                      statusVariant={status.variant}
-                    />
-                  </Link>
-                </CarouselItem>
-              )
-            })}
-          </Carousel>
-        )}
-      </section>
-
-      {/* 이번 주말 어디로 갈까요? — 에디터 큐레이션 */}
-      <section className="mt-2">
-        <SectionHeader title="이번 주말 어디로 갈까요?" />
-        {curations.length === 0 ? (
-          !isLoading && <EmptySection text="아직 발행된 큐레이션이 없어요" />
-        ) : (
-          // 시안대로 다음 카드가 살짝 보이게 두어 더 있다는 걸 알린다(슬라이드 폭 72%).
-          <Carousel className="px-4 pb-4">
-            {curations.map((item) => (
-              <CarouselItem key={item.id} className="flex-[0_0_72%] pr-3">
-                <Link href={`/creators/${item.id}`} className="block">
-                  <ExplorCard
-                    type="course"
-                    className="w-full"
-                    image={item.heroImageUrl ?? PLACEHOLDER_IMAGE}
-                    title={item.title}
-                    subtitle={item.subtitle ?? item.weekLabel}
-                  />
-                </Link>
-              </CarouselItem>
-            ))}
-          </Carousel>
-        )}
-      </section>
+          {/* 이번 주말 어디로 갈까요? — 에디터 큐레이션 */}
+          <section className="mt-2">
+            <SectionHeader title="이번 주말 어디로 갈까요?" />
+            {curations.length === 0 ? (
+              <EmptySection text="아직 발행된 큐레이션이 없어요" />
+            ) : (
+              // 시안대로 다음 카드가 살짝 보이게 두어 더 있다는 걸 알린다(슬라이드 폭 72%).
+              <Carousel className="px-4 pb-4">
+                {curations.map((item) => (
+                  <CarouselItem key={item.id} className="flex-[0_0_72%] pr-3">
+                    <Link href={`/creators/${item.id}`} className="block">
+                      <ExplorCard
+                        type="course"
+                        className="w-full"
+                        image={item.heroImageUrl ?? PLACEHOLDER_IMAGE}
+                        title={item.title}
+                        subtitle={item.subtitle ?? item.weekLabel}
+                      />
+                    </Link>
+                  </CarouselItem>
+                ))}
+              </Carousel>
+            )}
+          </section>
+        </>
+      )}
 
       <Drawer />
       <Nav activeTab="explore" />
