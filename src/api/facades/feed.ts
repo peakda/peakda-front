@@ -1,7 +1,6 @@
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   postFeedByIdReactions,
-  getFeedById,
   getFeed,
   deleteFeedByIdReactions,
   getGetFeedByIdQueryKey,
@@ -17,6 +16,7 @@ import type {
 import { PAGE_SIZE, nextPageParam } from '@/api/facades/pagination'
 import { useIsLoggedIn } from '@/hooks/useIsLoggedIn'
 import type { SpotRecordResponse } from '@/api/facades/generated/peakdaApi.schemas'
+import { feedDetailApi } from '@/api/facades/feed-detail'
 
 // 트레이드 규칙: res.data (Orval 래퍼) → res.data.data (백엔드 실제 payload)
 
@@ -34,11 +34,6 @@ export async function feedListApi(params: GetFeedParams) {
 }
 
 // options 는 서버 컴포넌트에서 캐시 설정(next.revalidate)을 넘길 때 쓴다.
-export async function feedDetailApi(id: number, options?: RequestInit) {
-  const res = await getFeedById(id, options)
-  return res.data.data ?? null
-}
-
 export async function addReactionApi(id: number, params: PostFeedByIdReactionsParams) {
   const res = await postFeedByIdReactions(id, params)
   return res.data.data ?? null

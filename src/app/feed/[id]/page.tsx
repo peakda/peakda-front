@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { cache } from 'react'
 import { notFound } from 'next/navigation'
-import { feedDetailApi } from '@/api/facades/feed'
+import { feedDetailApi } from '@/api/facades/feed-detail'
 import { BASE_OPEN_GRAPH, DEFAULT_OG_IMAGE, SITE_BRAND_NAME } from '@/constants/site'
 import { isApiErrorStatus } from '@/lib/utils/apiError'
 import { recordPhotoUrl } from '@/lib/utils/recordPhotoUrl'
