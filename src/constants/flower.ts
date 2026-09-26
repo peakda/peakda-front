@@ -47,3 +47,18 @@ export const FLOWER_CATEGORIES: FlowerCategoryMeta[] = [
   define('MAPLE', '단풍', '10-11월', 'FALL'),
   define('SILVERGRASS', '억새', '9-11월', 'FALL'),
 ]
+
+// '동백'↔'동백꽃', '단풍나무'↔'단풍'처럼 표기가 조금 달라도 같은 꽃으로 본다.
+const normalizeFlowerName = (name: string) => name.replace(/\s/g, '').replace(/(꽃|나무)$/, '')
+
+const FLOWER_IMAGE_BY_NAME = new Map(
+  FLOWER_CATEGORIES.map((f) => [normalizeFlowerName(f.label), f.image])
+)
+
+/**
+ * 식물 이름 → 필터 드로어의 꽃 사진. 기록의 식물(PlantSummary)에는 카테고리가 없어 이름으로 찾는다.
+ * 사용자가 직접 추가한 식물처럼 필터 목록에 없는 이름이면 undefined.
+ */
+export function findFlowerImageByName(name: string): string | undefined {
+  return FLOWER_IMAGE_BY_NAME.get(normalizeFlowerName(name))
+}
