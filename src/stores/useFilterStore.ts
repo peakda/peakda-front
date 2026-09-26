@@ -56,6 +56,8 @@ interface FilterState {
   toggleDraftRegion: (region: RegionKey) => void
   toggleDraftTiming: (timing: TimingKey) => void
   toggleDraftCategory: (category: BloomSlotCategory) => void
+  setSingleDraftCategory: (category: BloomSlotCategory) => void
+  keepFirstDraftCategory: () => void
   /** 드로어를 열 때 applied 기준으로 되돌린다 — 지난번에 버린 선택이 남지 않게 */
   syncDraft: () => void
   /** 초기화 버튼. draft 만 비우므로 하단 버튼을 눌러야 실제로 풀린다 */
@@ -114,6 +116,17 @@ export const useFilterStore = create<FilterState>((set) => ({
           : [...s.draft.categories, category],
       },
     })),
+
+  setSingleDraftCategory: (category) =>
+    set((s) => ({
+      draft: {
+        ...s.draft,
+        categories:
+          s.draft.categories.length === 1 && s.draft.categories[0] === category ? [] : [category],
+      },
+    })),
+  keepFirstDraftCategory: () =>
+    set((s) => ({ draft: { ...s.draft, categories: s.draft.categories.slice(0, 1) } })),
 
   syncDraft: () => set((s) => ({ draft: s.applied })),
   resetDraft: () => set({ draft: EMPTY_VALUES }),

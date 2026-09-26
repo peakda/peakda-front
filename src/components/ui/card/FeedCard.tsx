@@ -121,7 +121,13 @@ export function FeedCard({
         <Link href={`/users/${authorId}`}>
           <IconBtn size="md" className="relative overflow-hidden">
             {safeAuthorImageUrl ? (
-              <Image src={safeAuthorImageUrl} alt="프로필" fill className="object-cover" sizes="32px" />
+              <Image
+                src={safeAuthorImageUrl}
+                alt="프로필"
+                fill
+                className="object-cover"
+                sizes="32px"
+              />
             ) : (
               <Image src="/icons/person.svg" alt="프로필" width={16} height={16} />
             )}
@@ -145,6 +151,19 @@ export function FeedCard({
           embla 가 자체적으로 preventDefault/stopPropagation 하므로 별도 드래그 판별이 필요 없다 */}
       <div
         onClick={onOpen}
+        role={onOpen ? 'button' : undefined}
+        tabIndex={onOpen ? 0 : undefined}
+        aria-label={onOpen ? `${authorName}님의 기록 자세히 보기` : undefined}
+        onKeyDown={(event) => {
+          if (
+            onOpen &&
+            event.target === event.currentTarget &&
+            (event.key === 'Enter' || event.key === ' ')
+          ) {
+            event.preventDefault()
+            onOpen()
+          }
+        }}
         className={cn('relative overflow-hidden rounded-2xl', onOpen && 'cursor-pointer')}
       >
         <div ref={emblaRef} className="overflow-hidden">
@@ -211,7 +230,7 @@ export function FeedCard({
 
       {/* 꽃 태그 */}
       {flowers.length > 0 && (
-        <div onClick={onOpen} className={cn('flex flex-wrap gap-2', onOpen && 'cursor-pointer')}>
+        <div className="flex flex-wrap gap-2">
           {flowers.map((flower, i) => (
             <Badge
               key={i}
@@ -231,12 +250,18 @@ export function FeedCard({
       )}
 
       {/* 본문 */}
-      <p
-        onClick={onOpen}
-        className={cn('text-text-primary text-sm leading-relaxed', onOpen && 'cursor-pointer')}
-      >
-        {content}
-      </p>
+      {onOpen ? (
+        <button
+          type="button"
+          onClick={onOpen}
+          className="text-text-primary text-left text-sm leading-relaxed"
+        >
+          <span className="sr-only">기록 자세히 보기: </span>
+          {content}
+        </button>
+      ) : (
+        <p className="text-text-primary text-sm leading-relaxed">{content}</p>
+      )}
 
       {/* 리액션 — 추가 버튼 + 남겨진 리액션만 카운트 칩으로 노출 */}
       <ReactionBar recordId={recordId} reactions={reactions} />

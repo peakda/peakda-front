@@ -3,6 +3,7 @@ import { IconBtn } from '@/components/ui/button/IconBtn'
 import { SpotCard } from '@/components/ui/card/SpotCard'
 import type { CardBadgeVariant } from '@/components/ui/card/CardBadge'
 import { InfiniteScrollFooter } from '@/components/ui/display/InfiniteScrollFooter'
+import { QueryFeedback } from '@/components/ui/display/QueryFeedback'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import type { PinBadge } from '@/types/types'
 
@@ -31,10 +32,24 @@ interface Props {
   hasMore?: boolean
   // hasMore 는 로딩 중에 false 가 되므로 스피너 표시 여부는 따로 받는다.
   isLoadingMore?: boolean
+  isLoading?: boolean
+  isError?: boolean
+  onRetry?: () => void
 }
 
-export function SpotPanel({ spots, onLoadMore, hasMore = false, isLoadingMore = false }: Props) {
+export function SpotPanel({
+  spots,
+  onLoadMore,
+  hasMore = false,
+  isLoadingMore = false,
+  isLoading = false,
+  isError = false,
+  onRetry,
+}: Props) {
   const sentinelRef = useInfiniteScroll(() => onLoadMore?.(), hasMore)
+
+  if (isLoading) return <QueryFeedback state="loading" />
+  if (isError && spots.length === 0) return <QueryFeedback state="error" onRetry={onRetry} />
 
   if (spots.length === 0) {
     return (
