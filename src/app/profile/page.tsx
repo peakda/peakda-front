@@ -19,7 +19,8 @@ import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { toast } from 'sonner'
 import type { SignupCompleteRequestFavoriteCategoriesItem } from '@/api/facades/generated/peakdaApi.schemas'
 import { compressImage } from '@/lib/utils/image'
-import { OtherPlantPicker } from './_components/OtherPlantPicker'
+// 기타 식물 선택은 임시로 숨김 — 다시 열 때 아래 OtherPlantPicker 주석과 함께 푼다
+// import { OtherPlantPicker } from './_components/OtherPlantPicker'
 import { savePendingCustomFavoritePlantIds } from '@/lib/utils/customFavoritePlants'
 
 const FLOWER_LIST: { label: string; value: SignupCompleteRequestFavoriteCategoriesItem }[] = [
@@ -44,7 +45,8 @@ export default function ProfilePage() {
   // 중복확인을 통과한 닉네임 — 현재 입력값과 일치할 때만 검증된 것으로 본다
   const [checkedNickname, setCheckedNickname] = useState<string | null>(null)
   const [selected, setSelected] = useState<SignupCompleteRequestFavoriteCategoriesItem[]>([])
-  const [customPlantIds, setCustomPlantIds] = useState<number[]>([])
+  // 기타 식물 선택을 숨긴 동안은 setter 를 쓰지 않는다 — 다시 열 때 setCustomPlantIds 도 되살린다
+  const [customPlantIds /* , setCustomPlantIds */] = useState<number[]>([])
   const [preview, setPreview] = useState<string | null>(null)
   // 회원가입 임시 업로드 응답의 profileImageKey — signup complete 로 그대로 전달
   const [profileImageKey, setProfileImageKey] = useState<string | null>(null)
@@ -230,7 +232,7 @@ export default function ProfilePage() {
               />
             )
           })}
-          <OtherPlantPicker selectedIds={customPlantIds} onChange={setCustomPlantIds} />
+          {/* <OtherPlantPicker selectedIds={customPlantIds} onChange={setCustomPlantIds} /> */}
         </div>
         {customPlantIds.length > 0 && selected.length === 0 && (
           <p className="text-sm text-rose-500">기본 꽃·자연도 1개 이상 선택해 주세요.</p>
