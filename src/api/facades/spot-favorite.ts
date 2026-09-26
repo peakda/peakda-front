@@ -19,6 +19,20 @@ import { track } from '@/lib/analytics'
 // 李?紐⑸줉 罹먯떆 ????mutation ?깃났 ??臾댄슚?????
 const favoriteListKey = getGetSpotsFavoritesQueryKey()
 
+const invalidateFavoriteViews = (queryClient: ReturnType<typeof useQueryClient>) => {
+  void queryClient.invalidateQueries({ queryKey: favoriteListKey })
+  void queryClient.invalidateQueries({
+    predicate: (query) => {
+      const key = query.queryKey[0]
+      return typeof key === 'string' &&
+        (/^\/api\/spots\/\d+$/.test(key) ||
+          key.startsWith('/api/explore') ||
+          key.startsWith('/api/search') ||
+          key.startsWith('/api/spots/preview'))
+    },
+  })
+}
+
 // ??? plain async (?대깽??湲곕컲 ?몄텧) ???????????????????????????????????????????
 
 export async function addFavoriteApi(spotId: number) {
@@ -59,7 +73,7 @@ export const useAddFavorite = () => {
     mutation: {
       onSuccess: (_, { spotId }) => {
         track('spot_save', { spot_id: spotId })
-        return queryClient.invalidateQueries({ queryKey: favoriteListKey })
+        invalidateFavoriteViews(queryClient)
       },
     },
   })
@@ -71,7 +85,7 @@ export const useRemoveFavorite = () => {
     mutation: {
       onSuccess: (_, { spotId }) => {
         track('spot_unsave', { spot_id: spotId })
-        return queryClient.invalidateQueries({ queryKey: favoriteListKey })
+        invalidateFavoriteViews(queryClient)
       },
     },
   })
@@ -85,7 +99,7 @@ export const useUpdateFavoriteNotify = () => {
       // 찜을 추가하면 만개 알림이 기본으로 켜져 이 요청 없이도 알림이 걸린다. 여기서는 사용자가 바꾼 것만 잡힌다.
       onSuccess: (_, { spotId, data }) => {
         track(data.enabled ? 'bloom_alert_on' : 'bloom_alert_off', { spot_id: spotId })
-        return queryClient.invalidateQueries({ queryKey: favoriteListKey })
+        invalidateFavoriteViews(queryClient)
       },
     },
   })

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button/Button'
 import { useFollow, useUnfollow } from '@/api/facades/user-follow'
 import { useRequireLogin } from '@/hooks/useRequireLogin'
@@ -16,8 +16,11 @@ export function FollowButton({ userId, initialFollowing = false }: Props) {
   const unfollowMutation = useUnfollow()
   const requireLogin = useRequireLogin()
 
+  useEffect(() => setFollowing(initialFollowing), [initialFollowing, userId])
+
   // 낙관적 토글 + userId 가 있으면 실제 mutation 호출(실패 시 원복). userId 없으면 로컬 토글만.
   const handleToggle = () => {
+    if (followMutation.isPending || unfollowMutation.isPending) return
     const next = !following
     setFollowing(next)
     if (userId === undefined) return
@@ -27,11 +30,11 @@ export function FollowButton({ userId, initialFollowing = false }: Props) {
   }
 
   return following ? (
-    <Button variant="outlined" color="primary" size="sm" onClick={() => requireLogin(handleToggle)} className='rounded-xl'>
+    <Button variant="outlined" color="primary" size="sm" disabled={followMutation.isPending || unfollowMutation.isPending} onClick={() => requireLogin(handleToggle)} className='rounded-xl'>
       팔로잉
     </Button>
   ) : (
-    <Button variant="filled" color="primary" size="sm" onClick={() => requireLogin(handleToggle)} className='rounded-xl'>
+    <Button variant="filled" color="primary" size="sm" disabled={followMutation.isPending || unfollowMutation.isPending} onClick={() => requireLogin(handleToggle)} className='rounded-xl'>
       팔로우
     </Button>
   )

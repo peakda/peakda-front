@@ -12,14 +12,20 @@ import type {
   GetUsersByUserIdFollowingsParams,
 } from '@/api/facades/generated/peakdaApi.schemas'
 import { PAGE_SIZE, nextPageParam } from '@/api/facades/pagination'
+import { getGetUsersMeQueryKey } from '@/api/facades/generated/user/user'
 
 // 언랩 규칙: res.data (Orval 래퍼) → res.data.data (백엔드 실제 payload)
 
 // 팔로우 변경 시 여러 userId 의 목록이 동시에 바뀔 수 있어 predicate 로 일괄 무효화한다.
-const invalidateFollow = (queryClient: ReturnType<typeof useQueryClient>) =>
-  queryClient.invalidateQueries({
+const invalidateFollow = (queryClient: ReturnType<typeof useQueryClient>) => {
+  void queryClient.invalidateQueries({
     predicate: (q) => typeof q.queryKey[0] === 'string' && q.queryKey[0].includes('/follow'),
   })
+  void queryClient.invalidateQueries({ queryKey: getGetUsersMeQueryKey() })
+  void queryClient.invalidateQueries({
+    predicate: (q) => typeof q.queryKey[0] === 'string' && /^\/api\/users\/\d+$/.test(q.queryKey[0]),
+  })
+}
 
 // ▷ plain async (이벤트 기반 호출) ─────────────────────────────────────────
 

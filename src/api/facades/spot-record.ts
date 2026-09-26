@@ -24,6 +24,7 @@ import type {
   UpdateSpotRecordRequest,
 } from '@/api/facades/generated/peakdaApi.schemas'
 import { PAGE_SIZE, nextPageParam } from '@/api/facades/pagination'
+import { getGetUsersMeQueryKey } from '@/api/facades/generated/user/user'
 import { track } from '@/lib/analytics'
 
 // 언랩 규칙: res.data (Orval 래퍼) → res.data.data (백엔드 실제 payload)
@@ -117,6 +118,14 @@ const invalidateFeed = (queryClient: ReturnType<typeof useQueryClient>) =>
     predicate: (q) => typeof q.queryKey[0] === 'string' && q.queryKey[0].startsWith('/api/feed'),
   })
 
+const invalidateProfileSummaries = (queryClient: ReturnType<typeof useQueryClient>) => {
+  void queryClient.invalidateQueries({ queryKey: getGetUsersMeQueryKey() })
+  void queryClient.invalidateQueries({
+    predicate: (query) =>
+      typeof query.queryKey[0] === 'string' && /^\/api\/users\/\d+$/.test(query.queryKey[0]),
+  })
+}
+
 // 기록 변경 mutation — 성공 시 스팟별·본인 기록 리스트 캐시 무효화
 
 export const useCreateSpotRecord = () => {
@@ -133,6 +142,8 @@ export const useCreateSpotRecord = () => {
         recordListKeys.forEach((queryKey) => queryClient.invalidateQueries({ queryKey }))
         invalidateSpotDetail(queryClient, res.data.data?.spot.id)
         invalidateBloomMap(queryClient)
+        invalidateFeed(queryClient)
+        invalidateProfileSummaries(queryClient)
       },
     },
   })
@@ -151,6 +162,7 @@ export const useUpdateSpotRecord = () => {
         // 게시된 기록은 피드에도 그대로 노출된다. 사진·메모를 고쳐도 무효화하지 않으면
         // 전역 staleTime(5분) 동안 피드에 옛 사진이 남는다(삭제와 같은 이유).
         invalidateFeed(queryClient)
+        invalidateProfileSummaries(queryClient)
       },
     },
   })
@@ -165,6 +177,7 @@ export const useDeleteSpotRecord = () => {
         invalidateSpotDetail(queryClient)
         invalidateBloomMap(queryClient)
         invalidateFeed(queryClient)
+        invalidateProfileSummaries(queryClient)
       },
     },
   })

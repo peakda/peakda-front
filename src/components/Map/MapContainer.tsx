@@ -24,6 +24,7 @@ import { spotPreviewApi } from '@/api/facades/spot'
 import { toPinListItems } from '@/lib/utils/spotPreview'
 import { bloomToMapSpots } from '@/lib/utils/bloomToMapSpots'
 import { readMapView, rememberMapView } from '@/lib/utils/mapViewHistory'
+import { loadAppSettings } from '@/lib/utils/appSettings'
 import { track } from '@/lib/analytics'
 import { REGION_MAP_CENTERS } from '@/constants/region'
 import { STAGE_LABEL } from '@/constants/map'
@@ -471,6 +472,10 @@ export const MapContainer = () => {
 
   const handleLocate = useCallback(() => {
     if (!mapRef.current) return
+    if (!loadAppSettings().locationEnabled) {
+      toast.error('설정에서 위치 정보 사용을 켜주세요.')
+      return
+    }
     panToCurrentLocation(mapRef.current, () => {
       toast.error('위치 권한이 필요합니다.', {
         description: '브라우저 설정에서 위치 권한을 허용해주세요.',
@@ -492,7 +497,7 @@ export const MapContainer = () => {
       setMapInstance(map)
 
       // 보던 위치로 되살렸거나 쿼리 좌표로 들어온 경우엔 현재 위치로 튕기지 않는다.
-      if (!savedView && !initialCenter) panToCurrentLocation(map)
+      if (!savedView && !initialCenter && loadAppSettings().locationEnabled) panToCurrentLocation(map)
     }
 
     // SDK 준비와 실제 지도 표시 완료는 다르다. 첫 타일이 모두 그려질 때까지

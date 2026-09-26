@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { SmilePlus } from 'lucide-react'
 import { toast } from 'sonner'
 import { EmojiBtn } from '@/components/ui/button/EmojiBtn'
@@ -48,7 +48,10 @@ export function ReactionBar({ recordId, reactions, className }: ReactionBarProps
   const removeReaction = useRemoveReaction()
   const requireLogin = useRequireLogin()
 
+  useEffect(() => setReactionOverride(null), [reactions, recordId])
+
   const handleReaction = (type: FeedReactionSummaryResponseMyReactionsItem) => {
+    if (addReaction.isPending || removeReaction.isPending) return
     const action = reactionToggleAction(myReactions, type)
     const mutation = action === 'add' ? addReaction : removeReaction
     mutation.mutate(
