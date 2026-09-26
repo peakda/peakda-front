@@ -5,7 +5,6 @@ import { useState } from 'react'
 import { HeartBtn } from '@/components/ui/button/HeartBtn'
 import { BellBtn } from '@/components/ui/button/BellBtn'
 import { IconBtn } from '@/components/ui/button/IconBtn'
-import { CardBadge } from '@/components/ui/card/CardBadge'
 import { Tag } from '@/components/ui/display/Tag'
 import { SPOTProps } from '@/app/search/_components/SpotPanel'
 import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
@@ -40,7 +39,8 @@ export function SpotCard({ spot }: Props) {
         <span className="text-text-secondary text-sm">{spot.location}</span>
         <div className="flex items-center gap-1">
           {spot.status && (
-            <CardBadge label={spot.status} variant={spot.statusVariant ?? 'secondary'} />
+            // 스팟 카드의 상태 뱃지는 단계 색 대신 진한 분홍(Tag) 하나로 통일한다
+            <Tag text={spot.status} />
           )}
           {/* 꽃이 여러 개면 칩 하나에 '첫 꽃 외N' 으로 접는다. 아이콘 없는 태그(명소/동네)는 기존 Tag 그대로 */}
           {firstTag &&
