@@ -1,7 +1,7 @@
 'use client'
 import { cn } from '@/lib/utils/cn'
 import { Heart } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useAddFavorite, useRemoveFavorite } from '@/api/facades/spot-favorite'
 import { useRequireLogin } from '@/hooks/useRequireLogin'
 
@@ -19,9 +19,11 @@ export function HeartBtn({ InitFavorite, className, spotId, onToggle }: HeartBtn
   const removeFavorite = useRemoveFavorite()
   const requireLogin = useRequireLogin()
 
+  useEffect(() => setIsFavorite(InitFavorite), [InitFavorite, spotId])
+
   // 낙관적 토글 + 실제 mutation 호출(실패 시 원복).
   const toggleHeart = () => {
-    if (spotId === undefined) return
+    if (spotId === undefined || addFavorite.isPending || removeFavorite.isPending) return
 
     const next = !isFavorite
     setIsFavorite(next)

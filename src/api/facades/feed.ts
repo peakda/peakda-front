@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
+import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   postFeedByIdReactions,
   getFeedById,
@@ -6,7 +6,6 @@ import {
   deleteFeedByIdReactions,
   getGetFeedByIdQueryKey,
   usePostFeedByIdReactions as useAddReactionGen,
-  useGetFeedById,
   useDeleteFeedByIdReactions as useRemoveReactionGen,
 } from '@/api/facades/generated/feed/feed'
 import type {
@@ -16,6 +15,8 @@ import type {
   DeleteFeedByIdReactionsParams,
 } from '@/api/facades/generated/peakdaApi.schemas'
 import { PAGE_SIZE, nextPageParam } from '@/api/facades/pagination'
+import { useIsLoggedIn } from '@/hooks/useIsLoggedIn'
+import type { SpotRecordResponse } from '@/api/facades/generated/peakdaApi.schemas'
 
 // 트레이드 규칙: res.data (Orval 래퍼) → res.data.data (백엔드 실제 payload)
 
@@ -60,8 +61,17 @@ export const useFeedListInfinite = (filter: GetFeedFilter) =>
     getNextPageParam: nextPageParam,
   })
 
-export const useFeedDetail = (id: number | undefined) =>
-  useGetFeedById(id ?? 0, { query: { enabled: !!id, select: (res) => res.data.data ?? null } })
+export const useFeedDetail = (id: number | undefined, initialRecord?: SpotRecordResponse) => {
+  const isLoggedIn = useIsLoggedIn()
+  return useQuery({
+    queryKey: getGetFeedByIdQueryKey(id ?? 0),
+    queryFn: () => feedDetailApi(id!),
+    enabled: !!id,
+    initialData: initialRecord,
+    // Server HTML is public. Signed-in clients refresh personal reaction state immediately.
+    staleTime: isLoggedIn ? 0 : 60_000,
+  })
+}
 
 // mutate({ id, params: { reactionType } }) 형태로 호출 → 성공 시 해당 기록 상세 캐시만 무효화
 

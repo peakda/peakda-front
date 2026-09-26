@@ -1,7 +1,7 @@
 'use client'
 import { cn } from '@/lib/utils/cn'
 import { Bell } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useUpdateFavoriteNotify } from '@/api/facades/spot-favorite'
 
 interface BellBtnProps {
@@ -16,9 +16,11 @@ export function BellBtn({ InitEnabled, className, spotId, favorited = false }: B
   const [isEnabled, setIsEnabled] = useState(InitEnabled)
   const updateNotify = useUpdateFavoriteNotify()
 
+  useEffect(() => setIsEnabled(InitEnabled && favorited), [InitEnabled, favorited, spotId])
+
   // 낙관적 토글 + 실제 mutation 호출(실패 시 원복).
   const toggleNotify = () => {
-    if (spotId === undefined || !favorited) return
+    if (spotId === undefined || !favorited || updateNotify.isPending) return
 
     const next = !isEnabled
     setIsEnabled(next)
@@ -26,7 +28,7 @@ export function BellBtn({ InitEnabled, className, spotId, favorited = false }: B
   }
 
   // spotId 가 없거나 찜하지 않았으면 알림을 걸 대상이 없다. HeartBtn 과 같게 비활성 처리한다.
-  const isDisabled = spotId === undefined || !favorited
+  const isDisabled = spotId === undefined || !favorited || updateNotify.isPending
 
   return (
     <button onClick={toggleNotify} disabled={isDisabled} aria-label="개화 알림">

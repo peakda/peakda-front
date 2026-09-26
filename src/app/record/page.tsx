@@ -14,6 +14,8 @@ import { LocationSearchView } from '@/app/record/_components/LocationSearchView'
 import { RecordCompleteView } from '@/app/record/_components/RecordCompleteView'
 import { RecordSkeleton } from '@/app/record/_components/RecordSkeleton'
 import { compressImage } from '@/lib/utils/image'
+import { readPhotoExif } from '@/lib/utils/photoExif'
+import { loadAppSettings } from '@/lib/utils/appSettings'
 import { track } from '@/lib/analytics'
 
 // 매칭/생성에 필요한 스팟 정보 (카카오 검색 + 스팟 매칭 결과)
@@ -101,6 +103,14 @@ function RecordPageContent() {
   const handlePhotoAdd = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? [])
     e.target.value = ''
+    if (files.length > 0 && loadAppSettings().exifEnabled) {
+      try {
+        const { date: photoDate } = await readPhotoExif(files[0])
+        if (photoDate) setDate((previous) => previous || photoDate)
+      } catch (error) {
+        console.error('사진 촬영 날짜 읽기 실패', error)
+      }
+    }
     // 미리보기도 업로드에 쓸 파일 그대로 보여 준다(원본 수 MB 를 메모리에 들고 있지 않도록).
     const compressed = await Promise.all(files.map(compressImage))
     const newItems = compressed.map((file) => ({ file, previewUrl: URL.createObjectURL(file) }))

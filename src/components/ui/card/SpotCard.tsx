@@ -1,7 +1,7 @@
 'use client'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { HeartBtn } from '@/components/ui/button/HeartBtn'
 import { BellBtn } from '@/components/ui/button/BellBtn'
 import { IconBtn } from '@/components/ui/button/IconBtn'
@@ -17,6 +17,12 @@ interface Props {
 export function SpotCard({ spot }: Props) {
   // 알림은 찜에 종속이라, 이 자리에서 하트를 누르면 종도 같이 켜지고 꺼져야 한다.
   const [favorited, setFavorited] = useState(spot.favorited ?? false)
+  const [notifyEnabled, setNotifyEnabled] = useState(spot.notifyEnabled ?? false)
+
+  useEffect(() => {
+    setFavorited(spot.favorited ?? false)
+    setNotifyEnabled(spot.notifyEnabled ?? false)
+  }, [spot.favorited, spot.notifyEnabled, spot.id])
 
   // Spot 행이 아직 없으면(spotId null) 찜할 대상도 없어 두 버튼 다 비활성된다.
   const spotId = spot.id ?? undefined
@@ -64,13 +70,16 @@ export function SpotCard({ spot }: Props) {
           <HeartBtn
             InitFavorite={spot.favorited ?? false}
             spotId={spotId}
-            onToggle={setFavorited}
+            onToggle={(next) => {
+              setFavorited(next)
+              setNotifyEnabled(next)
+            }}
             className="h-5 w-5"
           />
         </IconBtn>
         <IconBtn size="md">
           <BellBtn
-            InitEnabled={spot.notifyEnabled ?? false}
+            InitEnabled={notifyEnabled}
             spotId={spotId}
             favorited={favorited}
             className="h-5 w-5"

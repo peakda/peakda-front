@@ -59,5 +59,5 @@ export default async function FeedDetailPage({ params }: FeedDetailPageProps) {
   const record = await getRecord((await params).id)
   if (!record) notFound()
 
-  return <FeedDetailClient />
+  return <FeedDetailClient initialRecord={record} />
 }

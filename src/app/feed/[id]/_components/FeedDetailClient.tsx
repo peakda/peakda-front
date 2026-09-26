@@ -19,14 +19,15 @@ import { useRequireLogin } from '@/hooks/useRequireLogin'
 import { detailToFeedCardProps } from '@/lib/utils/spotRecordToFeed'
 import { buildReportRequest } from '@/lib/utils/feed'
 import type { CreateReportRequestReason } from '@/api/facades/generated/peakdaApi.schemas'
+import type { SpotRecordResponse } from '@/api/facades/generated/peakdaApi.schemas'
 
 // 피드(공개) 상세. 게시된(PUBLISHED) 기록만 조회되며, DRAFT·없음이면 서버 페이지가 404 로 처리한다.
 // 헤더는 사진 위에 겹쳐 뜨고, 더보기는 소유자면 수정/삭제, 아니면 신고하기를 노출한다.
-export function FeedDetailClient() {
+export function FeedDetailClient({ initialRecord }: { initialRecord: SpotRecordResponse }) {
   const router = useRouter()
   const { id } = useParams<{ id: string }>()
   const recordId = Number(id)
-  const { data: record, isLoading } = useFeedDetail(recordId)
+  const { data: record, isLoading } = useFeedDetail(recordId, initialRecord)
   const { data: currentUser } = useCurrentUser()
   const { data: spot } = useSpotDetail(record?.spot.id)
   const deleteRecord = useDeleteSpotRecord()
