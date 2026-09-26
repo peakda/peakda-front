@@ -5,6 +5,7 @@ import type {
   ExploreSpotItem,
 } from '@/api/facades/generated/peakdaApi.schemas'
 import { toStatusBadge } from '@/lib/utils/bloomStatus'
+import { CATEGORY_ICON } from '@/constants/map'
 
 // '2026-04-01' → '4.1'. 파싱 실패 시 원본 반환.
 export const formatMonthDay = (iso: string) => {
@@ -20,7 +21,7 @@ export const toExploreSpotProps = (item: ExploreSpotItem): SPOTProps => ({
   location: item.address ?? '',
   imageUrl: item.thumbnailUrl,
   ...toStatusBadge(item.status),
-  nameList: [item.displayName],
+  tags: [{ label: item.displayName, icon: CATEGORY_ICON[item.category] }],
   favorited: item.favorited,
   notifyEnabled: item.notifyEnabled,
 })

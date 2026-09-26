@@ -20,6 +20,7 @@ export function SpotCard({ spot }: Props) {
 
   // Spot 행이 아직 없으면(spotId null) 찜할 대상도 없어 두 버튼 다 비활성된다.
   const spotId = spot.id ?? undefined
+  const firstTag = spot.tags[0]
 
   const info = (
     <>
@@ -38,12 +39,21 @@ export function SpotCard({ spot }: Props) {
         <span className="text-text-primary text-base font-semibold">{spot.name}</span>
         <span className="text-text-secondary text-sm">{spot.location}</span>
         <div className="flex items-center gap-1">
-          {spot.nameList.map((name, idx) => (
-            <Tag text={name} key={idx} />
-          ))}
           {spot.status && (
             <CardBadge label={spot.status} variant={spot.statusVariant ?? 'secondary'} />
           )}
+          {/* 꽃이 여러 개면 칩 하나에 '첫 꽃 외N' 으로 접는다. 아이콘 없는 태그(명소/동네)는 기존 Tag 그대로 */}
+          {firstTag &&
+            (firstTag.icon ? (
+              <span className="flex items-center gap-0.5 rounded-full bg-pink-50 px-2 py-0.5 text-[11px] font-semibold text-pink-400">
+                <Image src={firstTag.icon} alt="" width={14} height={14} />
+                {spot.tags.length > 1
+                  ? `${firstTag.label} 외${spot.tags.length - 1}`
+                  : firstTag.label}
+              </span>
+            ) : (
+              <Tag text={firstTag.label} />
+            ))}
         </div>
       </div>
     </>

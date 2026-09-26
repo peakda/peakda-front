@@ -18,7 +18,7 @@ export type BloomStageStatus = BloomStatus | 'BEFORE_SEASON'
 const LABEL: Record<BloomStageStatus, string> = {
   BEFORE_SEASON: '개화 전',
   PREPARING: '이르다',
-  STARTED: '이제 막요',
+  STARTED: '피기 시작',
   PEAK: '절정',
   ENDED: '끝났어요',
 }

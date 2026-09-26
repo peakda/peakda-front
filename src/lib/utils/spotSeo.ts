@@ -4,7 +4,7 @@ import { SITE_NAME, SITE_URL } from '@/constants/site'
 import { formatPeakPeriod } from '@/lib/utils/bloomCalendar'
 import { formatMonthDay } from '@/lib/utils/explore'
 
-// 검색 결과 설명문용 상태 표기. 화면 뱃지('이르다', '이제 막요')는 문맥 없이 읽히면 뜻이 흐려서 따로 둔다.
+// 검색 결과 설명문용 상태 표기. 화면 뱃지('이르다', '피기 시작')는 문맥 없이 읽히면 뜻이 흐려서 따로 둔다.
 // PREPARING 은 '개화 전'이었는데, 진짜 개화 전인 BEFORE_SEASON 이 생겨 '개화 임박'으로 비켰다.
 const STATUS_TEXT: Record<BloomStageStatus, string> = {
   BEFORE_SEASON: '개화 전',

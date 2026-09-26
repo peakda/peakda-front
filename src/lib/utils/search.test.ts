@@ -31,13 +31,13 @@ describe('utils/search', () => {
         location: '서울 중구',
         imageUrl: undefined,
         status: '',
-        nameList: ['명소'],
+        tags: [{ label: '명소' }],
         favorited: false,
         notifyEnabled: false,
       })
     })
     it('LOCAL 은 동네 태그로 표시', () => {
-      expect(toSpotProps({ ...base, type: 'LOCAL' }).nameList).toEqual(['동네'])
+      expect(toSpotProps({ ...base, type: 'LOCAL' }).tags).toEqual([{ label: '동네' }])
     })
 
     it('썸네일과 찜 상태를 그대로 옮긴다', () => {
