@@ -26,6 +26,8 @@ import type {
 interface FlowerTag {
   emoji: string
   label: string
+  // 필터 드로어의 꽃 사진. 이름으로 못 찾은 식물은 없고 emoji 로 대신한다.
+  icon?: string
 }
 
 export interface SpotSummaryInfo {
@@ -214,7 +216,13 @@ export function FeedCard({
             <Badge
               key={i}
               label={flower.label}
-              leftIcon={<span>{flower.emoji}</span>}
+              leftIcon={
+                flower.icon ? (
+                  <Image src={flower.icon} alt="" width={20} height={20} />
+                ) : (
+                  <span>{flower.emoji}</span>
+                )
+              }
               variant="filled"
               color="pink"
             />

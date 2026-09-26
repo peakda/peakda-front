@@ -23,7 +23,7 @@ export const toSpotProps = (item: SpotSearchItem): SPOTProps => {
     imageUrl: item.thumbnailUrl,
     ...toStatusBadge(item.bloom?.status),
     // 식물 태그 자리가 비어 있어 명소/동네 구분을 대신 노출한다.
-    nameList: typeLabel ? [typeLabel] : [],
+    tags: typeLabel ? [{ label: typeLabel }] : [],
     favorited: item.favorited,
     notifyEnabled: item.notifyEnabled,
   }

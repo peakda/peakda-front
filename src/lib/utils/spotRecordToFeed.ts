@@ -1,11 +1,13 @@
 ﻿import type {
   PhotoEntry,
+  PlantSummary,
   SpotRecordResponse,
   SpotRecordSummaryResponse,
 } from '@/api/facades/generated/peakdaApi.schemas'
 import type { FeedCardProps } from '@/components/ui/card/FeedCard'
 import type { MyRecord } from '@/app/my/_components/MyRecordSection'
 import { recordPhotoUrl } from '@/lib/utils/recordPhotoUrl'
+import { findFlowerImageByName } from '@/constants/flower'
 
 const BLOOM_LABEL = {
   EARLY: '이르다',
@@ -41,7 +43,7 @@ function formatTimeAgo(iso: string): string {
 type SummaryWithPhotos = SpotRecordSummaryResponse & { photos?: PhotoEntry[] }
 
 // SpotRecordSummaryResponse → FeedCard props
-// 한계: 요약 응답에는 식물 이모지가 없어 기본값(🌸)을 사용한다.
+// 꽃 태그는 식물 이름으로 필터 드로어의 꽃 사진을 찾고, 못 찾으면 기본 이모지(🌸)를 쓴다.
 // photos 가 오면 전부, 아니면 대표 사진 한 장, 그것도 없으면 placeholder 를 쓴다.
 export function toFeedCardProps(
   record: SummaryWithPhotos,
@@ -58,7 +60,7 @@ export function toFeedCardProps(
     statusLabel: record.bloomStage ? BLOOM_LABEL[record.bloomStage] : '상태 미정',
     statusVariant: record.bloomStage ? BLOOM_VARIANT[record.bloomStage] : 'secondary',
     images: toSummaryImages(record),
-    flowers: record.plants.map((plant) => ({ emoji: '🌸', label: plant.name })),
+    flowers: record.plants.map(toFlowerTag),
     content: record.memo ?? '',
     reactions: record.reactions,
     ...options,
@@ -91,7 +93,7 @@ export function detailToFeedCardProps(
       record.photos.length > 0
         ? record.photos.map((p) => recordPhotoUrl(p, 'medium'))
         : ['/images/explore.png'],
-    flowers: record.plants.map((plant) => ({ emoji: '🌸', label: plant.name })),
+    flowers: record.plants.map(toFlowerTag),
     content: record.memo ?? '',
     reactions: record.reactions,
     ...options,
@@ -108,4 +110,9 @@ export function toMyRecordThumb(record: SpotRecordSummaryResponse): MyRecord {
       : '/images/explore.png',
     date: toDot(record.visitedDate ?? record.createdAt),
   }
+}
+
+// 기록의 식물 → 꽃 태그. 식물에는 카테고리가 없어 이름으로 꽃 사진을 찾는다.
+function toFlowerTag(plant: PlantSummary): FeedCardProps['flowers'][number] {
+  return { emoji: '🌸', label: plant.name, icon: findFlowerImageByName(plant.name) }
 }
