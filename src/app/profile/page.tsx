@@ -12,7 +12,6 @@ import { isValidNickname } from '@/lib/utils/nickname'
 import { useUploadSignupProfileImage } from '@/api/facades/auth'
 import Image from 'next/image'
 import { Camera } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 import { useCallback, useRef, useState } from 'react'
 import { useSignUpComplete } from '@/hooks/useSignUpComplete'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
@@ -40,7 +39,6 @@ const FLOWER_LIST: { label: string; value: SignupCompleteRequestFavoriteCategori
 ]
 
 export default function ProfilePage() {
-  const router = useRouter()
   const [nickname, setNickname] = useState('')
   // 중복확인을 통과한 닉네임 — 현재 입력값과 일치할 때만 검증된 것으로 본다
   const [checkedNickname, setCheckedNickname] = useState<string | null>(null)
@@ -59,7 +57,9 @@ export default function ProfilePage() {
       savePendingCustomFavoritePlantIds(customPlantIds)
       // 가입이 끝나야 정식 인증 상태 — 이 시점에 마커를 심어야 미들웨어가 /map 을 통과시킨다.
       setAuthMarker()
-      router.replace('/map')
+      // router.replace 는 마커 변경으로 걸린 router.refresh 를 취소해 로그인 전 prefetch 캐시가 남는다.
+      // 전체 로드로 라우터 캐시를 비워, 가입 직후 보호 경로가 로그인 시트로 돌아가지 않게 한다.
+      window.location.replace('/map')
     },
   })
 
