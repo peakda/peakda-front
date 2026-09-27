@@ -18,6 +18,7 @@ import { useExploreCuration } from '@/api/facades/explore'
 import type { ExploreSpotItem } from '@/api/facades/generated/peakdaApi.schemas'
 import {
   formatMonthDay,
+  hasSpotId,
   toExploreSpotProps,
   toFestivalDateRange,
   toFestivalDescription,
@@ -78,8 +79,8 @@ export default function ExplorePage() {
     isError,
     refetch,
   } = useExploreCuration({ category: category ?? undefined })
-  const peakNow = explore?.peakNow ?? []
-  const nextWeek = explore?.nextWeek ?? []
+  const peakNow = (explore?.peakNow ?? []).filter(hasSpotId)
+  const nextWeek = (explore?.nextWeek ?? []).filter(hasSpotId)
   const festivals = explore?.festivals ?? []
   const curations = explore?.curations ?? []
 
