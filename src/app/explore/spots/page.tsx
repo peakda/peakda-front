@@ -9,7 +9,7 @@ import { InfiniteScrollFooter } from '@/components/ui/display/InfiniteScrollFoot
 import { QueryFeedback } from '@/components/ui/display/QueryFeedback'
 import { useExploreSpotsInfinite } from '@/api/facades/explore'
 import { GetExploreSpotsSection } from '@/api/facades/generated/peakdaApi.schemas'
-import { toExploreSpotProps } from '@/lib/utils/explore'
+import { hasSpotId, toExploreSpotProps } from '@/lib/utils/explore'
 import { flattenPages } from '@/lib/utils/infinitePages'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { useFilterStore } from '@/stores/useFilterStore'
@@ -32,7 +32,7 @@ function ExploreSpotsContent() {
 
   const { data, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useExploreSpotsInfinite(section, category ?? undefined)
-  const spots = flattenPages(data)
+  const spots = flattenPages(data).filter(hasSpotId)
   const sentinelRef = useInfiniteScroll(fetchNextPage, hasNextPage && !isFetchingNextPage)
 
   return (

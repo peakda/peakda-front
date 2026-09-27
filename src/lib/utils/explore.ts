@@ -13,8 +13,11 @@ export const formatMonthDay = (iso: string) => {
   return m && d ? `${Number(m)}.${Number(d)}` : iso
 }
 
-// 서버가 탐색에 노출되는 명소의 Spot 행을 미리 만들어 주므로 spotId 는 실질적으로 항상 있다.
-// 좌표 없는 명소를 대비해 타입은 nullable 로 남아 있어 그대로 넘긴다.
+// 운영 응답에 spotId 가 null 인 명소가 섞여 온다(2026-09-27 확인 — 서버 백필 미적용, 좌표 없는 명소).
+// 상세 이동·찜이 모두 spotId 로만 되므로 누를 수 없는 카드가 되어, 탐색 목록에서는 뺀다.
+export const hasSpotId = (item: ExploreSpotItem): item is ExploreSpotItem & { spotId: number } =>
+  item.spotId != null
+
 export const toExploreSpotProps = (item: ExploreSpotItem): SPOTProps => ({
   id: item.spotId ?? null,
   name: item.name,
