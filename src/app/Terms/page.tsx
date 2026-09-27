@@ -36,7 +36,8 @@ export default function TermsPage() {
             variant="filled"
             size="lg"
             disabled={!canSubmit}
-            onClick={() => router.push('/profile')}
+            // replace: 가입을 마친 뒤 뒤로가기가 약관 화면으로 돌아가지 않게 한다
+            onClick={() => router.replace('/profile')}
             className="bg-brand-secondary hover:bg-brand-secondary active:bg-brand-secondary w-full cursor-pointer text-white disabled:cursor-not-allowed"
           >
             동의하고 계속하기
