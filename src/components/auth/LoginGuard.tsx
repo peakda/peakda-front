@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import {
+  AUTH_MARKER_CHANGED_EVENT,
   LOGIN_SHEET_QUERY,
   hasAuthMarker,
   isProtectedPath,
@@ -37,6 +38,22 @@ export function LoginGuard() {
     document.addEventListener('click', handleClick, true)
     return () => document.removeEventListener('click', handleClick, true)
   }, [openLoginSheet])
+
+  // 로그인 전에 받아 둔 보호 경로 prefetch 는 미들웨어의 /map?login=1 리다이렉트까지 캐시하고 있다.
+  // 로그인이 클라이언트 이동(네이티브 로그인·가입 완료 등)으로 끝나면 그 캐시가 남아, 로그인 직후
+  // + 버튼을 눌러도 로그인 시트로 돌아간다. 마커 값이 실제로 바뀔 때 라우터 캐시를 비운다.
+  useEffect(() => {
+    let prev = hasAuthMarker()
+    const handleChange = () => {
+      const next = hasAuthMarker()
+      if (next === prev) return
+      prev = next
+      router.refresh()
+    }
+
+    window.addEventListener(AUTH_MARKER_CHANGED_EVENT, handleChange)
+    return () => window.removeEventListener(AUTH_MARKER_CHANGED_EVENT, handleChange)
+  }, [router])
 
   // 미들웨어가 막힌 경로를 /map?login=1 로 보낸 경우. 시트를 열고 새로고침 때 또 뜨지 않게 쿼리를 지운다.
   useEffect(() => {
