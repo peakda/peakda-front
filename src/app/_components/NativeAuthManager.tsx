@@ -46,7 +46,9 @@ export function NativeAuthManager() {
           if (session.accessToken) {
             setAuthMarker()
             track('login', {})
-            router.replace(takeReturnTo() ?? '/map')
+            // router.replace 를 쓰면 마커 변경으로 LoginGuard 가 건 router.refresh 가 이 이동에 취소돼
+            // 로그인 전 prefetch(/record → /map?login=1)가 남는다. 전체 로드로 라우터 캐시를 확실히 비운다.
+            window.location.replace(takeReturnTo() ?? '/map')
           } else {
             router.replace('/Terms')
           }
@@ -70,7 +72,8 @@ export function NativeAuthManager() {
       try {
         await getAuthMe()
         setAuthMarker()
-        if (window.location.pathname === '/login') router.replace(takeReturnTo() ?? '/map')
+        // 로그인 성공 때와 같은 이유로 전체 로드한다
+        if (window.location.pathname === '/login') window.location.replace(takeReturnTo() ?? '/map')
       } catch {
         await clearNativeAuthSession()
       }
