@@ -15,10 +15,7 @@ import { Nav } from '@/components/ui/layout/Nav'
 import { QueryFeedback } from '@/components/ui/display/QueryFeedback'
 import { useHomeSuggestion } from '@/api/facades/home'
 import { useExploreCuration } from '@/api/facades/explore'
-import type {
-  ExploreResponse,
-  ExploreSpotItem,
-} from '@/api/facades/generated/peakdaApi.schemas'
+import type { ExploreResponse, ExploreSpotItem } from '@/api/facades/generated/peakdaApi.schemas'
 import {
   formatMonthDay,
   hasSpotId,
