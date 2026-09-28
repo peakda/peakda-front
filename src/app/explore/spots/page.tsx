@@ -12,6 +12,8 @@ interface ExploreSpotsPageProps {
 // 사용자 쿠키가 없는 비로그인 기준 응답이라 5분 동안 서버에서 재사용한다(섹션별 URL 단위).
 // 실패는 null 로 넘기고 클라이언트가 다시 조회한다.
 async function getInitialPage(section: GetExploreSpotsSection) {
+  // API 주소가 없는 환경(Vercel Preview 등)에서 상대 URL 로 캐시 fetch 를 하면 에러를 잡아도 빌드 워커가 끝나지 않는다.
+  if (!process.env.NEXT_PUBLIC_API_URL) return null
   try {
     return await exploreSpotsApi(
       { section, pageRequest: { page: 0, size: PAGE_SIZE } },
