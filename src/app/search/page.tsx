@@ -9,6 +9,7 @@ import { HotChipList } from './_components/HotChipList'
 import { SpotPanel } from './_components/SpotPanel'
 import { UserPanel } from './_components/UserPanel'
 import { SearchInput } from './_components/SearchInput'
+import { Drawer } from '@/components/ui/layout/Drawer'
 import { useHomeSuggestion } from '@/api/facades/home'
 import { useSearchSpotsInfinite, useSearchUsersInfinite } from '@/api/facades/search'
 import { useDebounce } from '@/hooks/useDebounce'
@@ -149,6 +150,7 @@ export default function SearchPage() {
           </Tabs>
         </div>
       )}
+      <Drawer />
     </div>
   )
 }

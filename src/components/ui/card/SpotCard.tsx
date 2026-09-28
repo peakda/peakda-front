@@ -8,6 +8,7 @@ import { IconBtn } from '@/components/ui/button/IconBtn'
 import { Tag } from '@/components/ui/display/Tag'
 import { SPOTProps } from '@/app/search/_components/SpotPanel'
 import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
+import { useDrawerStore } from '@/stores/useDrawerStore'
 
 interface Props {
   spot: SPOTProps
@@ -17,6 +18,7 @@ export function SpotCard({ spot }: Props) {
   // 알림은 찜에 종속이라, 이 자리에서 하트를 누르면 종도 같이 켜지고 꺼져야 한다.
   const [favorited, setFavorited] = useState(spot.favorited ?? false)
   const [notifyEnabled, setNotifyEnabled] = useState(spot.notifyEnabled ?? false)
+  const openSaveSpotDrawer = useDrawerStore((s) => s.openSaveSpotDrawer)
 
   useEffect(() => {
     setFavorited(spot.favorited ?? false)
@@ -26,6 +28,20 @@ export function SpotCard({ spot }: Props) {
   // Spot 행이 아직 없으면(spotId null) 찜할 대상도 없어 두 버튼 다 비활성된다.
   const spotId = spot.id ?? undefined
   const firstTag = spot.tags[0]
+
+  // 찜 추가는 상세 화면과 같은 찜 시트(알림 토글 포함)를 거친다.
+  const requestSave = () => {
+    if (spotId === undefined) return
+    openSaveSpotDrawer({
+      spotId,
+      name: spot.name,
+      location: spot.location,
+      onSaved: (enabled) => {
+        setFavorited(true)
+        setNotifyEnabled(enabled)
+      },
+    })
+  }
 
   const info = (
     <>
@@ -78,8 +94,9 @@ export function SpotCard({ spot }: Props) {
       <div className="flex items-center gap-2">
         <IconBtn size="md">
           <HeartBtn
-            InitFavorite={spot.favorited ?? false}
+            InitFavorite={favorited}
             spotId={spotId}
+            onRequestSave={requestSave}
             onToggle={(next) => {
               setFavorited(next)
               setNotifyEnabled(next)
@@ -92,6 +109,8 @@ export function SpotCard({ spot }: Props) {
             InitEnabled={notifyEnabled}
             spotId={spotId}
             favorited={favorited}
+            onRequestSave={requestSave}
+            onToggle={setNotifyEnabled}
             className="h-5 w-5"
           />
         </IconBtn>

@@ -3,6 +3,7 @@
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { SpotCard } from '@/components/ui/card/SpotCard'
+import { Drawer } from '@/components/ui/layout/Drawer'
 import { SavedSpotEmpty } from '@/app/my/_components/SavedSpotEmpty'
 import { useFavoriteList } from '@/api/facades/spot-favorite'
 import { toFavoriteSpotProps } from '@/lib/utils/spotFavorite'
@@ -34,6 +35,7 @@ export default function SavedSpotsPage() {
             ))}
           </ul>
         ))}
+      <Drawer />
     </div>
   )
 }

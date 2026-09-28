@@ -31,6 +31,7 @@ export function SaveSpotDrawerContent({ spot, onClose }: Props) {
           }
           // 상세 화면 하트 상태(favorited)를 즉시 반영하기 위해 상세 쿼리 무효화
           queryClient.invalidateQueries({ queryKey: getGetSpotsByIdQueryKey(spot.spotId) })
+          spot.onSaved?.(notifyEnabled.current)
           onClose()
         },
       },
