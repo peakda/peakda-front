@@ -1,4 +1,7 @@
+import { useCallback } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import {
+  getGetSpotsPreviewQueryKey,
   getSpotsById,
   getSpotsPreview,
   useGetSpotsPreview,
@@ -45,6 +48,36 @@ export async function spotPreviewApi(spotIds: number[], options: SpotPreviewOpti
     status: options.status,
   })
   return res.data.data ?? null
+}
+
+// 지도 핀·클러스터 탭용 프리뷰 조회. 같은 핀을 다시 누르면 캐시로 바로 연다.
+// 찜·알림(spot-favorite)과 기록(spot-record) mutation 이 '/api/spots/preview' 를 무효화하므로
+// 내 행동으로 바뀐 찜 상태·기록 수가 캐시에 남지 않는다.
+// 좌표는 보내지 않는다 — distanceMeters 를 화면에서 쓰지 않는데, 넣으면 지도 중심이 바뀔 때마다
+// 쿼리 키가 갈려 캐시가 맞지 않는다.
+const PREVIEW_STALE_MS = 1000 * 60 * 5
+
+export const useFetchSpotPreview = () => {
+  const queryClient = useQueryClient()
+
+  return useCallback(
+    async (spotIds: number[], options: Omit<SpotPreviewOptions, 'coords'> = {}) => {
+      if (spotIds.length === 0) return null
+
+      const params = {
+        spotIds,
+        categories: options.categories?.length ? options.categories : undefined,
+        status: options.status,
+      }
+      const res = await queryClient.fetchQuery({
+        queryKey: getGetSpotsPreviewQueryKey(params),
+        queryFn: ({ signal }) => getSpotsPreview(params, { signal }),
+        staleTime: PREVIEW_STALE_MS,
+      })
+      return res.data.data ?? null
+    },
+    [queryClient]
+  )
 }
 
 // 스팟 id 목록으로 프리뷰 카드(썸네일·거리·뱃지) 조회. coords 전달 시 거리 계산.
