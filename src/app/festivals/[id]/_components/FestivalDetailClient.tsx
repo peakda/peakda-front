@@ -221,7 +221,7 @@ export function FestivalDetailClient({ festival }: FestivalDetailClientProps) {
           color="primary"
           size="lg"
           className="flex-1"
-          onClick={() => router.push(buildMapUrl(festival))}
+          onClick={() => router.push(buildMapUrl({ ...festival, query: place ?? festival.name }))}
         >
           지도에서 보기
         </Button>

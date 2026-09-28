@@ -199,6 +199,13 @@ export const MapContainer = () => {
     const lng = toCoord(lngParam)
     return lat != null && lng != null ? { lat, lng } : null
   }, [latParam, lngParam])
+  // 좌표가 없는 축제·큐레이션은 주소·장소명(?q)으로 넘어온다. 괄호 속 부연(예: '(효석문화제)')은
+  // 키워드 검색을 실패하게 만들어 떼고 찾는다.
+  const targetQuery = searchParams.get('q')?.replace(/\(.*?\)/g, '').trim() || null
+  const targetSpotId = toCoord(searchParams.get('spotId'))
+
+  // ?spotId 로 들어오면 그 명소 핀을 찾아 드로어를 연다. 좌표가 정해진 뒤에만 채운다.
+  const pendingTargetRef = useRef<{ spotId: number; lat: number; lng: number } | null>(null)
 
   // 서버로 나가는 건 bbox·개화상태(status)·권역(region)이다. 전부 applied 기준이라
   // 드로어에서 필터를 만지는 것만으로는 요청이 나가지 않는다.
@@ -363,6 +370,24 @@ export const MapContainer = () => {
 
   useMapCluster(mapInstance, spots, handlePinClick, handleClusterClick)
 
+  // 목표 좌표를 담은 영역의 조회 결과가 도착했을 때 한 번만 찾는다. 이전 영역의 결과
+  // (placeholder)나 목표가 빠진 bbox 의 결과로 판정하면 핀이 있는데도 못 찾고 끝난다.
+  // 필터로 가려진 핀이어도 사용자가 고른 명소라 allSpots 에서 찾는다. 없으면 이동만 한다.
+  useEffect(() => {
+    const target = pendingTargetRef.current
+    if (!target || !bbox || !bloomData || isPlaceholderData) return
+    const inBbox =
+      target.lat >= bbox.minLat &&
+      target.lat <= bbox.maxLat &&
+      target.lng >= bbox.minLng &&
+      target.lng <= bbox.maxLng
+    if (!inBbox) return
+
+    pendingTargetRef.current = null
+    const spot = allSpots.find((s) => s.spotId === target.spotId)
+    if (spot) handlePinClick(spot)
+  }, [bbox, bloomData, isPlaceholderData, allSpots, handlePinClick])
+
   // 지도 이동/줌이 멈출 때(idle) 현재 영역(bbox)으로 개화현황을 조회한다.
   // 좌표를 격자에 스냅해 캐시가 작동하게 하고, 연속 이동은 debounce로 마지막 정착만 조회한다.
   useEffect(() => {
@@ -492,12 +517,34 @@ export const MapContainer = () => {
       // 쿼리 좌표보다 우선한다. ?lat/?lng 는 그 화면에 '처음' 들어올 때만 의미가 있다.
       const savedView = readMapView()
       const center = savedView ?? initialCenter ?? DEFAULT_CENTER
-      map = initMap(containerRef.current, center, savedView?.level ?? INITIAL_LEVEL)
+      const createdMap = initMap(containerRef.current, center, savedView?.level ?? INITIAL_LEVEL)
+      map = createdMap
       mapRef.current = map
+
+      // 핀 자동 선택도 처음 들어올 때만 한다. 뒤로가기로 돌아왔는데 드로어가 또 열리면 안 된다.
+      if (!savedView && initialCenter && targetSpotId != null) {
+        pendingTargetRef.current = { spotId: targetSpotId, ...initialCenter }
+      }
       setMapInstance(map)
 
+      const canUseLocation = loadAppSettings().locationEnabled
       // 보던 위치로 되살렸거나 쿼리 좌표로 들어온 경우엔 현재 위치로 튕기지 않는다.
-      if (!savedView && !initialCenter && loadAppSettings().locationEnabled) panToCurrentLocation(map)
+      if (!savedView && !initialCenter && targetQuery) {
+        // 검색에 실패하면(결과 없음) 쿼리 없이 들어온 것처럼 현재 위치로 보낸다.
+        new kakao.maps.services.Places().keywordSearch(targetQuery, (data, status) => {
+          const place = status === kakao.maps.services.Status.OK ? data[0] : undefined
+          if (!place) {
+            if (canUseLocation) panToCurrentLocation(createdMap)
+            return
+          }
+          const lat = Number(place.y)
+          const lng = Number(place.x)
+          if (targetSpotId != null) pendingTargetRef.current = { spotId: targetSpotId, lat, lng }
+          createdMap.setCenter(new kakao.maps.LatLng(lat, lng))
+        })
+      } else if (!savedView && !initialCenter && canUseLocation) {
+        panToCurrentLocation(map)
+      }
     }
 
     // SDK 준비와 실제 지도 표시 완료는 다르다. 첫 타일이 모두 그려질 때까지
@@ -513,7 +560,7 @@ export const MapContainer = () => {
       kakao.maps.event.removeListener(map, 'tilesloaded', handleTilesLoaded)
       if (frameId != null) window.cancelAnimationFrame(frameId)
     }
-  }, [isSdkReady, initialCenter])
+  }, [isSdkReady, initialCenter, targetQuery, targetSpotId])
 
   return (
     <div className="relative h-dvh w-full contain-strict">

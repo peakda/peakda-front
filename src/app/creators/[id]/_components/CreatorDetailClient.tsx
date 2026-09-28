@@ -11,6 +11,7 @@ import { CardBadge } from '@/components/ui/card/CardBadge'
 import type { CurationDetailResponse } from '@/api/facades/generated/peakdaApi.schemas'
 import { type BloomStageStatus, toStatusBadge } from '@/lib/utils/bloomStatus'
 import { cn } from '@/lib/utils/cn'
+import { buildMapUrl } from '@/lib/utils/spotCta'
 
 // BloomBadge.status → 스팟 상세·카드와 같은 표기(bloomStatus)를 쓴다.
 // 직접 표를 두면 ENDED·BEFORE_SEASON 처럼 나중에 늘어난 값이 여기만 빠진다.
@@ -135,6 +136,7 @@ export function CreatorDetailClient({ curation }: CreatorDetailClientProps) {
 
             <MapLinkButton
               spotId={chapter.spotId}
+              placeName={chapter.placeName}
               latitude={chapter.latitude}
               longitude={chapter.longitude}
             />
@@ -196,25 +198,25 @@ function PhotoCaption({ placeName, leadText }: { placeName: string; leadText?: s
   )
 }
 
-// 좌표가 있으면 그 위치의 지도로, 없으면 연결된 스팟 상세로 보낸다.
-// 둘 다 없는 카드도 시안대로 버튼은 노출하고 큐레이션 지도로 보낸다.
+// 좌표가 있으면 그 위치로, 없으면 장소명을 카카오 키워드 검색해 지도를 옮긴다(spotId 가 있으면 핀도 연다).
+// 좌표·장소명이 모두 없으면 연결된 스팟 상세로, 그것도 없으면 시안대로 버튼은 노출하고 지도로 보낸다.
 function MapLinkButton({
   spotId,
+  placeName,
   latitude,
   longitude,
 }: {
   spotId?: number | null
+  placeName?: string | null
   latitude?: number | null
   longitude?: number | null
 }) {
   const router = useRouter()
 
   const href =
-    latitude != null && longitude != null
-      ? `/map?lat=${latitude}&lng=${longitude}`
-      : spotId
-        ? `/spot/${spotId}`
-        : '/map'
+    (latitude == null || longitude == null) && !placeName?.trim() && spotId
+      ? `/spot/${spotId}`
+      : buildMapUrl({ latitude, longitude, query: placeName, spotId })
 
   return (
     <Button
@@ -270,7 +272,10 @@ function RecommendationCard({
 
       <p className="text-text-secondary text-sm leading-[1.6]">{body}</p>
 
-      <MapLinkButton spotId={spotId} latitude={latitude} longitude={longitude} />
+      <MapLinkButton
+        spotId={spotId}
+        placeName={placeName}
+        latitude={latitude} longitude={longitude} />
     </div>
   )
 }
