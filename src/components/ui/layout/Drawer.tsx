@@ -209,8 +209,10 @@ export function Drawer() {
               : type === 'reaction'
                 ? '기록에 남길 이모지 반응을 선택합니다.'
                 : '선택한 스팟을 찜 목록에 추가하고 개화 알림을 설정합니다.'
+    // 두 분기의 Root 가 같은 자리라 key 가 없으면 React 가 재사용해, 핀 목록 ↔ 찜 시트 전환 때
+    // 드로어가 새로 뜨지 않고 내용만 바뀐 채 스냅 위치를 다시 잡느라 느리게 내려갔다 올라온다.
     return (
-      <VaulDrawer.Root open={isOpen} onOpenChange={(open) => !open && closeDrawer()}>
+      <VaulDrawer.Root key="sheet" open={isOpen} onOpenChange={(open) => !open && closeDrawer()}>
         <VaulDrawer.Portal>
           <VaulDrawer.Overlay className="fixed inset-0 z-100 bg-black/40" />
           <VaulDrawer.Content className="fixed right-0 bottom-0 left-0 z-100 mx-auto flex max-w-[430px] flex-col rounded-t-[20px] bg-white outline-none">
@@ -264,6 +266,7 @@ export function Drawer() {
 
   return (
     <VaulDrawer.Root
+      key="snap"
       open={isOpen}
       onOpenChange={(open) => {
         if (!open) {
