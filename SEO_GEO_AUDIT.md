@@ -439,7 +439,7 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 - [x] `src/app/layout.tsx` 인증 태그 커밋 (`d189c9a`)
 - [x] 운영(Production) 배포
 - [x] 2026-09-16 `https://www.peakda.com` 페이지 소스에 `naver-site-verification` 확인
-- [ ] 네이버 서치어드바이저 → 웹마스터 도구 → `https://www.peakda.com` → **소유 확인** 클릭 (소유 확인 전에는 `요청 > 사이트맵 제출` 메뉴가 보이지 않는다)
+- [x] 2026-09-28 네이버 서치어드바이저 → 웹마스터 도구 → `https://www.peakda.com` → **소유 확인** 클릭 (소유 확인 전에는 `요청 > 사이트맵 제출` 메뉴가 보이지 않는다)
 
 #### 2) 비로그인 모드 운영 반영
 
@@ -465,7 +465,7 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 - [x] `src/app/layout.tsx`: `metadataBase`, `applicationName`, `openGraph.siteName`, Twitter 카드. 공통값은 `src/constants/site.ts`
 - [x] 기본 OG 이미지 `src/app/opengraph-image.tsx` (next/og + 로고. 기본 폰트에 한글이 없어 문구는 영문)
 - [x] `src/app/robots.ts` — 로그인 필요 경로·`/auth/` disallow + sitemap 위치
-- [x] `src/app/sitemap.ts` — 고정 4개 + 스팟 상세, 하루 단위 revalidate, 조회 실패 시 고정 페이지만
+- [x] `src/app/sitemap.ts` — 고정 5개(2026-09-28 `/explore/festivals` 추가) + 스팟 상세, 하루 단위 revalidate, 조회 실패 시 고정 페이지만
 - [x] `next.config.ts` `headers()` — `/login`, `/onboarding`, `/search`, `/profile`, `/auth/*` 에 `X-Robots-Tag: noindex`
 - [x] 스팟 상세 서버 렌더링: `page.tsx` 서버 + `_components/SpotDetailClient.tsx`, `generateMetadata`, `notFound()`, `TouristAttraction`/`Place` + `BreadcrumbList` JSON-LD
 - [x] 피드 상세: `page.tsx` 서버 + `_components/FeedDetailClient.tsx`, `generateMetadata` + `notFound()` (OG 이미지는 기본 카드 — 9.2-E)
@@ -489,13 +489,14 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 
 #### 5) 검색엔진 제출
 
-- [ ] Search Console → 색인 생성 → Sitemaps → `https://www.peakda.com/sitemap.xml` 제출 → 상태 "성공" 확인
+- [x] 2026-09-28 Search Console → 색인 생성 → Sitemaps → `https://www.peakda.com/sitemap.xml` 제출
 - [x] 2026-09-16 Search Console URL 검사 색인 요청: `/`, `/explore`, `/feed`, `/map`
-- [ ] 스팟 상세 색인 요청 (하루 10개 내외 한도. 2026-09-16 운영에서 200·제목·설명·JSON-LD 확인한 URL)
+- [x] 2026-09-28 탐색 서버 렌더링(PR #90) 배포 후 재요청: `/explore`(첫 HTML 에 카드 링크가 생김), `/explore/festivals`(신규)
+- [x] 2026-09-28 스팟 상세 색인 요청 (하루 10개 내외 한도. 2026-09-16 운영에서 200·제목·설명·JSON-LD 확인한 URL)
   - 제철: `/spot/988` 느러지전망관람대(코스모스 절정), `/spot/1654` 무안 전통생활문화 테마파크(코스모스 절정), `/spot/6151` 황매산(산청)(억새), `/spot/3212` 월출산 국화축제
   - 대표 명소: `/spot/527` 광양 매화마을, `/spot/4433` 홍쌍리 청매실농원, `/spot/618` 구례 섬진강 벚꽃길, `/spot/11` 서동공원과 궁남지, `/spot/8486` 삼척 맹방유채꽃 마을, `/spot/5727` 서산 해미읍성, `/spot/1888` 보배섬 유채꽃 축제, `/spot/352` 강진수국길축제
-- [ ] 네이버 서치어드바이저 → 소유 확인 → 요청 → 사이트맵 제출 (`sitemap.xml`)
-- [ ] 네이버 → 요청 → 웹 페이지 수집 (위 URL)
+- [x] 2026-09-28 네이버 서치어드바이저 → 소유 확인 → 요청 → 사이트맵 제출 (`sitemap.xml`)
+- [x] 2026-09-28 네이버 → 요청 → 웹 페이지 수집 (위 URL + `/explore`, `/explore/festivals`)
 - [ ] 네이버 → 검증 → robots.txt / 웹 페이지 최적화 확인
 - [ ] 1~2주 뒤 Search Console 페이지 색인 보고서("크롤링됨 - 현재 색인이 생성되지 않음" 비율), 네이버 수집 현황 오류 확인
 
