@@ -9,8 +9,8 @@ export const revalidate = 86400
 // 제주(마라도)~독도를 모두 덮는 범위. 스팟 목록 API 가 따로 없어 개화 지도를 한 번에 조회해 spotId 를 모은다.
 const KOREA_BBOX = { minLat: 33, maxLat: 38.7, minLng: 124.5, maxLng: 131.9 }
 
-// 공개·정상 응답하는 canonical URL 만 넣는다. 축제·큐레이션은 조회 API 가 아직 인증을 요구해 제외.
-const STATIC_PATHS = ['', '/map', '/explore', '/feed']
+// 공개·정상 응답하는 canonical URL 만 넣는다. /explore/spots 는 ?section 마다 목록이 달라 canonical 이 없어 제외.
+const STATIC_PATHS = ['', '/map', '/explore', '/explore/festivals', '/feed']
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = STATIC_PATHS.map((path) => ({
