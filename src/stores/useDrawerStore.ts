@@ -17,8 +17,10 @@ export interface SaveSpotData {
   spotId: number
   name: string
   location: string
-  // 확인 후 찜이 추가됐을 때 호출한 카드가 하트·종 상태를 바로 맞추도록 알린다.
+  // 확인을 누르면(응답 전) 호출한 카드가 하트·종 상태를 바로 맞추도록 알린다.
   onSaved?: (notifyEnabled: boolean) => void
+  // 시트는 응답 전에 닫히므로, 찜 추가가 실패하면 onSaved 로 켠 상태를 되돌린다.
+  onSaveFailed?: () => void
 }
 
 export interface DateSelectData {

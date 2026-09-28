@@ -3,6 +3,7 @@
 import { MapPin } from 'lucide-react'
 import { useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button/Button'
 import { Toggle } from '@/components/ui/display/Toggle'
 import { useAddFavorite, useUpdateFavoriteNotify } from '@/api/facades/spot-favorite'
@@ -20,22 +21,34 @@ export function SaveSpotDrawerContent({ spot, onClose }: Props) {
   const addFavorite = useAddFavorite()
   const updateNotify = useUpdateFavoriteNotify()
 
-  const handleConfirm = () => {
+  // 서버 응답을 기다렸다 닫으면 시트가 멈춘 듯 보여, 먼저 닫고 카드에 반영한 뒤 실패하면 되돌린다.
+  // 시트가 닫히며 언마운트돼도 끝까지 이어지도록 mutate 콜백 대신 mutateAsync 를 기다린다.
+  const handleConfirm = async () => {
+    const notify = notifyEnabled.current
+    spot.onSaved?.(notify)
+    onClose()
+
+    try {
+      await addFavorite.mutateAsync({ spotId: spot.spotId })
+    } catch (err) {
+      console.error(err)
+      toast.error('찜하지 못했어요')
+      spot.onSaveFailed?.()
+      return
+    }
+    // 상세 화면 하트 상태(favorited)를 즉시 반영하기 위해 상세 쿼리 무효화
+    void queryClient.invalidateQueries({ queryKey: getGetSpotsByIdQueryKey(spot.spotId) })
+
     // 찜 추가 시 만개 알림이 기본 활성화되므로, 토글을 끈 경우에만 알림 해제 요청
-    addFavorite.mutate(
-      { spotId: spot.spotId },
-      {
-        onSuccess: () => {
-          if (!notifyEnabled.current) {
-            updateNotify.mutate({ spotId: spot.spotId, data: { enabled: false } })
-          }
-          // 상세 화면 하트 상태(favorited)를 즉시 반영하기 위해 상세 쿼리 무효화
-          queryClient.invalidateQueries({ queryKey: getGetSpotsByIdQueryKey(spot.spotId) })
-          spot.onSaved?.(notifyEnabled.current)
-          onClose()
-        },
-      },
-    )
+    if (notify) return
+    try {
+      await updateNotify.mutateAsync({ spotId: spot.spotId, data: { enabled: false } })
+    } catch (err) {
+      console.error(err)
+      toast.error('알림 설정을 바꾸지 못했어요')
+      // 찜은 됐고 알림은 서버 기본값(켜짐) 그대로다.
+      spot.onSaved?.(true)
+    }
   }
 
   return (
@@ -70,7 +83,7 @@ export function SaveSpotDrawerContent({ spot, onClose }: Props) {
         color="primary"
         size="lg"
         className="w-full"
-        onClick={handleConfirm}
+        onClick={() => void handleConfirm()}
         disabled={addFavorite.isPending}
       >
         확인

@@ -1,6 +1,6 @@
 'use client'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { HeartBtn } from '@/components/ui/button/HeartBtn'
 import { BellBtn } from '@/components/ui/button/BellBtn'
 import { Badge } from './Badge'
@@ -37,6 +37,12 @@ export function PinText({
   // 알림은 찜에 종속이라, 이 자리에서 하트를 누르면 종도 같이 켜지고 꺼져야 한다.
   const [favorited, setFavorited] = useState(isFavorite)
   const [notify, setNotify] = useState(notifyEnabled)
+
+  // 찜 시트는 응답 전에 닫혀 핀 목록이 먼저 다시 그려진다. 이후 실패로 스토어가 되돌려지면 따라간다.
+  useEffect(() => {
+    setFavorited(isFavorite)
+    setNotify(notifyEnabled)
+  }, [isFavorite, notifyEnabled, spotId])
   const openSaveSpotDrawer = useDrawerStore((s) => s.openSaveSpotDrawer)
   // 핀 목록 드로어는 찜 시트가 열렸다 닫히면 스토어 데이터로 다시 그려지므로 바뀐 값을 스토어에도 맞춘다.
   const updatePinFavorite = useDrawerStore((s) => s.updatePinFavorite)
@@ -62,6 +68,11 @@ export function PinText({
         setFavorited(true)
         setNotify(enabled)
         updatePinFavorite(spotId, true, enabled)
+      },
+      onSaveFailed: () => {
+        setFavorited(false)
+        setNotify(false)
+        updatePinFavorite(spotId, false, false)
       },
     })
   }

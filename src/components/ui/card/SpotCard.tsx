@@ -40,6 +40,10 @@ export function SpotCard({ spot }: Props) {
         setFavorited(true)
         setNotifyEnabled(enabled)
       },
+      onSaveFailed: () => {
+        setFavorited(false)
+        setNotifyEnabled(false)
+      },
     })
   }
 
