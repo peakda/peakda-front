@@ -1,54 +1,18 @@
-'use client'
+import { exploreFestivalsApi } from '@/api/facades/explore-festivals'
+import { ExploreFestivalsClient } from './_components/ExploreFestivalsClient'
 
-import Link from 'next/link'
-import { Header } from '@/components/ui/layout/Header'
-import { LeftArrow } from '@/components/ui/button/LeftArrow'
-import { ExplorCard } from '@/components/ui/card/ExplorCard'
-import { useExploreFestivals } from '@/api/facades/explore'
-import { toFestivalDateRange, toFestivalDescription, toFestivalStatus } from '@/lib/utils/explore'
+// 검색엔진이 받는 첫 HTML 에 축제 카드와 링크가 담기도록 서버에서 먼저 조회한다.
+// 사용자 쿠키가 없는 비로그인 기준 응답이라 5분 동안 서버에서 재사용한다.
+// 빌드 중 API 가 죽어 있어도 빌드가 깨지지 않게 실패는 null 로 넘기고, 클라이언트가 다시 조회한다.
+async function getInitialFestivals() {
+  try {
+    return await exploreFestivalsApi(undefined, { next: { revalidate: 300 } })
+  } catch (error) {
+    console.error('[explore/festivals] 서버 조회 실패 — 클라이언트 조회로 대체', error)
+    return null
+  }
+}
 
-export default function ExploreFestivalsPage() {
-  // 진행 중 축제는 페이징 없이 전량 내려온다.
-  const { data, isLoading } = useExploreFestivals()
-  const festivals = data?.items ?? []
-
-  return (
-    <div className="bg-bg-primary relative flex min-h-screen flex-col pb-12">
-      <div className="h-14">
-        <Header
-          left={<LeftArrow />}
-          center={<div className="text-[15px] font-medium text-[#000000]">요즘 뜨는 축제</div>}
-        />
-      </div>
-
-      {!isLoading &&
-        (festivals.length === 0 ? (
-          <div className="flex h-96 flex-col items-center justify-center gap-2 py-6 text-center">
-            <p className="text-text-primary text-lg font-semibold">진행 중인 축제가 없어요</p>
-            <p className="text-text-tertiary text-base">다음 축제 소식을 기다려주세요</p>
-          </div>
-        ) : (
-          <ul className="flex flex-col items-center gap-4 px-4 pb-4">
-            {festivals.map((item) => {
-              const status = toFestivalStatus(item)
-              return (
-                <li key={item.festivalId}>
-                  <Link href={`/festivals/${item.festivalId}`}>
-                    <ExplorCard
-                      type="festival"
-                      image={item.thumbnailUrl ?? '/images/exploreEmpty.jpg'}
-                      name={item.name}
-                      description={toFestivalDescription(item)}
-                      dateRange={toFestivalDateRange(item)}
-                      status={status.label}
-                      statusVariant={status.variant}
-                    />
-                  </Link>
-                </li>
-              )
-            })}
-          </ul>
-        ))}
-    </div>
-  )
+export default async function ExploreFestivalsPage() {
+  return <ExploreFestivalsClient initialFestivals={await getInitialFestivals()} />
 }

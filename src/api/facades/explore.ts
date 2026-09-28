@@ -1,10 +1,11 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import {
   getExploreSpots,
+  getGetExploreFestivalsQueryKey,
   getGetExploreQueryKey,
-  useGetExploreFestivals,
 } from '@/api/facades/generated/explore/explore'
 import type {
+  ExploreFestivalListResponse,
   ExploreResponse,
   GetExploreFestivalsParams,
   GetExploreParams,
@@ -14,6 +15,7 @@ import type {
 } from '@/api/facades/generated/peakdaApi.schemas'
 import { PAGE_SIZE, nextPageParam } from '@/api/facades/pagination'
 import { exploreCurationApi } from '@/api/facades/explore-curation'
+import { exploreFestivalsApi } from '@/api/facades/explore-festivals'
 import { useIsLoggedIn } from '@/hooks/useIsLoggedIn'
 
 // 언랩 규칙: res.data (Orval 래퍼) → res.data.data (백엔드 실제 payload)
@@ -51,5 +53,13 @@ export const useExploreSpotsInfinite = (
   })
 
 // 진행 중 꽃축제 전체 보기 — 페이징 없이 전량.
-export const useExploreFestivals = (params?: GetExploreFestivalsParams) =>
-  useGetExploreFestivals(params, { query: { select: (res) => res.data.data ?? null } })
+// 사용자별 상태가 없어 로그인 여부와 관계없이 서버 초기값을 전역 staleTime 동안 그대로 쓴다.
+export const useExploreFestivals = (
+  params?: GetExploreFestivalsParams,
+  initialFestivals?: ExploreFestivalListResponse
+) =>
+  useQuery({
+    queryKey: getGetExploreFestivalsQueryKey(params),
+    queryFn: () => exploreFestivalsApi(params),
+    initialData: initialFestivals,
+  })
