@@ -1,84 +1,31 @@
-'use client'
+import { exploreSpotsApi } from '@/api/facades/explore-spots'
+import { PAGE_SIZE } from '@/api/facades/pagination'
+import type { GetExploreSpotsSection } from '@/api/facades/generated/peakdaApi.schemas'
+import { toExploreSection } from '@/lib/utils/explore'
+import { ExploreSpotsClient } from './_components/ExploreSpotsClient'
 
-import { Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
-import { Header } from '@/components/ui/layout/Header'
-import { LeftArrow } from '@/components/ui/button/LeftArrow'
-import { SpotCard } from '@/components/ui/card/SpotCard'
-import { Drawer } from '@/components/ui/layout/Drawer'
-import { InfiniteScrollFooter } from '@/components/ui/display/InfiniteScrollFooter'
-import { QueryFeedback } from '@/components/ui/display/QueryFeedback'
-import { useExploreSpotsInfinite } from '@/api/facades/explore'
-import { GetExploreSpotsSection } from '@/api/facades/generated/peakdaApi.schemas'
-import { hasSpotId, toExploreSpotProps } from '@/lib/utils/explore'
-import { flattenPages } from '@/lib/utils/infinitePages'
-import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
-import { useFilterStore } from '@/stores/useFilterStore'
-
-const SECTION_TITLE: Record<GetExploreSpotsSection, string> = {
-  PEAK_NOW: '지금이 절정이에요',
-  NEXT_WEEK: '다음 주에 가면 좋을 곳',
+interface ExploreSpotsPageProps {
+  searchParams: Promise<{ section?: string | string[] }>
 }
 
-function ExploreSpotsContent() {
-  const raw = useSearchParams().get('section')
-  // 값이 없거나 정의되지 않은 섹션이면 PEAK_NOW 로 폴백한다.
-  const section: GetExploreSpotsSection =
-    raw === GetExploreSpotsSection.NEXT_WEEK
-      ? GetExploreSpotsSection.NEXT_WEEK
-      : GetExploreSpotsSection.PEAK_NOW
-
-  // 필터 드로어에서 고른 꽃 종류. 서버 category 는 값 하나만 받으므로 첫 번째만 보낸다.
-  const category = useFilterStore((state) => state.applied.categories[0])
-
-  const { data, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useExploreSpotsInfinite(section, category ?? undefined)
-  const spots = flattenPages(data).filter(hasSpotId)
-  const sentinelRef = useInfiniteScroll(fetchNextPage, hasNextPage && !isFetchingNextPage)
-
-  return (
-    <div className="bg-bg-primary relative flex min-h-screen flex-col pb-12">
-      <div className="h-14">
-        <Header
-          left={<LeftArrow />}
-          center={
-            <div className="text-[15px] font-medium text-[#000000]">{SECTION_TITLE[section]}</div>
-          }
-        />
-      </div>
-
-      {isLoading ? (
-        <QueryFeedback state="loading" />
-      ) : isError && spots.length === 0 ? (
-        <QueryFeedback state="error" onRetry={() => void refetch()} />
-      ) : spots.length === 0 ? (
-        <div className="flex h-96 flex-col items-center justify-center gap-2 py-6 text-center">
-          <p className="text-text-primary text-lg font-semibold">아직 보여드릴 스팟이 없어요</p>
-          <p className="text-text-tertiary text-base">다음 개화 소식을 기다려주세요</p>
-        </div>
-      ) : (
-        <>
-          <ul className="divide-y divide-gray-100">
-            {spots.map((item) => (
-              <SpotCard
-                key={`${item.attractionId}-${item.category}`}
-                spot={toExploreSpotProps(item)}
-              />
-            ))}
-          </ul>
-          <InfiniteScrollFooter sentinelRef={sentinelRef} isLoading={isFetchingNextPage} />
-        </>
-      )}
-      <Drawer />
-    </div>
-  )
+// 검색엔진이 받는 첫 HTML 에 첫 페이지 명소 카드와 링크가 담기도록 서버에서 먼저 조회한다.
+// 사용자 쿠키가 없는 비로그인 기준 응답이라 5분 동안 서버에서 재사용한다(섹션별 URL 단위).
+// 실패는 null 로 넘기고 클라이언트가 다시 조회한다.
+async function getInitialPage(section: GetExploreSpotsSection) {
+  // API 주소가 없는 환경(Vercel Preview 등)에서 상대 URL 로 캐시 fetch 를 하면 에러를 잡아도 빌드 워커가 끝나지 않는다.
+  if (!process.env.NEXT_PUBLIC_API_URL) return null
+  try {
+    return await exploreSpotsApi(
+      { section, pageRequest: { page: 0, size: PAGE_SIZE } },
+      { next: { revalidate: 300 } }
+    )
+  } catch (error) {
+    console.error('[explore/spots] 서버 조회 실패 — 클라이언트 조회로 대체', error)
+    return null
+  }
 }
 
-// useSearchParams 는 App Router 에서 Suspense 경계가 필요하다.
-export default function ExploreSpotsPage() {
-  return (
-    <Suspense fallback={<QueryFeedback state="loading" />}>
-      <ExploreSpotsContent />
-    </Suspense>
-  )
+export default async function ExploreSpotsPage({ searchParams }: ExploreSpotsPageProps) {
+  const section = toExploreSection((await searchParams).section)
+  return <ExploreSpotsClient section={section} initialPage={await getInitialPage(section)} />
 }
