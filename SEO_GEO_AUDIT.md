@@ -526,7 +526,9 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
   - canonical `/festivals/{id}`. og:image 는 대표 이미지 URL 이 만료되지 않는지 확인 후 사용, 아니면 기본 카드 (9.2-E 와 같은 문제)
   - JSON-LD: `Event`(name, startDate, endDate, eventStatus, location = `Place`(name, address, geo), url) + `BreadcrumbList`(Peakda > 탐색 > 축제명)
 - [x] 2026-09-22 `/creators/[id]` (큐레이션) — 같은 구조로 적용 (JSON-LD 없음). 제목은 큐레이션 제목, 설명은 부제·주차 라벨
-- [ ] `src/app/sitemap.ts` 에 추가 — 축제 id 는 `GET /api/explore/festivals`, 큐레이션 id 는 `GET /api/curations`. 목록 하나가 실패해도 나머지는 낸다 (스팟과 같은 방식)
+- [x] 2026-09-28 `src/app/sitemap.ts` 에 추가 — 축제 id 는 `GET /api/explore/festivals`, 큐레이션 id 는 `GET /api/curations`(첫 페이지 50개). 목록마다 실패를 따로 삼킨다
+  - 공개 축제 목록 API 가 **진행 중 축제만** 준다. 끝났거나 시작 전인 축제 상세는 sitemap 에서 빠진다(전체 목록은 `/api/admin/festivals` 로 인증 필요)
+  - `NEXT_PUBLIC_API_URL` 이 없으면(Vercel Preview 등) 고정 페이지만 낸다 — 상대 URL 로 조회하면 빌드가 60초 타임아웃으로 멈춘다
 - [ ] 검증: 없는 id `404`, 로컬 빌드 후 curl 로 제목·설명·canonical·JSON-LD, Rich Results Test (Event 리치 결과는 한국에서 보장되지 않음 — 3.2)
 
 #### 9) 홈 `/` 개선 — 결정 대기
