@@ -4,6 +4,7 @@ import type {
   ExploreFestivalItemPhase,
   ExploreSpotItem,
 } from '@/api/facades/generated/peakdaApi.schemas'
+import { GetExploreSpotsSection } from '@/api/facades/generated/peakdaApi.schemas'
 import { toStatusBadge } from '@/lib/utils/bloomStatus'
 import { CATEGORY_ICON } from '@/constants/map'
 
@@ -12,6 +13,12 @@ export const formatMonthDay = (iso: string) => {
   const [, m, d] = iso.split('-')
   return m && d ? `${Number(m)}.${Number(d)}` : iso
 }
+
+// /explore/spots?section= 값 → 서버 section. 값이 없거나 정의되지 않은 섹션이면 PEAK_NOW 로 폴백한다.
+export const toExploreSection = (raw: string | string[] | undefined): GetExploreSpotsSection =>
+  raw === GetExploreSpotsSection.NEXT_WEEK
+    ? GetExploreSpotsSection.NEXT_WEEK
+    : GetExploreSpotsSection.PEAK_NOW
 
 // 운영 응답에 spotId 가 null 인 명소가 섞여 온다(2026-09-27 확인 — 서버 백필 미적용, 좌표 없는 명소).
 // 상세 이동·찜이 모두 spotId 로만 되므로 누를 수 없는 카드가 되어, 탐색 목록에서는 뺀다.

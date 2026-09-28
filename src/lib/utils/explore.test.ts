@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest'
-import { toFestivalStatus, toFestivalDateRange, toFestivalDescription } from './explore'
+import {
+  toExploreSection,
+  toFestivalStatus,
+  toFestivalDateRange,
+  toFestivalDescription,
+} from './explore'
 import type { ExploreFestivalItem } from '@/api/facades/generated/peakdaApi.schemas'
 
 // 판정에 필요한 필드만 값을 바꿔가며 채우고 나머지는 고정 기본값으로 둔다.
@@ -15,6 +20,17 @@ const festival = (overrides: Partial<ExploreFestivalItem>): ExploreFestivalItem 
 })
 
 describe('lib/utils/explore', () => {
+  describe('toExploreSection', () => {
+    it('NEXT_WEEK 만 그대로 두고 나머지는 PEAK_NOW 로 폴백한다', () => {
+      expect(toExploreSection('NEXT_WEEK')).toBe('NEXT_WEEK')
+      expect(toExploreSection('PEAK_NOW')).toBe('PEAK_NOW')
+      expect(toExploreSection(undefined)).toBe('PEAK_NOW')
+      expect(toExploreSection('UNKNOWN')).toBe('PEAK_NOW')
+      // ?section=a&section=b 처럼 여러 번 오면 배열이다
+      expect(toExploreSection(['NEXT_WEEK', 'PEAK_NOW'])).toBe('PEAK_NOW')
+    })
+  })
+
   // 날짜로 직접 판정하면 취소·연기를 표현할 수 없고 서버와 기준이 갈린다.
   describe('toFestivalStatus', () => {
     it('서버 phase 를 그대로 배지로 옮긴다', () => {
