@@ -7,6 +7,7 @@ import { Badge } from './Badge'
 import { Tag } from './Tag'
 import { IconBtn } from '@/components/ui/button/IconBtn'
 import type { PinBadge } from '@/types/types'
+import { useDrawerStore } from '@/stores/useDrawerStore'
 
 interface PinTextProps {
   title: string
@@ -35,6 +36,35 @@ export function PinText({
 }: PinTextProps) {
   // 알림은 찜에 종속이라, 이 자리에서 하트를 누르면 종도 같이 켜지고 꺼져야 한다.
   const [favorited, setFavorited] = useState(isFavorite)
+  const [notify, setNotify] = useState(notifyEnabled)
+  const openSaveSpotDrawer = useDrawerStore((s) => s.openSaveSpotDrawer)
+  // 핀 목록 드로어는 찜 시트가 열렸다 닫히면 스토어 데이터로 다시 그려지므로 바뀐 값을 스토어에도 맞춘다.
+  const updatePinFavorite = useDrawerStore((s) => s.updatePinFavorite)
+
+  const handleHeartToggle = (next: boolean) => {
+    setFavorited(next)
+    if (spotId !== undefined) updatePinFavorite(spotId, next, next && notify)
+  }
+
+  const handleBellToggle = (next: boolean) => {
+    setNotify(next)
+    if (spotId !== undefined) updatePinFavorite(spotId, favorited, next)
+  }
+
+  // 찜 추가는 상세 화면과 같은 찜 시트(알림 토글 포함)를 거친다.
+  const requestSave = () => {
+    if (spotId === undefined) return
+    openSaveSpotDrawer({
+      spotId,
+      name: title,
+      location,
+      onSaved: (enabled) => {
+        setFavorited(true)
+        setNotify(enabled)
+        updatePinFavorite(spotId, true, enabled)
+      },
+    })
+  }
 
   return (
     <div className="flex-1 p-4">
@@ -65,18 +95,21 @@ export function PinText({
         <div className="flex shrink-0 items-center gap-1" onClick={(e) => e.stopPropagation()}>
           <IconBtn size="md">
             <HeartBtn
-              InitFavorite={isFavorite}
+              InitFavorite={favorited}
               spotId={spotId}
-              onToggle={setFavorited}
+              onRequestSave={requestSave}
+              onToggle={handleHeartToggle}
               className="h-5 w-5"
             />
           </IconBtn>
           {variant === 'list' && (
             <IconBtn size="md">
               <BellBtn
-                InitEnabled={notifyEnabled}
+                InitEnabled={notify}
                 spotId={spotId}
                 favorited={favorited}
+                onRequestSave={requestSave}
+                onToggle={handleBellToggle}
                 className="h-5 w-5"
               />
             </IconBtn>
