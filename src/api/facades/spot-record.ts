@@ -109,8 +109,11 @@ export const useMySpotRecordsInfinite = (status: GetSpotsRecordsMeStatus) =>
 // 기록은 동네형 핀의 원천이라 지도 개화현황도 함께 낡는다. bbox·필터마다 키가 갈리므로
 // 프리픽스로 지운다. useBloomMap 의 staleTime 이 30분이라 무효화하지 않으면 내가 쓴 기록이
 // 그동안 지도에 안 나타난다.
-const invalidateBloomMap = (queryClient: ReturnType<typeof useQueryClient>) =>
-  queryClient.invalidateQueries({ queryKey: ['/api/seasonal/blooms'] })
+// 핀을 눌러 여는 프리뷰(기록 수·최근 사진)도 캐시하므로 함께 지운다.
+const invalidateBloomMap = (queryClient: ReturnType<typeof useQueryClient>) => {
+  void queryClient.invalidateQueries({ queryKey: ['/api/seasonal/blooms'] })
+  void queryClient.invalidateQueries({ queryKey: ['/api/spots/preview'] })
+}
 
 // 게시된 기록은 피드에도 노출되므로 '/api/feed' 프리픽스 캐시를 함께 무효화한다.
 const invalidateFeed = (queryClient: ReturnType<typeof useQueryClient>) =>

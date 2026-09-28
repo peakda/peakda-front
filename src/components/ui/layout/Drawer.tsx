@@ -65,8 +65,8 @@ export function Drawer() {
   const [snap, setSnap] = useState<string | number | null>('400px')
 
   // 지도가 올려주는 "현재 화면의 필터 결과" — 필터 모드 하단 버튼이 쓴다.
-  const visibleSpotIds = useFilterStore((s) => s.visibleSpotIds)
-  const mapCenter = useFilterStore((s) => s.mapCenter)
+  // visibleSpotIds·mapCenter 는 지도 이동(idle)마다 새 값으로 발행된다. 구독하면 드로어가 닫혀
+  // 있어도 팬할 때마다 다시 렌더되므로, 쓰는 순간(openPreviewList)에 getState() 로 읽는다.
   const isVisibleStale = useFilterStore((s) => s.isVisibleStale)
   const draftVisibleCount = useFilterStore((s) => s.draftVisibleCount)
   const applied = useFilterStore((s) => s.applied)
@@ -101,6 +101,7 @@ export function Drawer() {
   const openPreviewList = useCallback(async () => {
     setIsLoadingPreview(true)
     try {
+      const { visibleSpotIds, mapCenter } = useFilterStore.getState()
       const preview = await spotPreviewApi(visibleSpotIds, {
         coords: mapCenter,
         // 고른 꽃·시기를 그대로 넘겨야 카드 뱃지가 지도 핀과 같은 기준으로 계산된다.
@@ -125,7 +126,7 @@ export function Drawer() {
     } finally {
       setIsLoadingPreview(false)
     }
-  }, [visibleSpotIds, mapCenter, applied, openPinDrawer, closeDrawer])
+  }, [applied, openPinDrawer, closeDrawer])
 
   // 하단 버튼 → 필터 커밋. 지도 조회가 끝나야 목록을 열 수 있어 대기 플래그를 세운다.
   const handleApplyFilter = () => {

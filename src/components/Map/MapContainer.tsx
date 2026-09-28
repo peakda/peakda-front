@@ -20,7 +20,7 @@ import { timingToStatus, timingToStatuses } from '@/lib/utils/timing'
 import { useBloomMap } from '@/api/facades/seasonal-bloom'
 import { useHomeSuggestion } from '@/api/facades/home'
 import { useUnreadNotificationCount } from '@/api/facades/notification'
-import { spotPreviewApi } from '@/api/facades/spot'
+import { useFetchSpotPreview } from '@/api/facades/spot'
 import { toPinListItems } from '@/lib/utils/spotPreview'
 import { bloomToMapSpots } from '@/lib/utils/bloomToMapSpots'
 import { readMapView, rememberMapView } from '@/lib/utils/mapViewHistory'
@@ -297,6 +297,7 @@ export const MapContainer = () => {
   const { data: unread } = useUnreadNotificationCount()
   const requireLogin = useRequireLogin()
   const hasUnreadNotification = (unread?.unreadCount ?? 0) > 0
+  const fetchSpotPreview = useFetchSpotPreview()
 
   // 핀 하나든 필터 결과 목록이든 같은 preview API 로 채운다.
   // 서버가 탐색·지도에 노출되는 명소의 Spot 행을 미리 만들어 주므로 spotId 가 사실상 항상 있고,
@@ -306,9 +307,7 @@ export const MapContainer = () => {
       try {
         if (spot.spotId != null) {
           track('map_pin_click', { spot_id: spot.spotId })
-          const center = mapInstance?.getCenter()
-          const preview = await spotPreviewApi([spot.spotId], {
-            coords: center ? { lat: center.getLat(), lng: center.getLng() } : null,
+          const preview = await fetchSpotPreview([spot.spotId], {
             categories: applied.categories,
             status: timingToStatus(applied.timing),
           })
@@ -337,7 +336,7 @@ export const MapContainer = () => {
         }))
       )
     },
-    [openPinDrawer, mapInstance, applied.categories, applied.timing]
+    [openPinDrawer, fetchSpotPreview, applied.categories, applied.timing]
   )
 
   // 확대해도 갈라지지 않는 클러스터. 구성원 전체를 한 목록으로 연다.
@@ -346,9 +345,7 @@ export const MapContainer = () => {
       const spotIds = members.map((s) => s.spotId).filter((id): id is number => id != null)
 
       try {
-        const center = mapInstance?.getCenter()
-        const preview = await spotPreviewApi(spotIds, {
-          coords: center ? { lat: center.getLat(), lng: center.getLng() } : null,
+        const preview = await fetchSpotPreview(spotIds, {
           categories: applied.categories,
           status: timingToStatus(applied.timing),
         })
@@ -365,7 +362,7 @@ export const MapContainer = () => {
       // 프리뷰가 비면 핀 하나를 탭했을 때와 같은 폴백을 쓴다.
       handlePinClick(members[0])
     },
-    [mapInstance, applied.categories, applied.timing, openPinDrawer, handlePinClick]
+    [fetchSpotPreview, applied.categories, applied.timing, openPinDrawer, handlePinClick]
   )
 
   useMapCluster(mapInstance, spots, handlePinClick, handleClusterClick)
