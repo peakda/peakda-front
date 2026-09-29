@@ -12,7 +12,9 @@ export function CategoryChip({
   className?: string
 }) {
   return (
-    <div
+    <button
+      type="button"
+      aria-pressed={selected === label}
       onClick={onClick}
       className={cn(
         'flex h-[28px] w-[60px] cursor-pointer items-center justify-center rounded-full px-2 py-1',
@@ -20,14 +22,14 @@ export function CategoryChip({
         selected === label && 'bg-brand-secondary transition-colors duration-300'
       )}
     >
-      <p
+      <span
         className={cn(
           'text-sm',
           selected === label ? 'text-text-primary-inverse font-bold' : 'text-text-tertiary'
         )}
       >
         {label}
-      </p>
-    </div>
+      </span>
+    </button>
   )
 }

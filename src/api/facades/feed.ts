@@ -14,7 +14,7 @@ import type {
   DeleteFeedByIdReactionsParams,
 } from '@/api/facades/generated/peakdaApi.schemas'
 import { PAGE_SIZE, nextPageParam } from '@/api/facades/pagination'
-import { useIsLoggedIn } from '@/hooks/useIsLoggedIn'
+import { useSsrInitialQuery } from '@/hooks/useSsrInitialQuery'
 import type { SpotRecordResponse } from '@/api/facades/generated/peakdaApi.schemas'
 import { feedDetailApi } from '@/api/facades/feed-detail'
 
@@ -57,14 +57,14 @@ export const useFeedListInfinite = (filter: GetFeedFilter) =>
   })
 
 export const useFeedDetail = (id: number | undefined, initialRecord?: SpotRecordResponse) => {
-  const isLoggedIn = useIsLoggedIn()
+  // 서버 HTML 은 비로그인 기준이라, 로그인 사용자는 내 리액션 상태를 채우려 하이드레이션 직후 한 번 다시 조회한다.
+  const ssr = useSsrInitialQuery<SpotRecordResponse | null>((data) => data === initialRecord)
   return useQuery({
     queryKey: getGetFeedByIdQueryKey(id ?? 0),
     queryFn: () => feedDetailApi(id!),
-    enabled: !!id,
+    enabled: !!id && ssr.enabled,
     initialData: initialRecord,
-    // Server HTML is public. Signed-in clients refresh personal reaction state immediately.
-    staleTime: isLoggedIn ? 0 : 60_000,
+    staleTime: ssr.staleTime,
   })
 }
 

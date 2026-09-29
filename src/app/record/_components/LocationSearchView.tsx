@@ -34,14 +34,14 @@ export function LocationSearchView({
       <div className="h-14 shrink-0">
         <Header
           left={
-            <Image
-              src={'/icons/LeftArrow.svg'}
-              alt="왼쪽 화살표"
-              className="h-6 w-6 cursor-pointer"
-              width={24}
-              height={24}
+            <button
+              type="button"
+              aria-label="뒤로 가기"
+              className="-m-3 flex cursor-pointer p-3"
               onClick={onClose}
-            />
+            >
+              <Image src="/icons/LeftArrow.svg" alt="" className="h-6 w-6" width={24} height={24} />
+            </button>
           }
           center={<span className="text-[15px] font-medium">위치 검색</span>}
         />

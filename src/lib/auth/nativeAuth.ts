@@ -92,9 +92,13 @@ async function requestAppToken(path: string, payload: Record<string, string>): P
     body: JSON.stringify(payload),
   })
 
-  const body = (await response.json()) as { data?: AppTokenResponse; message?: string }
-  if (!response.ok || !body.data) {
-    throw new Error(body.message ?? '앱 인증 토큰 요청에 실패했습니다.')
+  // 게이트웨이 502 HTML 처럼 JSON 이 아닌 응답에서 SyntaxError 로 원래 메시지가 가려지지 않게 한다.
+  const body = (await response.json().catch(() => null)) as {
+    data?: AppTokenResponse
+    message?: string
+  } | null
+  if (!response.ok || !body?.data) {
+    throw new Error(body?.message ?? `앱 인증 토큰 요청에 실패했습니다. (${response.status})`)
   }
   return body.data
 }

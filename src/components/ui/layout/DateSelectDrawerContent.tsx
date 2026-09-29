@@ -234,6 +234,8 @@ export function DateSelectDrawerContent({ value, onSelect, onClose }: Props) {
 
       <div className="flex items-center justify-between">
         <button
+          type="button"
+          aria-label="이전 달"
           onClick={goToPrev}
           className="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-gray-100"
         >
@@ -247,6 +249,8 @@ export function DateSelectDrawerContent({ value, onSelect, onClose }: Props) {
           <ChevronDown size={16} />
         </button>
         <button
+          type="button"
+          aria-label="다음 달"
           onClick={goToNext}
           className="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-gray-100"
         >

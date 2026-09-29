@@ -73,7 +73,11 @@ export const customInstance = async <T>(url: string, options?: RequestInit): Pro
   }
 
   if (!res.ok) {
-    throw { response: { status: res.status, data: await res.json() } }
+    // Caddy 502 HTML·본문 없는 403 등 JSON 이 아닌 에러 응답도 status 는 살려서 던진다.
+    const data = res.headers.get('content-type')?.includes('json')
+      ? await res.json().catch(() => null)
+      : null
+    throw { response: { status: res.status, data } }
   }
 
   const data = await res.json()
