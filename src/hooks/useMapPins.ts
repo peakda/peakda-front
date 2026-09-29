@@ -208,6 +208,35 @@ function canSplitByZoom(spots: MapSpot[], level: number): boolean {
 // 핀치줌 중 zoom_changed 가 연속 발화하므로 마지막 한 번만 다시 그린다.
 const ZOOM_DEBOUNCE_MS = 120
 
+// 드래그 중에는 이 간격으로만 다시 그린다(drag 는 매 프레임 발화한다).
+const DRAG_THROTTLE_MS = 100
+
+// 화면 밖 이만큼(px)까지 미리 그려 둔다. 좌표는 꼬리 끝이라 핀 몸통이 좌우 ~63px·위 ~65px
+// 걸치므로 그보다 커야 가장자리 핀이 잘리지 않고, 드래그 throttle 사이의 이동도 흡수한다.
+// 화면 비율로 잡으면 넓은 화면에서 여유가 bbox 를 다시 거의 다 덮어 효과가 없다.
+const VIEW_MARGIN_PX = 100
+
+/** 현재 화면 + 여유분 안에 있는 좌표인지 판정하는 함수 */
+function inViewChecker(map: kakao.maps.Map) {
+  const proj = map.getProjection()
+  const bounds = map.getBounds()
+  // 화면 좌표로 남서 = (0, 높이), 북동 = (폭, 0) 이라 컨테이너 크기를 따로 재지 않아도 된다.
+  const height = proj.containerPointFromCoords(bounds.getSouthWest()).y
+  const width = proj.containerPointFromCoords(bounds.getNorthEast()).x
+  const sw = proj.coordsFromContainerPoint(
+    new kakao.maps.Point(-VIEW_MARGIN_PX, height + VIEW_MARGIN_PX)
+  )
+  const ne = proj.coordsFromContainerPoint(
+    new kakao.maps.Point(width + VIEW_MARGIN_PX, -VIEW_MARGIN_PX)
+  )
+  const minLat = sw.getLat()
+  const maxLat = ne.getLat()
+  const minLng = sw.getLng()
+  const maxLng = ne.getLng()
+  return (lat: number, lng: number) =>
+    lat >= minLat && lat <= maxLat && lng >= minLng && lng <= maxLng
+}
+
 interface OverlayEntry {
   overlay: kakao.maps.CustomOverlay
   // 클릭 시점의 최신 데이터. 오버레이를 재사용해도 리스너가 옛 spot 을 붙들지 않도록 여기서 읽는다.
@@ -242,6 +271,9 @@ export function useMapCluster(
       clusterCacheRef.current.set(level, clusterSpots(spotsRef.current, level))
     }
     const clusters = clusterCacheRef.current.get(level)!
+    // 조회 bbox 는 격자 스냅으로 화면보다 넓다. 클러스터는 전체로 계산해 팬해도 묶음이
+    // 바뀌지 않게 하고, DOM 오버레이는 화면 근처 것만 만든다.
+    const inView = inViewChecker(map)
 
     const add = (key: string, lat: number, lng: number, html: string, members: MapSpot[]) => {
       const existing = entries.get(key)
@@ -288,6 +320,7 @@ export function useMapCluster(
 
     for (const cluster of clusters) {
       if (cluster.spots.length >= 2 && level >= 4) {
+        if (!inView(cluster.lat, cluster.lng)) continue
         const html = createClusterHTML(cluster.spots)
         const key = `c:${cluster.lat},${cluster.lng}|${html}`
         nextKeys.add(key)
@@ -296,6 +329,7 @@ export function useMapCluster(
       }
 
       for (const spot of cluster.spots) {
+        if (!inView(spot.lat, spot.lng)) continue
         const html = createPinHTML(spot.flowers, spot.maxStage)
         const key = `p:${spot.lat},${spot.lng}|${html}`
         nextKeys.add(key)
@@ -327,12 +361,29 @@ export function useMapCluster(
       timer = setTimeout(() => render(map), ZOOM_DEBOUNCE_MS)
     }
 
+    // 화면 안 핀만 그리므로 팬할 때도 다시 그려야 한다. 드래그 중엔 throttle 로,
+    // 관성 이동·panTo·setBounds 까지 끝나면 idle 에서 한 번 더 맞춘다.
+    let dragTimer: ReturnType<typeof setTimeout> | undefined
+    const onDrag = () => {
+      if (dragTimer) return
+      dragTimer = setTimeout(() => {
+        dragTimer = undefined
+        render(map)
+      }, DRAG_THROTTLE_MS)
+    }
+    const onIdle = () => render(map)
+
     kakao.maps.event.addListener(map, 'zoom_changed', onZoom)
+    kakao.maps.event.addListener(map, 'drag', onDrag)
+    kakao.maps.event.addListener(map, 'idle', onIdle)
     const entries = entriesRef.current
     const clusterCache = clusterCacheRef.current
     return () => {
       clearTimeout(timer)
+      clearTimeout(dragTimer)
       kakao.maps.event.removeListener(map, 'zoom_changed', onZoom)
+      kakao.maps.event.removeListener(map, 'drag', onDrag)
+      kakao.maps.event.removeListener(map, 'idle', onIdle)
       entries.forEach((e) => e.overlay.setMap(null))
       entries.clear()
       clusterCache.clear()
