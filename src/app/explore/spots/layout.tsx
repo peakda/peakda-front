@@ -1,13 +1,12 @@
 import type { Metadata } from 'next'
-import { SITE_BRAND_NAME } from '@/constants/site'
+import { createPageMetadata } from '@/lib/utils/pageMetadata'
 
-export const metadata: Metadata = {
-  // 부모(/explore) 레이아웃이 title 을 정의해 루트 템플릿이 여기까지 오지 않는다.
-  title: { absolute: `개화 명소 모아보기 | ${SITE_BRAND_NAME}` },
-  description: '지금 절정이거나 다음 주에 절정을 맞는 계절 명소를 확인하세요.',
-  // ?section 에 따라 목록이 달라 한 주소로 모을 수 없다. 부모(/explore)의 canonical 을 물려받지 않게 비운다.
-  alternates: { canonical: null },
-}
+export const metadata: Metadata = createPageMetadata({
+  title: '개화·절정 시기별 계절 명소',
+  description:
+    '지금 절정인 명소와 다음 주에 가기 좋은 계절 명소를 모아보세요. 꽃 종류별로 명소를 살펴보고 개화·절정 시기에 맞춰 여행지를 찾아보세요.',
+  path: null,
+})
 
 export default function ExploreSpotsLayout({ children }: { children: React.ReactNode }) {
   return children

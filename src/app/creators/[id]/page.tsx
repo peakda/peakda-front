@@ -37,9 +37,15 @@ export async function generateMetadata({ params }: CreatorDetailPageProps): Prom
   const image = curation.heroImageUrl ?? DEFAULT_OG_IMAGE
 
   return {
-    title,
+    title: { absolute: `${title} | ${SITE_BRAND_NAME}` },
     description,
     alternates: { canonical: path },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${title} | ${SITE_BRAND_NAME}`,
+      description,
+      images: [image],
+    },
     openGraph: {
       ...BASE_OPEN_GRAPH,
       title: `${title} | ${SITE_BRAND_NAME}`,

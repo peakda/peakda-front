@@ -36,15 +36,25 @@ export async function generateMetadata({ params }: SpotDetailPageProps): Promise
   const spot = await getSpot((await params).id)
   if (!spot) return {}
 
-  const title = toSpotSeoTitle(spot)
-  const description = toSpotSeoDescription(spot) || undefined
+  const title =
+    spot.bloom?.category === 'MAPLE'
+      ? `${spot.name} ${spot.bloom.displayName} 절정 시기`
+      : toSpotSeoTitle(spot)
+  const description =
+    toSpotSeoDescription(spot) || `${spot.name}의 위치와 방문 기록을 확인하고 여행을 준비하세요.`
   const path = `/spot/${spot.id}`
   const image = toSpotShareImage(spot)
 
   return {
-    title,
+    title: { absolute: `${title} | ${SITE_BRAND_NAME}` },
     description,
     alternates: { canonical: path },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${title} | ${SITE_BRAND_NAME}`,
+      description,
+      images: [image ?? DEFAULT_OG_IMAGE],
+    },
     openGraph: {
       ...BASE_OPEN_GRAPH,
       title: `${title} | ${SITE_BRAND_NAME}`,

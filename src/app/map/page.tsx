@@ -1,15 +1,16 @@
 import type { Metadata } from 'next'
+import { createPageMetadata } from '@/lib/utils/pageMetadata'
 import { Suspense } from 'react'
 import { MapContainer } from '@/components/Map/MapContainer'
 import { MapSkeleton } from '@/components/Map/MapSkeleton'
 import { getKakaoMapSdkUrl } from '@/lib/kakao/kakaoLoader'
 
-export const metadata: Metadata = {
-  title: '지도',
-  description: '지도에서 내 주변 계절 명소와 실시간 개화 상태를 확인하세요.',
-  // ?lat/?lng, ?login=1 이 붙은 주소가 따로 색인되지 않게 한다.
-  alternates: { canonical: '/map' },
-}
+export const metadata: Metadata = createPageMetadata({
+  title: '전국 명소 지도·개화 지도',
+  description:
+    '벚꽃·유채꽃·수국 등 계절 명소의 위치와 개화 추정 상태를 지도에서 확인하세요. 단풍·억새 명소와 최근 방문 기록을 살펴보고 여행할 장소를 골라보세요.',
+  path: '/map',
+})
 
 // MapContainer 가 useSearchParams(?lat/?lng)를 쓰므로 App Router 에서 Suspense 경계가 필요하다.
 // fallback 이 null 이면 서버가 보내는 HTML 에 지도 영역이 비어 있어 LCP 후보가 하이드레이션
