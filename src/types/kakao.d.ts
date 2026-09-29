@@ -7,6 +7,7 @@ declare namespace kakao.maps {
     setLevel(level: number, options?: { anchor?: LatLng; animate?: boolean }): void
     getLevel(): number
     getBounds(): LatLngBounds
+    getProjection(): MapProjection
     setBounds(
       bounds: LatLngBounds,
       paddingTop?: number,
@@ -20,6 +21,19 @@ declare namespace kakao.maps {
     constructor(lat: number, lng: number)
     getLat(): number
     getLng(): number
+  }
+
+  class Point {
+    constructor(x: number, y: number)
+    x: number
+    y: number
+  }
+
+  class MapProjection {
+    /** 좌표 → 지도 엘리먼트 좌상단 기준 화면 px */
+    containerPointFromCoords(latlng: LatLng): Point
+    /** 지도 엘리먼트 좌상단 기준 화면 px → 좌표 (엘리먼트 밖 px 도 된다) */
+    coordsFromContainerPoint(point: Point): LatLng
   }
 
   class LatLngBounds {
