@@ -11,6 +11,8 @@ import { NativeAuthManager } from '@/app/_components/NativeAuthManager'
 import { NativeBackButton } from '@/app/_components/NativeBackButton'
 import { NativeSplash } from '@/app/_components/NativeSplash'
 import { PushNotificationManager } from '@/app/_components/PushNotificationManager'
+import { shouldRetryQuery } from '@/lib/utils/apiError'
+import { DEFAULT_STALE_TIME } from '@/hooks/useSsrInitialQuery'
 
 // 로그인 시트는 vaul 을 끌고 와 모든 페이지 공통 번들을 키운다. 대부분의 방문에선 열리지 않으므로
 // 처음 열릴 때 받아 오고, 한 번 받은 뒤에는 닫힘 애니메이션을 위해 계속 마운트해 둔다.
@@ -32,8 +34,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 1000 * 60 * 5, // 5분. 실시간성 필요한 쿼리만 개별 오버라이드
-            retry: 1,
+            staleTime: DEFAULT_STALE_TIME, // 5분. 실시간성 필요한 쿼리만 개별 오버라이드
+            retry: shouldRetryQuery, // 5xx·네트워크 오류만 1회
           },
         },
       })
