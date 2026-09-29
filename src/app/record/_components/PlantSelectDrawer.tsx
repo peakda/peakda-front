@@ -88,7 +88,7 @@ export function PlantSelectDrawer({
   return (
     <VaulDrawer.Root open={open} onOpenChange={onOpenChange}>
       <VaulDrawer.Portal>
-        <VaulDrawer.Overlay className="fixed inset-0 z-100 mx-auto max-w-[430px] bg-black/30" />
+        <VaulDrawer.Overlay className="fixed inset-0 z-100 bg-black/30" />
 
         <VaulDrawer.Content className="fixed right-0 bottom-0 left-0 z-100 mx-auto flex max-h-[85vh] max-w-[430px] flex-col rounded-t-[20px] bg-white outline-none">
           <VaulDrawer.Title className="sr-only">식물 선택</VaulDrawer.Title>

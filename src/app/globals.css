@@ -384,6 +384,11 @@
   html {
     @apply font-sans;
   }
+  /* Tailwind v4 는 button 기본 커서가 default 라, 클릭 가능한 요소에 v3 처럼 pointer 를 되돌린다. */
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
 }
 
 @utility no-scrollbar {

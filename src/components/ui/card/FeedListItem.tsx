@@ -25,13 +25,15 @@ export const FeedListItem = memo(function FeedListItem({
   onDelete,
 }: FeedListItemProps) {
   return (
-    <FeedCard
+    <div style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 520px' }}>
+      <FeedCard
       {...toFeedCardProps(record, {
         isOwner,
         onEdit: () => onEdit(record.id),
         onDelete: () => onDelete(record.id),
       })}
       onOpen={onOpen && (() => onOpen(record.id))}
-    />
+      />
+    </div>
   )
 })

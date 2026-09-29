@@ -67,6 +67,23 @@ describe('stores/useFilterStore', () => {
       expect(s().draft.categories).toEqual(['MAPLE'])
     })
 
+    it('탐색은 꽃 한 종류만 선택하고 지도 복수 선택은 유지한다', () => {
+      const s = () => useFilterStore.getState()
+      s().toggleDraftCategory('CHERRY')
+      s().toggleDraftCategory('MAPLE')
+      s().applyDraft()
+
+      s().syncDraft()
+      s().keepFirstDraftCategory()
+      expect(s().draft.categories).toEqual(['CHERRY'])
+      expect(s().applied.categories).toEqual(['CHERRY', 'MAPLE'])
+
+      s().setSingleDraftCategory('MAPLE')
+      expect(s().draft.categories).toEqual(['MAPLE'])
+      s().setSingleDraftCategory('MAPLE')
+      expect(s().draft.categories).toEqual([])
+    })
+
     it('draft 를 만져도 applied 는 그대로다', () => {
       const s = () => useFilterStore.getState()
       s().toggleDraftTiming('EARLY')

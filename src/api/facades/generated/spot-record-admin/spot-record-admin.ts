@@ -16,7 +16,9 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  ApiResponseSpotRecordPhotoBackfillResponse,
   ApiResponseUnit,
+  PostAdminSpotRecordsPhotosBackfillVariantsParams,
   UpdateSpotRecordStatusRequest
 } from '../peakdaApi.schemas';
 
@@ -27,7 +29,104 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export type patchAdminSpotRecordsByIdStatusResponse200 = {
+export type postAdminSpotRecordsPhotosBackfillVariantsResponse200 = {
+  data: ApiResponseSpotRecordPhotoBackfillResponse
+  status: 200
+}
+
+export type postAdminSpotRecordsPhotosBackfillVariantsResponseSuccess = (postAdminSpotRecordsPhotosBackfillVariantsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type postAdminSpotRecordsPhotosBackfillVariantsResponse = (postAdminSpotRecordsPhotosBackfillVariantsResponseSuccess)
+
+export const getPostAdminSpotRecordsPhotosBackfillVariantsUrl = (params?: PostAdminSpotRecordsPhotosBackfillVariantsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+        Object.entries(value).forEach(([nestedKey, nestedValue]) => {
+          if (nestedValue !== undefined && nestedValue !== null) {
+            normalizedParams.append(nestedKey, nestedValue.toString())
+          }
+        })
+      } else {
+        normalizedParams.append(key, value === null ? 'null' : value.toString())
+      }
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/admin/spot-records/photos/backfill-variants?${stringifiedParams}` : `/api/admin/spot-records/photos/backfill-variants`
+}
+
+/**
+ * variant 세트가 늘어나기 전에 올라온 사진의 빠진 이미지를 원본에서 다시 만들어 채운다. 한 번에 batchSize 장씩 처리하므로 응답의 remaining 이 0 이 될 때까지 반복 호출한다.
+ * @summary 기록 사진 이미지 variant 백필
+ */
+export const postAdminSpotRecordsPhotosBackfillVariants = async (params?: PostAdminSpotRecordsPhotosBackfillVariantsParams, options?: RequestInit): Promise<postAdminSpotRecordsPhotosBackfillVariantsResponse> => {
+
+  return customInstance<postAdminSpotRecordsPhotosBackfillVariantsResponse>(getPostAdminSpotRecordsPhotosBackfillVariantsUrl(params),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getPostAdminSpotRecordsPhotosBackfillVariantsMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAdminSpotRecordsPhotosBackfillVariants>>, TError,{params?: PostAdminSpotRecordsPhotosBackfillVariantsParams}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postAdminSpotRecordsPhotosBackfillVariants>>, TError,{params?: PostAdminSpotRecordsPhotosBackfillVariantsParams}, TContext> => {
+
+const mutationKey = ['postAdminSpotRecordsPhotosBackfillVariants'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAdminSpotRecordsPhotosBackfillVariants>>, {params?: PostAdminSpotRecordsPhotosBackfillVariantsParams}> = (props) => {
+          const {params} = props ?? {};
+
+          return  postAdminSpotRecordsPhotosBackfillVariants(params,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostAdminSpotRecordsPhotosBackfillVariantsMutationResult = NonNullable<Awaited<ReturnType<typeof postAdminSpotRecordsPhotosBackfillVariants>>>
+
+    export type PostAdminSpotRecordsPhotosBackfillVariantsMutationError = unknown
+
+    /**
+ * @summary 기록 사진 이미지 variant 백필
+ */
+export const usePostAdminSpotRecordsPhotosBackfillVariants = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAdminSpotRecordsPhotosBackfillVariants>>, TError,{params?: PostAdminSpotRecordsPhotosBackfillVariantsParams}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postAdminSpotRecordsPhotosBackfillVariants>>,
+        TError,
+        {params?: PostAdminSpotRecordsPhotosBackfillVariantsParams},
+        TContext
+      > => {
+      return useMutation(getPostAdminSpotRecordsPhotosBackfillVariantsMutationOptions(options), queryClient);
+    }
+    export type patchAdminSpotRecordsByIdStatusResponse200 = {
   data: ApiResponseUnit
   status: 200
 }

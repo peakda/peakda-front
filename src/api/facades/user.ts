@@ -1,5 +1,6 @@
 ﻿import { useQueryClient } from '@tanstack/react-query'
 import { getGetAuthMeQueryKey } from '@/api/facades/generated/auth/auth'
+import { getGetUsersMeQueryKey } from '@/api/facades/generated/user/user'
 import {
   deleteUsersMeProfileImage,
   getUsersMe,
@@ -47,11 +48,22 @@ export const useMyPage = () => {
   return useGetUsersMe({ query: { enabled: isLoggedIn, select: (res) => res.data.data ?? null } })
 }
 
+const invalidateProfileViews = (queryClient: ReturnType<typeof useQueryClient>) => {
+  void queryClient.invalidateQueries({ queryKey: getGetAuthMeQueryKey() })
+  void queryClient.invalidateQueries({ queryKey: getGetUsersMeQueryKey() })
+  void queryClient.invalidateQueries({
+    predicate: (query) =>
+      typeof query.queryKey[0] === 'string' && /^\/api\/users\/\d+$/.test(query.queryKey[0]),
+  })
+}
+
 export const useUploadProfileImage = () => {
   const queryClient = useQueryClient()
   return useUploadProfileImageGen({
     mutation: {
-      onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetAuthMeQueryKey() }),
+      onSuccess: () => {
+        invalidateProfileViews(queryClient)
+      },
     },
   })
 }
@@ -61,7 +73,9 @@ export const useDeleteProfileImage = () => {
   const queryClient = useQueryClient()
   return useDeleteProfileImageGen({
     mutation: {
-      onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetAuthMeQueryKey() }),
+      onSuccess: () => {
+        invalidateProfileViews(queryClient)
+      },
     },
   })
 }
@@ -72,7 +86,9 @@ export const useUpdateFavoriteCategories = () => {
   const queryClient = useQueryClient()
   return useUpdateFavoriteCategoriesGen({
     mutation: {
-      onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetAuthMeQueryKey() }),
+      onSuccess: () => {
+        invalidateProfileViews(queryClient)
+      },
     },
   })
 }

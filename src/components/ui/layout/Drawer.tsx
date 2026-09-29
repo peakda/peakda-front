@@ -17,6 +17,7 @@ import { useFilterStore } from '@/stores/useFilterStore'
 import { spotPreviewApi } from '@/api/facades/spot'
 import { toPinListItems } from '@/lib/utils/spotPreview'
 import { timingToStatus } from '@/lib/utils/timing'
+import { track } from '@/lib/analytics'
 import { toast } from 'sonner'
 
 // 필터 시트와 날짜 선택 달력은 드로어 중 가장 무거운 두 덩어리인데, <Drawer /> 를 올리는
@@ -64,14 +65,15 @@ export function Drawer() {
   const [snap, setSnap] = useState<string | number | null>('400px')
 
   // 지도가 올려주는 "현재 화면의 필터 결과" — 필터 모드 하단 버튼이 쓴다.
-  const visibleSpotIds = useFilterStore((s) => s.visibleSpotIds)
-  const mapCenter = useFilterStore((s) => s.mapCenter)
+  // visibleSpotIds·mapCenter 는 지도 이동(idle)마다 새 값으로 발행된다. 구독하면 드로어가 닫혀
+  // 있어도 팬할 때마다 다시 렌더되므로, 쓰는 순간(openPreviewList)에 getState() 로 읽는다.
   const isVisibleStale = useFilterStore((s) => s.isVisibleStale)
   const draftVisibleCount = useFilterStore((s) => s.draftVisibleCount)
   const applied = useFilterStore((s) => s.applied)
   const visibleAppliedFor = useFilterStore((s) => s.visibleAppliedFor)
   const applyDraft = useFilterStore((s) => s.applyDraft)
   const syncDraft = useFilterStore((s) => s.syncDraft)
+  const keepFirstDraftCategory = useFilterStore((s) => s.keepFirstDraftCategory)
 
   const [isLoadingPreview, setIsLoadingPreview] = useState(false)
   // 버튼을 눌러 필터를 적용한 뒤, 지도 조회가 끝나면 목록을 연다.
@@ -90,12 +92,16 @@ export function Drawer() {
 
   // 드로어를 열 때마다 applied 기준으로 되돌려, 지난번에 버리고 닫은 선택이 남지 않게 한다.
   useEffect(() => {
-    if (isOpen && isFilterMode) syncDraft()
-  }, [isOpen, isFilterMode, syncDraft])
+    if (isOpen && isFilterMode) {
+      syncDraft()
+      if (type === 'flower-filter') keepFirstDraftCategory()
+    }
+  }, [isOpen, isFilterMode, type, syncDraft, keepFirstDraftCategory])
 
   const openPreviewList = useCallback(async () => {
     setIsLoadingPreview(true)
     try {
+      const { visibleSpotIds, mapCenter } = useFilterStore.getState()
       const preview = await spotPreviewApi(visibleSpotIds, {
         coords: mapCenter,
         // 고른 꽃·시기를 그대로 넘겨야 카드 뱃지가 지도 핀과 같은 기준으로 계산된다.
@@ -120,10 +126,16 @@ export function Drawer() {
     } finally {
       setIsLoadingPreview(false)
     }
-  }, [visibleSpotIds, mapCenter, applied, openPinDrawer, closeDrawer])
+  }, [applied, openPinDrawer, closeDrawer])
 
   // 하단 버튼 → 필터 커밋. 지도 조회가 끝나야 목록을 열 수 있어 대기 플래그를 세운다.
   const handleApplyFilter = () => {
+    const { draft } = useFilterStore.getState()
+    track('map_filter_apply', {
+      region: draft.region ?? 'all',
+      timing: draft.timing ?? 'all',
+      categories: draft.categories.length > 0 ? draft.categories.join(',') : 'all',
+    })
     applyDraft()
 
     // 탐색 화면의 꽃 필터는 뒤에 지도가 없어 보여줄 핀 목록이 없다. 적용만 하고 닫는다.
@@ -198,10 +210,12 @@ export function Drawer() {
               : type === 'reaction'
                 ? '기록에 남길 이모지 반응을 선택합니다.'
                 : '선택한 스팟을 찜 목록에 추가하고 개화 알림을 설정합니다.'
+    // 두 분기의 Root 가 같은 자리라 key 가 없으면 React 가 재사용해, 핀 목록 ↔ 찜 시트 전환 때
+    // 드로어가 새로 뜨지 않고 내용만 바뀐 채 스냅 위치를 다시 잡느라 느리게 내려갔다 올라온다.
     return (
-      <VaulDrawer.Root open={isOpen} onOpenChange={(open) => !open && closeDrawer()}>
+      <VaulDrawer.Root key="sheet" open={isOpen} onOpenChange={(open) => !open && closeDrawer()}>
         <VaulDrawer.Portal>
-          <VaulDrawer.Overlay className="fixed inset-0 z-100 mx-auto max-w-[430px] bg-black/40" />
+          <VaulDrawer.Overlay className="fixed inset-0 z-100 bg-black/40" />
           <VaulDrawer.Content className="fixed right-0 bottom-0 left-0 z-100 mx-auto flex max-w-[430px] flex-col rounded-t-[20px] bg-white outline-none">
             <VaulDrawer.Title className="sr-only">{title}</VaulDrawer.Title>
             <VaulDrawer.Description className="sr-only">{description}</VaulDrawer.Description>
@@ -253,6 +267,7 @@ export function Drawer() {
 
   return (
     <VaulDrawer.Root
+      key="snap"
       open={isOpen}
       onOpenChange={(open) => {
         if (!open) {
@@ -265,7 +280,7 @@ export function Drawer() {
       setActiveSnapPoint={handleSnapChange}
     >
       <VaulDrawer.Portal>
-        <VaulDrawer.Overlay className="pointer-events-none fixed inset-0 z-100 mx-auto max-w-[430px] bg-black/10 opacity-100!" />
+        <VaulDrawer.Overlay className="pointer-events-none fixed inset-0 z-100 bg-black/10 opacity-100!" />
 
         <VaulDrawer.Content className="pointer-events-auto fixed right-0 bottom-0 left-0 z-100 mx-auto flex h-full max-w-[430px] flex-col overflow-hidden rounded-t-[20px] bg-white outline-none">
           <VaulDrawer.Title className="sr-only">

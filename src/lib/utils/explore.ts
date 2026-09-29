@@ -4,7 +4,9 @@ import type {
   ExploreFestivalItemPhase,
   ExploreSpotItem,
 } from '@/api/facades/generated/peakdaApi.schemas'
+import { GetExploreSpotsSection } from '@/api/facades/generated/peakdaApi.schemas'
 import { toStatusBadge } from '@/lib/utils/bloomStatus'
+import { CATEGORY_ICON } from '@/constants/map'
 
 // '2026-04-01' → '4.1'. 파싱 실패 시 원본 반환.
 export const formatMonthDay = (iso: string) => {
@@ -12,15 +14,24 @@ export const formatMonthDay = (iso: string) => {
   return m && d ? `${Number(m)}.${Number(d)}` : iso
 }
 
-// 서버가 탐색에 노출되는 명소의 Spot 행을 미리 만들어 주므로 spotId 는 실질적으로 항상 있다.
-// 좌표 없는 명소를 대비해 타입은 nullable 로 남아 있어 그대로 넘긴다.
+// /explore/spots?section= 값 → 서버 section. 값이 없거나 정의되지 않은 섹션이면 PEAK_NOW 로 폴백한다.
+export const toExploreSection = (raw: string | string[] | undefined): GetExploreSpotsSection =>
+  raw === GetExploreSpotsSection.NEXT_WEEK
+    ? GetExploreSpotsSection.NEXT_WEEK
+    : GetExploreSpotsSection.PEAK_NOW
+
+// 운영 응답에 spotId 가 null 인 명소가 섞여 온다(2026-09-27 확인 — 서버 백필 미적용, 좌표 없는 명소).
+// 상세 이동·찜이 모두 spotId 로만 되므로 누를 수 없는 카드가 되어, 탐색 목록에서는 뺀다.
+export const hasSpotId = (item: ExploreSpotItem): item is ExploreSpotItem & { spotId: number } =>
+  item.spotId != null
+
 export const toExploreSpotProps = (item: ExploreSpotItem): SPOTProps => ({
   id: item.spotId ?? null,
   name: item.name,
   location: item.address ?? '',
   imageUrl: item.thumbnailUrl,
   ...toStatusBadge(item.status),
-  nameList: [item.displayName],
+  tags: [{ label: item.displayName, icon: CATEGORY_ICON[item.category] }],
   favorited: item.favorited,
   notifyEnabled: item.notifyEnabled,
 })

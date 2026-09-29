@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { FLOWER_CATEGORIES } from './flower'
+import { FLOWER_CATEGORIES, findFlowerImageByName } from './flower'
 import { CATEGORY_ICON } from './map'
 import { BloomCategory } from '@/api/facades/generated/peakdaApi.schemas'
 
@@ -69,5 +69,23 @@ describe('constants/flower', () => {
         '억새',
       ].sort()
     )
+  })
+})
+
+describe('findFlowerImageByName', () => {
+  it('필터 라벨과 같은 이름이면 그 꽃 사진을 준다', () => {
+    expect(findFlowerImageByName('벚꽃')).toBe(CATEGORY_ICON.CHERRY)
+    expect(findFlowerImageByName('억새')).toBe(CATEGORY_ICON.SILVERGRASS)
+  })
+
+  it("끝의 '꽃'·'나무'와 공백 차이는 무시한다", () => {
+    expect(findFlowerImageByName('동백')).toBe(CATEGORY_ICON.CAMELLIA)
+    expect(findFlowerImageByName('유채')).toBe(CATEGORY_ICON.CANOLA)
+    expect(findFlowerImageByName('단풍나무')).toBe(CATEGORY_ICON.MAPLE)
+    expect(findFlowerImageByName(' 코스모스 ')).toBe(CATEGORY_ICON.COSMOS)
+  })
+
+  it('필터 목록에 없는 식물은 undefined', () => {
+    expect(findFlowerImageByName('튤립')).toBeUndefined()
   })
 })

@@ -9,6 +9,7 @@ import { ProfileStats } from '@/app/my/_components/ProfileStats'
 import { InterestFlowerSection } from '@/app/my/_components/InterestFlowerSection'
 import { MyRecordSection } from '@/app/my/_components/MyRecordSection'
 import { SavedSpotSection } from '@/app/my/_components/SavedSpotSection'
+import { Drawer } from '@/components/ui/layout/Drawer'
 import { IconBtn } from '@/components/ui/button/IconBtn'
 import { useRouter } from 'next/navigation'
 import { toMyRecordThumb } from '@/lib/utils/spotRecordToFeed'
@@ -21,6 +22,9 @@ import { formatUnreadBadge } from '@/lib/utils/notificationToAlarm'
 import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
 import { useIsLoggedIn } from '@/hooks/useIsLoggedIn'
 import { useRequireLogin } from '@/hooks/useRequireLogin'
+import { useEffect, useState } from 'react'
+import { usePlants } from '@/api/facades/plant'
+import { readCustomFavoritePlantIds } from '@/lib/utils/customFavoritePlants'
 
 export default function MyPage() {
   const router = useRouter()
@@ -28,9 +32,19 @@ export default function MyPage() {
   const isLoggedIn = useIsLoggedIn()
   const requireLogin = useRequireLogin()
   const { data: myPage } = useMyPage()
+  const { data: plants } = usePlants()
+  const [customPlantIds, setCustomPlantIds] = useState<number[]>([])
+  useEffect(() => {
+    if (myPage) setCustomPlantIds(readCustomFavoritePlantIds(myPage.userId))
+  }, [myPage])
   const records = (myPage?.recordPreview ?? []).map(toMyRecordThumb)
   const stats = myPage ? toProfileStats(myPage.stats) : null
-  const flowers = myPage ? toFavoriteFlowerLabels(myPage.favoriteCategories) : []
+  const flowers = myPage
+    ? [
+        ...toFavoriteFlowerLabels(myPage.favoriteCategories),
+        ...(plants ?? []).filter((plant) => customPlantIds.includes(plant.id)).map((plant) => plant.name),
+      ]
+    : []
   const { data: unread } = useUnreadNotificationCount()
   const unreadBadge = formatUnreadBadge(unread?.unreadCount ?? 0)
   const { data: favoriteData } = useFavoriteList()
@@ -134,6 +148,7 @@ export default function MyPage() {
       <SavedSpotSection spots={savedSpots} count={favoriteData?.count} />
 
       <Nav activeTab="my" />
+      <Drawer />
     </div>
   )
 }

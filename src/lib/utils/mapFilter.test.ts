@@ -102,7 +102,7 @@ describe('lib/utils/mapFilter', () => {
       expect(narrowed.statuses).toEqual(['PREPARING'])
       expect(narrowed.flowers).toEqual([{ src: CATEGORY_ICON.CHERRY, alt: 'CHERRY' }])
       // 좁히기 전에는 단풍(PEAK) 때문에 Peak 였다.
-      expect(narrowed.maxStage).toBe('Before')
+      expect(narrowed.maxStage).toBe('Early')
       expect(localMulti.maxStage).toBe('Peak')
     })
 

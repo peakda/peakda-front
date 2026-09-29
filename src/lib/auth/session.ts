@@ -4,15 +4,15 @@
 
 export const AUTH_MARKER = 'peakda_auth'
 export const RETURN_TO = 'peakda_return_to'
-export const AUTH_MARKER_SET_EVENT = 'peakda:auth-marker-set'
+// 마커가 심기거나 지워질 때 모두 발생한다 — 구독자(useIsLoggedIn 등)가 로그아웃도 알아야 한다.
+export const AUTH_MARKER_CHANGED_EVENT = 'peakda:auth-marker-changed'
 
 // 이 쿼리가 붙은 주소로 오면 로그인 바텀시트를 연다 (미들웨어가 막힌 경로를 /map?login=1 로 보낸다).
 export const LOGIN_SHEET_QUERY = 'login'
 
-// 비로그인은 홈·지도·탐색·검색·스팟·공개 피드를 둘러볼 수 있다. 아래 경로만 로그인이 필요하다.
+// 비로그인은 홈·지도·탐색·검색·스팟·공개 피드·축제·큐레이션을 둘러볼 수 있다. 아래 경로만 로그인이 필요하다.
 // - 기록 작성·마이 하위 화면·알림·팔로우 목록·프로필 수정: 내 계정이 있어야 의미가 있는 화면
-// - /users·/festivals·/creators: 백엔드 조회 API(/api/users/{id}, /api/festivals/{id}, /api/curations/{id})가
-//   아직 인증을 요구한다. 공개되면 여기서 빼면 된다 (BACKEND_API_REQUESTS.md)
+// - /users: 백엔드 조회 API(/api/users/{id})가 아직 인증을 요구한다. 공개되면 여기서 빼면 된다 (BACKEND_API_REQUESTS.md)
 // /my 자체는 비로그인에게 "로그인하고 시작해보세요" 화면을 보여주므로 넣지 않고 하위 화면만 막는다.
 // /profile(가입 중 프로필 설정)은 signup-token 만 있어 마커가 없는 상태로 거치므로 넣지 않는다.
 // robots.ts 도 이 목록으로 크롤링을 막는다.
@@ -26,8 +26,6 @@ export const PROTECTED_PATHS = [
   '/followers',
   '/following',
   '/users',
-  '/festivals',
-  '/creators',
 ]
 
 export function isProtectedPath(pathname: string): boolean {
@@ -40,7 +38,7 @@ const RETURN_TO_MAX_AGE = 600 // 10분
 export function setAuthMarker(): void {
   if (typeof document === 'undefined') return
   document.cookie = `${AUTH_MARKER}=1; path=/; max-age=${MARKER_MAX_AGE}; samesite=lax`
-  window.dispatchEvent(new Event(AUTH_MARKER_SET_EVENT))
+  window.dispatchEvent(new Event(AUTH_MARKER_CHANGED_EVENT))
 }
 
 export function hasAuthMarker(): boolean {
@@ -51,6 +49,7 @@ export function hasAuthMarker(): boolean {
 export function clearAuthMarker(): void {
   if (typeof document === 'undefined') return
   document.cookie = `${AUTH_MARKER}=; path=/; max-age=0; samesite=lax`
+  window.dispatchEvent(new Event(AUTH_MARKER_CHANGED_EVENT))
 }
 
 export function setReturnTo(path: string): void {

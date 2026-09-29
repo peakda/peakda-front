@@ -70,7 +70,7 @@ export const getGetCurationsUrl = (params: GetCurationsParams,) => {
 }
 
 /**
- * 발행된 주차 단위 큐레이션을 최신 주차순으로 조회한다.
+ * 비로그인으로 조회할 수 있다. 발행된 주차 단위 큐레이션을 최신 주차순으로 조회한다.
  * @summary 발행 큐레이션 목록
  */
 export const getCurations = async (params: GetCurationsParams, options?: RequestInit): Promise<getCurationsResponse> => {
@@ -199,7 +199,7 @@ export const getGetCurationsByIdUrl = (id: number,
 }
 
 /**
- * 발행된 큐레이션의 챕터와 추천 카드를 조회한다. lat·lng를 모두 전달하면 연결 스팟까지의 거리를 계산한다.
+ * 비로그인으로 조회할 수 있다. 검색엔진·SNS 크롤러가 쿠키 없이 요청하는 공개 상세 화면이다. 발행된 큐레이션의 챕터와 추천 카드를 조회한다. 초안이거나 발행 취소된 큐레이션은 404다. lat·lng를 모두 전달하면 연결 스팟까지의 거리를 계산하고, 없으면 거리 값은 null이다.
  * @summary 발행 큐레이션 상세
  */
 export const getCurationsById = async (id: number,

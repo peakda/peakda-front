@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { Bell, Heart, MapPin } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
 import { Header } from '@/components/ui/layout/Header'
@@ -18,17 +19,26 @@ import { toFeedCardProps } from '@/lib/utils/spotRecordToFeed'
 import { useSpotDetail } from '@/api/facades/spot'
 import { useBloomCalendar } from '@/api/facades/seasonal-bloom'
 import { useRemoveFavorite, useUpdateFavoriteNotify } from '@/api/facades/spot-favorite'
-import { getGetSpotsByIdQueryKey } from '@/api/facades/generated/spot/spot'
-import type { SpotDetailResponse } from '@/api/facades/generated/peakdaApi.schemas'
+import { track } from '@/lib/analytics'
+import {
+  getGetSpotsByIdQueryKey,
+  type getSpotsByIdResponse,
+} from '@/api/facades/generated/spot/spot'
+import type {
+  FavoriteState,
+  SpotDetailResponse,
+} from '@/api/facades/generated/peakdaApi.schemas'
 import { buildRecordUrl } from '@/lib/utils/spotCta'
-import { toStatusBadge } from '@/lib/utils/bloomStatus'
+import { type BloomStageStatus, toStatusBadge } from '@/lib/utils/bloomStatus'
 import { BLOOM_CATEGORY_EMOJI, formatPeakPeriod, peakHeadline } from '@/lib/utils/bloomCalendar'
 import { formatMonthDay } from '@/lib/utils/explore'
 import { cn } from '@/lib/utils/cn'
+import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
 
 // 캘린더(일별 타임라인)가 없으면 '이번 주말이 딱이에요' 판정을 못 하므로
 // 상세 응답 배너의 현재 상태만으로 문구를 대체한다.
-const BLOOM_BANNER_MESSAGE: Record<string, string> = {
+const BLOOM_BANNER_MESSAGE: Record<BloomStageStatus, string> = {
+  BEFORE_SEASON: '아직 개화 전이에요',
   PREPARING: '곧 피기 시작해요',
   STARTED: '이제 막 피기 시작했어요',
   PEAK: '지금이 절정이에요',
@@ -48,6 +58,20 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
   const removeFavorite = useRemoveFavorite()
   const updateNotify = useUpdateFavoriteNotify()
   const requireLogin = useRequireLogin()
+
+  // 상세 진입 1회. "지금 가기 좋은 곳"에 더 반응하는지 보려고 개화 단계를 같이 보낸다.
+  // 개화 정보는 사용자와 무관해 서버 응답(initialSpot) 값으로 충분하다.
+  const spotType = initialSpot.type
+  const bloomCategory = initialSpot.bloom?.category
+  const bloomStatus = initialSpot.bloom?.status
+  useEffect(() => {
+    track('spot_view', {
+      spot_id: id,
+      spot_type: spotType,
+      bloom_category: bloomCategory,
+      bloom_status: bloomStatus,
+    })
+  }, [id, spotType, bloomCategory, bloomStatus])
 
   // 서버 응답에는 사용자 쿠키가 없어 찜·알림이 항상 false 다. 클라이언트가 쿠키를 실어 다시 조회해 덮어쓰고,
   // 그 전까지(또는 재조회 실패 시)는 서버 값을 그대로 보여준다.
@@ -72,7 +96,31 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
   const durationDays = calendar?.peakDurationDays ?? spot.bloom?.peakDurationDays
   const headline = calendar
     ? peakHeadline(calendar)
-    : (BLOOM_BANNER_MESSAGE[spot.bloom?.status ?? ''] ?? '')
+    : spot.bloom
+      ? BLOOM_BANNER_MESSAGE[spot.bloom.status]
+      : ''
+
+  // 찜 시트는 서버 응답 전에 닫히므로 상세 캐시의 찜 상태를 먼저 바꿔 하트·종을 바로 채운다.
+  // 진행 중인 재조회가 늦게 도착해 옛 값으로 덮지 않도록 먼저 취소한다. 성공하면 시트가 상세 쿼리를 무효화해 서버 값으로 맞춰진다.
+  const setFavoriteCache = (favorite: FavoriteState) => {
+    const queryKey = getGetSpotsByIdQueryKey(id)
+    void queryClient.cancelQueries({ queryKey })
+    queryClient.setQueryData<getSpotsByIdResponse>(queryKey, (old) =>
+      old?.data.data
+        ? { ...old, data: { ...old.data, data: { ...old.data.data, favorite } } }
+        : old
+    )
+  }
+
+  // 시트는 찜하지 않은 상태에서만 열리므로, 실패하면 찜·알림 모두 꺼진 상태로 되돌린다.
+  const openSaveSheet = () =>
+    openSaveSpotDrawer({
+      spotId: id,
+      name: spot.name,
+      location: spot.address ?? '',
+      onSaved: (enabled) => setFavoriteCache({ favorited: true, notifyEnabled: enabled }),
+      onSaveFailed: () => setFavoriteCache({ favorited: false, notifyEnabled: false }),
+    })
 
   // 추가는 "개화 알림 받기" 토글이라는 실제 선택지가 있어 시트가 필요하지만,
   // 해제는 선택지가 없어 시트가 순수 마찰이라 HeartBtn과 동일하게 즉시 토글한다.
@@ -93,14 +141,14 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
       )
       return
     }
-    openSaveSpotDrawer({ spotId: id, name: spot.name, location: spot.address ?? '' })
+    openSaveSheet()
   }
 
   // 알림은 찜에 붙은 설정이라 찜하지 않은 스팟은 알림만 켤 수 없다.
   // 이때는 알림 토글이 들어 있는 찜 추가 시트를 연다.
   const handleNotify = () => {
     if (!favorited) {
-      openSaveSpotDrawer({ spotId: id, name: spot.name, location: spot.address ?? '' })
+      openSaveSheet()
       return
     }
     updateNotify.mutate(
@@ -124,7 +172,7 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
       <div className="relative h-64 bg-gray-200">
         {spot.representativeImageUrl && (
           <Image
-            src={spot.representativeImageUrl}
+            src={toHttpsImageUrl(spot.representativeImageUrl) ?? spot.representativeImageUrl}
             alt={spot.name}
             fill
             priority
@@ -150,7 +198,9 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
                 type="button"
                 aria-label="만개 알림 받기"
                 aria-pressed={favorited && notifyEnabled}
-                onClick={() => requireLogin(handleNotify, '알림 설정을 하고 싶다면 로그인이 필요해요.')}
+                onClick={() =>
+                  requireLogin(handleNotify, '알림 설정을 하고 싶다면 로그인이 필요해요.')
+                }
                 disabled={updateNotify.isPending}
               >
                 <Bell

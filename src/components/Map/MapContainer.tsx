@@ -20,9 +20,12 @@ import { timingToStatus, timingToStatuses } from '@/lib/utils/timing'
 import { useBloomMap } from '@/api/facades/seasonal-bloom'
 import { useHomeSuggestion } from '@/api/facades/home'
 import { useUnreadNotificationCount } from '@/api/facades/notification'
-import { spotPreviewApi } from '@/api/facades/spot'
+import { useFetchSpotPreview } from '@/api/facades/spot'
 import { toPinListItems } from '@/lib/utils/spotPreview'
 import { bloomToMapSpots } from '@/lib/utils/bloomToMapSpots'
+import { readMapView, rememberMapView } from '@/lib/utils/mapViewHistory'
+import { loadAppSettings } from '@/lib/utils/appSettings'
+import { track } from '@/lib/analytics'
 import { REGION_MAP_CENTERS } from '@/constants/region'
 import { STAGE_LABEL } from '@/constants/map'
 import type { GetSeasonalBloomsParams } from '@/api/facades/generated/peakdaApi.schemas'
@@ -144,10 +147,10 @@ function panToCurrentLocation(map: kakao.maps.Map, onPermissionDenied?: () => vo
   )
 }
 
-const initMap = (container: HTMLElement, center: { lat: number; lng: number }) => {
+const initMap = (container: HTMLElement, center: { lat: number; lng: number }, level: number) => {
   const map = new kakao.maps.Map(container, {
     center: new kakao.maps.LatLng(center.lat, center.lng),
-    level: INITIAL_LEVEL,
+    level,
     maxLevel: 13,
     draggable: true,
     scrollwheel: true,
@@ -196,6 +199,13 @@ export const MapContainer = () => {
     const lng = toCoord(lngParam)
     return lat != null && lng != null ? { lat, lng } : null
   }, [latParam, lngParam])
+  // 좌표가 없는 축제·큐레이션은 주소·장소명(?q)으로 넘어온다. 괄호 속 부연(예: '(효석문화제)')은
+  // 키워드 검색을 실패하게 만들어 떼고 찾는다.
+  const targetQuery = searchParams.get('q')?.replace(/\(.*?\)/g, '').trim() || null
+  const targetSpotId = toCoord(searchParams.get('spotId'))
+
+  // ?spotId 로 들어오면 그 명소 핀을 찾아 드로어를 연다. 좌표가 정해진 뒤에만 채운다.
+  const pendingTargetRef = useRef<{ spotId: number; lat: number; lng: number } | null>(null)
 
   // 서버로 나가는 건 bbox·개화상태(status)·권역(region)이다. 전부 applied 기준이라
   // 드로어에서 필터를 만지는 것만으로는 요청이 나가지 않는다.
@@ -287,6 +297,7 @@ export const MapContainer = () => {
   const { data: unread } = useUnreadNotificationCount()
   const requireLogin = useRequireLogin()
   const hasUnreadNotification = (unread?.unreadCount ?? 0) > 0
+  const fetchSpotPreview = useFetchSpotPreview()
 
   // 핀 하나든 필터 결과 목록이든 같은 preview API 로 채운다.
   // 서버가 탐색·지도에 노출되는 명소의 Spot 행을 미리 만들어 주므로 spotId 가 사실상 항상 있고,
@@ -295,9 +306,8 @@ export const MapContainer = () => {
     async (spot: MapSpot) => {
       try {
         if (spot.spotId != null) {
-          const center = mapInstance?.getCenter()
-          const preview = await spotPreviewApi([spot.spotId], {
-            coords: center ? { lat: center.getLat(), lng: center.getLng() } : null,
+          track('map_pin_click', { spot_id: spot.spotId })
+          const preview = await fetchSpotPreview([spot.spotId], {
             categories: applied.categories,
             status: timingToStatus(applied.timing),
           })
@@ -326,7 +336,7 @@ export const MapContainer = () => {
         }))
       )
     },
-    [openPinDrawer, mapInstance, applied.categories, applied.timing]
+    [openPinDrawer, fetchSpotPreview, applied.categories, applied.timing]
   )
 
   // 확대해도 갈라지지 않는 클러스터. 구성원 전체를 한 목록으로 연다.
@@ -335,9 +345,7 @@ export const MapContainer = () => {
       const spotIds = members.map((s) => s.spotId).filter((id): id is number => id != null)
 
       try {
-        const center = mapInstance?.getCenter()
-        const preview = await spotPreviewApi(spotIds, {
-          coords: center ? { lat: center.getLat(), lng: center.getLng() } : null,
+        const preview = await fetchSpotPreview(spotIds, {
           categories: applied.categories,
           status: timingToStatus(applied.timing),
         })
@@ -354,10 +362,28 @@ export const MapContainer = () => {
       // 프리뷰가 비면 핀 하나를 탭했을 때와 같은 폴백을 쓴다.
       handlePinClick(members[0])
     },
-    [mapInstance, applied.categories, applied.timing, openPinDrawer, handlePinClick]
+    [fetchSpotPreview, applied.categories, applied.timing, openPinDrawer, handlePinClick]
   )
 
   useMapCluster(mapInstance, spots, handlePinClick, handleClusterClick)
+
+  // 목표 좌표를 담은 영역의 조회 결과가 도착했을 때 한 번만 찾는다. 이전 영역의 결과
+  // (placeholder)나 목표가 빠진 bbox 의 결과로 판정하면 핀이 있는데도 못 찾고 끝난다.
+  // 필터로 가려진 핀이어도 사용자가 고른 명소라 allSpots 에서 찾는다. 없으면 이동만 한다.
+  useEffect(() => {
+    const target = pendingTargetRef.current
+    if (!target || !bbox || !bloomData || isPlaceholderData) return
+    const inBbox =
+      target.lat >= bbox.minLat &&
+      target.lat <= bbox.maxLat &&
+      target.lng >= bbox.minLng &&
+      target.lng <= bbox.maxLng
+    if (!inBbox) return
+
+    pendingTargetRef.current = null
+    const spot = allSpots.find((s) => s.spotId === target.spotId)
+    if (spot) handlePinClick(spot)
+  }, [bbox, bloomData, isPlaceholderData, allSpots, handlePinClick])
 
   // 지도 이동/줌이 멈출 때(idle) 현재 영역(bbox)으로 개화현황을 조회한다.
   // 좌표를 격자에 스냅해 캐시가 작동하게 하고, 연속 이동은 debounce로 마지막 정착만 조회한다.
@@ -367,12 +393,23 @@ export const MapContainer = () => {
     // 화면 안 개수는 이미 받아 둔 데이터로 세므로 조회와 달리 지연시키지 않는다.
     const syncViewport = () => setViewport(mapBox(mapInstance))
 
+    // 상세로 나갔다 뒤로 돌아왔을 때 보던 자리로 되살리기 위해, 정착할 때마다 남겨 둔다.
+    const saveView = () => {
+      const center = mapInstance.getCenter()
+      rememberMapView({
+        lat: center.getLat(),
+        lng: center.getLng(),
+        level: mapInstance.getLevel(),
+      })
+    }
+
     const updateBbox = () =>
       applyBbox(snapBbox(mapBox(mapInstance), mapInstance.getLevel(), appliedRegionRef.current))
 
     let timer: ReturnType<typeof setTimeout>
     const onIdle = () => {
       syncViewport()
+      saveView()
       clearTimeout(timer)
       timer = setTimeout(() => {
         updateBbox()
@@ -386,6 +423,7 @@ export const MapContainer = () => {
     }
 
     syncViewport()
+    saveView() // idle 전에 핀을 눌러 나가도 위치가 남아 있도록 한 번 기록
     updateBbox() // 첫 진입은 즉시 조회
     kakao.maps.event.addListener(mapInstance, 'idle', onIdle)
     return () => {
@@ -456,6 +494,10 @@ export const MapContainer = () => {
 
   const handleLocate = useCallback(() => {
     if (!mapRef.current) return
+    if (!loadAppSettings().locationEnabled) {
+      toast.error('설정에서 위치 정보 사용을 켜주세요.')
+      return
+    }
     panToCurrentLocation(mapRef.current, () => {
       toast.error('위치 권한이 필요합니다.', {
         description: '브라우저 설정에서 위치 권한을 허용해주세요.',
@@ -468,13 +510,38 @@ export const MapContainer = () => {
 
     let map = mapRef.current
     if (!map) {
-      const center = initialCenter ?? DEFAULT_CENTER
-      map = initMap(containerRef.current, center)
+      // 이 히스토리 엔트리에 값이 있다는 건 여기서 지도를 보다가 상세로 갔다 돌아왔다는 뜻이라
+      // 쿼리 좌표보다 우선한다. ?lat/?lng 는 그 화면에 '처음' 들어올 때만 의미가 있다.
+      const savedView = readMapView()
+      const center = savedView ?? initialCenter ?? DEFAULT_CENTER
+      const createdMap = initMap(containerRef.current, center, savedView?.level ?? INITIAL_LEVEL)
+      map = createdMap
       mapRef.current = map
+
+      // 핀 자동 선택도 처음 들어올 때만 한다. 뒤로가기로 돌아왔는데 드로어가 또 열리면 안 된다.
+      if (!savedView && initialCenter && targetSpotId != null) {
+        pendingTargetRef.current = { spotId: targetSpotId, ...initialCenter }
+      }
       setMapInstance(map)
 
-      // 쿼리 좌표로 들어온 경우엔 현재 위치로 튕기지 않는다.
-      if (!initialCenter) panToCurrentLocation(map)
+      const canUseLocation = loadAppSettings().locationEnabled
+      // 보던 위치로 되살렸거나 쿼리 좌표로 들어온 경우엔 현재 위치로 튕기지 않는다.
+      if (!savedView && !initialCenter && targetQuery) {
+        // 검색에 실패하면(결과 없음) 쿼리 없이 들어온 것처럼 현재 위치로 보낸다.
+        new kakao.maps.services.Places().keywordSearch(targetQuery, (data, status) => {
+          const place = status === kakao.maps.services.Status.OK ? data[0] : undefined
+          if (!place) {
+            if (canUseLocation) panToCurrentLocation(createdMap)
+            return
+          }
+          const lat = Number(place.y)
+          const lng = Number(place.x)
+          if (targetSpotId != null) pendingTargetRef.current = { spotId: targetSpotId, lat, lng }
+          createdMap.setCenter(new kakao.maps.LatLng(lat, lng))
+        })
+      } else if (!savedView && !initialCenter && canUseLocation) {
+        panToCurrentLocation(map)
+      }
     }
 
     // SDK 준비와 실제 지도 표시 완료는 다르다. 첫 타일이 모두 그려질 때까지
@@ -490,7 +557,7 @@ export const MapContainer = () => {
       kakao.maps.event.removeListener(map, 'tilesloaded', handleTilesLoaded)
       if (frameId != null) window.cancelAnimationFrame(frameId)
     }
-  }, [isSdkReady, initialCenter])
+  }, [isSdkReady, initialCenter, targetQuery, targetSpotId])
 
   return (
     <div className="relative h-dvh w-full contain-strict">

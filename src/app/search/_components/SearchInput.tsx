@@ -46,11 +46,28 @@ export function SearchInput({
     return () => cancelAnimationFrame(frame)
   }, [autoFocus])
 
+  if (readOnly) {
+    return (
+      <div className="flex items-center gap-4 px-4 pt-2 pb-2">
+        <button
+          type="button"
+          onClick={onClick}
+          aria-label="검색 페이지 열기"
+          className="bg-bg-secondary text-text-tertiary flex h-12 w-full items-center gap-3 rounded-3xl px-3 text-left text-base"
+        >
+          <Image src="/icons/search.svg" alt="" width={24} height={24} />
+          <span className="truncate">{placeholder}</span>
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div className="flex items-center gap-4 px-4 pt-2 pb-2">
       <div className="flex-1">
         <Input
           ref={inputRef}
+          aria-label="검색어"
           autoFocus={autoFocus}
           value={query}
           variant="none"
@@ -65,7 +82,7 @@ export function SearchInput({
           }
           rightIcon={
             hasQuery ? (
-              <button type="button" onClick={() => setQuery?.('')}>
+              <button type="button" aria-label="검색어 지우기" onClick={() => setQuery?.('')}>
                 <IconBtn size="sm" className="bg-bg-quaternary-2">
                   <X size={14} color="white" />
                 </IconBtn>

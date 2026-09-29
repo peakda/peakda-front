@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { cache } from 'react'
 import { notFound } from 'next/navigation'
 import { spotDetailApi } from '@/api/facades/spot'
-import { BASE_OPEN_GRAPH, DEFAULT_OG_IMAGE } from '@/constants/site'
+import { BASE_OPEN_GRAPH, DEFAULT_OG_IMAGE, SITE_BRAND_NAME } from '@/constants/site'
 import { isApiErrorStatus } from '@/lib/utils/apiError'
 import {
   toJsonLdScript,
@@ -47,7 +47,7 @@ export async function generateMetadata({ params }: SpotDetailPageProps): Promise
     alternates: { canonical: path },
     openGraph: {
       ...BASE_OPEN_GRAPH,
-      title: `Peakda | ${title}`,
+      title: `${title} | ${SITE_BRAND_NAME}`,
       description,
       url: path,
       images: [{ url: image ?? DEFAULT_OG_IMAGE, alt: spot.name }],

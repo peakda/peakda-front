@@ -120,7 +120,13 @@ export function FeedDetailView({
             <Badge
               key={i}
               label={flower.label}
-              leftIcon={<span>{flower.emoji}</span>}
+              leftIcon={
+                flower.icon ? (
+                  <Image src={flower.icon} alt="" width={20} height={20} />
+                ) : (
+                  <span>{flower.emoji}</span>
+                )
+              }
               variant="filled"
               color="pink"
             />

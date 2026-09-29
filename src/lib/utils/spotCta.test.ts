@@ -30,6 +30,24 @@ describe('lib/utils/spotCta', () => {
     it('둘 다 undefined 이면 /map', () => {
       expect(buildMapUrl({})).toBe('/map')
     })
+
+    it('좌표가 없으면 검색어를 인코딩해 q 로 넘긴다', () => {
+      expect(buildMapUrl({ latitude: null, longitude: null, query: ' 서울 길상사 ' })).toBe(
+        '/map?q=%EC%84%9C%EC%9A%B8+%EA%B8%B8%EC%83%81%EC%82%AC'
+      )
+    })
+
+    it('좌표가 있으면 검색어는 무시한다', () => {
+      expect(buildMapUrl({ latitude: 37.5, longitude: 127, query: '길상사' })).toBe(
+        '/map?lat=37.5&lng=127'
+      )
+    })
+
+    it('spotId 가 있으면 함께 넘긴다', () => {
+      expect(buildMapUrl({ query: '노을공원', spotId: 949 })).toBe(
+        '/map?q=%EB%85%B8%EC%9D%84%EA%B3%B5%EC%9B%90&spotId=949'
+      )
+    })
   })
 
   describe('buildRecordUrl', () => {

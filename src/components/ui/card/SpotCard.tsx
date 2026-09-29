@@ -1,13 +1,14 @@
 'use client'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { HeartBtn } from '@/components/ui/button/HeartBtn'
 import { BellBtn } from '@/components/ui/button/BellBtn'
 import { IconBtn } from '@/components/ui/button/IconBtn'
-import { CardBadge } from '@/components/ui/card/CardBadge'
 import { Tag } from '@/components/ui/display/Tag'
 import { SPOTProps } from '@/app/search/_components/SpotPanel'
+import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
+import { useDrawerStore } from '@/stores/useDrawerStore'
 
 interface Props {
   spot: SPOTProps
@@ -16,27 +17,69 @@ interface Props {
 export function SpotCard({ spot }: Props) {
   // 알림은 찜에 종속이라, 이 자리에서 하트를 누르면 종도 같이 켜지고 꺼져야 한다.
   const [favorited, setFavorited] = useState(spot.favorited ?? false)
+  const [notifyEnabled, setNotifyEnabled] = useState(spot.notifyEnabled ?? false)
+  const openSaveSpotDrawer = useDrawerStore((s) => s.openSaveSpotDrawer)
+
+  useEffect(() => {
+    setFavorited(spot.favorited ?? false)
+    setNotifyEnabled(spot.notifyEnabled ?? false)
+  }, [spot.favorited, spot.notifyEnabled, spot.id])
 
   // Spot 행이 아직 없으면(spotId null) 찜할 대상도 없어 두 버튼 다 비활성된다.
   const spotId = spot.id ?? undefined
+  const firstTag = spot.tags[0]
+
+  // 찜 추가는 상세 화면과 같은 찜 시트(알림 토글 포함)를 거친다.
+  const requestSave = () => {
+    if (spotId === undefined) return
+    openSaveSpotDrawer({
+      spotId,
+      name: spot.name,
+      location: spot.location,
+      onSaved: (enabled) => {
+        setFavorited(true)
+        setNotifyEnabled(enabled)
+      },
+      onSaveFailed: () => {
+        setFavorited(false)
+        setNotifyEnabled(false)
+      },
+    })
+  }
 
   const info = (
     <>
       <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-gray-200">
         {spot.imageUrl && (
-          <Image src={spot.imageUrl} alt={spot.name} fill className="object-cover" sizes="80px" />
+          <Image
+            src={toHttpsImageUrl(spot.imageUrl) ?? spot.imageUrl}
+            alt={spot.name}
+            fill
+            className="object-cover"
+            sizes="80px"
+          />
         )}
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="text-text-primary text-base font-semibold">{spot.name}</span>
         <span className="text-text-secondary text-sm">{spot.location}</span>
         <div className="flex items-center gap-1">
-          {spot.nameList.map((name, idx) => (
-            <Tag text={name} key={idx} />
-          ))}
           {spot.status && (
-            <CardBadge label={spot.status} variant={spot.statusVariant ?? 'secondary'} />
+            // 스팟 카드의 상태 뱃지는 단계 색 대신 진한 분홍(Tag) 하나로 통일한다
+            <Tag text={spot.status} />
           )}
+          {/* 꽃이 여러 개면 칩 하나에 '첫 꽃 외N' 으로 접는다. 아이콘 없는 태그(명소/동네)는 기존 Tag 그대로 */}
+          {firstTag &&
+            (firstTag.icon ? (
+              <span className="flex items-center gap-0.5 rounded-full bg-pink-50 px-2 py-0.5 text-[11px] font-semibold text-pink-400">
+                <Image src={firstTag.icon} alt="" width={14} height={14} />
+                {spot.tags.length > 1
+                  ? `${firstTag.label} 외${spot.tags.length - 1}`
+                  : firstTag.label}
+              </span>
+            ) : (
+              <Tag text={firstTag.label} />
+            ))}
         </div>
       </div>
     </>
@@ -55,17 +98,23 @@ export function SpotCard({ spot }: Props) {
       <div className="flex items-center gap-2">
         <IconBtn size="md">
           <HeartBtn
-            InitFavorite={spot.favorited ?? false}
+            InitFavorite={favorited}
             spotId={spotId}
-            onToggle={setFavorited}
+            onRequestSave={requestSave}
+            onToggle={(next) => {
+              setFavorited(next)
+              setNotifyEnabled(next)
+            }}
             className="h-5 w-5"
           />
         </IconBtn>
         <IconBtn size="md">
           <BellBtn
-            InitEnabled={spot.notifyEnabled ?? false}
+            InitEnabled={notifyEnabled}
             spotId={spotId}
             favorited={favorited}
+            onRequestSave={requestSave}
+            onToggle={setNotifyEnabled}
             className="h-5 w-5"
           />
         </IconBtn>

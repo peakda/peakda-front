@@ -13,6 +13,7 @@ import { TabPanels } from '@/components/ui/Tab/TabPanel'
 import { Tabs } from '@/components/ui/Tab/Tab'
 import { TabItem } from '@/context/TabContext'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
+import { track } from '@/lib/analytics'
 import { flattenPages } from '@/lib/utils/infinitePages'
 import { shouldLoadMore } from '@/lib/utils/myRecords'
 import { segmentFromTab, toAlarmItem, toNotificationHref } from '@/lib/utils/notificationToAlarm'
@@ -89,6 +90,7 @@ function NotificationPanel({ tabValue, label }: { tabValue: string; label: strin
         const item = toAlarmItem(n)
         const link = toNotificationHref(n)
         const handleSelect = () => {
+          track('notification_click', { notification_type: n.type })
           if (!n.read) markRead.mutate({ id: n.id })
           if (!link) return
           if (link.isExternal) window.open(link.href, '_blank', 'noopener,noreferrer')

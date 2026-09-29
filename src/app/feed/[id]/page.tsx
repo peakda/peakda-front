@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
 import { cache } from 'react'
 import { notFound } from 'next/navigation'
-import { feedDetailApi } from '@/api/facades/feed'
-import { BASE_OPEN_GRAPH, DEFAULT_OG_IMAGE } from '@/constants/site'
+import { feedDetailApi } from '@/api/facades/feed-detail'
+import { BASE_OPEN_GRAPH, DEFAULT_OG_IMAGE, SITE_BRAND_NAME } from '@/constants/site'
 import { isApiErrorStatus } from '@/lib/utils/apiError'
+import { recordPhotoUrl } from '@/lib/utils/recordPhotoUrl'
 import { FeedDetailClient } from './_components/FeedDetailClient'
 
 interface FeedDetailPageProps {
@@ -46,10 +47,10 @@ export async function generateMetadata({ params }: FeedDetailPageProps): Promise
     // 기본 카드를 쓴다 (영구 URL 은 백엔드 요청 대기).
     openGraph: {
       ...BASE_OPEN_GRAPH,
-      title: `Peakda | ${title}`,
+      title: `${title} | ${SITE_BRAND_NAME}`,
       description,
       url: path,
-      images: [DEFAULT_OG_IMAGE],
+      images: [record.photos[0] ? recordPhotoUrl(record.photos[0], 'medium') : DEFAULT_OG_IMAGE],
     },
   }
 }
@@ -58,5 +59,5 @@ export default async function FeedDetailPage({ params }: FeedDetailPageProps) {
   const record = await getRecord((await params).id)
   if (!record) notFound()
 
-  return <FeedDetailClient />
+  return <FeedDetailClient initialRecord={record} />
 }

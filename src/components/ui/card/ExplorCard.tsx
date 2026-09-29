@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import { CardBadge, type CardBadgeVariant } from '@/components/ui/card/CardBadge'
 import { cn } from '@/lib/utils/cn'
+import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
 
 // 카드 클릭 시 이동은 호출부에서 넘긴다(카드 내부에서 라우터를 쓰지 않는다).
 interface ExplorCardBaseProps {
@@ -49,7 +50,7 @@ export function ExplorCard(props: ExplorCardProps) {
       {/* 이미지 영역 */}
       <div className="relative overflow-hidden rounded-2xl">
         <Image
-          src={props.image}
+          src={toHttpsImageUrl(props.image) ?? props.image}
           alt={isCourse ? props.title : props.name}
           width={250}
           height={180}

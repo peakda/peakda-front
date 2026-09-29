@@ -54,9 +54,10 @@ function SectionLabel({ label, withReset = false }: { label: string; withReset?:
 }
 
 // 꽃 종류는 서버로 보내지 않고 응답의 category 로 클라에서 거른다(MapContainer 의 bloomParams 참고).
-function FlowerSections() {
+function FlowerSections({ singleSelect = false }: { singleSelect?: boolean }) {
   const categories = useFilterStore((s) => s.draft.categories)
   const toggleDraftCategory = useFilterStore((s) => s.toggleDraftCategory)
+  const setSingleDraftCategory = useFilterStore((s) => s.setSingleDraftCategory)
 
   return (
     <div className="space-y-6">
@@ -71,7 +72,9 @@ function FlowerSections() {
                 date={f.months}
                 image={f.image}
                 selected={categories.includes(f.value)}
-                onClick={() => toggleDraftCategory(f.value)}
+                onClick={() =>
+                  singleSelect ? setSingleDraftCategory(f.value) : toggleDraftCategory(f.value)
+                }
               />
             ))}
           </div>
@@ -199,7 +202,7 @@ export function FilterDrawerContent({
           if (dy < -60 && snap === '400px') onExpandToFull()
         }}
       >
-        <FlowerSections />
+        <FlowerSections singleSelect />
       </div>
     )
   }

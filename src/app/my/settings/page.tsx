@@ -85,7 +85,7 @@ export default function SettingsPage() {
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex flex-col">
           <span className="text-text-primary text-base">위치 정보 활용</span>
-          <span className="text-text-tertiary text-sm">내 위치 기반 추천</span>
+          <span className="text-text-tertiary text-sm">지도에서 현재 위치 사용</span>
         </div>
         {settingsLoaded && (
           <Toggle
@@ -111,8 +111,8 @@ export default function SettingsPage() {
       )}
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex flex-col">
-          <span className="text-text-primary text-base">EXIF 데이터 자동 추출</span>
-          <span className="text-text-tertiary text-sm">사진에서 위치·날짜 자동 입력</span>
+          <span className="text-text-primary text-base">촬영 날짜 자동 입력</span>
+          <span className="text-text-tertiary text-sm">사진에 저장된 날짜가 있을 때 빈 날짜 칸에 입력</span>
         </div>
         {settingsLoaded && (
           <Toggle initialStatus={settings.exifEnabled} onChange={updateSetting('exifEnabled')} />

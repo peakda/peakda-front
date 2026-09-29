@@ -12,6 +12,7 @@
 | `api/facades/generated/` | `pnpm generate:api`로 orval이 생성 (tags-split 모드, 도메인별 분리). **직접 수정 금지** — swagger 재생성 시 덮어씀 |
 | `api/facades/*.ts` | 도메인별 수동 파사드. generated 훅을 감싸서 앱에 노출. 언래핑 규칙: `res.data`(orval 래퍼) → `res.data.data`(백엔드 실제 payload) |
 | `app/` | Next.js App Router. 라우트: explore, feed, map, spot, search, my, profile, users, creators, festivals, followers, following, notification, onboarding, login/auth, Terms(약관), record. `app/_components/`는 앱 전역 공용 컴포넌트(Providers, SplashScreen). Route Handler 디렉터리는 없다 — 백엔드를 직접 호출한다 (`ARCHITECTURE.md` 참고) |
+| `app/Terms/_prompts/` | 법적 고지 페이지를 만들 때 쓴 AI 프롬프트 원본. 런타임에서 참조하지 않으니 문구 수정은 `app/Terms/_data/`를 직접 고친다. `public/`에 두면 운영 URL로 공개되므로 여기 둔다 |
 | `components/Map/` | 카카오맵 관련 컴포넌트 — `dynamic import + ssr: false` 필수 |
 | `components/ui/` | 프레젠테이셔널 컴포넌트 (button, card, category, display, form, icon, layout, list, message, Tab) |
 | `components/notification/` | 알림 관련 컴포넌트 |

@@ -12,13 +12,15 @@ import { isValidNickname } from '@/lib/utils/nickname'
 import { useUploadSignupProfileImage } from '@/api/facades/auth'
 import Image from 'next/image'
 import { Camera } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 import { useCallback, useRef, useState } from 'react'
 import { useSignUpComplete } from '@/hooks/useSignUpComplete'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { toast } from 'sonner'
 import type { SignupCompleteRequestFavoriteCategoriesItem } from '@/api/facades/generated/peakdaApi.schemas'
 import { compressImage } from '@/lib/utils/image'
+// 기타 식물 선택은 임시로 숨김 — 다시 열 때 아래 OtherPlantPicker 주석과 함께 푼다
+// import { OtherPlantPicker } from './_components/OtherPlantPicker'
+import { savePendingCustomFavoritePlantIds } from '@/lib/utils/customFavoritePlants'
 
 const FLOWER_LIST: { label: string; value: SignupCompleteRequestFavoriteCategoriesItem }[] = [
   { label: '동백꽃', value: 'CAMELLIA' },
@@ -37,11 +39,12 @@ const FLOWER_LIST: { label: string; value: SignupCompleteRequestFavoriteCategori
 ]
 
 export default function ProfilePage() {
-  const router = useRouter()
   const [nickname, setNickname] = useState('')
   // 중복확인을 통과한 닉네임 — 현재 입력값과 일치할 때만 검증된 것으로 본다
   const [checkedNickname, setCheckedNickname] = useState<string | null>(null)
   const [selected, setSelected] = useState<SignupCompleteRequestFavoriteCategoriesItem[]>([])
+  // 기타 식물 선택을 숨긴 동안은 setter 를 쓰지 않는다 — 다시 열 때 setCustomPlantIds 도 되살린다
+  const [customPlantIds /* , setCustomPlantIds */] = useState<number[]>([])
   const [preview, setPreview] = useState<string | null>(null)
   // 회원가입 임시 업로드 응답의 profileImageKey — signup complete 로 그대로 전달
   const [profileImageKey, setProfileImageKey] = useState<string | null>(null)
@@ -51,9 +54,12 @@ export default function ProfilePage() {
   const { mutate: uploadImage, isPending: isUploading } = useUploadSignupProfileImage()
   const { isPending: signupPending, check: submit } = useSignUpComplete(nickname, profileImageKey, selected, {
     onSuccess: () => {
+      savePendingCustomFavoritePlantIds(customPlantIds)
       // 가입이 끝나야 정식 인증 상태 — 이 시점에 마커를 심어야 미들웨어가 /map 을 통과시킨다.
       setAuthMarker()
-      router.replace('/map')
+      // router.replace 는 마커 변경으로 걸린 router.refresh 를 취소해 로그인 전 prefetch 캐시가 남는다.
+      // 전체 로드로 라우터 캐시를 비워, 가입 직후 보호 경로가 로그인 시트로 돌아가지 않게 한다.
+      window.location.replace('/map')
     },
   })
 
@@ -188,7 +194,14 @@ export default function ProfilePage() {
             }
           }}
           disabled={!isValidNickname(nickname) || isPending}
-          message="닉네임을 작성해주세요"
+          // 형식이 틀리면 버튼이 잠기므로 안내하지 않는다 (규칙은 description 에 이미 노출)
+          message={
+            isNicknameVerified
+              ? '사용 가능한 닉네임이에요.'
+              : isValidNickname(nickname)
+                ? '중복확인을 해주세요.'
+                : undefined
+          }
           error={message}
           isAvailable={isNicknameVerified}
           isError={isError}
@@ -199,6 +212,7 @@ export default function ProfilePage() {
           <h3 className="text-[16px] font-semibold tracking-tight text-gray-700">
             어떤 꽃·자연이 좋으세요?
           </h3>
+          <span className="text-brand-primary">*</span>
           <p className="text-gray-500">(복수 선택)</p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -218,7 +232,11 @@ export default function ProfilePage() {
               />
             )
           })}
+          {/* <OtherPlantPicker selectedIds={customPlantIds} onChange={setCustomPlantIds} /> */}
         </div>
+        {customPlantIds.length > 0 && selected.length === 0 && (
+          <p className="text-sm text-rose-500">기본 꽃·자연도 1개 이상 선택해 주세요.</p>
+        )}
       </div>
       <div className="fixed right-0 bottom-2 left-0 z-10 mx-auto max-w-107.5 px-4">
         <Button

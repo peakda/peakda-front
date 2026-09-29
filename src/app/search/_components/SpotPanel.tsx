@@ -3,7 +3,9 @@ import { IconBtn } from '@/components/ui/button/IconBtn'
 import { SpotCard } from '@/components/ui/card/SpotCard'
 import type { CardBadgeVariant } from '@/components/ui/card/CardBadge'
 import { InfiniteScrollFooter } from '@/components/ui/display/InfiniteScrollFooter'
+import { QueryFeedback } from '@/components/ui/display/QueryFeedback'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
+import type { PinBadge } from '@/types/types'
 
 export interface SPOTProps {
   // 스팟 상세로 이동할 spotId. 명소만 있고 Spot 행이 아직 없으면 null(이동 불가)
@@ -15,7 +17,8 @@ export interface SPOTProps {
   // 개화 상태 라벨. 정보가 없으면 '' (배지 미표시)
   status: string
   statusVariant?: CardBadgeVariant
-  nameList: string[]
+  // 카드 하단 태그. 꽃이면 아이콘을 붙이고, 명소/동네 구분처럼 아이콘이 없으면 라벨만 보인다.
+  tags: PinBadge[]
   // 찜 상태. SpotCard 하트의 초기값이다.
   favorited?: boolean
   // 개화 알림 on/off. 알림은 찜에 종속이라 favorited 가 false 면 종은 비활성이다.
@@ -29,10 +32,24 @@ interface Props {
   hasMore?: boolean
   // hasMore 는 로딩 중에 false 가 되므로 스피너 표시 여부는 따로 받는다.
   isLoadingMore?: boolean
+  isLoading?: boolean
+  isError?: boolean
+  onRetry?: () => void
 }
 
-export function SpotPanel({ spots, onLoadMore, hasMore = false, isLoadingMore = false }: Props) {
+export function SpotPanel({
+  spots,
+  onLoadMore,
+  hasMore = false,
+  isLoadingMore = false,
+  isLoading = false,
+  isError = false,
+  onRetry,
+}: Props) {
   const sentinelRef = useInfiniteScroll(() => onLoadMore?.(), hasMore)
+
+  if (isLoading) return <QueryFeedback state="loading" />
+  if (isError && spots.length === 0) return <QueryFeedback state="error" onRetry={onRetry} />
 
   if (spots.length === 0) {
     return (

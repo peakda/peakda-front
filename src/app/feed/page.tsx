@@ -9,6 +9,7 @@ import { CategoryChip } from '@/components/ui/category/CategoryChip'
 import { FeedListItem } from '@/components/ui/card/FeedListItem'
 import { Drawer } from '@/components/ui/layout/Drawer'
 import { InfiniteScrollFooter } from '@/components/ui/display/InfiniteScrollFooter'
+import { QueryFeedback } from '@/components/ui/display/QueryFeedback'
 import { useFeedListInfinite } from '@/api/facades/feed'
 import { useCurrentUser } from '@/api/facades/auth'
 import { useDeleteSpotRecord } from '@/api/facades/spot-record'
@@ -25,9 +26,8 @@ export default function FeedPage() {
   const router = useRouter()
   const [tab, setTab] = useState(FEED_CATEGORIES[0])
 
-  const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } = useFeedListInfinite(
-    filterFromTab(tab)
-  )
+  const { data, isLoading, isError, refetch, hasNextPage, isFetchingNextPage, fetchNextPage } =
+    useFeedListInfinite(filterFromTab(tab))
   const records = flattenPages(data)
   const sentinelRef = useInfiniteScroll(
     () => fetchNextPage(),
@@ -66,7 +66,12 @@ export default function FeedPage() {
           left={<div className="text-text-primary text-xl font-semibold">피드</div>}
           right={
             <div className="flex items-center gap-3">
-              <button type="button" aria-label="검색" className="cursor-pointer" onClick={() => router.push('/search')}>
+              <button
+                type="button"
+                aria-label="검색"
+                className="cursor-pointer"
+                onClick={() => router.push('/search')}
+              >
                 <Image src="/icons/search.svg" alt="검색" width={22} height={22} />
               </button>
             </div>
@@ -89,7 +94,9 @@ export default function FeedPage() {
 
       {/* 피드 목록 */}
       {isLoading ? (
-        <p className="text-text-tertiary py-10 text-center text-sm">불러오는 중...</p>
+        <QueryFeedback state="loading" />
+      ) : isError && records.length === 0 ? (
+        <QueryFeedback state="error" onRetry={() => void refetch()} />
       ) : records.length === 0 ? (
         <p className="text-text-tertiary py-10 text-center text-sm">아직 피드가 없어요</p>
       ) : (

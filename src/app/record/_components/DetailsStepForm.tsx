@@ -20,6 +20,8 @@ export const STATUS_OPTIONS = [
 export type BloomStage = (typeof STATUS_OPTIONS)[number]['value']
 
 interface DetailsStepFormProps {
+  // 기록 수정 화면도 같은 2단계 흐름을 쓴다. 헤더·버튼 문구만 수정용으로 바뀐다.
+  isEdit?: boolean
   plants: PlantResponse[] | undefined
   selectedPlantIds: number[]
   onTogglePlant: (id: number) => void
@@ -35,6 +37,7 @@ interface DetailsStepFormProps {
 }
 
 export function DetailsStepForm({
+  isEdit = false,
   plants,
   selectedPlantIds,
   onTogglePlant,
@@ -65,7 +68,9 @@ export function DetailsStepForm({
               <ChevronLeft size={24} />
             </button>
           }
-          center={<span className="text-[15px] font-medium">스팟 기록</span>}
+          center={
+            <span className="text-[15px] font-medium">{isEdit ? '기록 수정' : '스팟 기록'}</span>
+          }
         />
       </div>
 
@@ -162,7 +167,7 @@ export function DetailsStepForm({
           disabled={!isStep2Valid || isSubmitting}
           onClick={onPublish}
         >
-          게시하기
+          {isEdit ? '수정 완료' : '게시하기'}
         </Button>
       </div>
 

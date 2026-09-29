@@ -90,7 +90,7 @@ pnpm generate:facades   # 없는 도메인만 파사드 스텁 생성
 | --- | --- |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | 데이터 흐름 (API 호출, 인증 refresh, 카카오맵, 상태 관리 계층) |
 | [MEMORY.md](MEMORY.md) | **코드만 봐서는 알 수 없는 결정과 이유** — 작업 전 먼저 확인 |
-| [src/CLAUDE.md](src/CLAUDE.md), [public/CLAUDE.md](public/CLAUDE.md) | 디렉터리별 구조와 규칙 |
+| [src/CLAUDE.md](src/CLAUDE.md) | 디렉터리별 구조와 규칙 |
 | [design-tokens.md](design-tokens.md) | Figma 디자인 토큰 원본 (색상 스케일, Text Style, Flower_colors) |
 | [BACKEND_API_REQUESTS.md](BACKEND_API_REQUESTS.md) | **백엔드에 전달하는 요청서** — 요청 내용만. 백엔드와 공유하는 문서 |
 | [API_CHANGE_REQUESTS.md](API_CHANGE_REQUESTS.md) | 위 요청들의 프론트 대응 현황과 경위 (내부용) |
