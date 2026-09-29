@@ -11,15 +11,6 @@ const nextConfig: NextConfig = {
       headers: [{ key: 'X-Robots-Tag', value: 'noindex' }],
     }))
   },
-  webpack: (config, { dev }) => {
-    if (dev) {
-      config.watchOptions = {
-        ...config.watchOptions,
-        ignored: ['**/node_modules/**', '**/.git/**', '**/System Volume Information/**'],
-      }
-    }
-    return config
-  },
   images: {
     // 서버가 용도별 이미지 크기를 제공하므로 Vercel 이미지 변환을 사용하지 않는다.
     unoptimized: true,
