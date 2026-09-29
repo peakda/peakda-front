@@ -17,16 +17,18 @@ export function FlowerCard({
   onClick,
 }: FlowerCardProps) {
   return (
-    <div
+    <button
+      type="button"
+      aria-pressed={selected}
       onClick={onClick}
       className={cn(
         'border-border-primary flex min-h-[90px] min-w-[60px] cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border p-3',
         selected && 'border-primary bg-pink-50'
       )}
     >
-      <Image src={image} alt={label} width={24} height={24} />
-      <p className="text-text-primary text-sm">{label}</p>
-      <p className="text-text-tertiary text-[13px]">{date}</p>
-    </div>
+      <Image src={image} alt="" width={24} height={24} />
+      <span className="text-text-primary text-sm">{label}</span>
+      <span className="text-text-tertiary text-[13px]">{date}</span>
+    </button>
   )
 }

@@ -64,7 +64,7 @@ export function DetailsStepForm({
       <div className="h-14">
         <Header
           left={
-            <button onClick={onBack}>
+            <button type="button" aria-label="뒤로 가기" onClick={onBack}>
               <ChevronLeft size={24} />
             </button>
           }

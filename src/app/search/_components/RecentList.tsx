@@ -44,7 +44,7 @@ export function RecentList({
                 <Clock className="text-icon-secondary h-4 w-4 shrink-0" strokeWidth={1} />
                 <span className="text-text-secondary cursor-pointer text-sm">{item}</span>
               </button>
-              <button onClick={() => removeRecent(item)}>
+              <button type="button" aria-label={`최근 검색어 ${item} 삭제`} onClick={() => removeRecent(item)}>
                 <X className="text-icon-quaternary h-5 w-5 cursor-pointer" />
               </button>
             </li>

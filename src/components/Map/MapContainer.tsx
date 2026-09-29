@@ -586,15 +586,17 @@ export const MapContainer = () => {
           </div>
         }
         right={
-          <div
+          <button
+            type="button"
+            aria-label={hasUnreadNotification ? '알림, 읽지 않은 알림 있음' : '알림'}
             className="bg-bg-primary-80 border-border-primary relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-full p-1"
             onClick={() => requireLogin(() => router.push('/notification'))}
           >
-            <Image src={'/icons/alram.svg'} alt="알람" width={20} height={20} className="h-6 w-6" />
+            <Image src={'/icons/alram.svg'} alt="" width={20} height={20} className="h-6 w-6" />
             {hasUnreadNotification && (
-              <div className="absolute top-2.5 right-2.5 h-1 w-1 rounded-full bg-pink-500"></div>
+              <span className="absolute top-2.5 right-2.5 h-1 w-1 rounded-full bg-pink-500"></span>
             )}
-          </div>
+          </button>
         }
       />
 

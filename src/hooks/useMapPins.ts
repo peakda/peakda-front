@@ -38,6 +38,8 @@ interface ClusterGroup {
   lng: number
 }
 
+// 핀·클러스터 HTML 은 innerHTML 로 들어간다. 서버 문자열(꽃 이름·명소명)을 여기에 끼워 넣지 말 것 —
+// 이름은 컨테이너의 aria-label(setAttribute)로만 붙이고, 이미지는 장식용(alt="")으로 둔다.
 function createPinHTML(flowers: FlowerItem[], maxStage: Stage): string {
   const color = STAGE_COLOR[maxStage]
   const grayscale =
@@ -50,7 +52,7 @@ function createPinHTML(flowers: FlowerItem[], maxStage: Stage): string {
     .slice(0, 3)
     .map(
       (f) =>
-        `<img src="${f.src}" alt="${f.alt ?? ''}" width="24" height="24" style="width:24px;height:24px;max-width:none;flex-shrink:0;object-fit:contain;${grayscale}">`
+        `<img src="${f.src}" alt="" width="24" height="24" style="width:24px;height:24px;max-width:none;flex-shrink:0;object-fit:contain;${grayscale}">`
     )
     .join('')
   const badge =
@@ -146,7 +148,7 @@ function createClusterHTML(spots: MapSpot[]): string {
   const flower = topStageFlower(spots, topStage)
   const iconOffset = (CLUSTER_SIZE - CLUSTER_ICON_SIZE) / 2
   const icon = flower
-    ? `<img src="${flower.src}" alt="${flower.alt ?? ''}" width="${CLUSTER_ICON_SIZE}" height="${CLUSTER_ICON_SIZE}" style="position:absolute;left:${iconOffset}px;top:${iconOffset}px;width:${CLUSTER_ICON_SIZE}px;height:${CLUSTER_ICON_SIZE}px;object-fit:contain;">`
+    ? `<img src="${flower.src}" alt="" width="${CLUSTER_ICON_SIZE}" height="${CLUSTER_ICON_SIZE}" style="position:absolute;left:${iconOffset}px;top:${iconOffset}px;width:${CLUSTER_ICON_SIZE}px;height:${CLUSTER_ICON_SIZE}px;object-fit:contain;">`
     : ''
 
   // 배지는 대표로 보여준 꽃 1개를 뺀 나머지 스팟 수다.
@@ -168,6 +170,12 @@ function createClusterHTML(spots: MapSpot[]): string {
       ${icon}${badge}
     </div>
   `
+}
+
+// 스크린리더가 읽을 핀 이름. 예) "여의도 한강공원, 벚꽃·유채 개화 정보"
+export function pinLabel(spot: MapSpot): string {
+  const flowers = spot.flowers.map((f) => f.alt).filter(Boolean).join('·')
+  return `${spot.title ?? '이름 없는 명소'}${flowers ? `, ${flowers}` : ''} 개화 정보`
 }
 
 // 셀 크기는 level 에 비례하므로 화면상 크기가 일정하다(≈106px @ 모바일 390px 폭).
@@ -275,7 +283,14 @@ export function useMapCluster(
     // 바뀌지 않게 하고, DOM 오버레이는 화면 근처 것만 만든다.
     const inView = inViewChecker(map)
 
-    const add = (key: string, lat: number, lng: number, html: string, members: MapSpot[]) => {
+    const add = (
+      key: string,
+      lat: number,
+      lng: number,
+      html: string,
+      members: MapSpot[],
+      label: string
+    ) => {
       const existing = entries.get(key)
       if (existing) {
         existing.spots = members
@@ -284,26 +299,36 @@ export function useMapCluster(
 
       const container = document.createElement('div')
       container.innerHTML = html
+      // 키보드·스크린리더(TalkBack)로도 핀을 누를 수 있게 버튼으로 노출한다.
+      container.setAttribute('role', 'button')
+      container.setAttribute('aria-label', label)
+      container.tabIndex = 0
       const entry: OverlayEntry = { overlay: null!, spots: members }
 
-      if (members.length >= 2) {
-        container.addEventListener('click', () => {
-          // 더 확대할 수 있으면 확대만 한다(구성원이 벌어지면 다음 렌더에서 자동으로 갈라진다).
-          // 평균 좌표로 2단계 확대하면 구성원이 화면 밖으로 흩어지므로 구성원 전체를 감싸는
-          // 영역에 맞춘다. padding 은 헤더·카테고리·검색바(위)와 Nav(아래)에 가리지 않을 만큼.
-          if (canSplitByZoom(entry.spots, map.getLevel())) {
-            const bounds = new kakao.maps.LatLngBounds()
-            entry.spots.forEach((s) => bounds.extend(new kakao.maps.LatLng(s.lat, s.lng)))
-            map.setBounds(bounds, 180, 40, 140, 40)
-            return
-          }
-          // 최대 줌인데도 안 갈라지는 클러스터는 목록으로 보여 준다.
-          onClusterClickRef.current?.(entry.spots)
-        })
-      } else {
-        container.style.cursor = 'pointer'
-        container.addEventListener('click', () => onPinClickRef.current?.(entry.spots[0]))
-      }
+      const activate =
+        members.length >= 2
+          ? () => {
+              // 더 확대할 수 있으면 확대만 한다(구성원이 벌어지면 다음 렌더에서 자동으로 갈라진다).
+              // 평균 좌표로 2단계 확대하면 구성원이 화면 밖으로 흩어지므로 구성원 전체를 감싸는
+              // 영역에 맞춘다. padding 은 헤더·카테고리·검색바(위)와 Nav(아래)에 가리지 않을 만큼.
+              if (canSplitByZoom(entry.spots, map.getLevel())) {
+                const bounds = new kakao.maps.LatLngBounds()
+                entry.spots.forEach((s) => bounds.extend(new kakao.maps.LatLng(s.lat, s.lng)))
+                map.setBounds(bounds, 180, 40, 140, 40)
+                return
+              }
+              // 최대 줌인데도 안 갈라지는 클러스터는 목록으로 보여 준다.
+              onClusterClickRef.current?.(entry.spots)
+            }
+          : () => onPinClickRef.current?.(entry.spots[0])
+
+      if (members.length < 2) container.style.cursor = 'pointer'
+      container.addEventListener('click', activate)
+      container.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return
+        e.preventDefault() // Space 가 페이지를 스크롤하지 않게
+        activate()
+      })
 
       entry.overlay = new kakao.maps.CustomOverlay({
         position: new kakao.maps.LatLng(lat, lng),
@@ -322,18 +347,21 @@ export function useMapCluster(
       if (cluster.spots.length >= 2 && level >= 4) {
         if (!inView(cluster.lat, cluster.lng)) continue
         const html = createClusterHTML(cluster.spots)
-        const key = `c:${cluster.lat},${cluster.lng}|${html}`
+        const label = `명소 ${cluster.spots.length}곳 묶음`
+        // 라벨은 HTML 밖(setAttribute)에 붙으므로 재사용 판정 키에 함께 넣는다(배지는 99+ 에서 멈춘다).
+        const key = `c:${cluster.lat},${cluster.lng}|${label}|${html}`
         nextKeys.add(key)
-        add(key, cluster.lat, cluster.lng, html, cluster.spots)
+        add(key, cluster.lat, cluster.lng, html, cluster.spots, label)
         continue
       }
 
       for (const spot of cluster.spots) {
         if (!inView(spot.lat, spot.lng)) continue
         const html = createPinHTML(spot.flowers, spot.maxStage)
-        const key = `p:${spot.lat},${spot.lng}|${html}`
+        const label = pinLabel(spot)
+        const key = `p:${spot.lat},${spot.lng}|${label}|${html}`
         nextKeys.add(key)
-        add(key, spot.lat, spot.lng, html, [spot])
+        add(key, spot.lat, spot.lng, html, [spot], label)
       }
     }
 

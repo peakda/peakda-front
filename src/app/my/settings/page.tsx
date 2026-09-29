@@ -89,6 +89,7 @@ export default function SettingsPage() {
         </div>
         {settingsLoaded && (
           <Toggle
+            label="위치 정보 활용"
             initialStatus={settings.locationEnabled}
             onChange={updateSetting('locationEnabled')}
           />
@@ -102,6 +103,7 @@ export default function SettingsPage() {
           </div>
           {settingsLoaded && (
             <Toggle
+              label="푸시 알림"
               initialStatus={settings.pushEnabled}
               status={settings.pushEnabled}
               onChange={updatePushSetting}
@@ -115,7 +117,7 @@ export default function SettingsPage() {
           <span className="text-text-tertiary text-sm">사진에 저장된 날짜가 있을 때 빈 날짜 칸에 입력</span>
         </div>
         {settingsLoaded && (
-          <Toggle initialStatus={settings.exifEnabled} onChange={updateSetting('exifEnabled')} />
+          <Toggle label="촬영 날짜 자동 입력" initialStatus={settings.exifEnabled} onChange={updateSetting('exifEnabled')} />
         )}
       </div>
 

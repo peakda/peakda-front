@@ -17,7 +17,11 @@ export function Card({
       tabIndex={0}
       aria-label={`${title} 카드`}
       onClick={onClick}
-      onKeyDown={(e) => e.key === 'Enter' && onClick?.()}
+      onKeyDown={(e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return
+        e.preventDefault()
+        onClick?.()
+      }}
       className={cn(
         'bg-bg-secondary rounded-xl transition-colors',
         isBig
