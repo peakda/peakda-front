@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { FeedListItem } from '@/components/ui/card/FeedListItem'
-import { Drawer } from '@/components/ui/layout/Drawer'
+import { LazyDrawer } from '@/components/ui/layout/LazyDrawer'
 import { InfiniteScrollFooter } from '@/components/ui/display/InfiniteScrollFooter'
 import { useSpotRecordsBySpotInfinite, useDeleteSpotRecord } from '@/api/facades/spot-record'
 import { useSpotDetail } from '@/api/facades/spot'
@@ -68,7 +68,7 @@ export default function SpotFeedPage() {
         </div>
       )}
 
-      <Drawer />
+      <LazyDrawer />
     </div>
   )
 }

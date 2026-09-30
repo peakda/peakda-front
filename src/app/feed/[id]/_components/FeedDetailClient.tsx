@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { MoreMenu } from '@/components/ui/button/MoreMenu'
-import { Drawer } from '@/components/ui/layout/Drawer'
+import { LazyDrawer } from '@/components/ui/layout/LazyDrawer'
 import { ReportModal } from '@/components/ui/card/ReportModal'
 import { FeedDetailView } from './FeedDetailView'
 import { useFeedDetail } from '@/api/facades/feed'
@@ -101,7 +101,7 @@ export function FeedDetailClient({ initialRecord }: { initialRecord: SpotRecordR
         />
       )}
 
-      <Drawer />
+      <LazyDrawer />
     </div>
   )
 }

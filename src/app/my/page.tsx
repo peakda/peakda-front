@@ -9,7 +9,7 @@ import { ProfileStats } from '@/app/my/_components/ProfileStats'
 import { InterestFlowerSection } from '@/app/my/_components/InterestFlowerSection'
 import { MyRecordSection } from '@/app/my/_components/MyRecordSection'
 import { SavedSpotSection } from '@/app/my/_components/SavedSpotSection'
-import { Drawer } from '@/components/ui/layout/Drawer'
+import { LazyDrawer } from '@/components/ui/layout/LazyDrawer'
 import { IconBtn } from '@/components/ui/button/IconBtn'
 import { useRouter } from 'next/navigation'
 import { toMyRecordThumb } from '@/lib/utils/spotRecordToFeed'
@@ -148,7 +148,7 @@ export default function MyPage() {
       <SavedSpotSection spots={savedSpots} count={favoriteData?.count} />
 
       <Nav activeTab="my" />
-      <Drawer />
+      <LazyDrawer />
     </div>
   )
 }

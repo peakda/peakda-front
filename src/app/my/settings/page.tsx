@@ -6,7 +6,7 @@ import { ChevronRight } from 'lucide-react'
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { Toggle } from '@/components/ui/display/Toggle'
-import { Drawer } from '@/components/ui/layout/Drawer'
+import { LazyDrawer } from '@/components/ui/layout/LazyDrawer'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import { readStorage, writeStorage } from '@/lib/utils/storage'
 import { BlockedUsersSection } from '@/app/my/settings/_components/BlockedUsersSection'
@@ -165,7 +165,7 @@ export default function SettingsPage() {
         <span className="text-base text-rose-500">계정 탈퇴</span>
       </button>
 
-      <Drawer />
+      <LazyDrawer />
     </div>
   )
 }
