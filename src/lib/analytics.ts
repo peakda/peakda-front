@@ -21,6 +21,15 @@ interface AnalyticsEvents {
   // 알림으로 어느 스팟에 갔는지는 뒤따르는 spot_view 로 알 수 있어 대상 id 는 보내지 않는다.
   push_open: { notification_type?: string }
   notification_click: { notification_type: string }
+  // 실사용자 성능(Core Web Vitals). metric_value 는 ms 단위, CLS 만 1000배 한 정수다(GA value 는 정수 집계).
+  // metric_id 로 같은 페이지뷰의 보고를 묶을 수 있고, metric_rating 은 good·needs-improvement·poor.
+  web_vitals: {
+    metric_name: string
+    metric_value: number
+    metric_rating: string
+    metric_id: string
+    navigation_type?: string
+  }
 }
 
 // GA 초기화 스크립트(layout 의 GoogleAnalytics)는 화면 컴포넌트의 effect 보다 늦게 돈다.
