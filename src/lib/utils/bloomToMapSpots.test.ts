@@ -154,6 +154,24 @@ describe('lib/utils/bloomToMapSpots', () => {
     expect(spot.maxStage).toBe('End')
   })
 
+  // 서버는 개화 조건(최근 14일·지정 꽃)을 통과하지 못한 동네 스팟도 blooms 를 비워 내려준다.
+  it('꽃이 없는 핀도 빼지 않고 빈 배열로 싣는다', () => {
+    const [spot] = bloomToMapSpots(
+      response([
+        { type: 'LOCAL', name: '우리 동네', latitude: 37.5, longitude: 127, spotId: 9, blooms: [] },
+      ])
+    )
+
+    expect(spot).toMatchObject({
+      type: 'LOCAL',
+      spotId: 9,
+      flowers: [],
+      statuses: [],
+      categories: [],
+      maxStage: 'Before',
+    })
+  })
+
   it('핀이 없으면 빈 배열', () => {
     expect(bloomToMapSpots(response([]))).toEqual([])
   })

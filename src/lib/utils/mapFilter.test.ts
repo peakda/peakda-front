@@ -130,6 +130,24 @@ describe('lib/utils/mapFilter', () => {
     ).toEqual([])
   })
 
+  // 개화 조건을 못 넘긴 동네 스팟은 blooms: [] 로 온다. 핀 유형만 고르면 보이고,
+  // 시기·꽃 종류를 고르면 해당할 꽃이 없으니 빠진다.
+  describe('꽃 없는 핀(blooms: [])', () => {
+    const localNoBloom = spot('동네-꽃없음', 'LOCAL', [], [])
+
+    it('핀 유형만 고르면 남는다', () => {
+      expect(filterMapSpots([localNoBloom], filter({ pinType: 'LOCAL' }))).toEqual([localNoBloom])
+    })
+
+    it('시기를 고르면 빠진다', () => {
+      expect(filterMapSpots([localNoBloom], filter({ statuses: ['PEAK'] }))).toEqual([])
+    })
+
+    it('꽃 종류를 고르면 빠진다', () => {
+      expect(filterMapSpots([localNoBloom], filter({ categories: ['CHERRY'] }))).toEqual([])
+    })
+  })
+
   it('빈 배열을 넣으면 빈 배열', () => {
     expect(filterMapSpots([], filter({ pinType: 'LOCAL' }))).toEqual([])
   })

@@ -323,6 +323,22 @@ export const MapContainer = () => {
       }
 
       // 프리뷰를 못 가져오면(좌표만 있는 핀·비공개·네트워크 실패) 지도 개화 데이터로 폴백한다.
+      // 꽃 없는 핀(blooms: [])은 꽃 단위로 만들 항목이 없어 드로어가 비므로 스팟 하나로 띄운다.
+      if (spot.flowers.length === 0) {
+        openPinDrawer([
+          {
+            type: 'list' as const,
+            title: spot.title ?? '동네',
+            location: spot.title ?? '위치 정보 없음',
+            description: '아직 개화 정보가 없어요.',
+            badges: [],
+            isFavorite: false,
+            images: [],
+            spotId: spot.spotId ?? spot.attractionId,
+          },
+        ])
+        return
+      }
       openPinDrawer(
         spot.flowers.map((f) => ({
           type: 'list' as const,
