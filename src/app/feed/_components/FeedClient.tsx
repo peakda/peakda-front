@@ -17,17 +17,28 @@ import { useDrawerStore } from '@/stores/useDrawerStore'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { useRequireLogin } from '@/hooks/useRequireLogin'
 import { filterFromTab } from '@/lib/utils/feed'
+import { GetFeedFilter } from '@/api/facades/generated/peakdaApi.schemas'
+import type { PageResponseSpotRecordSummaryResponse } from '@/api/facades/generated/peakdaApi.schemas'
 import { flattenPages } from '@/lib/utils/infinitePages'
 import { shouldLoadMore } from '@/lib/utils/myRecords'
 
 const FEED_CATEGORIES = ['전체', '관심 식물', '팔로잉']
 
-export default function FeedPage() {
+interface FeedClientProps {
+  // 서버에서 받은 '전체' 탭 첫 페이지. 조회 실패(API 장애 등)면 null 이고 클라이언트가 다시 조회한다.
+  initialPage: PageResponseSpotRecordSummaryResponse | null
+}
+
+export function FeedClient({ initialPage }: FeedClientProps) {
   const router = useRouter()
   const [tab, setTab] = useState(FEED_CATEGORIES[0])
+  const filter = filterFromTab(tab)
 
   const { data, isLoading, isError, refetch, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    useFeedListInfinite(filterFromTab(tab))
+    useFeedListInfinite(
+      filter,
+      filter === GetFeedFilter.ALL ? (initialPage ?? undefined) : undefined
+    )
   const records = flattenPages(data)
   const sentinelRef = useInfiniteScroll(
     () => fetchNextPage(),
@@ -52,7 +63,6 @@ export default function FeedPage() {
   const openDeleteConfirmDrawer = useDrawerStore((s) => s.openDeleteConfirmDrawer)
 
   // 아이템에 넘기는 콜백은 참조가 고정돼야 FeedListItem 의 memo 가 동작한다.
-  const handleOpen = useCallback((id: number) => router.push(`/feed/${id}`), [router])
   const handleEdit = useCallback((id: number) => router.push(`/record/${id}/edit`), [router])
   const handleDelete = useCallback(
     (id: number) => openDeleteConfirmDrawer(() => deleteRecord({ id })),
@@ -107,7 +117,6 @@ export default function FeedPage() {
                 key={record.id}
                 record={record}
                 isOwner={record.user.id === currentUser?.id}
-                onOpen={handleOpen}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
               />

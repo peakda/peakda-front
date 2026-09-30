@@ -277,7 +277,7 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
               <FeedCard
                 key={record.id}
                 {...toFeedCardProps(record, {
-                  onOpen: () => router.push(`/feed/${record.id}`),
+                  href: `/feed/${record.id}`,
                 })}
               />
             ))}
