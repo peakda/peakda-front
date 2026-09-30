@@ -16,8 +16,27 @@ export default tseslint.config(
   {
     rules: {
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-      '@typescript-eslint/no-explicit-any': 'warn',
-      'no-console': ['warn', { allow: ['error', 'warn'] }],
+      '@typescript-eslint/no-explicit-any': 'error',
+      'no-console': ['error', { allow: ['error', 'warn'] }],
+      'no-restricted-imports': [
+        'error',
+        { patterns: [{ group: ['../*'], message: '@/ 절대경로를 사용하세요.' }] },
+      ],
+    },
+  },
+  {
+    // orval 생성 코드는 mutator·schemas 를 상대경로로 import 한다 (직접 수정 금지)
+    files: ['src/api/facades/generated/**'],
+    rules: { 'no-restricted-imports': 'off' },
+  },
+  {
+    // 라우트 파일(page·layout 등)은 Next 가 default export 를 요구하므로 app/ 밖에서만 막는다.
+    files: ['src/components/**/*.{ts,tsx}', 'src/hooks/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        { selector: 'ExportDefaultDeclaration', message: 'named export 를 사용하세요.' },
+      ],
     },
   },
   {

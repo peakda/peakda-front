@@ -22,7 +22,7 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { compressImage } from '@/lib/utils/image'
-import { OtherPlantPicker } from '../_components/OtherPlantPicker'
+import { OtherPlantPicker } from '@/app/profile/_components/OtherPlantPicker'
 import {
   readCustomFavoritePlantIds,
   saveCustomFavoritePlantIds,
