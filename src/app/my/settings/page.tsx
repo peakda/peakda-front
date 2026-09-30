@@ -8,6 +8,7 @@ import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { Toggle } from '@/components/ui/display/Toggle'
 import { Drawer } from '@/components/ui/layout/Drawer'
 import { useDrawerStore } from '@/stores/useDrawerStore'
+import { readStorage, writeStorage } from '@/lib/utils/storage'
 import { BlockedUsersSection } from '@/app/my/settings/_components/BlockedUsersSection'
 import {
   APP_SETTINGS_KEY,
@@ -43,14 +44,14 @@ export default function SettingsPage() {
 
   // SSR 에는 localStorage 가 없으므로 마운트 후에 읽는다
   useEffect(() => {
-    setSettings(readAppSettings(window.localStorage.getItem(APP_SETTINGS_KEY)))
+    setSettings(readAppSettings(readStorage(APP_SETTINGS_KEY)))
     setSettingsLoaded(true)
   }, [])
 
   const updateSetting = (key: keyof AppSettings) => (isOn: boolean) => {
     const next = { ...settings, [key]: isOn }
     setSettings(next)
-    window.localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(next))
+    writeStorage(APP_SETTINGS_KEY, JSON.stringify(next))
   }
 
   const updatePushSetting = async (isOn: boolean) => {
@@ -60,13 +61,13 @@ export default function SettingsPage() {
 
       const next = { ...settings, pushEnabled: enabled }
       setSettings(next)
-      window.localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(next))
+      writeStorage(APP_SETTINGS_KEY, JSON.stringify(next))
       window.dispatchEvent(new Event(APP_SETTINGS_CHANGED_EVENT))
     } catch (error) {
       console.error('푸시 알림 설정 변경 실패', error)
       const next = { ...settings, pushEnabled: false }
       setSettings(next)
-      window.localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(next))
+      writeStorage(APP_SETTINGS_KEY, JSON.stringify(next))
       window.dispatchEvent(new Event(APP_SETTINGS_CHANGED_EVENT))
     }
   }
