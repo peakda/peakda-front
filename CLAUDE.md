@@ -43,14 +43,14 @@ pnpm validate:context  # context 문서 경로 검증 (CI에서도 실행)
 - cn() 유틸로 조건부 클래스 처리
   예) cn('base-class', isActive && 'active-class')
 - 디자인 토큰 변수 활용 (`src/app/globals.css`의 @theme 정의 참고)
-  원본 토큰 값(색상 스케일, Text Style, Flower_colors)은 [design-tokens.md](design-tokens.md) — globals.css가 이 값을 미러링한다
+  원본 토큰 값(색상 스케일, Text Style, Flower_colors)은 [docs/design-tokens.md](docs/design-tokens.md) — globals.css가 이 값을 미러링한다
 
 ## 상태 관리 규칙
 
 - 서버 상태: TanStack Query (useQuery, useMutation)
 - 클라이언트 전역 상태: Zustand
 - 로컬 UI 상태: useState
-- 폼 상태: React Hook Form + Zod
+- 폼 상태: useState + 수동 검증 (React Hook Form·Zod는 설치돼 있지 않다 — 폼이 복잡해져 도입할 때 이 줄을 갱신)
 
 ## API 호출 규칙
 
@@ -78,6 +78,7 @@ pnpm generate:facades   # 없는 도메인만 파사드 스텁 생성
 - 인라인 스타일
 - default export (컴포넌트)
 - `customInstance`(`src/api/mutator`)를 거치지 않는 임의의 fetch/axios 직접 호출
+  - 예외(의도된 우회, 새로 늘리지 말 것): refresh 호출 자체(`src/api/mutator/index.ts`의 `runRefresh`), 네이티브 토큰 교환(`src/lib/auth/nativeAuth.ts` — mutator가 이 모듈에 의존해 순환), 로그인 콜백(`src/app/auth/callback/_components/AuthCallbackHandler.tsx` — 신규 유저의 401을 인터셉터가 로그인 시트로 가로채면 안 됨)
 
 ## PR 작성 규칙
 
@@ -92,16 +93,16 @@ pnpm generate:facades   # 없는 도메인만 파사드 스텁 생성
 | [ARCHITECTURE.md](ARCHITECTURE.md) | 데이터 흐름 (API 호출, 인증 refresh, 카카오맵, 상태 관리 계층) |
 | [MEMORY.md](MEMORY.md) | **코드만 봐서는 알 수 없는 결정과 이유** — 작업 전 먼저 확인 |
 | [src/CLAUDE.md](src/CLAUDE.md) | 디렉터리별 구조와 규칙 |
-| [design-tokens.md](design-tokens.md) | Figma 디자인 토큰 원본 (색상 스케일, Text Style, Flower_colors) |
-| [BACKEND_API_REQUESTS.md](BACKEND_API_REQUESTS.md) | **백엔드에 전달하는 요청서** — 요청 내용만. 백엔드와 공유하는 문서 |
-| [API_CHANGE_REQUESTS.md](API_CHANGE_REQUESTS.md) | 위 요청들의 프론트 대응 현황과 경위 (내부용) |
-| [UNLINKED_ROUTES.md](UNLINKED_ROUTES.md) | 생성됐지만 아직 화면에 연결되지 않은 라우트 목록 |
-| [TODO.md](TODO.md) | **Google Play 출시까지 남은 일과 확인된 사실** — 블로커, 담당, 실기기 체크리스트 |
-| [UX_BACKLOG.md](UX_BACKLOG.md) | 동작은 하지만 사용자 흐름이 어색해 고쳐야 하는 것 (보류 중인 건만) |
-| [CONTEST_ACTION_PLAN.md](CONTEST_ACTION_PLAN.md) | 공모전 1차 심사 대응 — 심사 기준별 현재 점수와 실행 우선순위 |
-| [ANDROID_APP_DECISION.md](ANDROID_APP_DECISION.md) | Google Play 배포 방식(TWA vs Capacitor) 논의용 — 아직 미정 |
-| [CAPACITOR_FRONT_PLAN.md](CAPACITOR_FRONT_PLAN.md) | Capacitor 안드로이드 앱 프론트 개발 계획/TODO (잠정 결정: Capacitor) |
-| [SEO_GEO_AUDIT.md](SEO_GEO_AUDIT.md) | SEO·GEO 점검 보고서 + **9절: 검색엔진 등록·비로그인 모드 진행 현황과 남은 일** (외부 답변 대기 포함) |
+| [docs/design-tokens.md](docs/design-tokens.md) | Figma 디자인 토큰 원본 (색상 스케일, Text Style, Flower_colors) |
+| [docs/BACKEND_API_REQUESTS.md](docs/BACKEND_API_REQUESTS.md) | **백엔드에 전달하는 요청서** — 요청 내용만. 백엔드와 공유하는 문서 |
+| [docs/API_CHANGE_REQUESTS.md](docs/API_CHANGE_REQUESTS.md) | 위 요청들의 프론트 대응 현황과 경위 (내부용) |
+| [docs/UNLINKED_ROUTES.md](docs/UNLINKED_ROUTES.md) | 생성됐지만 아직 화면에 연결되지 않은 라우트 목록 |
+| [docs/TODO.md](docs/TODO.md) | **Google Play 출시까지 남은 일과 확인된 사실** — 블로커, 담당, 실기기 체크리스트 |
+| [docs/UX_BACKLOG.md](docs/UX_BACKLOG.md) | 동작은 하지만 사용자 흐름이 어색해 고쳐야 하는 것 (보류 중인 건만) |
+| [docs/CONTEST_ACTION_PLAN.md](docs/CONTEST_ACTION_PLAN.md) | 공모전 1차 심사 대응 — 심사 기준별 현재 점수와 실행 우선순위 |
+| [docs/ANDROID_APP_DECISION.md](docs/ANDROID_APP_DECISION.md) | Google Play 배포 방식(TWA vs Capacitor) 논의용 — 아직 미정 |
+| [docs/CAPACITOR_FRONT_PLAN.md](docs/CAPACITOR_FRONT_PLAN.md) | Capacitor 안드로이드 앱 프론트 개발 계획/TODO (잠정 결정: Capacitor) |
+| [docs/SEO_GEO_AUDIT.md](docs/SEO_GEO_AUDIT.md) | SEO·GEO 점검 보고서 + **9절: 검색엔진 등록·비로그인 모드 진행 현황과 남은 일** (외부 답변 대기 포함) |
 
 ## 버그 수정 시 설명
 

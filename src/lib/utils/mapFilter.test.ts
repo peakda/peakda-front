@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { filterMapSpots } from './mapFilter'
-import type { MapSpot } from '@/hooks/useMapPins'
+import type { MapSpot } from '@/lib/utils/mapCluster'
 import type {
   BloomMapPinType,
   BloomSlotCategory,

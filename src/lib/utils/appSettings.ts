@@ -1,3 +1,5 @@
+import { readStorage } from '@/lib/utils/storage'
+
 // 앱 설정 localStorage 키. 서버에 저장하지 않고 클라이언트에서만 관리하는 값이다.
 export const APP_SETTINGS_KEY = 'peakda:app-settings'
 export const APP_SETTINGS_CHANGED_EVENT = 'peakda:app-settings-changed'
@@ -45,6 +47,5 @@ export const readAppSettings = (raw: string | null): AppSettings => {
 // 설정 화면 밖(위치 권한·EXIF 추출 등)에서 현재 값을 읽을 때 쓴다.
 // SSR 에는 localStorage 가 없으므로 기본값을 돌려준다.
 export const loadAppSettings = (): AppSettings => {
-  if (typeof window === 'undefined') return DEFAULT_APP_SETTINGS
-  return readAppSettings(window.localStorage.getItem(APP_SETTINGS_KEY))
+  return readAppSettings(readStorage(APP_SETTINGS_KEY))
 }
