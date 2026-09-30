@@ -1,13 +1,7 @@
 'use client'
 import { useCompleteSignup } from '@/api/facades/auth'
 import type { SignupCompleteRequestFavoriteCategoriesItem } from '@/api/facades/generated/peakdaApi.schemas'
-
-interface ApiError {
-  response: {
-    status: number
-    data: { code: string; message: string }
-  }
-}
+import { getApiErrorMessage } from '@/lib/utils/apiError'
 
 export const useSignUpComplete = (
   nickname: string,
@@ -21,7 +15,7 @@ export const useSignUpComplete = (
     mutate({ data: { nickname, profileImageUrl, favoriteCategories } }, { onSuccess: options?.onSuccess })
 
   return {
-    message: data?.data.message ?? (error as ApiError | null)?.response?.data?.message,
+    message: data?.data.message ?? getApiErrorMessage(error),
     isPending,
     check: submit,
     isError,

@@ -1,212 +1,44 @@
 import { useCallback, useEffect, useRef } from 'react'
-import type { FlowerItem } from '@/components/Map/Pin'
-import type {
-  BloomMapPinType,
-  BloomSlotCategory,
-} from '@/api/facades/generated/peakdaApi.schemas'
-import type { BloomStageStatus } from '@/lib/utils/bloomStatus'
-import { type Stage, STAGE_COLOR, STAGE_PRIORITY, STATUS_STAGE } from '@/constants/map'
-
-/**
- * 지도 핀 하나.
- *
- * flowers · statuses · categories 는 이 핀에 달린 꽃을 같은 순서로 담은 **병렬 배열**이다
- * (flowers[i] · statuses[i] · categories[i] 가 같은 꽃). mapFilter 가 꽃 종류로 좁힐 때
- * 이 인덱스 정렬에 기대므로, 한쪽만 따로 만들거나 정렬을 바꾸면 안 된다.
- */
-export interface MapSpot {
-  lat: number
-  lng: number
-  flowers: FlowerItem[]
-  // 핀 색을 정하는 대표 단계. 꽃을 좁히면 constants/map 의 toMaxStage 로 다시 계산한다.
-  maxStage: Stage
-  title?: string
-  attractionId?: number
-  // 스팟 API(상세·기록)의 id. 명소형은 Spot 행이 아직 없으면 없다(탭 시 match 로 materialize).
-  spotId?: number
-  // 상단 칩(명소/동네) 필터용. 서버 파라미터가 없어 응답의 pin.type 을 그대로 들고 온다.
-  type: BloomMapPinType
-  // 시기 필터용. 이 핀에 달린 꽃들의 개화 상태(핀 하나에 여러 개 가능).
-  statuses: BloomStageStatus[]
-  // 꽃 종류 필터용. 서버 category 가 단일 값이라 복수 선택은 클라에서 거른다.
-  categories: BloomSlotCategory[]
-}
-
-interface ClusterGroup {
-  spots: MapSpot[]
-  lat: number
-  lng: number
-}
-
-function createPinHTML(flowers: FlowerItem[], maxStage: Stage): string {
-  const color = STAGE_COLOR[maxStage]
-  const grayscale =
-    maxStage === 'Before' || maxStage === 'End' ? 'opacity:0.4;filter:grayscale(1);' : ''
-  // max-width:none 은 Tailwind preflight 의 img { max-width:100% } 를 끄는 것이다.
-  // 카카오 오버레이는 폭 0 인 판 안에 absolute 로 붙어 min-content 폭으로 줄어드는데,
-  // Safari(WebKit)는 퍼센트 max-width 이미지의 min-content 를 0 으로 쳐서 이미지가 5px 로
-  // 찌그러지고 핀이 세로로 길쭉한 캡슐(21×40)이 된다. Chrome 은 영향 없음.
-  const imgs = flowers
-    .slice(0, 3)
-    .map(
-      (f) =>
-        `<img src="${f.src}" alt="${f.alt ?? ''}" width="24" height="24" style="width:24px;height:24px;max-width:none;flex-shrink:0;object-fit:contain;${grayscale}">`
-    )
-    .join('')
-  const badge =
-    flowers.length >= 2
-      ? `<span style="flex-shrink:0;background:${color};color:white;font-size:11px;font-weight:600;border-radius:9999px;padding:2px 5px;">+${flowers.length}</span>`
-      : ''
-
-  return `
-    <div style="display:inline-flex;flex-direction:column;align-items:center;">
-      <div style="background:white;border:2px solid ${color};border-radius:9999px;padding:6px;display:flex;align-items:center;gap:4px;box-shadow:0 1px 3px rgba(0,0,0,0.15);white-space:nowrap;">
-        ${imgs}${badge}
-      </div>
-      <svg width="10" height="8" viewBox="0 0 14 9" style="margin-top:-1px;display:block;flex-shrink:0;">
-        <polygon points="0,0 14,0 7,9" fill="${color}"/>
-      </svg>
-    </div>
-  `
-}
-
-/** 링에 그릴 상태 한 조각. count 는 그 상태를 대표 단계로 갖는 스팟 수(= 곳). */
-export interface ClusterSlice {
-  stage: Stage
-  count: number
-}
-
-/**
- * 클러스터의 상태 구성.
- *
- * 스팟이 많은 순으로 정렬하고, 개수가 같으면 STAGE_PRIORITY 가 높은 순
- * (만개 > 피기시작 > 이르다 > 늦었다 > 개화전)으로 둔다 — 동률이면 개화전이 항상 맨 뒤다.
- * 링은 이 순서 그대로 12시 방향부터 시계방향으로 그린다.
- */
-export function clusterSlices(spots: MapSpot[]): ClusterSlice[] {
-  const countByStage = new Map<Stage, number>()
-  for (const spot of spots) {
-    countByStage.set(spot.maxStage, (countByStage.get(spot.maxStage) ?? 0) + 1)
-  }
-
-  return [...countByStage.entries()]
-    .map(([stage, count]) => ({ stage, count }))
-    .sort((a, b) => b.count - a.count || STAGE_PRIORITY[b.stage] - STAGE_PRIORITY[a.stage])
-}
-
-// 가운데 아이콘은 1순위 상태의 꽃 하나. 그 상태인 꽃 중 가장 많은 종류를 고른다.
-function topStageFlower(spots: MapSpot[], stage: Stage): FlowerItem | undefined {
-  const countBySrc = new Map<string, { flower: FlowerItem; count: number }>()
-
-  for (const spot of spots) {
-    if (spot.maxStage !== stage) continue
-    // flowers[i] · statuses[i] 는 병렬 배열이다. 대표 상태와 같은 꽃만 센다.
-    spot.flowers.forEach((flower, i) => {
-      const status = spot.statuses[i]
-      if (status != null && STATUS_STAGE[status] !== stage) return
-      const entry = countBySrc.get(flower.src)
-      if (entry) entry.count++
-      else countBySrc.set(flower.src, { flower, count: 1 })
-    })
-  }
-
-  let top: { flower: FlowerItem; count: number } | undefined
-  for (const entry of countBySrc.values()) {
-    if (!top || entry.count > top.count) top = entry
-  }
-  return top?.flower
-}
-
-const CLUSTER_SIZE = 56
-const CLUSTER_RING_WIDTH = 5
-const CLUSTER_TAIL_HEIGHT = 9
-const CLUSTER_ICON_SIZE = 26
-
-function createClusterHTML(spots: MapSpot[]): string {
-  const slices = clusterSlices(spots)
-  const topStage = slices[0]?.stage ?? 'Before'
-  const color = STAGE_COLOR[topStage]
-
-  const center = CLUSTER_SIZE / 2
-  const radius = (CLUSTER_SIZE - CLUSTER_RING_WIDTH) / 2
-  const circumference = 2 * Math.PI * radius
-
-  // 상태별 비율(개수/전체)만큼 링을 각도로 나눈다. dasharray 로 호 길이를, dashoffset 으로
-  // 시작점을 잡고, 그룹을 -90° 돌려 12시 방향부터 시계방향으로 그린다.
-  let drawn = 0
-  const ring = slices
-    .map(({ stage, count }) => {
-      const arcLength = (count / spots.length) * circumference
-      const arc = `<circle cx="${center}" cy="${center}" r="${radius}" fill="none" stroke="${STAGE_COLOR[stage]}" stroke-width="${CLUSTER_RING_WIDTH}" stroke-dasharray="${arcLength.toFixed(2)} ${(circumference - arcLength).toFixed(2)}" stroke-dashoffset="${(-drawn).toFixed(2)}"/>`
-      drawn += arcLength
-      return arc
-    })
-    .join('')
-
-  const flower = topStageFlower(spots, topStage)
-  const iconOffset = (CLUSTER_SIZE - CLUSTER_ICON_SIZE) / 2
-  const icon = flower
-    ? `<img src="${flower.src}" alt="${flower.alt ?? ''}" width="${CLUSTER_ICON_SIZE}" height="${CLUSTER_ICON_SIZE}" style="position:absolute;left:${iconOffset}px;top:${iconOffset}px;width:${CLUSTER_ICON_SIZE}px;height:${CLUSTER_ICON_SIZE}px;object-fit:contain;">`
-    : ''
-
-  // 배지는 대표로 보여준 꽃 1개를 뺀 나머지 스팟 수다.
-  const rest = spots.length - 1
-  const restLabel = rest > 99 ? '99+' : `+${rest}`
-  const badge =
-    rest > 0
-      ? `<span style="position:absolute;right:-8px;bottom:11px;background:${color};color:white;font-size:13px;font-weight:700;line-height:1;border-radius:9999px;padding:5px 8px;white-space:nowrap;">${restLabel}</span>`
-      : ''
-
-  // 꼬리 → 흰 원판 → 링 순으로 겹쳐 꼬리가 링 뒤에서 나온 것처럼 보이게 한다.
-  return `
-    <div style="position:relative;width:${CLUSTER_SIZE}px;height:${CLUSTER_SIZE + CLUSTER_TAIL_HEIGHT}px;cursor:pointer;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.18));">
-      <svg width="${CLUSTER_SIZE}" height="${CLUSTER_SIZE + CLUSTER_TAIL_HEIGHT}" viewBox="0 0 ${CLUSTER_SIZE} ${CLUSTER_SIZE + CLUSTER_TAIL_HEIGHT}" style="display:block;">
-        <polygon points="${center - 7},${CLUSTER_SIZE - 12} ${center + 7},${CLUSTER_SIZE - 12} ${center},${CLUSTER_SIZE + CLUSTER_TAIL_HEIGHT}" fill="${color}"/>
-        <circle cx="${center}" cy="${center}" r="${radius}" fill="white"/>
-        <g transform="rotate(-90 ${center} ${center})">${ring}</g>
-      </svg>
-      ${icon}${badge}
-    </div>
-  `
-}
-
-// 셀 크기는 level 에 비례하므로 화면상 크기가 일정하다(≈106px @ 모바일 390px 폭).
-// 이 상수가 크면(이전 0.002 ≈ 706px) 셀이 화면보다 넓어 확대해도 클러스터가 쪼개지지 않는다.
-const CLUSTER_GRID_UNIT = 0.0003
-
-export function clusterSpots(spots: MapSpot[], level: number): ClusterGroup[] {
-  const gridSize = CLUSTER_GRID_UNIT * Math.pow(2, level - 1)
-  const grid = new Map<string, MapSpot[]>()
-
-  for (const spot of spots) {
-    const cellX = Math.floor(spot.lng / gridSize)
-    const cellY = Math.floor(spot.lat / gridSize)
-    const key = `${cellX},${cellY}`
-    const cell = grid.get(key) ?? []
-    cell.push(spot)
-    grid.set(key, cell)
-  }
-
-  return Array.from(grid.values()).map((group) => ({
-    spots: group,
-    lat: group.reduce((s, sp) => s + sp.lat, 0) / group.length,
-    lng: group.reduce((s, sp) => s + sp.lng, 0) / group.length,
-  }))
-}
-
-// 카카오 지도의 최대 확대(= 최소 레벨).
-const MAX_ZOOM_LEVEL = 1
-
-/**
- * 확대하면 이 클러스터가 갈라지는가.
- * 최대 줌의 격자에서도 한 셀에 남는(≈같은 좌표) 구성원은 아무리 확대해도 못 가른다.
- */
-function canSplitByZoom(spots: MapSpot[], level: number): boolean {
-  return level > MAX_ZOOM_LEVEL && clusterSpots(spots, MAX_ZOOM_LEVEL).length > 1
-}
+import { createClusterHTML, createPinHTML } from '@/components/Map/overlayHtml'
+import {
+  canSplitByZoom,
+  clusterSpots,
+  pinLabel,
+  type ClusterGroup,
+  type MapSpot,
+} from '@/lib/utils/mapCluster'
 
 // 핀치줌 중 zoom_changed 가 연속 발화하므로 마지막 한 번만 다시 그린다.
 const ZOOM_DEBOUNCE_MS = 120
+
+// 드래그 중에는 이 간격으로만 다시 그린다(drag 는 매 프레임 발화한다).
+const DRAG_THROTTLE_MS = 100
+
+// 화면 밖 이만큼(px)까지 미리 그려 둔다. 좌표는 꼬리 끝이라 핀 몸통이 좌우 ~63px·위 ~65px
+// 걸치므로 그보다 커야 가장자리 핀이 잘리지 않고, 드래그 throttle 사이의 이동도 흡수한다.
+// 화면 비율로 잡으면 넓은 화면에서 여유가 bbox 를 다시 거의 다 덮어 효과가 없다.
+const VIEW_MARGIN_PX = 100
+
+/** 현재 화면 + 여유분 안에 있는 좌표인지 판정하는 함수 */
+function inViewChecker(map: kakao.maps.Map) {
+  const proj = map.getProjection()
+  const bounds = map.getBounds()
+  // 화면 좌표로 남서 = (0, 높이), 북동 = (폭, 0) 이라 컨테이너 크기를 따로 재지 않아도 된다.
+  const height = proj.containerPointFromCoords(bounds.getSouthWest()).y
+  const width = proj.containerPointFromCoords(bounds.getNorthEast()).x
+  const sw = proj.coordsFromContainerPoint(
+    new kakao.maps.Point(-VIEW_MARGIN_PX, height + VIEW_MARGIN_PX)
+  )
+  const ne = proj.coordsFromContainerPoint(
+    new kakao.maps.Point(width + VIEW_MARGIN_PX, -VIEW_MARGIN_PX)
+  )
+  const minLat = sw.getLat()
+  const maxLat = ne.getLat()
+  const minLng = sw.getLng()
+  const maxLng = ne.getLng()
+  return (lat: number, lng: number) =>
+    lat >= minLat && lat <= maxLat && lng >= minLng && lng <= maxLng
+}
 
 interface OverlayEntry {
   overlay: kakao.maps.CustomOverlay
@@ -242,8 +74,18 @@ export function useMapCluster(
       clusterCacheRef.current.set(level, clusterSpots(spotsRef.current, level))
     }
     const clusters = clusterCacheRef.current.get(level)!
+    // 조회 bbox 는 격자 스냅으로 화면보다 넓다. 클러스터는 전체로 계산해 팬해도 묶음이
+    // 바뀌지 않게 하고, DOM 오버레이는 화면 근처 것만 만든다.
+    const inView = inViewChecker(map)
 
-    const add = (key: string, lat: number, lng: number, html: string, members: MapSpot[]) => {
+    const add = (
+      key: string,
+      lat: number,
+      lng: number,
+      html: string,
+      members: MapSpot[],
+      label: string
+    ) => {
       const existing = entries.get(key)
       if (existing) {
         existing.spots = members
@@ -252,26 +94,36 @@ export function useMapCluster(
 
       const container = document.createElement('div')
       container.innerHTML = html
+      // 키보드·스크린리더(TalkBack)로도 핀을 누를 수 있게 버튼으로 노출한다.
+      container.setAttribute('role', 'button')
+      container.setAttribute('aria-label', label)
+      container.tabIndex = 0
       const entry: OverlayEntry = { overlay: null!, spots: members }
 
-      if (members.length >= 2) {
-        container.addEventListener('click', () => {
-          // 더 확대할 수 있으면 확대만 한다(구성원이 벌어지면 다음 렌더에서 자동으로 갈라진다).
-          // 평균 좌표로 2단계 확대하면 구성원이 화면 밖으로 흩어지므로 구성원 전체를 감싸는
-          // 영역에 맞춘다. padding 은 헤더·카테고리·검색바(위)와 Nav(아래)에 가리지 않을 만큼.
-          if (canSplitByZoom(entry.spots, map.getLevel())) {
-            const bounds = new kakao.maps.LatLngBounds()
-            entry.spots.forEach((s) => bounds.extend(new kakao.maps.LatLng(s.lat, s.lng)))
-            map.setBounds(bounds, 180, 40, 140, 40)
-            return
-          }
-          // 최대 줌인데도 안 갈라지는 클러스터는 목록으로 보여 준다.
-          onClusterClickRef.current?.(entry.spots)
-        })
-      } else {
-        container.style.cursor = 'pointer'
-        container.addEventListener('click', () => onPinClickRef.current?.(entry.spots[0]))
-      }
+      const activate =
+        members.length >= 2
+          ? () => {
+              // 더 확대할 수 있으면 확대만 한다(구성원이 벌어지면 다음 렌더에서 자동으로 갈라진다).
+              // 평균 좌표로 2단계 확대하면 구성원이 화면 밖으로 흩어지므로 구성원 전체를 감싸는
+              // 영역에 맞춘다. padding 은 헤더·카테고리·검색바(위)와 Nav(아래)에 가리지 않을 만큼.
+              if (canSplitByZoom(entry.spots, map.getLevel())) {
+                const bounds = new kakao.maps.LatLngBounds()
+                entry.spots.forEach((s) => bounds.extend(new kakao.maps.LatLng(s.lat, s.lng)))
+                map.setBounds(bounds, 180, 40, 140, 40)
+                return
+              }
+              // 최대 줌인데도 안 갈라지는 클러스터는 목록으로 보여 준다.
+              onClusterClickRef.current?.(entry.spots)
+            }
+          : () => onPinClickRef.current?.(entry.spots[0])
+
+      if (members.length < 2) container.style.cursor = 'pointer'
+      container.addEventListener('click', activate)
+      container.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return
+        e.preventDefault() // Space 가 페이지를 스크롤하지 않게
+        activate()
+      })
 
       entry.overlay = new kakao.maps.CustomOverlay({
         position: new kakao.maps.LatLng(lat, lng),
@@ -288,18 +140,23 @@ export function useMapCluster(
 
     for (const cluster of clusters) {
       if (cluster.spots.length >= 2 && level >= 4) {
+        if (!inView(cluster.lat, cluster.lng)) continue
         const html = createClusterHTML(cluster.spots)
-        const key = `c:${cluster.lat},${cluster.lng}|${html}`
+        const label = `명소 ${cluster.spots.length}곳 묶음`
+        // 라벨은 HTML 밖(setAttribute)에 붙으므로 재사용 판정 키에 함께 넣는다(배지는 99+ 에서 멈춘다).
+        const key = `c:${cluster.lat},${cluster.lng}|${label}|${html}`
         nextKeys.add(key)
-        add(key, cluster.lat, cluster.lng, html, cluster.spots)
+        add(key, cluster.lat, cluster.lng, html, cluster.spots, label)
         continue
       }
 
       for (const spot of cluster.spots) {
+        if (!inView(spot.lat, spot.lng)) continue
         const html = createPinHTML(spot.flowers, spot.maxStage)
-        const key = `p:${spot.lat},${spot.lng}|${html}`
+        const label = pinLabel(spot)
+        const key = `p:${spot.lat},${spot.lng}|${label}|${html}`
         nextKeys.add(key)
-        add(key, spot.lat, spot.lng, html, [spot])
+        add(key, spot.lat, spot.lng, html, [spot], label)
       }
     }
 
@@ -327,12 +184,29 @@ export function useMapCluster(
       timer = setTimeout(() => render(map), ZOOM_DEBOUNCE_MS)
     }
 
+    // 화면 안 핀만 그리므로 팬할 때도 다시 그려야 한다. 드래그 중엔 throttle 로,
+    // 관성 이동·panTo·setBounds 까지 끝나면 idle 에서 한 번 더 맞춘다.
+    let dragTimer: ReturnType<typeof setTimeout> | undefined
+    const onDrag = () => {
+      if (dragTimer) return
+      dragTimer = setTimeout(() => {
+        dragTimer = undefined
+        render(map)
+      }, DRAG_THROTTLE_MS)
+    }
+    const onIdle = () => render(map)
+
     kakao.maps.event.addListener(map, 'zoom_changed', onZoom)
+    kakao.maps.event.addListener(map, 'drag', onDrag)
+    kakao.maps.event.addListener(map, 'idle', onIdle)
     const entries = entriesRef.current
     const clusterCache = clusterCacheRef.current
     return () => {
       clearTimeout(timer)
+      clearTimeout(dragTimer)
       kakao.maps.event.removeListener(map, 'zoom_changed', onZoom)
+      kakao.maps.event.removeListener(map, 'drag', onDrag)
+      kakao.maps.event.removeListener(map, 'idle', onIdle)
       entries.forEach((e) => e.overlay.setMap(null))
       entries.clear()
       clusterCache.clear()

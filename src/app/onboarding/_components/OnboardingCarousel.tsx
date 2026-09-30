@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button/Button'
 import { Header } from '@/components/ui/layout/Header'
 import { useCarousel } from '@/hooks/useEmblaCarousel'
 import type { StepProps } from '@/types/types'
+import { writeStorage } from '@/lib/utils/storage'
 import { useRouter } from 'next/navigation'
 import { Indecator } from './Indecator'
 import { SkipButton } from './SkipButton'
@@ -26,7 +27,7 @@ export function OnboardingCarousel({ steps }: Props) {
   const isLast = selectedIndex === steps.length - 1
 
   const completeOnboarding = () => {
-    localStorage.setItem('is_onboarding_done', 'true')
+    writeStorage('is_onboarding_done', 'true')
     router.replace('/map')
   }
 

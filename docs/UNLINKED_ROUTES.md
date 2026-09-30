@@ -56,8 +56,8 @@
 - `lib/utils/spotPreview.ts` — `formatDistance`. 프리뷰 응답에 `address`가 생겨 거리로 주소를 대신할 이유가 없어졌다
 - `lib/utils/timing.ts` — `timingToDate`, `isFutureTiming`. 시기 필터가 `date`에서 `status`로 바뀌었다
 
-> ⚠️ `next.config.ts`의 UploadThing 이미지 도메인(`utfs.io`, `*.ufs.sh`, `t3.storageapi.dev`)은 **백엔드가 내려주는 presigned URL** 때문에 여전히 필요하다. 라우트를 지웠다고 함께 지우면 안 된다.
-> `package.json`의 `uploadthing`·`@uploadthing/react` 의존성은 이제 소스에서 참조되지 않는다. 제거는 별도로 판단한다.
+> `next.config.ts`의 UploadThing 이미지 도메인(`utfs.io`, `*.ufs.sh`, `t3.storageapi.dev`)은 라우트와 무관하게 남아 있다. 지금은 `images.unoptimized: true` 라 `remotePatterns` 자체가 검사되지 않는다 ([MEMORY.md](../MEMORY.md) 이미지 항목 참고).
+> `uploadthing`·`@uploadthing/react` 의존성은 `package.json`에서 제거됐다.
 
 ---
 

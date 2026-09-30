@@ -40,7 +40,7 @@ export function TabTrigger({ tab, tabs }: { tab: TabItem; tabs: TabItem[] }) {
       onKeyDown={handleKeyDown}
       className={cn(
         // 공통
-        'relative px-5 py-2.5 text-center text-sm transition-colors duration-200 outline-none select-none',
+        'relative px-5 py-2.5 text-center text-sm transition-colors duration-200 outline-none select-none focus-visible:ring-2 focus-visible:ring-[#F87171] focus-visible:ring-inset',
         // 언더라인
         'after:absolute after:right-0 after:bottom-[-1px] after:left-0 after:h-0.5 after:origin-center after:rounded-full after:transition-transform after:duration-200',
         isSelected

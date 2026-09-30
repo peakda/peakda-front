@@ -1,12 +1,12 @@
 import type { Metadata } from 'next'
-import { SITE_BRAND_NAME } from '@/constants/site'
+import { createPageMetadata } from '@/lib/utils/pageMetadata'
 
-export const metadata: Metadata = {
-  // 부모(/explore) 레이아웃이 title 을 정의해 루트 템플릿이 여기까지 오지 않는다.
-  title: { absolute: `요즘 뜨는 축제 | ${SITE_BRAND_NAME}` },
-  description: '지금 진행 중인 계절 축제의 일정과 장소를 확인하세요.',
-  alternates: { canonical: '/explore/festivals' },
-}
+export const metadata: Metadata = createPageMetadata({
+  title: '꽃 축제·계절 축제 일정과 장소',
+  description:
+    '지금 진행 중인 꽃 축제와 계절 축제를 찾아보세요. 축제별 일정과 장소를 확인하고 여행 계획을 세워보세요.',
+  path: '/explore/festivals',
+})
 
 export default function ExploreFestivalsLayout({ children }: { children: React.ReactNode }) {
   return children

@@ -34,7 +34,11 @@ export const DateSelect = ({
         role="button"
         tabIndex={0}
         onClick={() => openDateSelectDrawer(value, onChange)}
-        onKeyDown={(e) => e.key === 'Enter' && openDateSelectDrawer(value, onChange)}
+        onKeyDown={(e) => {
+          if (e.key !== 'Enter' && e.key !== ' ') return
+          e.preventDefault()
+          openDateSelectDrawer(value, onChange)
+        }}
         className={cn(
           'flex cursor-pointer items-center gap-2 rounded-3xl border p-3 transition-all duration-200 bg-bg-secondary',
           borderColor

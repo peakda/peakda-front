@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { clusterSlices, clusterSpots } from './useMapPins'
-import type { MapSpot } from './useMapPins'
+import { clusterSlices, clusterSpots, pinLabel } from './mapCluster'
+import type { MapSpot } from './mapCluster'
 import type { Stage } from '@/constants/map'
 
 // 모바일 기준 뷰포트 (서비스 주 타깃)
@@ -188,5 +188,16 @@ describe('clusterSpots', () => {
       }
       throw new Error(`10회 안에 개별 핀까지 분해되지 않음: ${trail.join(' → ')}`)
     })
+  })
+})
+
+describe('pinLabel', () => {
+  it('명소명과 꽃 이름을 읽어 준다', () => {
+    const s = { ...spot(37.5, 127), title: '여의도 한강공원', flowers: [{ src: 'a', alt: '벚꽃' }, { src: 'b', alt: '유채' }] }
+    expect(pinLabel(s)).toBe('여의도 한강공원, 벚꽃·유채 개화 정보')
+  })
+
+  it('이름이 없으면 대체 문구를 쓴다', () => {
+    expect(pinLabel({ ...spot(37.5, 127), flowers: [{ src: 'a' }] })).toBe('이름 없는 명소 개화 정보')
   })
 })

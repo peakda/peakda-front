@@ -2,6 +2,7 @@
 
 import { MainMessage } from '@/components/ui/message/MainMessage'
 import { STEPS } from '@/constants'
+import { readStorage } from '@/lib/utils/storage'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { OnboardingCarousel } from '@/app/onboarding/_components/OnboardingCarousel'
@@ -11,7 +12,7 @@ export function SplashScreen() {
   const [showOnboarding, setShowOnboarding] = useState(false)
 
   useEffect(() => {
-    const isOnboardingDone = localStorage.getItem('is_onboarding_done') === 'true'
+    const isOnboardingDone = readStorage('is_onboarding_done') === 'true'
 
     if (isOnboardingDone) {
       // 재방문자는 바로 지도로 이동한다. 지도 자체의 스켈레톤이 로딩을 안내한다.

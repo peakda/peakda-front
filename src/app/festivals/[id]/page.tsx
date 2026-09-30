@@ -37,9 +37,15 @@ export async function generateMetadata({ params }: FestivalDetailPageProps): Pro
   const image = festival.editorial?.heroImageUrl ?? DEFAULT_OG_IMAGE
 
   return {
-    title,
+    title: { absolute: `${title} | ${SITE_BRAND_NAME}` },
     description,
     alternates: { canonical: path },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${title} | ${SITE_BRAND_NAME}`,
+      description,
+      images: [image],
+    },
     openGraph: {
       ...BASE_OPEN_GRAPH,
       title: `${title} | ${SITE_BRAND_NAME}`,

@@ -141,5 +141,5 @@ FCM 발송 구현과 SSE 구독 엔드포인트는 Swagger에 노출되어 있�
 
 - `src/lib/auth/socialLogin.ts` — 백엔드 OAuth 직행 방식과 그 이유, 카카오·네이버 둘 다 연결됨
 - `src/app/login/_components/SocialLoginBtns.tsx` — 애플 버튼만 핸들러 없음(미지원 확정, 추후 구글로 교체 예정)
-- `src/app/auth/callback/page.tsx` — `/auth/me` 응답으로 기존(`/map`)·신규(`/Terms`) 분기
+- `src/app/auth/callback/_components/AuthCallbackHandler.tsx` — `/auth/me` 응답으로 기존(`/map`)·신규(`/Terms`) 분기
 - `swagger.json` — `provider` enum에 `KAKAO / NAVER / APPLE`

@@ -7,6 +7,7 @@ import { InputFiled } from '@/components/ui/form/InputFiled'
 import { useCheckNickname } from '@/hooks/useCheckNickname'
 import { setAuthMarker } from '@/lib/auth/session'
 import { cn } from '@/lib/utils/cn'
+import { getApiErrorMessage } from '@/lib/utils/apiError'
 import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
 import { isValidNickname } from '@/lib/utils/nickname'
 import { useUploadSignupProfileImage } from '@/api/facades/auth'
@@ -92,9 +93,7 @@ export default function ProfilePage() {
           // 업로드 실패 시 미리보기/키를 비워 업로드되지 않은 상태로 되돌리고, API 메시지를 토스트로 안내한다.
           setPreview(null)
           setProfileImageKey(null)
-          const message = (error as { response?: { data?: { message?: string } } })?.response?.data
-            ?.message
-          toast.error(message ?? '이미지 업로드에 실패했어요.')
+          toast.error(getApiErrorMessage(error) ?? '이미지 업로드에 실패했어요.')
         },
       }
     )

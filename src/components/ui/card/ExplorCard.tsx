@@ -46,6 +46,14 @@ export function ExplorCard(props: ExplorCardProps) {
     <div
       className={cn('w-60 shrink-0', props.onClick && 'cursor-pointer', props.className)}
       onClick={props.onClick}
+      role={props.onClick ? 'button' : undefined}
+      tabIndex={props.onClick ? 0 : undefined}
+      onKeyDown={(e) => {
+        if (props.onClick && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault()
+          props.onClick()
+        }
+      }}
     >
       {/* 이미지 영역 */}
       <div className="relative overflow-hidden rounded-2xl">

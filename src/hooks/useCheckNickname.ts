@@ -1,19 +1,10 @@
 'use client'
 import { useQuery } from '@tanstack/react-query'
 import { checkNicknameApi } from '@/api/facades/auth'
-
-interface ApiError {
-  response: {
-    status: number
-    data: { code: string; message: string }
-  }
-}
+import { getApiErrorMessage } from '@/lib/utils/apiError'
 
 export const useCheckNickname = (nickname: string) => {
-  const { data, isFetching, refetch, isError, error } = useQuery<
-    Awaited<ReturnType<typeof checkNicknameApi>>,
-    ApiError
-  >({
+  const { data, isFetching, refetch, isError, error } = useQuery({
     queryKey: ['checkNickname', nickname],
     queryFn: () => checkNicknameApi(nickname),
     enabled: false,
@@ -30,7 +21,7 @@ export const useCheckNickname = (nickname: string) => {
 
   return {
     isAvailable: available,
-    message: isDuplicated ? '이미 사용 중인 닉네임이에요.' : error?.response?.data?.message,
+    message: isDuplicated ? '이미 사용 중인 닉네임이에요.' : getApiErrorMessage(error),
     // 요청이 실제로 도는 동안에만 버튼을 잠근다.
     isPending: isFetching,
     check: refetch,

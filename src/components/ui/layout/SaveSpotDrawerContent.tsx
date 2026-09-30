@@ -75,7 +75,7 @@ export function SaveSpotDrawerContent({ spot, onClose }: Props) {
           <span className="text-text-primary text-sm font-semibold">개화 알림 받기</span>
           <span className="text-text-tertiary text-xs">만개가 임박하면 알려드려요.</span>
         </div>
-        <Toggle initialStatus={true} onChange={(isOn) => (notifyEnabled.current = isOn)} />
+        <Toggle label="개화 알림 받기" initialStatus={true} onChange={(isOn) => (notifyEnabled.current = isOn)} />
       </div>
 
       <Button

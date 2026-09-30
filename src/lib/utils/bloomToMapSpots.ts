@@ -1,5 +1,5 @@
 import type { BloomMapResponse } from '@/api/facades/generated/peakdaApi.schemas'
-import type { MapSpot } from '@/hooks/useMapPins'
+import type { MapSpot } from '@/lib/utils/mapCluster'
 import { CATEGORY_ICON, toMaxStage } from '@/constants/map'
 
 // 지도 개화현황 응답 → 핀 데이터. 좌표 없는 명소는 제외한다.

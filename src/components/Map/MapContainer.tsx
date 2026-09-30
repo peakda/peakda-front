@@ -1,35 +1,38 @@
-﻿'use client'
+'use client'
 
 import { useLazyMapLoad } from '@/hooks/useLazyMapLoad'
-import { useRequireLogin } from '@/hooks/useRequireLogin'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { MapSkeleton } from '@/components/Map/MapSkeleton'
-import { Header } from '@/components/ui/layout/Header'
-import Image from 'next/image'
+import { MapHeader } from '@/components/Map/MapHeader'
+import { MapLocationBtn } from '@/components/Map/MapLocationBtn'
 import { Nav } from '@/components/ui/layout/Nav'
-import { LocationBtn } from '@/components/ui/button/LocationBtn'
 import { SearchBar } from '@/components/ui/form/SearchBar'
 import { Category } from '@/components/ui/category/Category'
 import { toast } from 'sonner'
-import { useMapCluster, type MapSpot } from '@/hooks/useMapPins'
+import { useMapCluster } from '@/hooks/useMapPins'
+import { useSpotPreviewDrawer } from '@/hooks/useSpotPreviewDrawer'
+import type { MapSpot } from '@/lib/utils/mapCluster'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import { hasActiveFilter, useFilterStore, type PinTypeFilter } from '@/stores/useFilterStore'
 import { filterMapSpots } from '@/lib/utils/mapFilter'
 import { timingToStatus, timingToStatuses } from '@/lib/utils/timing'
 import { useBloomMap } from '@/api/facades/seasonal-bloom'
 import { useHomeSuggestion } from '@/api/facades/home'
-import { useUnreadNotificationCount } from '@/api/facades/notification'
-import { useFetchSpotPreview } from '@/api/facades/spot'
-import { toPinListItems } from '@/lib/utils/spotPreview'
 import { bloomToMapSpots } from '@/lib/utils/bloomToMapSpots'
 import { readMapView, rememberMapView } from '@/lib/utils/mapViewHistory'
 import { loadAppSettings } from '@/lib/utils/appSettings'
-import { track } from '@/lib/analytics'
+import {
+  initMap,
+  mapBox,
+  panToCurrentLocation,
+  sameBbox,
+  snapBbox,
+  type Viewport,
+} from '@/lib/kakao/mapViewport'
 import { REGION_MAP_CENTERS } from '@/constants/region'
-import { STAGE_LABEL } from '@/constants/map'
 import type { GetSeasonalBloomsParams } from '@/api/facades/generated/peakdaApi.schemas'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 
 const Drawer = dynamic(
   () => import('@/components/ui/layout/Drawer').then((m) => ({ default: m.Drawer })),
@@ -44,62 +47,6 @@ const DEFAULT_CENTER = {
 const NETWORK_TOAST_ID = 'map-network-error'
 
 const INITIAL_LEVEL = 8
-
-// 화면 그대로의 영역. bbox 는 격자에 스냅돼 화면보다 넓어 개수 계산에는 쓸 수 없다.
-interface Viewport {
-  minLat: number
-  minLng: number
-  maxLat: number
-  maxLng: number
-}
-
-// bbox를 격자에 스냅해 이동 시 동일 쿼리 키로 수렴시킨다(캐시 히트 + staleTime 작동).
-// 셀 크기를 level 에 비례시켜 화면 폭의 약 90% 로 고정한다. 예전처럼 0.01°(≈880m)로
-// 고정하면 level 8 화면이 가로 14칸이라, 화면 폭의 7%만 움직여도 매번 새 키가 됐다.
-const BBOX_GRID_UNIT = 0.001
-const bboxGridSize = (level: number) => BBOX_GRID_UNIT * Math.pow(2, level - 1)
-
-// 뷰를 항상 덮도록 min은 내림, max는 올림. 부동소수 꼬리는 잘라 URL·쿼리 키를 안정시킨다.
-const snapDown = (v: number, unit: number) => Number((Math.floor(v / unit) * unit).toFixed(6))
-const snapUp = (v: number, unit: number) => Number((Math.ceil(v / unit) * unit).toFixed(6))
-
-// region 을 여기서 함께 확정하는 게 핵심이다. bloomParams 가 applied.region 을 직접 읽으면
-// 권역을 고른 순간 React Query 의 내부 effect(useBloomMap 호출 지점이라 훅 순서상 아래
-// 권역 effect보다 먼저 돈다)가 '옛 bbox + 새 region' 으로 요청을 한 번 보내고 버린다.
-// 둘을 한 state 에 담아 같은 setState 로 바꾸면 그 중간 상태 자체가 생기지 않는다.
-const snapBbox = (
-  box: Viewport,
-  level: number,
-  region: GetSeasonalBloomsParams['region']
-): GetSeasonalBloomsParams => {
-  const unit = bboxGridSize(level)
-  return {
-    minLat: snapDown(box.minLat, unit),
-    minLng: snapDown(box.minLng, unit),
-    maxLat: snapUp(box.maxLat, unit),
-    maxLng: snapUp(box.maxLng, unit),
-    region,
-  }
-}
-
-const sameBbox = (a: GetSeasonalBloomsParams, b: GetSeasonalBloomsParams) =>
-  a.minLat === b.minLat &&
-  a.minLng === b.minLng &&
-  a.maxLat === b.maxLat &&
-  a.maxLng === b.maxLng &&
-  a.region === b.region
-
-const mapBox = (map: kakao.maps.Map): Viewport => {
-  const bounds = map.getBounds()
-  const sw = bounds.getSouthWest()
-  const ne = bounds.getNorthEast()
-  return {
-    minLat: sw.getLat(),
-    minLng: sw.getLng(),
-    maxLat: ne.getLat(),
-    maxLng: ne.getLng(),
-  }
-}
 
 // 지도 정착 후 실제 조회까지의 지연. idle 자체가 이동 종료 후에만 발화하므로
 // 여기서는 '드래그 → 짧은 멈춤 → 드래그' 연타만 흡수하면 된다.
@@ -121,49 +68,8 @@ function toCoord(value: string | null) {
   return Number.isFinite(num) ? num : null
 }
 
-// snapHeight 는 드로어를 스냅할 때마다 바뀐다. MapContainer 가 직접 구독하면
-// 그때마다 지도 UI 전체(헤더·칩·검색바·Nav·드로어)가 다시 렌더되므로 이 버튼만 구독한다.
-function MapLocationBtn({ onLocate }: { onLocate: () => void }) {
-  const snapHeight = useDrawerStore((s) => s.snapHeight)
-
-  return (
-    <LocationBtn
-      onLocate={onLocate}
-      style={{
-        bottom: snapHeight > 0 ? `${snapHeight + 16}px` : '96px',
-        transition: 'bottom 0.5s cubic-bezier(0.32,0.72,0,1)',
-      }}
-    />
-  )
-}
-
-function panToCurrentLocation(map: kakao.maps.Map, onPermissionDenied?: () => void) {
-  navigator.geolocation.getCurrentPosition(
-    ({ coords }) => map.panTo(new kakao.maps.LatLng(coords.latitude, coords.longitude)),
-    (err) => {
-      if (err.code === err.PERMISSION_DENIED) onPermissionDenied?.()
-    },
-    { enableHighAccuracy: false, maximumAge: 5 * 60 * 1000, timeout: 8_000 }
-  )
-}
-
-const initMap = (container: HTMLElement, center: { lat: number; lng: number }, level: number) => {
-  const map = new kakao.maps.Map(container, {
-    center: new kakao.maps.LatLng(center.lat, center.lng),
-    level,
-    maxLevel: 13,
-    draggable: true,
-    scrollwheel: true,
-    disableDoubleClickZoom: false,
-    mapTypeId: kakao.maps.MapTypeId.ROADMAP,
-  })
-
-  return map
-}
-
 export const MapContainer = () => {
   const containerRef = useRef<HTMLDivElement>(null)
-  const router = useRouter()
   const isRegionMovePendingRef = useRef(false)
   const searchParams = useSearchParams()
   const [isRegionMovePending, setIsRegionMovePending] = useState(false)
@@ -177,7 +83,6 @@ export const MapContainer = () => {
   const appliedRegionRef = useRef<GetSeasonalBloomsParams['region']>(undefined)
   const { isReady: isSdkReady, error, retry } = useLazyMapLoad()
   const openFilterDrawer = useDrawerStore((s) => s.openFilterDrawer)
-  const openPinDrawer = useDrawerStore((s) => s.openPinDrawer)
   const pinType = useFilterStore((s) => s.pinType)
   const applied = useFilterStore((s) => s.applied)
   const draftCategories = useFilterStore((s) => s.draft.categories)
@@ -293,77 +198,7 @@ export const MapContainer = () => {
   const searchDescription =
     suggestion?.available && suggestion.message ? suggestion.message : '벚꽃 만개 지역'
 
-  // 안 읽은 알림이 있을 때만 헤더 알림 버튼에 점 표시
-  const { data: unread } = useUnreadNotificationCount()
-  const requireLogin = useRequireLogin()
-  const hasUnreadNotification = (unread?.unreadCount ?? 0) > 0
-  const fetchSpotPreview = useFetchSpotPreview()
-
-  // 핀 하나든 필터 결과 목록이든 같은 preview API 로 채운다.
-  // 서버가 탐색·지도에 노출되는 명소의 Spot 행을 미리 만들어 주므로 spotId 가 사실상 항상 있고,
-  // 예전처럼 클릭 시 POST /api/spots/match 로 만들어 낼 필요가 없다.
-  const handlePinClick = useCallback(
-    async (spot: MapSpot) => {
-      try {
-        if (spot.spotId != null) {
-          track('map_pin_click', { spot_id: spot.spotId })
-          const preview = await fetchSpotPreview([spot.spotId], {
-            categories: applied.categories,
-            status: timingToStatus(applied.timing),
-          })
-          const items = preview ? toPinListItems(preview.items) : []
-
-          if (items.length > 0) {
-            openPinDrawer(items)
-            return
-          }
-        }
-      } catch (e) {
-        console.error(e)
-      }
-
-      // 프리뷰를 못 가져오면(좌표만 있는 핀·비공개·네트워크 실패) 지도 개화 데이터로 폴백한다.
-      openPinDrawer(
-        spot.flowers.map((f) => ({
-          type: 'list' as const,
-          title: f.alt || '명소',
-          location: spot.title ?? '위치 정보 없음',
-          description: `현재 ${STAGE_LABEL[spot.maxStage]} 상태입니다.`,
-          badges: f.alt ? [{ label: f.alt, icon: f.src }] : [],
-          isFavorite: false,
-          images: [f.src],
-          spotId: spot.spotId ?? spot.attractionId,
-        }))
-      )
-    },
-    [openPinDrawer, fetchSpotPreview, applied.categories, applied.timing]
-  )
-
-  // 확대해도 갈라지지 않는 클러스터. 구성원 전체를 한 목록으로 연다.
-  const handleClusterClick = useCallback(
-    async (members: MapSpot[]) => {
-      const spotIds = members.map((s) => s.spotId).filter((id): id is number => id != null)
-
-      try {
-        const preview = await fetchSpotPreview(spotIds, {
-          categories: applied.categories,
-          status: timingToStatus(applied.timing),
-        })
-        const items = preview ? toPinListItems(preview.items) : []
-
-        if (items.length > 0) {
-          openPinDrawer(items)
-          return
-        }
-      } catch (e) {
-        console.error(e)
-      }
-
-      // 프리뷰가 비면 핀 하나를 탭했을 때와 같은 폴백을 쓴다.
-      handlePinClick(members[0])
-    },
-    [fetchSpotPreview, applied.categories, applied.timing, openPinDrawer, handlePinClick]
-  )
+  const { handlePinClick, handleClusterClick } = useSpotPreviewDrawer(applied)
 
   useMapCluster(mapInstance, spots, handlePinClick, handleClusterClick)
 
@@ -569,34 +404,7 @@ export const MapContainer = () => {
         </div>
       )}
 
-      <Header
-        className="mt-2"
-        left={
-          <div className="flex items-center justify-center gap-2">
-            <Image
-              src={'/images/logo.png'}
-              alt="로고"
-              width={36}
-              height={32}
-              className="h-8 w-8.5"
-            />
-            <p className="font-advent text-center text-[30px] font-semibold! tracking-tight text-green-700">
-              Peakda
-            </p>
-          </div>
-        }
-        right={
-          <div
-            className="bg-bg-primary-80 border-border-primary relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-full p-1"
-            onClick={() => requireLogin(() => router.push('/notification'))}
-          >
-            <Image src={'/icons/alram.svg'} alt="알람" width={20} height={20} className="h-6 w-6" />
-            {hasUnreadNotification && (
-              <div className="absolute top-2.5 right-2.5 h-1 w-1 rounded-full bg-pink-500"></div>
-            )}
-          </div>
-        }
-      />
+      <MapHeader />
 
       <Category
         isMap

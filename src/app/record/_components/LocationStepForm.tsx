@@ -113,6 +113,8 @@ export function LocationStepForm({
                     className="h-full w-full object-cover"
                   />
                   <button
+                    type="button"
+                    aria-label={`사진 ${i + 1} 삭제`}
                     onClick={() => onRemovePhoto(i)}
                     className="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60"
                   >
