@@ -26,6 +26,13 @@ const getFestival = cache(async (rawId: string) => {
   }
 })
 
+// 빌드 때는 만들지 않고 첫 요청 때 생성해 5분간 재사용한다(ISR, 스팟 상세와 같은 구조).
+export const revalidate = 300
+
+export async function generateStaticParams() {
+  return []
+}
+
 export async function generateMetadata({ params }: FestivalDetailPageProps): Promise<Metadata> {
   const festival = await getFestival((await params).id)
   if (!festival) return {}
