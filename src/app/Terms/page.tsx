@@ -1,15 +1,8 @@
-'use client'
 import { Header } from '@/components/ui/layout/Header'
 import { Drawer } from '@/components/ui/layout/Drawer'
-import { Button } from '@/components/ui/button/Button'
-import { TermsForm } from './_components/TermsForm'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { TermsAgreement } from '@/app/Terms/_components/TermsAgreement'
 
 export default function TermsPage() {
-  const router = useRouter()
-  const [canSubmit, setCanSubmit] = useState(false)
-
   return (
     <>
       <div className="relative flex h-dvh w-full flex-col py-11">
@@ -28,21 +21,7 @@ export default function TermsPage() {
             필수 항목에 동의해야 서비스를 이용할 수 있어요.
           </p>
         </div>
-        <div className="flex-1">
-          <TermsForm onRequiredChange={setCanSubmit} />
-        </div>
-        <div className="absolute right-0 bottom-10 left-0 z-10 flex-1 p-4">
-          <Button
-            variant="filled"
-            size="lg"
-            disabled={!canSubmit}
-            // replace: 가입을 마친 뒤 뒤로가기가 약관 화면으로 돌아가지 않게 한다
-            onClick={() => router.replace('/profile')}
-            className="bg-brand-secondary hover:bg-brand-secondary active:bg-brand-secondary w-full cursor-pointer text-white disabled:cursor-not-allowed"
-          >
-            동의하고 계속하기
-          </Button>
-        </div>
+        <TermsAgreement />
       </div>
       <Drawer />
     </>
