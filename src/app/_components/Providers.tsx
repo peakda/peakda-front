@@ -11,6 +11,7 @@ import { NativeAuthManager } from '@/app/_components/NativeAuthManager'
 import { NativeBackButton } from '@/app/_components/NativeBackButton'
 import { NativeSplash } from '@/app/_components/NativeSplash'
 import { PushNotificationManager } from '@/app/_components/PushNotificationManager'
+import { WebVitalsReporter } from '@/app/_components/WebVitalsReporter'
 import { shouldRetryQuery } from '@/lib/utils/apiError'
 import { DEFAULT_STALE_TIME } from '@/hooks/useSsrInitialQuery'
 
@@ -47,6 +48,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <NativeBackButton />
       <NativeAuthManager />
       <PushNotificationManager />
+      <WebVitalsReporter />
       {children}
       <LoginGuard />
       <LazyLoginSheet />
