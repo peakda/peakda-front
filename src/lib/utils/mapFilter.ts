@@ -1,6 +1,6 @@
 import type { BloomSlotCategory } from '@/api/facades/generated/peakdaApi.schemas'
 import type { BloomStageStatus } from '@/lib/utils/bloomStatus'
-import type { MapSpot } from '@/hooks/useMapPins'
+import type { MapSpot } from '@/lib/utils/mapCluster'
 import type { PinTypeFilter } from '@/stores/useFilterStore'
 import { toMaxStage } from '@/constants/map'
 

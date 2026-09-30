@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { clusterSlices, clusterSpots, pinLabel } from './useMapPins'
-import type { MapSpot } from './useMapPins'
+import { clusterSlices, clusterSpots, pinLabel } from './mapCluster'
+import type { MapSpot } from './mapCluster'
 import type { Stage } from '@/constants/map'
 
 // 모바일 기준 뷰포트 (서비스 주 타깃)
