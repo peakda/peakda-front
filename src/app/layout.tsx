@@ -63,7 +63,9 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  viewportFit: 'cover',
+  // viewport-fit=cover 를 두지 않는다. 있으면 Capacitor(SystemBars)가 Android 15+·WebView 140+ 에서
+  // 상태바·내비게이션바 여백을 네이티브로 잡지 않고 CSS env(safe-area-inset-*) 로 넘겨, 헤더·하단 버튼·
+  // 바텀시트가 시스템 바에 가려진다(S25 등). 없으면 네이티브가 WebView 를 두 바 사이에 배치한다.
 }
 
 export default function RootLayout({
