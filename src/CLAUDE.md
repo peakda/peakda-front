@@ -20,7 +20,7 @@
 | `context/` | React Context. 현재 `TabContext.tsx` 1개 — 새 상태 공유가 필요하면 Context 전에 Zustand 검토 |
 | `hooks/` | 커스텀 훅 (디바운스, 카카오 장소 검색, 지도 핀, 닉네임 체크 등) |
 | `lib/kakao/` | 카카오맵 SDK 초기화/유틸 |
-| `lib/utils/` | 범용 유틸 (`cn()` 등) |
+| `lib/utils/` | 범용 유틸 (`cn()` 등). API 에러 판별은 `apiError.ts`(`ApiError`·`getApiErrorStatus`·`getApiErrorMessage`), localStorage 접근은 반드시 `storage.ts`(`readStorage`/`writeStorage` — 예외를 삼킴)를 거친다 |
 | `stores/` | Zustand 스토어 (클라이언트 전역 상태) |
 | `types/` | 전역 타입 정의 |
 

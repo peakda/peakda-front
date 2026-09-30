@@ -78,7 +78,7 @@ export function toJsonLdScript(data: object): string {
   return JSON.stringify(data).replace(/</g, '\\u003c')
 }
 
-// 백엔드 개화 카테고리 오분류(SEO_GEO_AUDIT.md 9.2-F)가 정리될 때까지 sitemap 에서 빼는 임시 기준.
+// 백엔드 개화 카테고리 오분류(docs/SEO_GEO_AUDIT.md 9.2-F)가 정리될 때까지 sitemap 에서 빼는 임시 기준.
 // 억새만 달린 명소는 2026-09-22 운영 기준 208곳 중 대부분이 광주·강진의 호텔·식당·상점이라 통째로 뺀다.
 // 다른 꽃에 섞인 음식점·숙박·시장은 이름으로 거른다. 페이지 자체는 그대로 열린다.
 const NON_ATTRACTION_NAME = /식당|분식|떡볶이|갈비|한우|카페|커피|호텔|모텔|펜션|시장|마트|아울렛/

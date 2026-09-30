@@ -253,6 +253,10 @@ versionName 0.1.0 / versionCode 1
 - [ ] Firebase 개발/운영 프로젝트 분리 여부 (현재 `peakda` 하나, 소유·관리는 백엔드)
 - [ ] 업로드 키를 GitHub Actions secrets 로 관리할지
 - [ ] 버전 정책 — versionCode 수동 증가 vs CI 자동 증가
+- [ ] **에러 모니터링(Sentry) 도입 — 곧 진행 예정** (2026-09-30 기록). 지금은 운영 에러가 수집되지 않는다 — `src/app/error.tsx`·`global-error.tsx` 에 잡힌 에러와 API 5xx 가 사용자 화면에서 끝난다. 도입 시 확인할 것:
+  - `@sentry/nextjs` 로 웹(Vercel) + Capacitor WebView 를 함께 잡을지, 앱은 `@sentry/capacitor` 를 따로 둘지
+  - `error.tsx`/`global-error.tsx` 에서 `captureException` 호출, API 에러는 `src/api/mutator` 가 던지는 `ApiError`(스택 보존) 기준으로 5xx 만 보고 — 401/404 는 정상 흐름이라 노이즈
+  - 소스맵 업로드용 `SENTRY_AUTH_TOKEN` 을 Vercel·GitHub Actions secrets 에 등록, 개인정보(닉네임·이메일) 스크러빙
 
 ---
 
