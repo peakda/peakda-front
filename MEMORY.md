@@ -46,6 +46,8 @@
   - 프로필 **조회**는 서버 `displayName`을 쓰고 **편집**은 이 하드코딩을 쓴다. 그래서 매핑이 틀리면 같은 유저의 관심 꽃이 두 화면에서 다르게 보인다. 그 시기에 잘못 저장된 데이터는 프론트 수정으로 되돌아가지 않는다.
 - **꽃 필터 목록은 서버 enum의 부분집합**: 서버는 15종인데 Figma 필터는 14종이다. 핑크뮬리는 필터에서 뺐지만 서버가 핀으로는 계속 내려주므로 `CATEGORY_ICON`에는 남겨야 한다(지도에는 정상 표시, 필터 항목으로만 안 뜸).
 - **`public/`에는 문서를 두지 않는다** (2026-09-16): `public/` 안의 파일은 Next가 그대로 서빙해서 `https://www.peakda.com/CLAUDE.md`, `/terms-prompt.md` 등이 운영에서 누구나 열리고 검색에 잡힐 수 있었다. 디렉터리 안내였던 public/CLAUDE.md 는 없앴고(`map-tile-sw.js` 규칙은 위 지도 로딩 항목과 `ARCHITECTURE.md`에 이미 있다), 약관 생성 프롬프트는 `src/app/Terms/_prompts/`로 옮겼다(`_` 폴더라 라우트도 안 된다).
+- **`viewport-fit=cover`를 쓰지 않는다 — 시스템 바 여백은 네이티브가 잡는다** (2026-09-30): Capacitor 8 `SystemBars`는 Android 15+·WebView 140+에서 이 값이 있으면 여백을 CSS `env(safe-area-inset-*)`로 넘기는데, 우리 CSS는 그걸 `Nav`·`Header` 일부만 처리해 S25 등에서 헤더·하단 버튼·바텀시트가 상태바·내비게이션바에 가려졌다(QA P0). 빼면 네이티브가 WebView를 두 바 사이에 배치하고 `env()`는 0이 된다. 시스템 바 뒤까지 까는 디자인이 필요해지면 다시 켜되, 그때는 모든 고정 상·하단 요소에 safe-area 여백을 넣어야 한다.
+  - 띠 색은 앱 테마(`AppTheme.NoActionBar`, DayNight) 배경, 아이콘 색도 기기 테마를 따른다(`SystemBars.setStyle`). **테마 배경만 흰색으로 고정하면 다크 모드에서 흰 띠 위 흰 아이콘이 된다** — 바꾸려면 `SystemBars.style`도 함께 고정할 것.
 
 ## 자주 하는 작업
 

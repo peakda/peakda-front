@@ -4,6 +4,8 @@ import { notFound } from 'next/navigation'
 import { curationDetailApi } from '@/api/facades/curation'
 import { BASE_OPEN_GRAPH, DEFAULT_OG_IMAGE, SITE_BRAND_NAME } from '@/constants/site'
 import { isApiErrorStatus } from '@/lib/utils/apiError'
+import { toCurationJsonLd } from '@/lib/utils/curationSeo'
+import { toJsonLdScript } from '@/lib/utils/spotSeo'
 import { CreatorDetailClient } from './_components/CreatorDetailClient'
 
 interface CreatorDetailPageProps {
@@ -60,5 +62,13 @@ export default async function CreatorDetailPage({ params }: CreatorDetailPagePro
   const curation = await getCuration((await params).id)
   if (!curation) notFound()
 
-  return <CreatorDetailClient curation={curation} />
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: toJsonLdScript(toCurationJsonLd(curation)) }}
+      />
+      <CreatorDetailClient curation={curation} />
+    </>
+  )
 }

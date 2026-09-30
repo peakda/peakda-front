@@ -26,6 +26,22 @@ function codeFromAppUrl(value: string): string | null {
   }
 }
 
+// 딥링크로 앱이 새로 뜨면 같은 code 가 appUrlOpen(보관됐다 전달)과 getLaunchUrl 로 두 번 들어오고,
+// getLaunchUrl 은 프로세스가 살아 있는 동안 계속 그 URL 을 준다(전체 로드 후에도).
+// code 는 일회성이라 두 번째 교환은 실패해 로그인된 채로 로그인 시트가 뜬다. 처리한 code 를 남겨 건너뛴다.
+// window.location.replace 뒤에도 남아야 해서 sessionStorage 를 쓴다.
+const HANDLED_CODE_KEY = 'peakda:native-auth-handled-code'
+
+function claimCode(code: string): boolean {
+  try {
+    if (window.sessionStorage.getItem(HANDLED_CODE_KEY) === code) return false
+    window.sessionStorage.setItem(HANDLED_CODE_KEY, code)
+  } catch {
+    // 저장소를 못 쓰면 막지 않는다 — 예전 동작 그대로 교환을 시도한다
+  }
+  return true
+}
+
 export function NativeAuthManager() {
   const router = useRouter()
 
@@ -34,7 +50,7 @@ export function NativeAuthManager() {
 
     const handleAppUrl = (url: string) => {
       const code = codeFromAppUrl(url)
-      if (!code) return
+      if (!code || !claimCode(code)) return
 
       void (async () => {
         try {

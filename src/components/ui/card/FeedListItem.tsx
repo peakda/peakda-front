@@ -10,7 +10,6 @@ export interface FeedListItemProps {
   isOwner: boolean
   // 콜백은 id 를 인자로 받는다. 목록 쪽에서 아이템마다 새 클로저를 만들면
   // props 가 매번 달라져 memo 가 무력화되기 때문.
-  onOpen?: (id: number) => void
   onEdit: (id: number) => void
   onDelete: (id: number) => void
 }
@@ -20,7 +19,6 @@ export interface FeedListItemProps {
 export const FeedListItem = memo(function FeedListItem({
   record,
   isOwner,
-  onOpen,
   onEdit,
   onDelete,
 }: FeedListItemProps) {
@@ -31,8 +29,8 @@ export const FeedListItem = memo(function FeedListItem({
         isOwner,
         onEdit: () => onEdit(record.id),
         onDelete: () => onDelete(record.id),
+        href: `/feed/${record.id}`,
       })}
-      onOpen={onOpen && (() => onOpen(record.id))}
       />
     </div>
   )
