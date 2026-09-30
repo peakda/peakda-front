@@ -6,6 +6,7 @@ import {
   isNativeAndroid,
   refreshNativeAuthSession,
 } from '@/lib/auth/nativeAuth'
+import { ApiError } from '@/lib/utils/apiError'
 
 // 프론트(Vercel)·백엔드(AWS) 도메인이 달라, 브라우저/서버 모두 백엔드를 직접 호출하고
 // 크로스사이트 쿠키(SameSite=None; Secure)를 credentials: 'include' 로 주고받는다.
@@ -52,7 +53,7 @@ export const customInstance = async <T>(url: string, options?: RequestInit): Pro
   if (res.status === 401 && !url.includes(refreshUrl)) {
     // 비로그인 둘러보기 중인 웹 사용자는 갱신할 쿠키가 없다. refresh 없이 401 만 던지고
     // 로그인 화면으로 보내지 않는다 — 공개 화면에서 튕기면 안 된다. (서버 렌더링도 여기로 온다)
-    if (!native && !hasAuthMarker()) throw { response: { status: 401, data: null } }
+    if (!native && !hasAuthMarker()) throw new ApiError(401, null)
 
     try {
       if (native) await refreshNativeAuthSession()
@@ -68,14 +69,20 @@ export const customInstance = async <T>(url: string, options?: RequestInit): Pro
         setReturnTo(`${window.location.pathname}${window.location.search}`)
         useLoginSheetStore.getState().openLoginSheet()
       }
-      throw { response: { status: 401, data: null } }
+      throw new ApiError(401, null)
     }
   }
 
   if (!res.ok) {
-    throw { response: { status: res.status, data: await res.json() } }
+    // Caddy 502 HTML·본문 없는 403 등 JSON 이 아닌 에러 응답도 status 는 살려서 던진다.
+    const data = res.headers.get('content-type')?.includes('json')
+      ? await res.json().catch(() => null)
+      : null
+    throw new ApiError(res.status, data)
   }
 
-  const data = await res.json()
+  // 204 No Content 처럼 본문이 비어 있으면 res.json() 이 SyntaxError 를 던지므로 null 로 둔다.
+  const text = await res.text()
+  const data = text ? JSON.parse(text) : null
   return { data, status: res.status, headers: res.headers } as T
 }

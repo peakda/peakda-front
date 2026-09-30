@@ -10,15 +10,12 @@ import { SpotCard } from '@/components/ui/card/SpotCard'
 import { Carousel, CarouselItem } from '@/components/ui/display/Carousel'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import { useFilterStore } from '@/stores/useFilterStore'
-import { Drawer } from '@/components/ui/layout/Drawer'
+import { LazyDrawer } from '@/components/ui/layout/LazyDrawer'
 import { Nav } from '@/components/ui/layout/Nav'
 import { QueryFeedback } from '@/components/ui/display/QueryFeedback'
 import { useHomeSuggestion } from '@/api/facades/home'
 import { useExploreCuration } from '@/api/facades/explore'
-import type {
-  ExploreResponse,
-  ExploreSpotItem,
-} from '@/api/facades/generated/peakdaApi.schemas'
+import type { ExploreResponse, ExploreSpotItem } from '@/api/facades/generated/peakdaApi.schemas'
 import {
   formatMonthDay,
   hasSpotId,
@@ -138,14 +135,16 @@ export function ExploreClient({ initialExplore }: ExploreClientProps) {
               <EmptySection text="지금 절정인 명소가 없어요" />
             ) : (
               <Carousel className="px-4 pb-4">
-                {peakNow.map((item) => (
+                {peakNow.map((item, idx) => (
                   <CarouselItem
                     key={`${item.attractionId}-${item.category}`}
                     className="flex-[0_0_72%] pr-3"
                   >
                     <Link href={`/spot/${item.spotId}`} className="block">
+                      {/* 카드 폭이 72% 라 첫 화면에는 1장 + 2번째 일부가 보인다. */}
                       <ExplorCard
                         type="peak"
+                        priority={idx < 2}
                         className="w-full"
                         image={item.thumbnailUrl ?? PLACEHOLDER_IMAGE}
                         name={item.name}
@@ -238,7 +237,7 @@ export function ExploreClient({ initialExplore }: ExploreClientProps) {
         </>
       )}
 
-      <Drawer />
+      <LazyDrawer />
       <Nav activeTab="explore" />
     </div>
   )

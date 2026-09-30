@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { FeedListItem } from '@/components/ui/card/FeedListItem'
-import { Drawer } from '@/components/ui/layout/Drawer'
+import { LazyDrawer } from '@/components/ui/layout/LazyDrawer'
 import { InfiniteScrollFooter } from '@/components/ui/display/InfiniteScrollFooter'
 import { useSpotRecordsBySpotInfinite, useDeleteSpotRecord } from '@/api/facades/spot-record'
 import { useSpotDetail } from '@/api/facades/spot'
@@ -29,7 +29,6 @@ export default function SpotFeedPage() {
   const openDeleteConfirmDrawer = useDrawerStore((s) => s.openDeleteConfirmDrawer)
 
   // 아이템에 넘기는 콜백은 참조가 고정돼야 FeedListItem 의 memo 가 동작한다.
-  const handleOpen = useCallback((id: number) => router.push(`/feed/${id}`), [router])
   const handleEdit = useCallback((id: number) => router.push(`/record/${id}/edit`), [router])
   const handleDelete = useCallback(
     (id: number) => openDeleteConfirmDrawer(() => deleteRecord({ id })),
@@ -60,7 +59,6 @@ export default function SpotFeedPage() {
               key={record.id}
               record={record}
               isOwner={record.user.id === currentUser?.id}
-              onOpen={handleOpen}
               onEdit={handleEdit}
               onDelete={handleDelete}
             />
@@ -70,7 +68,7 @@ export default function SpotFeedPage() {
         </div>
       )}
 
-      <Drawer />
+      <LazyDrawer />
     </div>
   )
 }

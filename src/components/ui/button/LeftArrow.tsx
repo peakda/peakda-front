@@ -11,13 +11,14 @@ interface LeftArrowProps {
 export function LeftArrow({ href }: LeftArrowProps) {
   const router = useRouter()
   return (
-    <Image
-      src={'/icons/LeftArrow.svg'}
-      alt="왼쪽 화살표"
-      className="h-6 w-6 cursor-pointer"
-      width={24}
-      height={24}
+    // -m-3 p-3: 보이는 크기(24px)와 레이아웃은 그대로 두고 터치 영역만 48px 로 넓힌다.
+    <button
+      type="button"
+      aria-label="뒤로 가기"
+      className="-m-3 flex cursor-pointer p-3"
       onClick={() => (href ? router.push(href) : router.back())}
-    />
+    >
+      <Image src="/icons/LeftArrow.svg" alt="" className="h-6 w-6" width={24} height={24} />
+    </button>
   )
 }

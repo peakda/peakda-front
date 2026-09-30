@@ -4,6 +4,8 @@ import { notFound } from 'next/navigation'
 import { curationDetailApi } from '@/api/facades/curation'
 import { BASE_OPEN_GRAPH, DEFAULT_OG_IMAGE, SITE_BRAND_NAME } from '@/constants/site'
 import { isApiErrorStatus } from '@/lib/utils/apiError'
+import { toCurationJsonLd } from '@/lib/utils/curationSeo'
+import { toJsonLdScript } from '@/lib/utils/spotSeo'
 import { CreatorDetailClient } from './_components/CreatorDetailClient'
 
 interface CreatorDetailPageProps {
@@ -24,6 +26,13 @@ const getCuration = cache(async (rawId: string) => {
   }
 })
 
+// 빌드 때는 만들지 않고 첫 요청 때 생성해 5분간 재사용한다(ISR, 스팟 상세와 같은 구조).
+export const revalidate = 300
+
+export async function generateStaticParams() {
+  return []
+}
+
 export async function generateMetadata({ params }: CreatorDetailPageProps): Promise<Metadata> {
   const curation = await getCuration((await params).id)
   if (!curation) return {}
@@ -37,9 +46,15 @@ export async function generateMetadata({ params }: CreatorDetailPageProps): Prom
   const image = curation.heroImageUrl ?? DEFAULT_OG_IMAGE
 
   return {
-    title,
+    title: { absolute: `${title} | ${SITE_BRAND_NAME}` },
     description,
     alternates: { canonical: path },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${title} | ${SITE_BRAND_NAME}`,
+      description,
+      images: [image],
+    },
     openGraph: {
       ...BASE_OPEN_GRAPH,
       title: `${title} | ${SITE_BRAND_NAME}`,
@@ -54,5 +69,13 @@ export default async function CreatorDetailPage({ params }: CreatorDetailPagePro
   const curation = await getCuration((await params).id)
   if (!curation) notFound()
 
-  return <CreatorDetailClient curation={curation} />
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: toJsonLdScript(toCurationJsonLd(curation)) }}
+      />
+      <CreatorDetailClient curation={curation} />
+    </>
+  )
 }

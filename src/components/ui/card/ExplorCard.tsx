@@ -8,6 +8,8 @@ interface ExplorCardBaseProps {
   onClick?: () => void
   // 슬라이더처럼 카드 폭을 바깥에서 정해야 하는 곳에서만 넘긴다.
   className?: string
+  // 첫 화면에 보이는 카드(LCP 후보)만 true. 전부 주면 우선순위가 의미 없어진다.
+  priority?: boolean
 }
 
 interface PeakCardProps extends ExplorCardBaseProps {
@@ -46,6 +48,14 @@ export function ExplorCard(props: ExplorCardProps) {
     <div
       className={cn('w-60 shrink-0', props.onClick && 'cursor-pointer', props.className)}
       onClick={props.onClick}
+      role={props.onClick ? 'button' : undefined}
+      tabIndex={props.onClick ? 0 : undefined}
+      onKeyDown={(e) => {
+        if (props.onClick && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault()
+          props.onClick()
+        }
+      }}
     >
       {/* 이미지 영역 */}
       <div className="relative overflow-hidden rounded-2xl">
@@ -54,6 +64,7 @@ export function ExplorCard(props: ExplorCardProps) {
           alt={isCourse ? props.title : props.name}
           width={250}
           height={180}
+          priority={props.priority}
           className="h-[180px] w-full object-cover"
         />
 

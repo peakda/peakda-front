@@ -9,7 +9,7 @@ import { HotChipList } from './_components/HotChipList'
 import { SpotPanel } from './_components/SpotPanel'
 import { UserPanel } from './_components/UserPanel'
 import { SearchInput } from './_components/SearchInput'
-import { Drawer } from '@/components/ui/layout/Drawer'
+import { LazyDrawer } from '@/components/ui/layout/LazyDrawer'
 import { useHomeSuggestion } from '@/api/facades/home'
 import { useSearchSpotsInfinite, useSearchUsersInfinite } from '@/api/facades/search'
 import { useDebounce } from '@/hooks/useDebounce'
@@ -17,6 +17,7 @@ import { useIsLoggedIn } from '@/hooks/useIsLoggedIn'
 import { useRequireLogin } from '@/hooks/useRequireLogin'
 import { track } from '@/lib/analytics'
 import { flattenPages } from '@/lib/utils/infinitePages'
+import { readStorage, writeStorage } from '@/lib/utils/storage'
 import {
   RECENT_SEARCH_KEY,
   addRecentSearch,
@@ -63,13 +64,13 @@ export default function SearchPage() {
 
   // SSR 에는 localStorage 가 없으므로 마운트 후에 읽는다
   useEffect(() => {
-    setRecentSearches(readRecentSearches(window.localStorage.getItem(RECENT_SEARCH_KEY)))
+    setRecentSearches(readRecentSearches(readStorage(RECENT_SEARCH_KEY)))
     setRecentLoaded(true)
   }, [])
 
   useEffect(() => {
     if (!recentLoaded) return
-    window.localStorage.setItem(RECENT_SEARCH_KEY, JSON.stringify(recentSearches))
+    writeStorage(RECENT_SEARCH_KEY, JSON.stringify(recentSearches))
   }, [recentSearches, recentLoaded])
 
   const removeRecent = (item: string) => {
@@ -150,7 +151,7 @@ export default function SearchPage() {
           </Tabs>
         </div>
       )}
-      <Drawer />
+      <LazyDrawer />
     </div>
   )
 }

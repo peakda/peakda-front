@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { FeedCard } from '@/components/ui/card/FeedCard'
-import { Drawer } from '@/components/ui/layout/Drawer'
+import { LazyDrawer } from '@/components/ui/layout/LazyDrawer'
 import { useSpotRecord, useDeleteSpotRecord } from '@/api/facades/spot-record'
 import { useCurrentUser } from '@/api/facades/auth'
 import { detailToFeedCardProps } from '@/lib/utils/spotRecordToFeed'
@@ -48,7 +48,7 @@ export default function RecordDetailPage() {
         />
       )}
 
-      <Drawer />
+      <LazyDrawer />
     </div>
   )
 }

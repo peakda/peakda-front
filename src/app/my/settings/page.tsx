@@ -6,8 +6,9 @@ import { ChevronRight } from 'lucide-react'
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { Toggle } from '@/components/ui/display/Toggle'
-import { Drawer } from '@/components/ui/layout/Drawer'
+import { LazyDrawer } from '@/components/ui/layout/LazyDrawer'
 import { useDrawerStore } from '@/stores/useDrawerStore'
+import { readStorage, writeStorage } from '@/lib/utils/storage'
 import { BlockedUsersSection } from '@/app/my/settings/_components/BlockedUsersSection'
 import {
   APP_SETTINGS_KEY,
@@ -43,14 +44,14 @@ export default function SettingsPage() {
 
   // SSR 에는 localStorage 가 없으므로 마운트 후에 읽는다
   useEffect(() => {
-    setSettings(readAppSettings(window.localStorage.getItem(APP_SETTINGS_KEY)))
+    setSettings(readAppSettings(readStorage(APP_SETTINGS_KEY)))
     setSettingsLoaded(true)
   }, [])
 
   const updateSetting = (key: keyof AppSettings) => (isOn: boolean) => {
     const next = { ...settings, [key]: isOn }
     setSettings(next)
-    window.localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(next))
+    writeStorage(APP_SETTINGS_KEY, JSON.stringify(next))
   }
 
   const updatePushSetting = async (isOn: boolean) => {
@@ -60,13 +61,13 @@ export default function SettingsPage() {
 
       const next = { ...settings, pushEnabled: enabled }
       setSettings(next)
-      window.localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(next))
+      writeStorage(APP_SETTINGS_KEY, JSON.stringify(next))
       window.dispatchEvent(new Event(APP_SETTINGS_CHANGED_EVENT))
     } catch (error) {
       console.error('푸시 알림 설정 변경 실패', error)
       const next = { ...settings, pushEnabled: false }
       setSettings(next)
-      window.localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(next))
+      writeStorage(APP_SETTINGS_KEY, JSON.stringify(next))
       window.dispatchEvent(new Event(APP_SETTINGS_CHANGED_EVENT))
     }
   }
@@ -89,6 +90,7 @@ export default function SettingsPage() {
         </div>
         {settingsLoaded && (
           <Toggle
+            label="위치 정보 활용"
             initialStatus={settings.locationEnabled}
             onChange={updateSetting('locationEnabled')}
           />
@@ -102,6 +104,7 @@ export default function SettingsPage() {
           </div>
           {settingsLoaded && (
             <Toggle
+              label="푸시 알림"
               initialStatus={settings.pushEnabled}
               status={settings.pushEnabled}
               onChange={updatePushSetting}
@@ -115,7 +118,7 @@ export default function SettingsPage() {
           <span className="text-text-tertiary text-sm">사진에 저장된 날짜가 있을 때 빈 날짜 칸에 입력</span>
         </div>
         {settingsLoaded && (
-          <Toggle initialStatus={settings.exifEnabled} onChange={updateSetting('exifEnabled')} />
+          <Toggle label="촬영 날짜 자동 입력" initialStatus={settings.exifEnabled} onChange={updateSetting('exifEnabled')} />
         )}
       </div>
 
@@ -162,7 +165,7 @@ export default function SettingsPage() {
         <span className="text-base text-rose-500">계정 탈퇴</span>
       </button>
 
-      <Drawer />
+      <LazyDrawer />
     </div>
   )
 }

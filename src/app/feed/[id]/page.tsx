@@ -26,6 +26,13 @@ const getRecord = cache(async (rawId: string) => {
   }
 })
 
+// 빌드 때는 만들지 않고 첫 요청 때 생성해 재사용한다(ISR). 주기는 기록 조회 fetch 와 같은 1분.
+export const revalidate = 60
+
+export async function generateStaticParams() {
+  return []
+}
+
 export async function generateMetadata({ params }: FeedDetailPageProps): Promise<Metadata> {
   const record = await getRecord((await params).id)
   if (!record) return {}
@@ -40,9 +47,15 @@ export async function generateMetadata({ params }: FeedDetailPageProps): Promise
   const path = `/feed/${record.id}`
 
   return {
-    title,
+    title: { absolute: `${title} | ${SITE_BRAND_NAME}` },
     description,
     alternates: { canonical: path },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${title} | ${SITE_BRAND_NAME}`,
+      description,
+      images: [record.photos[0] ? recordPhotoUrl(record.photos[0], 'medium') : DEFAULT_OG_IMAGE],
+    },
     // 기록 사진은 만료되는 presigned URL 이라 공유 카드에 쓰면 나중에 깨진다.
     // 기본 카드를 쓴다 (영구 URL 은 백엔드 요청 대기).
     openGraph: {

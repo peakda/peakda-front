@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import type { MapSpot } from '@/hooks/useMapPins'
+import type { MapSpot } from '@/lib/utils/mapCluster'
 import { type Stage, STAGE_COLOR, STAGE_PRIORITY } from '@/constants/map'
 
 interface ClusterPinProps {

@@ -79,7 +79,7 @@ export const InputFiled = ({
               </span>
             )}
             {isMesssage && onClear && (
-              <button type="button" onClick={onClear}>
+              <button type="button" aria-label="입력 내용 지우기" onClick={onClear}>
                 <IconBtn size="sm" className="bg-bg-quaternary-2">
                   <X size={14} color="white" />
                 </IconBtn>

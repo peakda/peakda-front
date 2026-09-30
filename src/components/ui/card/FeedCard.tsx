@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { ChevronRight } from 'lucide-react'
 import { toast } from 'sonner'
 import { IconBtn } from '@/components/ui/button/IconBtn'
@@ -55,9 +56,12 @@ export interface FeedCardProps {
   onEdit?: () => void
   onDelete?: () => void
   onReport?: () => void
-  onOpen?: () => void
+  // 기록 상세 주소. 있으면 사진·본문이 상세로 이어지고, 본문은 크롤러가 따라갈 수 있는 링크가 된다.
+  href?: string
   showMoreMenu?: boolean
   spotSummary?: SpotSummaryInfo
+  // 목록 첫 카드처럼 첫 화면에 보이는 카드만 넘긴다. 첫 이미지만 우선 로드한다.
+  priority?: boolean
 }
 
 export function FeedCard({
@@ -78,9 +82,10 @@ export function FeedCard({
   onEdit,
   onDelete,
   onReport,
-  onOpen,
+  href,
   showMoreMenu = true,
   spotSummary,
+  priority = false,
 }: FeedCardProps) {
   const { emblaRef, selectedIndex, scrollSnaps, scrollTo } = useCarousel({ loop: true })
 
@@ -88,6 +93,9 @@ export function FeedCard({
   const report = useReport()
   const requireLogin = useRequireLogin()
   const safeAuthorImageUrl = toHttpsImageUrl(authorImageUrl)
+  const router = useRouter()
+  // 사진 캐러셀은 안에 인디케이터 버튼이 있어 <a> 로 감쌀 수 없다(중첩 인터랙티브). 클릭으로만 이동한다.
+  const onOpen = href ? () => router.push(href) : undefined
 
   const handleReportSubmit = (reason: CreateReportRequestReason, detail?: string) => {
     report.mutate(
@@ -118,7 +126,8 @@ export function FeedCard({
     <div className="bg-bg-primary flex flex-col gap-3 px-4 py-4">
       {/* 헤더 */}
       <div className="flex items-center gap-2">
-        <Link href={`/users/${authorId}`}>
+        {/* 유저 화면은 로그인 전용이라 크롤러가 따라가면 로그인 리다이렉트만 받는다 */}
+        <Link href={`/users/${authorId}`} rel="nofollow">
           <IconBtn size="md" className="relative overflow-hidden">
             {safeAuthorImageUrl ? (
               <Image
@@ -133,7 +142,11 @@ export function FeedCard({
             )}
           </IconBtn>
         </Link>
-        <Link href={`/users/${authorId}`} className="flex flex-1 flex-col text-left">
+        <Link
+          href={`/users/${authorId}`}
+          rel="nofollow"
+          className="flex flex-1 flex-col text-left"
+        >
           {authorInfo}
         </Link>
 
@@ -176,6 +189,7 @@ export function FeedCard({
                   width={430}
                   height={240}
                   sizes="(max-width: 430px) 100vw, 430px"
+                  priority={priority && i === 0}
                   className="h-[240px] w-full object-cover"
                 />
               </div>
@@ -250,15 +264,11 @@ export function FeedCard({
       )}
 
       {/* 본문 */}
-      {onOpen ? (
-        <button
-          type="button"
-          onClick={onOpen}
-          className="text-text-primary text-left text-sm leading-relaxed"
-        >
+      {href ? (
+        <Link href={href} className="text-text-primary text-left text-sm leading-relaxed">
           <span className="sr-only">기록 자세히 보기: </span>
           {content}
-        </button>
+        </Link>
       ) : (
         <p className="text-text-primary text-sm leading-relaxed">{content}</p>
       )}

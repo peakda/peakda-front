@@ -1,7 +1,11 @@
-import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  type InfiniteData,
+  useInfiniteQuery,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query'
 import {
   postFeedByIdReactions,
-  getFeed,
   deleteFeedByIdReactions,
   getGetFeedByIdQueryKey,
   usePostFeedByIdReactions as useAddReactionGen,
@@ -9,14 +13,17 @@ import {
 } from '@/api/facades/generated/feed/feed'
 import type {
   PostFeedByIdReactionsParams,
-  GetFeedParams,
   GetFeedFilter,
   DeleteFeedByIdReactionsParams,
 } from '@/api/facades/generated/peakdaApi.schemas'
 import { PAGE_SIZE, nextPageParam } from '@/api/facades/pagination'
-import { useIsLoggedIn } from '@/hooks/useIsLoggedIn'
-import type { SpotRecordResponse } from '@/api/facades/generated/peakdaApi.schemas'
+import { useSsrInitialQuery } from '@/hooks/useSsrInitialQuery'
+import type {
+  PageResponseSpotRecordSummaryResponse,
+  SpotRecordResponse,
+} from '@/api/facades/generated/peakdaApi.schemas'
 import { feedDetailApi } from '@/api/facades/feed-detail'
+import { feedListApi } from '@/api/facades/feed-list'
 
 // 트레이드 규칙: res.data (Orval 래퍼) → res.data.data (백엔드 실제 payload)
 
@@ -27,11 +34,6 @@ const invalidateFeedDetail = (queryClient: ReturnType<typeof useQueryClient>, id
   queryClient.invalidateQueries({ queryKey: getGetFeedByIdQueryKey(id) })
 
 // ▷ plain async (이벤트 기반 호출) ─────────────────────────────────────────
-
-export async function feedListApi(params: GetFeedParams) {
-  const res = await getFeed(params)
-  return res.data.data ?? null
-}
 
 // options 는 서버 컴포넌트에서 캐시 설정(next.revalidate)을 넘길 때 쓴다.
 export async function addReactionApi(id: number, params: PostFeedByIdReactionsParams) {
@@ -47,24 +49,36 @@ export async function removeReactionApi(id: number, params: DeleteFeedByIdReacti
 // ▷ React Query hooks (캐싱 / 상태 관리) ───────────────────────────────────
 
 // 무한 스크롤용. 기록 삭제 시 '/api/feed' 프리픽스 무효화에 함께 걸린다.
-export const useFeedListInfinite = (filter: GetFeedFilter) =>
-  useInfiniteQuery({
+// initialPage 는 서버가 받은 '전체' 탭 첫 페이지다. 비로그인 기준이라 로그인 사용자는 내 리액션을 채우려
+// 하이드레이션 직후 한 번 다시 조회한다. 다른 탭(관심 식물·팔로잉)에는 넘기지 않는다.
+export const useFeedListInfinite = (
+  filter: GetFeedFilter,
+  initialPage?: PageResponseSpotRecordSummaryResponse
+) => {
+  // initialData 객체는 렌더마다 새로 만들어지므로 첫 페이지 참조로 초기값인지 판정한다.
+  const ssr = useSsrInitialQuery<InfiniteData<PageResponseSpotRecordSummaryResponse | null, number>>(
+    (data) => data?.pages[0] === initialPage
+  )
+  return useInfiniteQuery({
     queryKey: ['/api/feed', 'infinite', filter],
     queryFn: ({ pageParam }) =>
       feedListApi({ filter, pageRequest: { page: pageParam, size: PAGE_SIZE } }),
     initialPageParam: 0,
     getNextPageParam: nextPageParam,
+    initialData: initialPage ? { pages: [initialPage], pageParams: [0] } : undefined,
+    ...ssr,
   })
+}
 
 export const useFeedDetail = (id: number | undefined, initialRecord?: SpotRecordResponse) => {
-  const isLoggedIn = useIsLoggedIn()
+  // 서버 HTML 은 비로그인 기준이라, 로그인 사용자는 내 리액션 상태를 채우려 하이드레이션 직후 한 번 다시 조회한다.
+  const ssr = useSsrInitialQuery<SpotRecordResponse | null>((data) => data === initialRecord)
   return useQuery({
     queryKey: getGetFeedByIdQueryKey(id ?? 0),
     queryFn: () => feedDetailApi(id!),
-    enabled: !!id,
+    enabled: !!id && ssr.enabled,
     initialData: initialRecord,
-    // Server HTML is public. Signed-in clients refresh personal reaction state immediately.
-    staleTime: isLoggedIn ? 0 : 60_000,
+    staleTime: ssr.staleTime,
   })
 }
 

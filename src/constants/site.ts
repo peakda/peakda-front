@@ -5,9 +5,9 @@ export const SITE_URL = 'https://www.peakda.com'
 export const SITE_NAME = 'Peakda'
 export const SITE_NAME_KO = '피크다'
 export const SITE_BRAND_NAME = `${SITE_NAME_KO} ${SITE_NAME}`
-export const SITE_TITLE = `${SITE_BRAND_NAME} | 계절 명소 개화·절정 타이밍`
+export const SITE_TITLE = `명소 지도·개화 지도 | ${SITE_BRAND_NAME}`
 export const SITE_DESCRIPTION =
-  '피크다(Peakda)는 벚꽃·유채꽃·철쭉·수국·단풍·억새 등 계절 명소의 개화와 절정 타이밍을 알려드려요. 지금 가장 예쁜 여행지를 한눈에 확인하세요.'
+  '피크다(Peakda)에서 전국 계절 명소 지도와 개화 지도를 확인하세요. 벚꽃·수국의 개화 추정 정보부터 단풍·억새의 절정 시기까지, 명소 위치와 방문 기록으로 여행을 준비하세요.'
 export const SITE_KEYWORDS = [
   SITE_NAME_KO,
   SITE_NAME,

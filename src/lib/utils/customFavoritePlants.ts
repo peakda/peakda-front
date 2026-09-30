@@ -1,10 +1,11 @@
+import { readStorage, removeStorage, writeStorage } from '@/lib/utils/storage'
+
 const keyForUser = (userId: number) => `peakda:favorite-plants:${userId}`
 const pendingKey = 'peakda:favorite-plants:pending-signup'
 
 function readIds(key: string): number[] {
-  if (typeof window === 'undefined') return []
   try {
-    const value: unknown = JSON.parse(window.localStorage.getItem(key) ?? '[]')
+    const value: unknown = JSON.parse(readStorage(key) ?? '[]')
     return Array.isArray(value)
       ? value.filter((id): id is number => Number.isSafeInteger(id) && id > 0)
       : []
@@ -18,15 +19,15 @@ export function readCustomFavoritePlantIds(userId: number): number[] {
   const pending = readIds(pendingKey)
   if (pending.length === 0) return saved
   const merged = [...new Set([...saved, ...pending])]
-  window.localStorage.setItem(keyForUser(userId), JSON.stringify(merged))
-  window.localStorage.removeItem(pendingKey)
+  writeStorage(keyForUser(userId), JSON.stringify(merged))
+  removeStorage(pendingKey)
   return merged
 }
 
 export function saveCustomFavoritePlantIds(userId: number, ids: number[]): void {
-  window.localStorage.setItem(keyForUser(userId), JSON.stringify(ids))
+  writeStorage(keyForUser(userId), JSON.stringify(ids))
 }
 
 export function savePendingCustomFavoritePlantIds(ids: number[]): void {
-  window.localStorage.setItem(pendingKey, JSON.stringify(ids))
+  writeStorage(pendingKey, JSON.stringify(ids))
 }

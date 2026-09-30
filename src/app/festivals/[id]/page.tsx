@@ -4,7 +4,8 @@ import { notFound } from 'next/navigation'
 import { festivalDetailApi } from '@/api/facades/festival'
 import { BASE_OPEN_GRAPH, DEFAULT_OG_IMAGE, SITE_BRAND_NAME } from '@/constants/site'
 import { isApiErrorStatus } from '@/lib/utils/apiError'
-import { FESTIVAL_PHASE_LABEL, formatMonthDay } from '@/lib/utils/explore'
+import { toFestivalJsonLd, toFestivalSeoDescription } from '@/lib/utils/festivalSeo'
+import { toJsonLdScript } from '@/lib/utils/spotSeo'
 import { FestivalDetailClient } from './_components/FestivalDetailClient'
 
 interface FestivalDetailPageProps {
@@ -25,33 +26,33 @@ const getFestival = cache(async (rawId: string) => {
   }
 })
 
+// 빌드 때는 만들지 않고 첫 요청 때 생성해 5분간 재사용한다(ISR, 스팟 상세와 같은 구조).
+export const revalidate = 300
+
+export async function generateStaticParams() {
+  return []
+}
+
 export async function generateMetadata({ params }: FestivalDetailPageProps): Promise<Metadata> {
   const festival = await getFestival((await params).id)
   if (!festival) return {}
 
   const title = `${festival.name} 일정·장소`
-  const { startsOn, endsOn, phase } = festival
-  const period = startsOn
-    ? endsOn
-      ? `${formatMonthDay(startsOn)}~${formatMonthDay(endsOn)}`
-      : formatMonthDay(startsOn)
-    : null
-  // 기간 · 장소 · 진행 상태
-  const description = [
-    period,
-    festival.roadAddress ?? festival.venue,
-    phase ? FESTIVAL_PHASE_LABEL[phase] : null,
-  ]
-    .filter(Boolean)
-    .join(' · ')
+  const description = toFestivalSeoDescription(festival)
   const path = `/festivals/${festival.festivalId}`
   // 대표 이미지는 CDN(cdn.peakda.com) 영구 URL 이라 공유 카드에 써도 깨지지 않는다.
   const image = festival.editorial?.heroImageUrl ?? DEFAULT_OG_IMAGE
 
   return {
-    title,
+    title: { absolute: `${title} | ${SITE_BRAND_NAME}` },
     description,
     alternates: { canonical: path },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${title} | ${SITE_BRAND_NAME}`,
+      description,
+      images: [image],
+    },
     openGraph: {
       ...BASE_OPEN_GRAPH,
       title: `${title} | ${SITE_BRAND_NAME}`,
@@ -66,5 +67,13 @@ export default async function FestivalDetailPage({ params }: FestivalDetailPageP
   const festival = await getFestival((await params).id)
   if (!festival) notFound()
 
-  return <FestivalDetailClient festival={festival} />
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: toJsonLdScript(toFestivalJsonLd(festival)) }}
+      />
+      <FestivalDetailClient festival={festival} />
+    </>
+  )
 }

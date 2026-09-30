@@ -32,19 +32,37 @@ const getSpot = cache(async (rawId: string) => {
   }
 })
 
+// generateStaticParams 가 없으면 fetch 가 캐시돼도 HTML 은 매 요청 서버에서 다시 그린다(ƒ).
+// 빈 목록을 주면 빌드 때는 만들지 않고, 첫 요청 때 생성해 5분간 재사용한다(ISR). notFound() 도 404 로 캐시된다.
+export const revalidate = 300
+
+export async function generateStaticParams() {
+  return []
+}
+
 export async function generateMetadata({ params }: SpotDetailPageProps): Promise<Metadata> {
   const spot = await getSpot((await params).id)
   if (!spot) return {}
 
-  const title = toSpotSeoTitle(spot)
-  const description = toSpotSeoDescription(spot) || undefined
+  const title =
+    spot.bloom?.category === 'MAPLE'
+      ? `${spot.name} ${spot.bloom.displayName} 절정 시기`
+      : toSpotSeoTitle(spot)
+  const description =
+    toSpotSeoDescription(spot) || `${spot.name}의 위치와 방문 기록을 확인하고 여행을 준비하세요.`
   const path = `/spot/${spot.id}`
   const image = toSpotShareImage(spot)
 
   return {
-    title,
+    title: { absolute: `${title} | ${SITE_BRAND_NAME}` },
     description,
     alternates: { canonical: path },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${title} | ${SITE_BRAND_NAME}`,
+      description,
+      images: [image ?? DEFAULT_OG_IMAGE],
+    },
     openGraph: {
       ...BASE_OPEN_GRAPH,
       title: `${title} | ${SITE_BRAND_NAME}`,

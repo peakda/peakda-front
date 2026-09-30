@@ -142,12 +142,14 @@ package_name    com.peakda.app   (gradle applicationId 와 일치 확인)
 - [ ] 네트워크 단절 시 `error.html` 폴백과 재시도
 - [ ] 푸시: **마이 → 설정에서 켜야** 권한 팝업이 뜬다 → 토큰 등록 → 수신 → 탭 이동
 - [ ] 다양한 화면 크기, 시스템 글꼴 크기
+- [ ] 휴대폰 다크 모드에서 스플래시·상하단 시스템 바가 흰색인지 (4절 "다음 빌드에 들어가야 하는 네이티브 변경")
 
 ---
 
 ## 4. AAB / 네이티브
 
-현재 산출물은 **네이티브 기준 최신**이다.
+> ⚠️ **아래 AAB(09-06)는 더 이상 네이티브 기준 최신이 아니다.** 이후 네이티브 변경이 쌓였다 —
+> 아래 "다음 빌드에 들어가야 하는 네이티브 변경" 참고. 다음 업로드 전에 반드시 다시 빌드한다.
 
 ```
 android/app/build/outputs/bundle/release/app-release.aab
@@ -190,6 +192,33 @@ cd android; .\gradlew.bat bundleRelease
 | 아이콘, 스플래시, 권한, `capacitor.config.ts`, 플러그인, `google-services.json`, versionCode | 필요 |
 
 **versionCode 1 은 첫 업로드용이다. 한 번 올린 뒤에는 `ANDROID_VERSION_CODE=2` 이상으로 빌드한다.**
+
+### 다음 빌드에 들어가야 하는 네이티브 변경
+
+#### 🔴 앱 첫 실행 시 검은 화면에 로고만 보임 — 코드는 수정됨, 재빌드 필요 (2026-09-30 기록)
+
+- **증상**: 휴대폰이 다크 모드면 콜드 스타트 때 검은 배경 + 아이콘만 보이는 스플래시가 뜬다 (QA 보고).
+- **원인**: Android 12+ 는 시스템이 `windowSplashScreenBackground` 로 스플래시를 그린다. 지정이 없으면
+  기기 테마 배경(다크 모드면 검정)을 쓴다. `splash.png` 자체는 흰 배경이라 문제없다.
+- **수정**: `c5eb02e`(09-28)에서 `styles.xml` 의 `AppTheme.NoActionBarLaunch` 에 흰 배경·로고 아이콘을 지정했다.
+  **09-06 AAB 이후라 배포된 앱에는 없다** — 스플래시는 네이티브 리소스라 웹 배포로 반영되지 않는다.
+- **확인**: 재빌드 설치 후 다크 모드로 콜드 스타트. 여전히 검으면 먼저 앱 삭제 후 재설치·재부팅
+  (삼성 등 일부 기기는 이전 스플래시를 캐시한다). 그래도 검으면 다른 원인이다.
+
+#### 🟡 상·하단 시스템 바 띠가 휴대폰 다크 모드를 따라 검게 보임 — 미수정 (2026-09-30 기록)
+
+- **배경**: PR #102 로 `viewport-fit=cover` 를 빼 시스템 바 여백을 네이티브가 잡게 했다(웹 배포만으로 반영).
+  그 결과 상태바·내비게이션바 영역은 앱 테마 배경색이 칠한다.
+- **증상**: 앱 테마(`AppTheme.NoActionBar`)가 `DayNight` 라, 휴대폰이 다크 모드면 **가운데 앱 화면은 흰색인데
+  위아래 띠만 검게** 보인다. 아이콘은 밝게 바뀌어 읽기에는 문제없다. 앱에는 다크 모드가 없다.
+- **수정안 (세 가지를 함께 바꿀 것)**:
+  1. `styles.xml` — `AppTheme.NoActionBar` 를 라이트 테마로 고정하고 배경을 흰색으로 지정
+  2. `capacitor.config.ts` — `plugins.SystemBars.style: 'LIGHT'` 추가 (흰 띠 위 어두운 아이콘)
+  3. `capacitor.config.ts` — `StatusBar.style` 을 `'DARK'` → `'LIGHT'`
+     (Capacitor 의 `DARK` 는 "어두운 배경용 = 흰 아이콘"이다)
+- **주의**: 하나만 바꾸면 흰 띠 위에 흰 아이콘이 되어 시계가 안 보일 수 있다
+  (`SystemBars.setStyle` 이 기기 테마로 아이콘 색을 정하고, 띠 색은 테마 `windowBackground` 를 쓴다).
+- **확인**: 라이트/다크 모드 각각에서 띠가 흰색이고 상태바 시계·아이콘이 잘 보이는지.
 
 ---
 
@@ -253,6 +282,10 @@ versionName 0.1.0 / versionCode 1
 - [ ] Firebase 개발/운영 프로젝트 분리 여부 (현재 `peakda` 하나, 소유·관리는 백엔드)
 - [ ] 업로드 키를 GitHub Actions secrets 로 관리할지
 - [ ] 버전 정책 — versionCode 수동 증가 vs CI 자동 증가
+- [ ] **에러 모니터링(Sentry) 도입 — 곧 진행 예정** (2026-09-30 기록). 지금은 운영 에러가 수집되지 않는다 — `src/app/error.tsx`·`global-error.tsx` 에 잡힌 에러와 API 5xx 가 사용자 화면에서 끝난다. 도입 시 확인할 것:
+  - `@sentry/nextjs` 로 웹(Vercel) + Capacitor WebView 를 함께 잡을지, 앱은 `@sentry/capacitor` 를 따로 둘지
+  - `error.tsx`/`global-error.tsx` 에서 `captureException` 호출, API 에러는 `src/api/mutator` 가 던지는 `ApiError`(스택 보존) 기준으로 5xx 만 보고 — 401/404 는 정상 흐름이라 노이즈
+  - 소스맵 업로드용 `SENTRY_AUTH_TOKEN` 을 Vercel·GitHub Actions secrets 에 등록, 개인정보(닉네임·이메일) 스크러빙
 
 ---
 

@@ -47,7 +47,7 @@ type SummaryWithPhotos = SpotRecordSummaryResponse & { photos?: PhotoEntry[] }
 // photos 가 오면 전부, 아니면 대표 사진 한 장, 그것도 없으면 placeholder 를 쓴다.
 export function toFeedCardProps(
   record: SummaryWithPhotos,
-  options?: Pick<FeedCardProps, 'isOwner' | 'onEdit' | 'onDelete' | 'onReport' | 'onOpen'>
+  options?: Pick<FeedCardProps, 'isOwner' | 'onEdit' | 'onDelete' | 'onReport' | 'href'>
 ): FeedCardProps {
   return {
     recordId: record.id,

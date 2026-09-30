@@ -2,7 +2,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import { X, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { Header } from '@/components/ui/layout/Header'
-import { Drawer } from '@/components/ui/layout/Drawer'
+import { LazyDrawer } from '@/components/ui/layout/LazyDrawer'
 import { StepperTab } from '@/components/ui/display/StepperTab'
 import { SearchInput } from '@/app/search/_components/SearchInput'
 import { Button } from '@/components/ui/button/Button'
@@ -113,6 +113,8 @@ export function LocationStepForm({
                     className="h-full w-full object-cover"
                   />
                   <button
+                    type="button"
+                    aria-label={`사진 ${i + 1} 삭제`}
                     onClick={() => onRemovePhoto(i)}
                     className="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60"
                   >
@@ -230,7 +232,7 @@ export function LocationStepForm({
         </Button>
       </div>
 
-      <Drawer />
+      <LazyDrawer />
     </div>
   )
 }
