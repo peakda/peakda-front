@@ -2,7 +2,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import { X, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { Header } from '@/components/ui/layout/Header'
-import { Drawer } from '@/components/ui/layout/Drawer'
+import { LazyDrawer } from '@/components/ui/layout/LazyDrawer'
 import { StepperTab } from '@/components/ui/display/StepperTab'
 import { SearchInput } from '@/app/search/_components/SearchInput'
 import { Button } from '@/components/ui/button/Button'
@@ -232,7 +232,7 @@ export function LocationStepForm({
         </Button>
       </div>
 
-      <Drawer />
+      <LazyDrawer />
     </div>
   )
 }

@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button/Button'
 import { Badge } from '@/components/ui/display/Badge'
 import { CardBadge } from '@/components/ui/card/CardBadge'
 import { FeedCard } from '@/components/ui/card/FeedCard'
-import { Drawer } from '@/components/ui/layout/Drawer'
+import { LazyDrawer } from '@/components/ui/layout/LazyDrawer'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import { useRequireLogin } from '@/hooks/useRequireLogin'
 import { toFeedCardProps } from '@/lib/utils/spotRecordToFeed'
@@ -314,7 +314,7 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
         </Button>
       </div>
 
-      <Drawer />
+      <LazyDrawer />
     </div>
   )
 }

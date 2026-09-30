@@ -32,6 +32,14 @@ const getSpot = cache(async (rawId: string) => {
   }
 })
 
+// generateStaticParams 가 없으면 fetch 가 캐시돼도 HTML 은 매 요청 서버에서 다시 그린다(ƒ).
+// 빈 목록을 주면 빌드 때는 만들지 않고, 첫 요청 때 생성해 5분간 재사용한다(ISR). notFound() 도 404 로 캐시된다.
+export const revalidate = 300
+
+export async function generateStaticParams() {
+  return []
+}
+
 export async function generateMetadata({ params }: SpotDetailPageProps): Promise<Metadata> {
   const spot = await getSpot((await params).id)
   if (!spot) return {}
