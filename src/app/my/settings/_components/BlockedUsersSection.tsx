@@ -12,12 +12,13 @@ import { toBlockedRow } from '@/lib/utils/userProfile'
 import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
 
 export function BlockedUsersSection() {
-  const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useBlockedListInfinite()
+  const { data, hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage } =
+    useBlockedListInfinite()
   const unblockMutation = useUnblockUser()
   const rows = flattenPages(data).map(toBlockedRow)
   const sentinelRef = useInfiniteScroll(
     () => fetchNextPage(),
-    shouldLoadMore(hasNextPage, isFetchingNextPage)
+    shouldLoadMore(hasNextPage, isFetchingNextPage, isFetchNextPageError)
   )
 
   return (
@@ -63,7 +64,11 @@ export function BlockedUsersSection() {
           </div>
         ))
       )}
-      <InfiniteScrollFooter sentinelRef={sentinelRef} isLoading={isFetchingNextPage} />
+      <InfiniteScrollFooter
+        sentinelRef={sentinelRef}
+        isLoading={isFetchingNextPage}
+        onRetry={isFetchNextPageError ? () => void fetchNextPage() : undefined}
+      />
     </>
   )
 }

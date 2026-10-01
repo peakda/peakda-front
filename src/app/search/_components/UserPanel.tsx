@@ -21,6 +21,8 @@ interface Props {
   hasMore?: boolean
   // hasMore 는 로딩 중에 false 가 되므로 스피너 표시 여부는 따로 받는다.
   isLoadingMore?: boolean
+  // 다음 페이지 요청이 실패했을 때만 넘긴다. 하단에 다시 시도 버튼을 띄운다.
+  onRetryMore?: () => void
   isLoading?: boolean
   isError?: boolean
   onRetry?: () => void
@@ -31,6 +33,7 @@ export function UserPanel({
   onLoadMore,
   hasMore = false,
   isLoadingMore = false,
+  onRetryMore,
   isLoading = false,
   isError = false,
   onRetry,
@@ -61,7 +64,11 @@ export function UserPanel({
           <UserList user={user} key={user.id} />
         ))}
       </ul>
-      <InfiniteScrollFooter sentinelRef={sentinelRef} isLoading={isLoadingMore} />
+      <InfiniteScrollFooter
+        sentinelRef={sentinelRef}
+        isLoading={isLoadingMore}
+        onRetry={onRetryMore}
+      />
     </>
   )
 }

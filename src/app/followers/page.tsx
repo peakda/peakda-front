@@ -13,12 +13,12 @@ import { flattenPages } from '@/lib/utils/infinitePages'
 import { shouldLoadMore } from '@/lib/utils/myRecords'
 
 function FollowerList({ userId }: { userId: number }) {
-  const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
+  const { data, isLoading, hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage } =
     useFollowerListInfinite(userId)
   const users = flattenPages(data)
   const sentinelRef = useInfiniteScroll(
     () => fetchNextPage(),
-    shouldLoadMore(hasNextPage, isFetchingNextPage)
+    shouldLoadMore(hasNextPage, isFetchingNextPage, isFetchNextPageError)
   )
 
   if (!isLoading && users.length === 0) {
@@ -38,7 +38,11 @@ function FollowerList({ userId }: { userId: number }) {
           />
         ))}
       </ul>
-      <InfiniteScrollFooter sentinelRef={sentinelRef} isLoading={isFetchingNextPage} />
+      <InfiniteScrollFooter
+        sentinelRef={sentinelRef}
+        isLoading={isFetchingNextPage}
+        onRetry={isFetchNextPageError ? () => void fetchNextPage() : undefined}
+      />
     </>
   )
 }

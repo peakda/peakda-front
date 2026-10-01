@@ -14,6 +14,12 @@ export function displayCount(totalElements: number | undefined, loadedLength: nu
 }
 
 // 무한 쿼리 상태 → sentinel 관찰 여부. 마지막 페이지이거나 이미 가져오는 중이면 관찰하지 않는다.
-export function shouldLoadMore(hasNextPage: boolean, isFetchingNextPage: boolean): boolean {
-  return hasNextPage && !isFetchingNextPage
+// 다음 페이지가 실패했을 때도 멈춘다. 요청이 끝나면 관찰이 새로 시작되고 sentinel 이 아직 보이면 곧바로
+// 다시 요청하므로, 막지 않으면 실패가 끝없이 반복된다. 재시도는 InfiniteScrollFooter 의 버튼으로 한다.
+export function shouldLoadMore(
+  hasNextPage: boolean,
+  isFetchingNextPage: boolean,
+  isFetchNextPageError: boolean
+): boolean {
+  return hasNextPage && !isFetchingNextPage && !isFetchNextPageError
 }
