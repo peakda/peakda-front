@@ -2,6 +2,9 @@
 
 작성일 2026-08-19 · 아직 정해진 것 없음
 
+> **2026-10-01 현재: Capacitor(B안)로 결정·구현됐다.** `android/`, `capacitor.config.ts`, 서명된 AAB 빌드, FCM 토큰 등록까지 들어가 있다.
+> 아래는 결정 당시의 비교 기록이라 그대로 둔다. 진행 현황은 [CAPACITOR_FRONT_PLAN.md](CAPACITOR_FRONT_PLAN.md)·[TODO.md](TODO.md)를 본다.
+
 Peakda 를 Google Play 에 올리려면 웹앱을 안드로이드 패키지로 감싸야 하는데, 방법이 두 가지입니다.
 어느 쪽이냐에 따라 백엔드가 할 일이 달라져서, 정하기 전에 같이 볼 내용을 정리했습니다.
 

@@ -1,6 +1,6 @@
 # Capacitor 안드로이드 앱 — 프론트 개발 계획 (TODO)
 
-작성일 2026-08-19 · 잠정 결정: **Capacitor** ([ANDROID_APP_DECISION.md](ANDROID_APP_DECISION.md) 논의 기반)
+작성일 2026-08-19 · 결정: **Capacitor** (2026-10-01 기준 구현·AAB 빌드 완료) ([ANDROID_APP_DECISION.md](ANDROID_APP_DECISION.md) 논의 기반)
 
 > 이 문서는 "무엇을 어떤 순서로 할지"를 담은 실행 계획이다.
 > 왜 Capacitor 인가 / TWA 와의 비교는 [ANDROID_APP_DECISION.md](ANDROID_APP_DECISION.md) 를 본다.
@@ -52,8 +52,8 @@ Peakda 는 순수 정적 웹앱이 아니라 **Next.js 15 SSR 앱**이다. 코�
 
 ## Phase 0 — 전제 확정 (코드 전, 지금 병렬 시작)
 
-- [x] 프로덕션 **실도메인 확정** — `https://peakda.com` (2026-09-06). 다만 apex·www 모두 아직 DNS 레코드가 없어 Vercel 연결이 남았다. 백엔드 `api.peakda.com`·`api-dev.peakda.com`은 이미 응답하므로 도메인 소유는 확인됨
-- [ ] 백엔드 확인: 푸시 인프라 **FCM 여부 + 일정** ([ANDROID_APP_DECISION.md](ANDROID_APP_DECISION.md) 92번). 발송단 없으면 Phase 3 차단
+- [x] 프로덕션 **실도메인 확정** — `https://peakda.com` (2026-09-06). DNS·Vercel 연결 완료, 앱 서버 URL 은 `https://www.peakda.com`(apex 는 www 로 308, [TODO.md](TODO.md) §6). 백엔드 `api.peakda.com`·`api-dev.peakda.com`은 이미 응답하므로 도메인 소유는 확인됨
+- [x] 백엔드 확인: 푸시 인프라 **FCM 여부 + 일정** — 2026-08-20 회신: FCM 확정(Phase 3 참고) ([ANDROID_APP_DECISION.md](ANDROID_APP_DECISION.md) 92번). 발송단 없으면 Phase 3 차단
 - [x] **Google Play 개발자 계정 개설** — 완료 (2026-09-06)
 - [ ] **비공개 테스트 착수 준비** (테스터 12명 / 14일) — 리드타임이 가장 길어 지금 시작해야 안 밀림
 - [x] `appId` 확정 — `com.peakda.app` (2026-09-06). Play 업로드 후에는 변경 불가
@@ -85,7 +85,7 @@ Peakda 는 순수 정적 웹앱이 아니라 **Next.js 15 SSR 앱**이다. 코�
 > 조회→발송 호출까지는 연결됐고 **발송 어댑터만 스텁**(서비스 계정 키 미발급). payload 규격(`type`/
 > `linkType`/`targetId`)도 확정돼 클라이언트 라우팅까지 구현했다. 남은 차단 요인은 서비스 계정 키뿐.
 
-- [ ] Firebase 프로젝트 생성 → `google-services.json` 안드로이드 앱에 배치 (패키지 ID·키 확정 대기)
+- [x] Firebase 프로젝트 생성 → `google-services.json` 안드로이드 앱에 배치 — 프로젝트 `peakda`(백엔드 소유), 2026-09-06 빌드에 반영 확인([TODO.md](TODO.md) §2). 파일은 gitignore 대상이라 빌드하는 PC 마다 따로 넣는다
 - [x] `@capacitor/push-notifications` 도입
 - [x] 토큰 수신 → `registerDeviceApi({ token, platform: 'ANDROID' })` 배선
 - [x] 로그아웃 → `unregisterDeviceApi(token)` 배선 (로그아웃 API보다 먼저 호출 — 백엔드 요구사항과 일치 확인됨)
@@ -113,7 +113,7 @@ Peakda 는 순수 정적 웹앱이 아니라 **Next.js 15 SSR 앱**이다. 코�
 ## 차단 요인 / 리스크
 
 1. **Firebase 서비스 계정 키 미발급** — Phase 3 발송 검증 차단(구현 자체는 완료). FCM 여부·발송 방식·payload·정책은 2026-08-20 전부 회신받아 더 이상 추측이 아니다
-2. **소셜 로그인 코드 교환 스펙 미확정** — Phase 2 신규 차단 요인. Custom Tab 방식은 백엔드가 안 된다고 확정했고, 대체할 일회성 코드 교환 방식의 엔드포인트·딥링크 스킴·스키마가 아직 안 나왔다. 그 전까지 앱은 기존 웹 로그인 방식으로만 동작
+2. ~~**소셜 로그인 코드 교환 스펙 미확정**~~ — **해소**: `peakda://auth` 딥링크 + `exchangeNativeAuthorizationCode`(`POST /api/auth/app/token`)로 구현됨(`src/lib/auth/nativeAuth.ts`, 실기기 검증 전). 아래는 당시 기록 — Custom Tab 방식은 백엔드가 안 된다고 확정했고, 대체할 일회성 코드 교환 방식의 엔드포인트·딥링크 스킴·스키마가 아직 안 나왔다. 그 전까지 앱은 기존 웹 로그인 방식으로만 동작
 3. ~~**실도메인 DNS 미연결**~~ — **해소**: [TODO.md](TODO.md) §6 기준 `www.peakda.com` 이 서버 URL 로 확정·사용 중이다(apex 는 www 로 308). Phase 1 실기기 검증은 막혀 있지 않다
 4. **Play 14일 비공개 테스트** — 착수 늦으면 그대로 밀림
 5. **`server.url` 프로덕션 사용** — Capacitor 공식은 비권장(원래 live-reload 용). Phase 1 실기기 검증이 실사용 가능 여부를 조기에 판정하는 안전장치

@@ -51,6 +51,14 @@
 - **`viewport-fit=cover`를 쓰지 않는다 — 시스템 바 여백은 네이티브가 잡는다** (2026-09-30): Capacitor 8 `SystemBars`는 Android 15+·WebView 140+에서 이 값이 있으면 여백을 CSS `env(safe-area-inset-*)`로 넘기는데, 우리 CSS는 그걸 `Nav`·`Header` 일부만 처리해 S25 등에서 헤더·하단 버튼·바텀시트가 상태바·내비게이션바에 가려졌다(QA P0). 빼면 네이티브가 WebView를 두 바 사이에 배치하고 `env()`는 0이 된다. 시스템 바 뒤까지 까는 디자인이 필요해지면 다시 켜되, 그때는 모든 고정 상·하단 요소에 safe-area 여백을 넣어야 한다.
   - 띠 색은 앱 테마(`AppTheme.NoActionBar`, DayNight) 배경, 아이콘 색도 기기 테마를 따른다(`SystemBars.setStyle`). **테마 배경만 흰색으로 고정하면 다크 모드에서 흰 띠 위 흰 아이콘이 된다** — 바꾸려면 `SystemBars.style`도 함께 고정할 것.
 
+- **비로그인 둘러보기 — 로그인 페이지로 보내지 않고 바텀시트로 막는다** (2026-09-14 `7691b04`·`1e39b2a`): 검색 노출과 첫 방문 이탈 때문에 지도·탐색·피드·스팟·축제·큐레이션은 로그인 없이 열린다. 막힌 경로는 `src/lib/auth/session.ts`의 `PROTECTED_PATHS` 하나로 관리하고 `robots.ts`도 이 목록을 쓴다.
+  - 막는 지점이 세 곳이다. ① 앱 안 링크: `LoginGuard`가 `<a>`/`<Link>` 클릭을 **캡처 단계에서 전역으로** 가로챈다(링크마다 막으면 빠뜨리기 쉽다) ② 버튼: `useRequireLogin` ③ 주소 직접 입력·새로고침: `middleware.ts`가 `/map?login=1`로 보내고 돌아올 곳을 one-shot 쿠키(`RETURN_TO`)에 남긴다.
+  - **401 이어도 인증 마커가 없으면 refresh·리다이렉트를 하지 않는다** (`src/api/mutator/index.ts`). 비로그인 사용자는 갱신할 쿠키가 없고, 공개 화면이 401 하나로 튕기면 안 되기 때문이다. 마커가 있던 사용자의 refresh 가 실패했을 때만 마커를 지우고 현재 화면 위에 로그인 시트를 연다.
+  - `/users`는 백엔드 조회 API가 아직 인증을 요구해서 막혀 있다. 공개되면 `PROTECTED_PATHS`에서 빼면 된다.
+- **`loading.tsx` 스켈레톤은 ISR 캐시 미스일 때만 보인다** (2026-10-01 PR #109): `feed`·`feed/[id]`·`spot/[id]`·`explore` 서버 페이지는 `revalidate`로 캐시돼 대부분 즉시 응답한다. 그리고 `loading.tsx`는 **하위 라우트에도 상속**되므로 모양이 다른 하위 화면(`explore/spots`·`explore/festivals`·`spot/[id]/feed`)에는 각자 `loading.tsx`를 둬서 덮어썼다. 상위 화면 UI를 바꾸면 스켈레톤도 함께 맞출 것.
+- **낙관적 업데이트는 `onMutate` 가 아니라 로컬 상태·캐시를 먼저 바꾸고 `onError`에서 되돌리는 방식이다**: `HeartBtn`·`BellBtn`·`FollowButton`·찜 시트·`ReactionBar`(`applyReactionToggle`)·스팟 상세(`setFavoriteCache`). `onMutate`로 검색하면 하나도 안 나오지만 낙관적 업데이트가 없는 게 아니다. 새 토글 버튼도 같은 방식으로 맞추고, 실패 시 `toast.error`를 띄운다.
+- **PR은 `main` 대상이고, `main`은 보호돼 있다** (2026-10-01): PR 필수 + `ci` 체크 통과 필수(관리자 우회 가능). 로컬 `develop`은 크게 뒤처져 있어 기준으로 쓰지 않는다. Android 워크플로는 필수 체크가 아니다.
+
 ## 자주 하는 작업
 
 - **신규 API 도메인 추가**: swagger 갱신 → `pnpm generate:api` → `pnpm generate:facades` (없는 도메인만 스텁 생성) → 파사드 TODO 채우기. 언래핑 규칙: `res.data`(orval 래퍼) → `res.data.data`(백엔드 실제 payload).

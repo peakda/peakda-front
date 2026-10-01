@@ -1,6 +1,6 @@
 # API 변경 요청 — 프론트 대응 현황
 
-> **최종 갱신**: 2026-08-18 (`refactor/18`) · **기준 스펙**: PEAKDA API v1 (Develop: `https://api-dev.peakda.com`)
+> **최종 갱신**: 2026-08-18 (`refactor/18`) · 2026-10-01 9번 표의 `devices` 행만 코드 대조로 갱신 · **기준 스펙**: PEAKDA API v1 (Develop: `https://api-dev.peakda.com`)
 > 백엔드에 전달한 요청 원문은 [BACKEND_API_REQUESTS.md](BACKEND_API_REQUESTS.md). 여기는 **그 요청들에 대한 프론트 대응 현황과 경위**(내부용)를 적는다.
 
 2026-08-10 자 요청 13건에 대해 백엔드 회신을 받았고(PR #70~#75), 프론트 대응을 완료했다.
@@ -90,7 +90,7 @@ prod 지도 '동네' 탭이 비어 있던 건 서버가 **최근 14일 방문 + 
 | `GET /api/users/{userId}/follow-summary` | 백엔드가 용도 확인 중. 프론트 파사드는 삭제 상태 유지 |
 | `GET /api/curations` | 큐레이션 **목록 화면** 기획 확인 필요 |
 | `POST /api/spots/records/{id}/publish` | DRAFT 흐름 확정 대기 |
-| `POST /api/devices` / `DELETE /api/devices/{token}` | 푸시 인프라 도입 일정 대기 |
+| ~~`POST /api/devices` / `DELETE /api/devices/{token}`~~ | **연동 완료** — `src/lib/push/pushNotifications.ts`(앱 푸시 토큰 등록·해제, 2026-10-01 확인) |
 
 ### 로컬 전용으로 확정된 것
 
