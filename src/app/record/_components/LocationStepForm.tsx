@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from 'react'
-import { X, Plus } from 'lucide-react'
+import { X, Plus, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { Header } from '@/components/ui/layout/Header'
 import { LazyDrawer } from '@/components/ui/layout/LazyDrawer'
@@ -35,6 +35,8 @@ interface LocationStepFormProps {
   onOpenSearch?: () => void
   onLocationChange?: Dispatch<SetStateAction<string>>
   photoItems: PhotoPreview[]
+  // 압축 중인 사진 수. 그만큼 로딩 칸을 보여 주고, 끝날 때까지 사진 추가를 막는다.
+  pendingPhotoCount?: number
   onPhotoAdd: (e: React.ChangeEvent<HTMLInputElement>) => void
   onRemovePhoto: (index: number) => void
   fileInputRef: React.RefObject<HTMLInputElement | null>
@@ -54,6 +56,7 @@ export function LocationStepForm({
   onOpenSearch = () => {},
   onLocationChange = () => {},
   photoItems,
+  pendingPhotoCount = 0,
   onPhotoAdd,
   onRemovePhoto,
   fileInputRef,
@@ -99,7 +102,7 @@ export function LocationStepForm({
             </p>
             <p className="text-text-secondary text-xs">최대 5장, 첫 사진이 대표 이미지</p>
           </div>
-          {photoItems.length > 0 && (
+          {(photoItems.length > 0 || pendingPhotoCount > 0) && (
             <div className="flex gap-2 overflow-x-auto pb-1">
               {photoItems.map((item, i) => (
                 <div
@@ -122,6 +125,16 @@ export function LocationStepForm({
                   </button>
                 </div>
               ))}
+              {Array.from({ length: pendingPhotoCount }, (_, i) => (
+                <div
+                  key={`pending-${i}`}
+                  role="status"
+                  className="bg-bg-secondary flex h-24 w-24 shrink-0 items-center justify-center rounded-xl"
+                >
+                  <Loader2 className="text-icon-tertiary h-5 w-5 animate-spin" />
+                  <span className="sr-only">사진 준비 중</span>
+                </div>
+              ))}
             </div>
           )}
           <input
@@ -132,12 +145,13 @@ export function LocationStepForm({
             className="hidden"
             onChange={onPhotoAdd}
           />
-          {photoItems.length < 5 && (
+          {photoItems.length + pendingPhotoCount < 5 && (
             <Button
               variant="outlined"
               size="md"
               leftIcon={<Plus size={16} />}
               onClick={() => fileInputRef.current?.click()}
+              disabled={pendingPhotoCount > 0}
               className="w-fit rounded-2xl py-5"
             >
               사진 추가
