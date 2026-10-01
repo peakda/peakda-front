@@ -39,7 +39,16 @@ export function FeedDetailClient({ initialRecord }: { initialRecord: SpotRecordR
   const isOwner = !!record && !!currentUser && record.user.id === currentUser.id
 
   const handleDelete = () => {
-    deleteRecord.mutate({ id: recordId }, { onSuccess: () => router.back() })
+    deleteRecord.mutate(
+      { id: recordId },
+      {
+        onSuccess: () => {
+          toast.success('기록을 삭제했어요')
+          router.back()
+        },
+        onError: () => toast.error('기록을 삭제하지 못했어요'),
+      }
+    )
   }
 
   const handleReportSubmit = (reason: CreateReportRequestReason, detail?: string) => {
@@ -50,6 +59,7 @@ export function FeedDetailClient({ initialRecord }: { initialRecord: SpotRecordR
           setReportModalOpen(false)
           toast.success('신고가 접수되었어요')
         },
+        onError: () => toast.error('신고를 접수하지 못했어요'),
       }
     )
   }

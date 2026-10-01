@@ -61,6 +61,7 @@ export function ReactionBar({ recordId, reactions, className }: ReactionBarProps
           setReactionOverride(toReactionSummary(res.data.data))
           showReactionToast(action, type)
         },
+        onError: () => toast.error('반응을 남기지 못했어요'),
       }
     )
   }

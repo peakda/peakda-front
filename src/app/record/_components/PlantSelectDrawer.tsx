@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Drawer as VaulDrawer } from 'vaul'
 import { Plus, X } from 'lucide-react'
+import { toast } from 'sonner'
 import { cn } from '@/lib/utils/cn'
 import { Badge } from '@/components/ui/display/Badge'
 import { Button } from '@/components/ui/button/Button'
@@ -65,6 +66,7 @@ export function PlantSelectDrawer({
       setQuery('')
     } catch (err) {
       console.error(err)
+      toast.error('식물을 추가하지 못했어요')
     }
   }
 

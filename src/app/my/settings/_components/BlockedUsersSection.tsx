@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button/Button'
 import { InfiniteScrollFooter } from '@/components/ui/display/InfiniteScrollFooter'
 import { useBlockedListInfinite, useUnblockUser } from '@/api/facades/user-block'
@@ -47,7 +48,15 @@ export function BlockedUsersSection() {
             <Button
               variant="outlined"
               size="sm"
-              onClick={() => unblockMutation.mutate({ userId: row.userId })}
+              onClick={() =>
+                unblockMutation.mutate(
+                  { userId: row.userId },
+                  {
+                    onSuccess: () => toast.success('차단을 해제했어요'),
+                    onError: () => toast.error('차단을 해제하지 못했어요'),
+                  }
+                )
+              }
             >
               차단 해제
             </Button>
