@@ -123,8 +123,10 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
 
   // 추가는 "개화 알림 받기" 토글이라는 실제 선택지가 있어 시트가 필요하지만,
   // 해제는 선택지가 없어 시트가 순수 마찰이라 HeartBtn과 동일하게 즉시 토글한다.
+  // 해제·알림 토글은 응답을 기다리지 않고 상세 캐시에 먼저 반영하고, 실패하면 누르기 전 값으로 되돌린다.
   const handleSave = () => {
     if (favorited) {
+      setFavoriteCache({ favorited: false, notifyEnabled: false })
       removeFavorite.mutate(
         { spotId: id },
         {
@@ -134,6 +136,7 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
           },
           onError: (err) => {
             console.error(err)
+            setFavoriteCache({ favorited, notifyEnabled })
             toast.error('찜을 해제하지 못했어요')
           },
         }
@@ -150,6 +153,7 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
       openSaveSheet()
       return
     }
+    setFavoriteCache({ favorited, notifyEnabled: !notifyEnabled })
     updateNotify.mutate(
       { spotId: id, data: { enabled: !notifyEnabled } },
       {
@@ -159,6 +163,7 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
         },
         onError: (err) => {
           console.error(err)
+          setFavoriteCache({ favorited, notifyEnabled })
           toast.error('알림 설정을 바꾸지 못했어요')
         },
       }

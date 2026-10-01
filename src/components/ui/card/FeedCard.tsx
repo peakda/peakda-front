@@ -105,6 +105,7 @@ export function FeedCard({
           setReportModalOpen(false)
           toast.success('신고가 접수되었어요')
         },
+        onError: () => toast.error('신고를 접수하지 못했어요'),
       }
     )
   }

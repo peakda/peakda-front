@@ -8,7 +8,7 @@ import { useAddReaction, useRemoveReaction } from '@/api/facades/feed'
 import { REACTIONS } from '@/constants/reaction'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import { useRequireLogin } from '@/hooks/useRequireLogin'
-import { reactionToggleAction, toReactionSummary } from '@/lib/utils/feed'
+import { applyReactionToggle, reactionToggleAction, toReactionSummary } from '@/lib/utils/feed'
 import { cn } from '@/lib/utils/cn'
 import type {
   FeedReactionSummaryResponseMyReactionsItem,
@@ -54,12 +54,19 @@ export function ReactionBar({ recordId, reactions, className }: ReactionBarProps
     if (addReaction.isPending || removeReaction.isPending) return
     const action = reactionToggleAction(myReactions, type)
     const mutation = action === 'add' ? addReaction : removeReaction
+    // 응답을 기다리지 않고 먼저 반영하고, 실패하면 누르기 전 값으로 되돌린다.
+    const previous = reactionOverride
+    setReactionOverride(applyReactionToggle({ counts: reactionCounts, myReactions }, type, action))
     mutation.mutate(
       { id: recordId, params: { reactionType: type } },
       {
         onSuccess: (res) => {
           setReactionOverride(toReactionSummary(res.data.data))
           showReactionToast(action, type)
+        },
+        onError: () => {
+          setReactionOverride(previous)
+          toast.error('반응을 남기지 못했어요')
         },
       }
     )

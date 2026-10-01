@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { toast } from 'sonner'
 import {
   useMarkAllNotificationsRead,
   useMarkNotificationRead,
@@ -124,7 +125,9 @@ export function NotificationTabs() {
       <div className="flex justify-end px-4 pt-2">
         <button
           type="button"
-          onClick={() => markAll.mutate()}
+          onClick={() =>
+            markAll.mutate(undefined, { onError: () => toast.error('알림을 읽음 처리하지 못했어요') })
+          }
           className="text-text-tertiary text-sm"
         >
           모두 읽음

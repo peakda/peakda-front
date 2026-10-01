@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { filterFromTab, reactionToggleAction, buildReportRequest, toReactionSummary } from './feed'
+import {
+  filterFromTab,
+  reactionToggleAction,
+  buildReportRequest,
+  toReactionSummary,
+  applyReactionToggle,
+} from './feed'
 
 describe('utils/feed', () => {
   describe('filterFromTab', () => {
@@ -45,6 +51,33 @@ describe('utils/feed', () => {
     it('응답 payload 가 없으면 빈 요약', () => {
       expect(toReactionSummary(null)).toEqual({ counts: [], myReactions: [] })
       expect(toReactionSummary(undefined)).toEqual({ counts: [], myReactions: [] })
+    })
+  })
+
+  describe('applyReactionToggle', () => {
+    it('add: 기존 집계에 +1, myReactions 에 추가', () => {
+      expect(
+        applyReactionToggle(
+          { counts: [{ reactionType: 'HEART', count: 2 }], myReactions: [] },
+          'HEART',
+          'add'
+        )
+      ).toEqual({ counts: [{ reactionType: 'HEART', count: 3 }], myReactions: ['HEART'] })
+    })
+    it('add: 집계에 없던 타입이면 count 1 로 추가', () => {
+      expect(applyReactionToggle({ counts: [], myReactions: [] }, 'SMILE', 'add')).toEqual({
+        counts: [{ reactionType: 'SMILE', count: 1 }],
+        myReactions: ['SMILE'],
+      })
+    })
+    it('remove: -1 하고 myReactions 에서 제거, 0 아래로 내려가지 않는다', () => {
+      expect(
+        applyReactionToggle(
+          { counts: [{ reactionType: 'HEART', count: 0 }], myReactions: ['HEART'] },
+          'HEART',
+          'remove'
+        )
+      ).toEqual({ counts: [{ reactionType: 'HEART', count: 0 }], myReactions: [] })
     })
   })
 

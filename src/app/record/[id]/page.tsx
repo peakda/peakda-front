@@ -1,6 +1,7 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { FeedCard } from '@/components/ui/card/FeedCard'
@@ -24,7 +25,16 @@ export default function RecordDetailPage() {
 
   const handleDelete = () => {
     openDeleteConfirmDrawer(() =>
-      deleteRecord.mutate({ id: recordId }, { onSuccess: () => router.back() })
+      deleteRecord.mutate(
+        { id: recordId },
+        {
+          onSuccess: () => {
+            toast.success('기록을 삭제했어요')
+            router.back()
+          },
+          onError: () => toast.error('기록을 삭제하지 못했어요'),
+        }
+      )
     )
   }
 

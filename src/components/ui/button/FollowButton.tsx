@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button/Button'
 import { useFollow, useUnfollow } from '@/api/facades/user-follow'
 import { useRequireLogin } from '@/hooks/useRequireLogin'
@@ -26,7 +27,15 @@ export function FollowButton({ userId, initialFollowing = false }: Props) {
     if (userId === undefined) return
 
     const mutation = next ? followMutation : unfollowMutation
-    mutation.mutate({ userId }, { onError: () => setFollowing(!next) })
+    mutation.mutate(
+      { userId },
+      {
+        onError: () => {
+          setFollowing(!next)
+          toast.error(next ? '팔로우하지 못했어요' : '팔로우를 취소하지 못했어요')
+        },
+      }
+    )
   }
 
   return following ? (
