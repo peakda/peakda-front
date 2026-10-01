@@ -28,21 +28,22 @@ pnpm android:build:debug
 pnpm android:build:bundle
 ```
 
-`android:build:debug` produces a debug APK. `android:build:bundle` produces an
-unsigned release AAB until the release signing configuration is added. Android builds
+`android:build:debug` produces a debug APK. `android:build:bundle` produces a
+signed release AAB when the upload-key Gradle properties are set (`signingConfigs.release`
+in `android/app/build.gradle`); without them the release build is not signed. Android builds
 require Node.js 22 or newer and a configured Android SDK.
 
 ## Defaults already configured
 
 - HTTPS-only remote origin and cleartext/mixed-content blocking
-- WebView zoom and release web-content debugging disabled
+- WebView zoom disabled; web-content debugging is off unless `CAPACITOR_DEBUG=true` is set when syncing/building (do not use for releases)
 - Debug-only Capacitor logging
 - Local network error page with a retry action
 - Native splash screen and light status bar defaults
 - Android application backup disabled
 - Keyboard resize behavior enabled
 - Signing files, Firebase configuration, local SDK paths, and build outputs ignored by Git
-- Android CI validation for lint, debug APK, and unsigned release AAB
+- Android CI (`.github/workflows/android.yml`) runs `lintDebug assembleDebug bundleRelease`
 
 The generated launcher and splash artwork are placeholders. Replace them when final
 design assets are available.
