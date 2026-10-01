@@ -4,7 +4,7 @@
 벚꽃·수국·단풍·억새 같은 계절 명소의 개화 상태를 지도에서 보고, 절정 시기에 맞춰 여행을 계획하고, 다녀온 기록을 남깁니다.
 
 - 웹: https://www.peakda.com
-- Android 앱: 같은 웹을 Capacitor 로 감싼 앱 (`com.peakda.app`, Google Play 출시 준비 중)
+- Android 앱: [Google Play](https://play.google.com/store/apps/details?id=com.peakda.app) — 같은 웹을 Capacitor 로 감싼 앱 (`com.peakda.app`)
 
 ---
 

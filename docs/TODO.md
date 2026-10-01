@@ -241,6 +241,9 @@ cd android; .\gradlew.bat bundleRelease
 
 ## 5. 스토어 등록
 
+> **2026-10-01: 스토어 페이지 공개 확인** — https://play.google.com/store/apps/details?id=com.peakda.app
+> (HTTP 200, 앱 이름 `Peakda`, 개발자 표기 `rhkr8521 Studio`). 어느 트랙으로 공개됐는지와 아래 미체크 항목의 실제 상태는 Play Console 에서 확인해야 한다.
+
 로그인과 무관하므로 **지금 병렬로 진행 가능하다.**
 
 - [ ] 스크린샷, feature graphic
