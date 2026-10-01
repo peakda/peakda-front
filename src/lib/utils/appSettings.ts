@@ -13,7 +13,7 @@ export interface AppSettings {
   pushEnabled: boolean
 }
 
-// 저장된 값이 없으면 둘 다 켜짐
+// 저장된 값이 없으면 위치·EXIF 는 켜짐, 푸시는 꺼짐 — 권한 팝업은 사용자가 알림을 켤 때(설정 토글·만개 알림)만 띄운다
 export const DEFAULT_APP_SETTINGS: AppSettings = {
   locationEnabled: true,
   exifEnabled: true,

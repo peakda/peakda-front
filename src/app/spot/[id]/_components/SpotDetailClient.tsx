@@ -19,6 +19,7 @@ import { useSpotDetail } from '@/api/facades/spot'
 import { useBloomCalendar } from '@/api/facades/seasonal-bloom'
 import { useRemoveFavorite, useUpdateFavoriteNotify } from '@/api/facades/spot-favorite'
 import { track } from '@/lib/analytics'
+import { enablePushForBloomAlert } from '@/lib/push/pushNotifications'
 import {
   getGetSpotsByIdQueryKey,
   type getSpotsByIdResponse,
@@ -159,6 +160,7 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
       {
         onSuccess: () => {
           toast(notifyEnabled ? '만개 알림을 껐어요' : '만개 알림을 켰어요')
+          if (!notifyEnabled) void enablePushForBloomAlert()
           queryClient.invalidateQueries({ queryKey: getGetSpotsByIdQueryKey(id) })
         },
         onError: (err) => {
