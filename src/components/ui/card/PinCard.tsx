@@ -2,8 +2,7 @@ import React from 'react'
 import { Tag } from '@/components/ui/display/Tag'
 import { PinText } from '@/components/ui/display/PinText'
 import { SingleImageProps } from '@/types/types'
-import Image from 'next/image'
-import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
+import { SafeImage } from '@/components/ui/display/SafeImage'
 
 export function PinCard({
   imageUrl,
@@ -19,8 +18,8 @@ export function PinCard({
       {/* 상단 이미지 영역 */}
       <div className="relative h-48 bg-gray-200">
         {imageUrl && (
-          <Image
-            src={toHttpsImageUrl(imageUrl) ?? imageUrl}
+          <SafeImage
+            src={imageUrl}
             alt={title}
             fill
             sizes="(max-width: 430px) 100vw, 430px"

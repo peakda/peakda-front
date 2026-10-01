@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import { Bell, Heart, MapPin } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
@@ -33,7 +32,7 @@ import { type BloomStageStatus, toStatusBadge } from '@/lib/utils/bloomStatus'
 import { BLOOM_CATEGORY_EMOJI, formatPeakPeriod, peakHeadline } from '@/lib/utils/bloomCalendar'
 import { formatMonthDay } from '@/lib/utils/explore'
 import { cn } from '@/lib/utils/cn'
-import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
+import { SafeImage } from '@/components/ui/display/SafeImage'
 
 // 캘린더(일별 타임라인)가 없으면 '이번 주말이 딱이에요' 판정을 못 하므로
 // 상세 응답 배너의 현재 상태만으로 문구를 대체한다.
@@ -171,8 +170,8 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
       {/* 대표 이미지 — 뒤로가기를 이미지 위에 겹친다 */}
       <div className="relative h-64 bg-gray-200">
         {spot.representativeImageUrl && (
-          <Image
-            src={toHttpsImageUrl(spot.representativeImageUrl) ?? spot.representativeImageUrl}
+          <SafeImage
+            src={spot.representativeImageUrl}
             alt={spot.name}
             fill
             priority
