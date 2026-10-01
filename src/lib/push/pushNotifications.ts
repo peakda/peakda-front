@@ -4,8 +4,11 @@ import {
   type ActionPerformed,
   type PushNotificationSchema,
 } from '@capacitor/push-notifications'
+import { toast } from 'sonner'
 import { registerDeviceApi, unregisterDeviceApi } from '@/api/facades/device'
 import { track } from '@/lib/analytics'
+import { APP_SETTINGS_CHANGED_EVENT, APP_SETTINGS_KEY, loadAppSettings } from '@/lib/utils/appSettings'
+import { writeStorage } from '@/lib/utils/storage'
 
 const CHANNEL_ID = 'peakda-default'
 
@@ -77,11 +80,33 @@ export async function requestAndStartPushNotifications(
   if (permission.receive === 'prompt' || permission.receive === 'prompt-with-rationale') {
     permission = await PushNotifications.requestPermissions()
   }
-  // 설정에서 푸시를 켤 때마다 보낸다 — 시스템에서 거부해 둔 사용자는 denied 로 남는다.
+  // 푸시를 켤 때마다(설정 토글·만개 알림 켜기) 보낸다 — 시스템에서 거부해 둔 사용자는 denied 로 남는다.
   track('push_permission', { result: permission.receive })
   if (permission.receive !== 'granted') return false
 
   return register(callbacks)
+}
+
+// 만개 알림을 켜는 순간(찜 시트·종 버튼)에 기기 푸시도 함께 켠다. 만개 알림은 서버 설정이라
+// 이것만 켜고 기기 토큰이 없으면 푸시가 오지 않는다. 설정 화면 토글과 같은 값(pushEnabled)을 저장하고
+// 이벤트를 보내면 PushNotificationManager 가 알림 탭 콜백까지 붙여 등록을 이어받는다.
+// 웹은 푸시가 없어 아무것도 하지 않는다(앱 내 알림 목록으로 받는다).
+export async function enablePushForBloomAlert(): Promise<void> {
+  if (!isNativeAndroid() || loadAppSettings().pushEnabled) return
+
+  try {
+    const enabled = await requestAndStartPushNotifications()
+    if (!enabled) {
+      toast('휴대폰 알림이 꺼져 있어 만개 알림이 오지 않아요', {
+        description: '기기 설정에서 피크다 알림을 허용해 주세요.',
+      })
+      return
+    }
+    writeStorage(APP_SETTINGS_KEY, JSON.stringify({ ...loadAppSettings(), pushEnabled: true }))
+    window.dispatchEvent(new Event(APP_SETTINGS_CHANGED_EVENT))
+  } catch (error) {
+    console.error('만개 알림 푸시 권한 요청 실패', error)
+  }
 }
 
 export async function stopPushNotifications(): Promise<void> {

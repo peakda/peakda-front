@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useUpdateFavoriteNotify } from '@/api/facades/spot-favorite'
 import { useRequireLogin } from '@/hooks/useRequireLogin'
+import { enablePushForBloomAlert } from '@/lib/push/pushNotifications'
 
 interface BellBtnProps {
   InitEnabled: boolean
@@ -46,7 +47,10 @@ export function BellBtn({
     updateNotify.mutate(
       { spotId, data: { enabled: next } },
       {
-        onSuccess: () => toast(next ? '만개 알림을 켰어요' : '만개 알림을 껐어요'),
+        onSuccess: () => {
+          toast(next ? '만개 알림을 켰어요' : '만개 알림을 껐어요')
+          if (next) void enablePushForBloomAlert()
+        },
         onError: (err) => {
           console.error(err)
           toast.error('알림 설정을 바꾸지 못했어요')

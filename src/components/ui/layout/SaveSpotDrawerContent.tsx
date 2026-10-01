@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button/Button'
 import { Toggle } from '@/components/ui/display/Toggle'
 import { useAddFavorite, useUpdateFavoriteNotify } from '@/api/facades/spot-favorite'
 import { getGetSpotsByIdQueryKey } from '@/api/facades/generated/spot/spot'
+import { enablePushForBloomAlert } from '@/lib/push/pushNotifications'
 import type { SaveSpotData } from '@/stores/useDrawerStore'
 
 interface Props {
@@ -39,8 +40,12 @@ export function SaveSpotDrawerContent({ spot, onClose }: Props) {
     // 상세 화면 하트 상태(favorited)를 즉시 반영하기 위해 상세 쿼리 무효화
     void queryClient.invalidateQueries({ queryKey: getGetSpotsByIdQueryKey(spot.spotId) })
 
-    // 찜 추가 시 만개 알림이 기본 활성화되므로, 토글을 끈 경우에만 알림 해제 요청
-    if (notify) return
+    // 찜 추가 시 만개 알림이 기본 활성화되므로, 토글을 끈 경우에만 알림 해제 요청.
+    // 켠 채로 찜했으면 기기 푸시도 켜야 실제로 알림이 온다.
+    if (notify) {
+      void enablePushForBloomAlert()
+      return
+    }
     try {
       await updateNotify.mutateAsync({ spotId: spot.spotId, data: { enabled: false } })
     } catch (err) {
