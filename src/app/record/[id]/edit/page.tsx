@@ -9,6 +9,7 @@ import { LocationStepForm } from '@/app/record/_components/LocationStepForm'
 import { DetailsStepForm, type BloomStage } from '@/app/record/_components/DetailsStepForm'
 import { RecordSkeleton } from '@/app/record/_components/RecordSkeleton'
 import { usePlants } from '@/api/facades/plant'
+import { recordPhotoUrl } from '@/lib/utils/recordPhotoUrl'
 import {
   useSpotRecord,
   useUpdateSpotRecord,
@@ -63,7 +64,7 @@ function RecordEditForm({ record }: { record: SpotRecordResponse }) {
     record.photos.map((photo) => ({
       kind: 'existing',
       objectKey: photo.objectKey,
-      previewUrl: photo.url,
+      previewUrl: recordPhotoUrl(photo, 'thumbnail'),
     }))
   )
   const [date, setDate] = useState(

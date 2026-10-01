@@ -56,9 +56,12 @@ export default function ProfileEditPage() {
   const [preview, setPreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // 현재 유저 정보로 초기값 채우기
+  // 현재 유저 정보로 초기값 채우기 — 최초 1회만.
+  // 사진 업로드·삭제가 /auth/me 를 무효화해 user 가 새로 오면 편집 중이던 입력을 덮어쓰기 때문이다.
+  const initializedRef = useRef(false)
   useEffect(() => {
-    if (!user) return
+    if (!user || initializedRef.current) return
+    initializedRef.current = true
     setNickname(user.nickname ?? '')
     setPreview(user.profileImageUrl ?? null)
     setCustomPlantIds(readCustomFavoritePlantIds(user.id))
@@ -106,7 +109,8 @@ export default function ProfileEditPage() {
     if (!original) return
     const file = await compressImage(original)
     const previousPreview = preview
-    setPreview(URL.createObjectURL(file))
+    const blobUrl = URL.createObjectURL(file)
+    setPreview(blobUrl)
     uploadImage(
       { data: { image: file } },
       {
@@ -119,6 +123,8 @@ export default function ProfileEditPage() {
           setPreview(previousPreview)
           toast.error('프로필 사진 등록에 실패했어요.')
         },
+        // 업로드가 끝나면 미리보기는 서버 URL(또는 이전 값)로 바뀌므로 blob 은 더 필요 없다
+        onSettled: () => URL.revokeObjectURL(blobUrl),
       }
     )
   }
