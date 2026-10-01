@@ -13,13 +13,13 @@ import { toMyRecordThumb } from '@/lib/utils/spotRecordToFeed'
 // 마이 화면의 "내 기록" 미리보기(상위 6건)에서 넘어오는 전체보기.
 // 미리보기는 MyPageResponse.recordPreview, 더보기는 스팟 기록 리스트 API를 쓴다(스키마 주석 기준).
 export default function MyRecordsPage() {
-  const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
+  const { data, isLoading, hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage } =
     useMySpotRecordsInfinite('PUBLISHED')
   const records = flattenPages(data).map(toMyRecordThumb)
   const total = displayCount(data?.pages[0]?.totalElements, records.length)
   const sentinelRef = useInfiniteScroll(
     () => fetchNextPage(),
-    shouldLoadMore(hasNextPage, isFetchingNextPage)
+    shouldLoadMore(hasNextPage, isFetchingNextPage, isFetchNextPageError)
   )
 
   return (
@@ -42,7 +42,11 @@ export default function MyRecordsPage() {
           </div>
         ))}
 
-      <InfiniteScrollFooter sentinelRef={sentinelRef} isLoading={isFetchingNextPage} />
+      <InfiniteScrollFooter
+        sentinelRef={sentinelRef}
+        isLoading={isFetchingNextPage}
+        onRetry={isFetchNextPageError ? () => void fetchNextPage() : undefined}
+      />
     </div>
   )
 }

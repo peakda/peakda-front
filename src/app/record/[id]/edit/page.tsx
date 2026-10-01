@@ -15,7 +15,7 @@ import {
   useUpdateSpotRecord,
   useUploadSpotRecordPhotos,
 } from '@/api/facades/spot-record'
-import { compressImage } from '@/lib/utils/image'
+import { compressImages } from '@/lib/utils/image'
 import { readPhotoExif } from '@/lib/utils/photoExif'
 import { loadAppSettings } from '@/lib/utils/appSettings'
 import type {
@@ -96,7 +96,8 @@ function RecordEditForm({ record }: { record: SpotRecordResponse }) {
       }
     }
     // 미리보기도 업로드에 쓸 파일 그대로 보여 준다(원본 수 MB 를 메모리에 들고 있지 않도록).
-    const compressed = await Promise.all(files.map(compressImage))
+    // 갤러리에서 많이 골라도 남은 칸만큼만 압축한다(어차피 5장까지만 남는다).
+    const compressed = await compressImages(files.slice(0, 5 - photoItems.length))
     const newItems = compressed.map(
       (file): EditPhoto => ({ kind: 'new', file, previewUrl: URL.createObjectURL(file) })
     )

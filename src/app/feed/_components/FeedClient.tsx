@@ -34,15 +34,23 @@ export function FeedClient({ initialPage }: FeedClientProps) {
   const [tab, setTab] = useState(FEED_CATEGORIES[0])
   const filter = filterFromTab(tab)
 
-  const { data, isLoading, isError, refetch, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    useFeedListInfinite(
-      filter,
-      filter === GetFeedFilter.ALL ? (initialPage ?? undefined) : undefined
-    )
+  const {
+    data,
+    isLoading,
+    isError,
+    refetch,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetchNextPageError,
+    fetchNextPage,
+  } = useFeedListInfinite(
+    filter,
+    filter === GetFeedFilter.ALL ? (initialPage ?? undefined) : undefined
+  )
   const records = flattenPages(data)
   const sentinelRef = useInfiniteScroll(
     () => fetchNextPage(),
-    shouldLoadMore(hasNextPage, isFetchingNextPage)
+    shouldLoadMore(hasNextPage, isFetchingNextPage, isFetchNextPageError)
   )
 
   // 탭마다 무한 쿼리 키가 달라 목록이 처음부터 다시 쌓인다.
@@ -123,7 +131,11 @@ export function FeedClient({ initialPage }: FeedClientProps) {
               />
             ))}
           </div>
-          <InfiniteScrollFooter sentinelRef={sentinelRef} isLoading={isFetchingNextPage} />
+          <InfiniteScrollFooter
+            sentinelRef={sentinelRef}
+            isLoading={isFetchingNextPage}
+            onRetry={isFetchNextPageError ? () => void fetchNextPage() : undefined}
+          />
         </>
       )}
 

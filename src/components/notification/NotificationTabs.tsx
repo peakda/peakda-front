@@ -69,7 +69,7 @@ function EmptyState({ label }: { label: string }) {
 }
 
 function NotificationPanel({ tabValue, label }: { tabValue: string; label: string }) {
-  const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
+  const { data, isLoading, hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage } =
     useNotificationListInfinite(segmentFromTab(tabValue))
   const markRead = useMarkNotificationRead()
   const router = useRouter()
@@ -77,7 +77,7 @@ function NotificationPanel({ tabValue, label }: { tabValue: string; label: strin
   // (다음 페이지 로딩은 isFetchingNextPage 로만 나타난다)
   const sentinelRef = useInfiniteScroll(
     () => fetchNextPage(),
-    shouldLoadMore(hasNextPage, isFetchingNextPage)
+    shouldLoadMore(hasNextPage, isFetchingNextPage, isFetchNextPageError)
   )
 
   if (isLoading) return null
@@ -112,7 +112,11 @@ function NotificationPanel({ tabValue, label }: { tabValue: string; label: strin
           </div>
         )
       })}
-      <InfiniteScrollFooter sentinelRef={sentinelRef} isLoading={isFetchingNextPage} />
+      <InfiniteScrollFooter
+        sentinelRef={sentinelRef}
+        isLoading={isFetchingNextPage}
+        onRetry={isFetchNextPageError ? () => void fetchNextPage() : undefined}
+      />
     </div>
   )
 }
@@ -126,7 +130,9 @@ export function NotificationTabs() {
         <button
           type="button"
           onClick={() =>
-            markAll.mutate(undefined, { onError: () => toast.error('알림을 읽음 처리하지 못했어요') })
+            markAll.mutate(undefined, {
+              onError: () => toast.error('알림을 읽음 처리하지 못했어요'),
+            })
           }
           className="text-text-tertiary text-sm"
         >

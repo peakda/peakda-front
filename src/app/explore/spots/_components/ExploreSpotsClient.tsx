@@ -5,6 +5,7 @@ import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { SpotCard } from '@/components/ui/card/SpotCard'
 import { LazyDrawer } from '@/components/ui/layout/LazyDrawer'
 import { InfiniteScrollFooter } from '@/components/ui/display/InfiniteScrollFooter'
+import { shouldLoadMore } from '@/lib/utils/myRecords'
 import { QueryFeedback } from '@/components/ui/display/QueryFeedback'
 import { useExploreSpotsInfinite } from '@/api/facades/explore'
 import type {
@@ -32,15 +33,26 @@ export function ExploreSpotsClient({ section, initialPage }: ExploreSpotsClientP
   // 필터 드로어에서 고른 꽃 종류. 서버 category 는 값 하나만 받으므로 첫 번째만 보낸다.
   const category = useFilterStore((state) => state.applied.categories[0])
 
-  const { data, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useExploreSpotsInfinite(
-      section,
-      category ?? undefined,
-      // 서버 응답은 필터 없는 조회라, 꽃 필터를 고른 채 들어왔으면 쓰지 않는다.
-      category ? undefined : (initialPage ?? undefined)
-    )
+  const {
+    data,
+    isLoading,
+    isError,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetchNextPageError,
+  } = useExploreSpotsInfinite(
+    section,
+    category ?? undefined,
+    // 서버 응답은 필터 없는 조회라, 꽃 필터를 고른 채 들어왔으면 쓰지 않는다.
+    category ? undefined : (initialPage ?? undefined)
+  )
   const spots = flattenPages(data).filter(hasSpotId)
-  const sentinelRef = useInfiniteScroll(fetchNextPage, hasNextPage && !isFetchingNextPage)
+  const sentinelRef = useInfiniteScroll(
+    fetchNextPage,
+    shouldLoadMore(hasNextPage, isFetchingNextPage, isFetchNextPageError)
+  )
 
   return (
     <div className="bg-bg-primary relative flex min-h-screen flex-col pb-12">
@@ -72,7 +84,11 @@ export function ExploreSpotsClient({ section, initialPage }: ExploreSpotsClientP
               />
             ))}
           </ul>
-          <InfiniteScrollFooter sentinelRef={sentinelRef} isLoading={isFetchingNextPage} />
+          <InfiniteScrollFooter
+            sentinelRef={sentinelRef}
+            isLoading={isFetchingNextPage}
+            onRetry={isFetchNextPageError ? () => void fetchNextPage() : undefined}
+          />
         </>
       )}
       <LazyDrawer />
