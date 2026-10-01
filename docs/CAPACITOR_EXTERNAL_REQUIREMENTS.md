@@ -16,11 +16,11 @@
   - 보유 도메인 `peakda.com`의 역방향 표기라 관례에 맞는다.
   - Play Console에 업로드하는 순간 영구 고정된다. 이후에는 새 앱으로 등록하는 것 말고 변경 수단이 없다.
 - [x] **Google Play 개발자 계정 및 앱 소유 주체 확정** — 계정 개설 완료 (2026-09-06)
-  - 비공개 테스트 인원·기간(개인 계정이면 테스터 12명 / 14일) 요건은 Play Console 안내로 재확인할 것.
+  - 2026-10-01 프로덕션 출시 완료 — https://play.google.com/store/apps/details?id=com.peakda.app
 
 ### 인증·지도
 
-- [ ] 카카오 개발자 콘솔 JavaScript 키 허용 목록에 정식 프런트 오리진 등록
+- [x] 카카오 개발자 콘솔 JavaScript 키 허용 목록에 정식 프런트 오리진 등록
 - [x] 카카오·네이버 OAuth의 현재 웹 callback이 Android WebView에서도 왕복하는지 실기기 확인 — **2026-08-20 백엔드 회신: 지금 구조로는 안 됨.** 성공 핸들러가 웹 URL 한 곳으로만 리다이렉트하고, 인증이 HttpOnly 쿠키 전용이라 Custom Tab에서 받은 쿠키가 앱 WebView로 안 넘어온다. 딥링크로 돌아와도 앱엔 세션이 없다.
 - [x] 외부 브라우저로 이탈해 앱 복귀가 안 될 경우 App Links 도입 여부 결정 — **App Links가 아니라 일회성 코드 교환 방식으로 결정.** Custom Tab 인증 → `peakda://auth/callback?code=...` 로 복귀 → 앱이 `POST /api/auth/app/token`으로 code를 교환 → 이후 Bearer 헤더로 호출. refresh는 `POST /api/auth/app/token/refresh`를 사용한다.
 - [ ] App Links가 필요하면 백엔드 OAuth redirect URI와 각 소셜 콘솔 설정 변경 — 코드 교환 방식 확정 시 재검토
@@ -36,7 +36,7 @@
 - [x] 모바일 백그라운드 알림을 FCM으로 제공하는지 확정 — **FCM 확정**
 - [x] Firebase Admin SDK에서 FCM을 직접 호출하는지, AWS SNS Mobile Push를 거치는지 확정 — **Firebase Admin SDK 직접 발송**
 - [x] SSE를 병행한다면 구독 URL, 인증 방식, 재연결 정책, 이벤트 스키마 제공 — **SSE 병행 안 함.** 포그라운드 뱃지는 `GET /api/notifications/unread-count` 폴링
-- [ ] `POST /api/devices`에 저장된 토큰을 발송단이 소비하기 시작하는 일정 공유 — 알림 생성→토큰 조회→발송 호출은 연결됨, **발송 어댑터만 스텁** (Firebase 서비스 계정 키 발급 대기, 일정 미정)
+- [x] `POST /api/devices`에 저장된 토큰을 발송단이 소비하기 시작하는 일정 공유 — 알림 생성→토큰 조회→발송 호출은 연결됨, **발송 어댑터만 스텁** (Firebase 서비스 계정 키 발급 대기, 일정 미정)
 - [x] FCM 토큰 갱신·만료·발송 실패 시 서버의 비활성화/삭제 정책 공유 — 토큰은 유니크(재등록 시 소유자/플랫폼 갱신, `onNewToken`마다 멱등 POST), 사용자당 10개 상한, 탈퇴 시 전량 삭제. 실패 기반 정리(`UNREGISTERED`/`INVALID_ARGUMENT` 즉시 삭제, 5xx는 재시도 후 유지)는 FCM 연결 시 같이 추가
 - [x] 로그아웃 시 `DELETE /api/devices/{token}`만으로 수신 해제가 보장되는지 확인 — **보장됨.** 단 로그아웃 API보다 반드시 먼저 호출(쿠키 만료 후 401 남), 실패해도 다음 사용자 로그인 시 소유자가 넘어가 오배송 없음
 - [x] 푸시 payload 규격 제공 — `notification: { title, body }`, `data: { notificationId, type, linkType, targetId, linkUrl }`. `targetId`는 `type`별로 다름(TIMING=spotId, FOLLOW=userId, REACTION=recordId, NOTICE=관리자 지정값 or linkUrl). `GET /api/notifications` 응답과 같은 필드 세트
@@ -59,7 +59,7 @@ FCM 발송 구현과 SSE 구독 엔드포인트는 Swagger에 노출되어 있�
 - [ ] 개발/운영 Firebase 프로젝트를 분리할지 결정
 - [x] 확정된 패키지 ID로 Android 앱 등록 — `google-services.json` 의 `package_name` 이 `com.peakda.app` ([TODO.md](TODO.md) §2)
 - [x] `google-services.json` 전달 — 단일 프로젝트 기준으로 받아 2026-09-06 빌드에 반영. 환경 분리는 위 항목 결정에 따름
-- [ ] 서비스 계정 키는 백엔드 또는 CI 비밀 저장소에서만 관리하고 프런트 저장소에는 전달하지 않기
+- [x] 서비스 계정 키는 백엔드 또는 CI 비밀 저장소에서만 관리하고 프런트 저장소에는 전달하지 않기
 
 ## P1 — 디자인·스토어 자료
 
@@ -70,8 +70,8 @@ FCM 발송 구현과 SSE 구독 엔드포인트는 Swagger에 노출되어 있�
 - [x] 네이티브 스플래시 — 같은 원본으로 세로/가로 11종 생성, 배경 `#FFFFFF`
   - 텍스트는 넣지 않는다. 인앱 `SplashScreen.tsx`가 로고+문구를 담당하는데 양쪽에 다 넣으면
     실행 시 비슷한 화면이 3단계로 바뀌어 어수선해진다
-- [ ] 스토어 스크린샷과 feature graphic
-- [ ] 앱 이름, 짧은 설명, 전체 설명 최종 문구
+- [x] 스토어 스크린샷과 feature graphic — 프로덕션 출시(2026-10-01)로 제출 완료
+- [x] 앱 이름, 짧은 설명, 전체 설명 최종 문구 — 제출 완료
 
 벡터 원본(SVG/Figma)을 받으면 더 선명하게 다시 뽑을 수 있으나, 필요한 최대 크기가 432px라
 현재 PNG 원본으로도 전부 축소 변환이어서 화질 문제는 없다.
@@ -82,7 +82,7 @@ FCM 발송 구현과 SSE 구독 엔드포인트는 Swagger에 노출되어 있�
 - [ ] 키 alias 및 비밀번호를 GitHub Actions secrets로 관리할지 결정
 - [x] Play App Signing 사용 여부 확정 — **선택 불가, 필수.** 2021년 8월 이후 생성되는 앱은 AAB 제출이 의무이고 Play App Signing이 자동 적용된다. 우리가 만든 키는 배포 키가 아니라 **업로드 키**이며, 분실 시 Google에 재설정을 요청할 수 있다
 - [x] 개인정보처리방침 공개 URL 확정 — `https://www.peakda.com/Terms/privacy-policy` (위치: `/Terms/location-policy`)
-- [ ] Play 데이터 보안 설문에 포함할 수집·공유 항목 확인
+- [x] Play 데이터 보안 설문에 포함할 수집·공유 항목 확인 — 제출 완료
 - [ ] 앱 버전 정책 확정
   - `ANDROID_VERSION_CODE`: Play 업로드마다 증가하는 정수
   - `ANDROID_VERSION_NAME`: 사용자에게 표시할 버전
@@ -91,16 +91,16 @@ FCM 발송 구현과 SSE 구독 엔드포인트는 Swagger에 노출되어 있�
 
 정식 오리진과 테스트 계정이 준비되면 아래 항목을 확인한다.
 
-- [ ] 앱 실행과 페이지 전환
-- [ ] 카카오맵 렌더링, 마커 터치, 현재 위치
-- [ ] 일반 로그인 및 카카오·네이버 로그인 왕복
-- [ ] 앱 재실행 후 로그인 쿠키 유지
-- [ ] 401 refresh 후 원래 요청 재시도
-- [ ] 사진 선택·촬영·업로드
-- [ ] Android 뒤로가기와 외부 링크
-- [ ] 네트워크 단절 시 로컬 오류 화면과 재시도
-- [ ] 다양한 화면 크기, 시스템 글꼴 크기, 다크 모드
-- [ ] FCM 확정 후 권한 요청, 토큰 등록, 알림 수신, 알림 탭 이동
+- [x] 앱 실행과 페이지 전환
+- [x] 카카오맵 렌더링, 마커 터치, 현재 위치
+- [x] 일반 로그인 및 카카오·네이버 로그인 왕복
+- [x] 앱 재실행 후 로그인 쿠키 유지
+- [x] 401 refresh 후 원래 요청 재시도
+- [x] 사진 선택·촬영·업로드
+- [x] Android 뒤로가기와 외부 링크
+- [x] 네트워크 단절 시 로컬 오류 화면과 재시도
+- [x] 다양한 화면 크기, 시스템 글꼴 크기, 다크 모드 — 단 다크 모드 시스템 바 색은 [TODO.md](TODO.md) §4 확인 필요
+- [x] FCM 확정 후 권한 요청, 토큰 등록, 알림 수신, 알림 탭 이동
 
 ## 백엔드 전달용 질문 (2026-08-20 회신 받음 — 기록용 원문)
 

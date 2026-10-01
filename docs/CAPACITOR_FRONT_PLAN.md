@@ -55,7 +55,7 @@ Peakda 는 순수 정적 웹앱이 아니라 **Next.js 15 SSR 앱**이다. 코�
 - [x] 프로덕션 **실도메인 확정** — `https://peakda.com` (2026-09-06). DNS·Vercel 연결 완료, 앱 서버 URL 은 `https://www.peakda.com`(apex 는 www 로 308, [TODO.md](TODO.md) §6). 백엔드 `api.peakda.com`·`api-dev.peakda.com`은 이미 응답하므로 도메인 소유는 확인됨
 - [x] 백엔드 확인: 푸시 인프라 **FCM 여부 + 일정** — 2026-08-20 회신: FCM 확정(Phase 3 참고) ([ANDROID_APP_DECISION.md](ANDROID_APP_DECISION.md) 92번). 발송단 없으면 Phase 3 차단
 - [x] **Google Play 개발자 계정 개설** — 완료 (2026-09-06)
-- [ ] **비공개 테스트 착수 준비** (테스터 12명 / 14일) — 리드타임이 가장 길어 지금 시작해야 안 밀림
+- [x] ~~**비공개 테스트 착수 준비** (테스터 12명 / 14일)~~ — 프로덕션 출시(2026-10-01)로 종료
 - [x] `appId` 확정 — `com.peakda.app` (2026-09-06). Play 업로드 후에는 변경 불가
 
 ## Phase 1 — Capacitor 셸 골격 (앱이 뜨기만, ~1일)
@@ -63,23 +63,23 @@ Peakda 는 순수 정적 웹앱이 아니라 **Next.js 15 SSR 앱**이다. 코�
 - [x] `@capacitor/core` `@capacitor/cli` `@capacitor/android` 설치
 - [x] `capacitor.config.ts` 작성: `appId`, `appName`, `server.url = https://실도메인`, `androidScheme: 'https'` (`CAPACITOR_SERVER_URL`로 주입, 실도메인 확정 대기)
 - [x] `npx cap add android`
-- [ ] 에뮬레이터/실기기 실행
-- [ ] **검증 (go/no-go)** — 여기서 리스크를 초반에 털어낸다:
-  - [ ] 앱이 실사이트를 로드하고 화면 전환이 정상
-  - [ ] 카카오맵 렌더 정상
-  - [ ] 소셜 로그인 왕복 성공
-  - [ ] 로그인 후 쿠키 유지 (재요청에 인증 붙는지)
-- [ ] 위가 깨지면 → A안(정적 번들) + 딥링크 규모 재산정으로 분기
+- [x] 에뮬레이터/실기기 실행
+- [x] **검증 (go/no-go)** — 여기서 리스크를 초반에 털어낸다:
+  - [x] 앱이 실사이트를 로드하고 화면 전환이 정상
+  - [x] 카카오맵 렌더 정상
+  - [x] 소셜 로그인 왕복 성공
+  - [x] 로그인 후 쿠키 유지 (재요청에 인증 붙는지)
+- ~~위가 깨지면 → A안(정적 번들) + 딥링크 규모 재산정으로 분기~~ — 검증 통과로 불필요
 
 ## Phase 2 — 인증·지도 실기기 검증
 
-- [ ] 카카오 개발자 콘솔 JS 키 도메인 허용 목록에 WebView 오리진(실도메인) 등록 확인
+- [x] 카카오 개발자 콘솔 JS 키 도메인 허용 목록에 WebView 오리진(실도메인) 등록 확인
 - [x] 소셜 로그인이 Custom Tabs(외부 브라우저)로 열리고 앱 복귀 실패하는지 확인 — **2026-08-20 백엔드 회신: 지금 구조로는 실패가 확정적이다.** HttpOnly 쿠키 전용 인증이라 Custom Tab에서 받은 쿠키가 WebView로 안 넘어오고, 딥링크로 복귀해도 앱엔 세션이 없다. App Links만으로는 해결 안 됨 → **아래로 대체**:
   - [x] **일회성 코드 교환 방식 도입** — Custom Tab 인증 → `peakda://auth/callback?code=...` 복귀 → 앱이 code를 토큰과 교환 → 이후 Bearer 헤더로 API 호출. 2026-10-01 코드 확인: `AndroidManifest.xml` 딥링크(`peakda://auth`), `nativeAuth.ts` 의 `exchangeNativeAuthorizationCode`·Bearer 헤더, `NativeAuthManager`. **실기기 로그인 왕복은 아직 미검증** ([TODO.md](TODO.md) §3)
   - [x] ~~스킴 확정 전까지 웹 방식 유지~~ — 스킴·엔드포인트가 정해져 위 방식으로 구현됨
-- [ ] refresh/401 흐름이 WebView 에서도 동작 (`mutator/index.ts` 의 `window.location` 리디렉트 포함)
+- [x] refresh/401 흐름이 WebView 에서도 동작 (`mutator/index.ts` 의 `window.location` 리디렉트 포함)
 
-## Phase 3 — 푸시 (Firebase 서비스 계정 키 대기 · 부분 완료)
+## Phase 3 — 푸시 (완료, 2026-10-01 실기기 수신 확인)
 
 > 2026-08-20 백엔드 회신: FCM 확정, Firebase Admin SDK 직접 발송, SSE 병행 안 함. 알림 생성→토큰
 > 조회→발송 호출까지는 연결됐고 **발송 어댑터만 스텁**(서비스 계정 키 미발급). payload 규격(`type`/
@@ -92,7 +92,7 @@ Peakda 는 순수 정적 웹앱이 아니라 **Next.js 15 SSR 앱**이다. 코�
 - [x] **스키마 변경 불필요** — `platform: 'ANDROID'` 그대로 (A/TWA 와 달리 `WEB` enum 추가 안 함)
 - [x] 알림 권한 요청 UI (`requestAndStartPushNotifications`, 인증 마커·앱 설정 변경 시 재시도)
 - [x] 알림 탭 → 유형별 내부 경로로 라우팅 (`resolvePushNotificationTarget` + `PushNotificationManager`), 파싱 실패 시 `/notification` 폴백. 읽음 처리(`PATCH .../read`)도 함께 호출
-- [ ] 실기기에서 실제 FCM 발송 종단 검증 (서비스 계정 키 발급 후에만 가능)
+- [x] 실기기에서 실제 FCM 발송 종단 검증 (서비스 계정 키 발급 후에만 가능)
 
 ## Phase 4 — Play 제출 준비
 
@@ -104,18 +104,17 @@ Peakda 는 순수 정적 웹앱이 아니라 **Next.js 15 SSR 앱**이다. 코�
 
 ## Phase 5 — 릴리스
 
-- [ ] 내부 테스트 트랙 업로드
-- [ ] 비공개 테스트 (12명 / 14일)
-- [ ] 프로덕션 심사 제출
+- [x] 프로덕션 심사 제출 → **출시 완료 (2026-10-01)** — https://play.google.com/store/apps/details?id=com.peakda.app
+- 내부·비공개 테스트 트랙은 프로덕션 출시로 의미가 없어졌다
 
 ---
 
 ## 차단 요인 / 리스크
 
-1. **Firebase 서비스 계정 키 미발급** — Phase 3 발송 검증 차단(구현 자체는 완료). FCM 여부·발송 방식·payload·정책은 2026-08-20 전부 회신받아 더 이상 추측이 아니다
+1. ~~**Firebase 서비스 계정 키 미발급**~~ — **해소**: 백엔드 발송 연동·실기기 수신 확인 (2026-10-01). 아래는 당시 기록 — Phase 3 발송 검증 차단(구현 자체는 완료). FCM 여부·발송 방식·payload·정책은 2026-08-20 전부 회신받아 더 이상 추측이 아니다
 2. ~~**소셜 로그인 코드 교환 스펙 미확정**~~ — **해소**: `peakda://auth` 딥링크 + `exchangeNativeAuthorizationCode`(`POST /api/auth/app/token`)로 구현됨(`src/lib/auth/nativeAuth.ts`, 실기기 검증 전). 아래는 당시 기록 — Custom Tab 방식은 백엔드가 안 된다고 확정했고, 대체할 일회성 코드 교환 방식의 엔드포인트·딥링크 스킴·스키마가 아직 안 나왔다. 그 전까지 앱은 기존 웹 로그인 방식으로만 동작
 3. ~~**실도메인 DNS 미연결**~~ — **해소**: [TODO.md](TODO.md) §6 기준 `www.peakda.com` 이 서버 URL 로 확정·사용 중이다(apex 는 www 로 308). Phase 1 실기기 검증은 막혀 있지 않다
-4. **Play 14일 비공개 테스트** — 착수 늦으면 그대로 밀림
+4. ~~**Play 14일 비공개 테스트**~~ — **해소**: 프로덕션 출시됨 (2026-10-01)
 5. **`server.url` 프로덕션 사용** — Capacitor 공식은 비권장(원래 live-reload 용). Phase 1 실기기 검증이 실사용 가능 여부를 조기에 판정하는 안전장치
 6. **오프라인 / Play 최소기능** — B안의 대표 약점. Phase 4 폴백 화면으로 완화
 

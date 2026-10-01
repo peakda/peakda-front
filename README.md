@@ -4,7 +4,7 @@
 벚꽃·수국·단풍·억새 같은 계절 명소의 개화 상태를 지도에서 보고, 절정 시기에 맞춰 여행을 계획하고, 다녀온 기록을 남깁니다.
 
 - 웹: https://www.peakda.com
-- Android 앱: 같은 웹을 Capacitor 로 감싼 앱 (`com.peakda.app`, Google Play 출시 준비 중)
+- Android 앱: [Google Play](https://play.google.com/store/apps/details?id=com.peakda.app) — 같은 웹을 Capacitor 로 감싼 앱 (`com.peakda.app`)
 
 ---
 
@@ -16,7 +16,7 @@
 | --- | --- |
 | 🗺️ 개화 지도 | 전국 명소를 개화 단계(개화 전 → 이르다 → 개화 시작 → 만개 → 개화 종료) 색으로 표시. 꽃 종류·지역·시기로 필터 |
 | 📅 절정 시기 예측 | 명소마다 올해 만개 예상 기간과 "언제 기준 예측인지"를 보여줌 |
-| 🔔 만개 알림 | 찜한 명소가 절정에 가까워지면 알림 (앱 푸시 — 앱 쪽은 준비 완료, 백엔드 발송 연동 대기) |
+| 🔔 만개 알림 | 찜한 명소가 절정에 가까워지면 알림 (Android 앱 푸시) |
 | 📸 방문 기록 | 다녀온 명소의 사진·꽃 상태·후기를 남기고, 다른 사람의 기록으로 현장 상황 확인 |
 | 🧭 탐색 | "지금이 절정", "다음 주에 가면 좋을 곳", 진행 중인 축제, 에디터 큐레이션 |
 | 👥 소셜 | 피드, 이모지 반응, 팔로우, 알림 |
@@ -165,7 +165,7 @@ docs/              # 진행 현황·백엔드 요청서·설계 기록
 | [CLAUDE.md](CLAUDE.md) | 작업 원칙과 코딩 규칙 |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | API 호출·인증·카카오맵·상태 관리 흐름 |
 | [MEMORY.md](MEMORY.md) | 코드만 봐서는 알 수 없는 결정과 이유 |
-| [docs/TODO.md](docs/TODO.md) | Google Play 출시까지 남은 일 |
+| [docs/TODO.md](docs/TODO.md) | Google Play 출시 기록과 이후 남은 일 |
 | [docs/UX_BACKLOG.md](docs/UX_BACKLOG.md) | 알고 있지만 아직 고치지 않은 사용자 흐름 문제 |
 | [docs/BACKEND_API_REQUESTS.md](docs/BACKEND_API_REQUESTS.md) | 백엔드에 전달한 요청서 |
 | [docs/SEO_GEO_AUDIT.md](docs/SEO_GEO_AUDIT.md) | 검색 노출(SEO) 점검과 진행 현황 |
