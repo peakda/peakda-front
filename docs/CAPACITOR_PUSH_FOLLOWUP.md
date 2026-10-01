@@ -7,7 +7,7 @@
 
 - [x] 확정된 Android 패키지 ID — `com.peakda.app`
 - [x] 해당 패키지 ID로 발급한 `google-services.json` (단일 프로젝트 `peakda`)
-- [ ] **Firebase 서비스 계정 키** — 2026-08-20 기준 아직 미발급, 발급되는 대로 공유 예정. 이게 나와야 백엔드 발송 어댑터가 켜진다
+- [x] **Firebase 서비스 계정 키** — 백엔드 발송 어댑터 연동 완료 (2026-10-01)
 - [x] FCM 직접 발송 또는 AWS SNS 경유 여부 — **Firebase Admin SDK 직접 발송**
 - [x] 푸시 payload 예시와 필드 규격 — `notification: { title, body }`, `data: { notificationId, type, linkType, targetId, linkUrl }` (상세는 [BACKEND_API_REQUESTS.md](BACKEND_API_REQUESTS.md) 참고)
 - [x] 알림 `type` 전체 목록과 각 유형의 이동 대상 — `TIMING`(spotId) / `FOLLOW`(userId) / `REACTION`(recordId) / `NOTICE`(관리자 지정값, 없으면 linkUrl). 4종 전부 서버 구현 완료
@@ -27,13 +27,13 @@
 
 ## 실기기 검증
 
-- [ ] Android 13 이상에서 최초 권한 요청, 허용, 거부를 각각 확인한다.
-- [ ] 로그인 후 `POST /api/devices`에 FCM 토큰과 `ANDROID`가 저장되는지 확인한다.
-- [ ] 앱 포그라운드·백그라운드·종료 상태에서 알림을 수신한다.
-- [ ] 알림을 눌렀을 때 유형별 대상 화면으로 이동한다.
-- [ ] 토큰 갱신 후 새 토큰으로 서버 등록이 갱신되는지 확인한다.
-- [ ] 로그아웃 후 해당 기기에서 더 이상 사용자 알림을 받지 않는지 확인한다.
-- [ ] 네트워크 실패 후 재실행 시 토큰 등록이 복구되는지 확인한다.
+- [x] Android 13 이상에서 최초 권한 요청, 허용, 거부를 각각 확인한다.
+- [x] 로그인 후 `POST /api/devices`에 FCM 토큰과 `ANDROID`가 저장되는지 확인한다.
+- [x] 앱 포그라운드·백그라운드·종료 상태에서 알림을 수신한다.
+- [x] 알림을 눌렀을 때 유형별 대상 화면으로 이동한다.
+- [x] 토큰 갱신 후 새 토큰으로 서버 등록이 갱신되는지 확인한다.
+- [x] 로그아웃 후 해당 기기에서 더 이상 사용자 알림을 받지 않는지 확인한다.
+- [x] 네트워크 실패 후 재실행 시 토큰 등록이 복구되는지 확인한다.
 
 ## 완료 조건
 
