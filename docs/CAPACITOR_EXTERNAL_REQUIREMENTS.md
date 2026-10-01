@@ -26,7 +26,7 @@
 - [x] 외부 브라우저로 이탈해 앱 복귀가 안 될 경우 App Links 도입 여부 결정 — **App Links가 아니라 일회성 코드 교환 방식으로 결정.** Custom Tab 인증 → `peakda://auth/callback?code=...` 로 복귀 → 앱이 `POST /api/auth/app/token`으로 code를 교환 → 이후 Bearer 헤더로 호출. refresh는 `POST /api/auth/app/token/refresh`를 사용한다.
 - [ ] App Links가 필요하면 백엔드 OAuth redirect URI와 각 소셜 콘솔 설정 변경 — 코드 교환 방식 확정 시 재검토
 - [x] 네이버 개발자센터 앱은 백엔드에서 관리. dev callback: `https://api-dev.peakda.com/login/oauth2/code/naver`, `https://api-dev.peakda.com/login/oauth2/code/kakao`. 운영 도메인 확정 시 동일 패턴으로 추가 등록 예정
-- [x] 애플 로그인은 **미지원 확정** — 추후 구글 로그인으로 교체 예정. `SocialLoginBtns`의 애플 버튼은 당분간 무반응 상태로 둔다([UX_BACKLOG.md](UX_BACKLOG.md) 1번)
+- [x] 애플 로그인은 **미지원 확정** — 구글 로그인으로 교체 완료(2026-10-01 코드 확인: `SocialLoginBtns` 가 `handleGoogleLogin` 사용). 애플 버튼은 없다
 
 **앱 전용 로그인은 `/oauth2/authorization/{provider}?client=app`으로 시작한다.** 웹은 기존 쿠키 방식(`/oauth2/authorization/{provider}` 직행)을 유지하며, Android는 Custom Tab·딥링크·Bearer 토큰 교환 경로를 사용한다.
 

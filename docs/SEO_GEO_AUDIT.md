@@ -349,7 +349,7 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 
 ## 9. 진행 현황과 남은 일
 
-- 최종 갱신: 2026-09-22 (운영 도메인 curl 재점검 — 9.1 배포 표시 갱신)
+- 최종 갱신: 2026-10-01 (코드 대조 — 9.2-B·E, 9.3 피드 OG 항목 갱신. 운영 curl 수치는 09-22 기준 그대로)
 - 대표 도메인(canonical): `https://www.peakda.com` — 루트 `peakda.com` 은 `308` 으로 www 리다이렉트
 - DNS: AWS Route 53 (`peakda.com` 호스팅 영역, 백엔드 AWS 계정). `www` 는 Vercel CNAME
 
@@ -400,7 +400,7 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 
 - [ ] 백엔드에 확인: 의도된 공개인지, 스웨거 `security` 표기 정리
 - [x] 2026-09-16 `PROTECTED_PATHS` 에서 `/festivals`, `/creators` 제거 (커밋 `b0548c3`) — 운영 API 가 열려 있으니 배포 가능
-- [ ] 축제·큐레이션 상세 서버 렌더링 + sitemap 추가 — 작업 내용은 9.3-8
+- [x] 축제·큐레이션 상세 서버 렌더링 + sitemap 추가 — 2026-10-01 코드 확인: `festivals/[id]`·`creators/[id]` 의 `page.tsx` 가 서버 `generateMetadata` 를 갖고, `sitemap.ts` 가 `/festivals/{id}`·`/creators/{id}` 와 고정 경로 `/explore/festivals` 를 포함한다. 운영 반영은 확인하지 않음
 
 #### C. [디자이너] 로그인 바텀시트 시안
 
@@ -413,15 +413,14 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 
 - [x] 2026-09-14 일단 그대로 두기로 함 (가장 단순). 거슬리면 `SpotDetailClient.tsx` 에서 재조회 전까지 찜·알림 버튼만 로딩 표시로 바꾼다
 
-#### E. [백엔드] 기록 사진 영구 공개 URL — ⚠️ 아직 요청 안 함
+#### E. [백엔드] 기록 사진 영구 공개 URL — 요청은 `BACKEND_API_REQUESTS.md` 15번(사진 variants + CDN 고정 주소)으로 반영됨
 
-피드 상세 공유 카드(og:image)에 기록 사진을 쓰고 싶지만 `photos[].url` 이 만료되는 presigned URL 이라, SNS·검색 크롤러가 나중에 다시 가져가면 깨진다. 지금은 기본 카드(`/opengraph-image`)를 쓴다. 동네(LOCAL) 스팟 대표 사진도 같은 이유로 공유 카드·JSON-LD 에서 뺐다.
+피드 상세 공유 카드(og:image)에 기록 사진을 쓰고 싶지만 `photos[].url` 이 만료되는 presigned URL 이라, SNS·검색 크롤러가 나중에 다시 가져가면 깨진다. **2026-10-01 코드 기준**: 피드 상세는 이미 첫 기록 사진(`recordPhotoUrl(photos[0], 'medium')`)을 og:image·twitter 카드로 쓰고, 사진이 없을 때만 기본 카드로 폴백한다. 동네(LOCAL) 스팟 대표 사진은 여전히 공유 카드·JSON-LD 에서 뺀다(`toSpotShareImage` 가 `ATTRACTION` 만 통과).
 
-- [ ] `BACKEND_API_REQUESTS.md` 에 "기록 사진·스팟 대표 사진의 만료 없는 공개 URL(또는 CDN 경로) 필드" 요청 추가 후 전달
+- [x] 기록 사진 만료 없는 URL 요청 — `BACKEND_API_REQUESTS.md` 15번, 기록 사진은 `cdn.peakda.com` 고정 주소로 반영됨
+- [ ] 동네(LOCAL) 스팟 **대표 사진**에도 같은 고정 URL 이 내려오는지 확인 — 내려오면 `src/lib/utils/spotSeo.ts` `toSpotShareImage` 의 LOCAL 제외 조건 제거
 
-답변 오면:
-- [ ] `src/app/feed/[id]/page.tsx` openGraph.images 를 첫 사진으로 교체
-- [ ] `src/lib/utils/spotSeo.ts` `toSpotShareImage` 의 LOCAL 제외 조건 제거
+(완료) `src/app/feed/[id]/page.tsx` openGraph.images 첫 사진 사용 — 코드 반영됨
 
 #### F. [백엔드] 개화 카테고리 오분류 — ⚠️ 아직 요청 안 함 (2026-09-16 발견)
 
@@ -468,7 +467,7 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 - [x] `src/app/sitemap.ts` — 고정 5개(2026-09-28 `/explore/festivals` 추가) + 스팟 상세, 하루 단위 revalidate, 조회 실패 시 고정 페이지만
 - [x] `next.config.ts` `headers()` — `/login`, `/onboarding`, `/search`, `/profile`, `/auth/*` 에 `X-Robots-Tag: noindex`
 - [x] 스팟 상세 서버 렌더링: `page.tsx` 서버 + `_components/SpotDetailClient.tsx`, `generateMetadata`, `notFound()`, `TouristAttraction`/`Place` + `BreadcrumbList` JSON-LD
-- [x] 피드 상세: `page.tsx` 서버 + `_components/FeedDetailClient.tsx`, `generateMetadata` + `notFound()` (OG 이미지는 기본 카드 — 9.2-E)
+- [x] 피드 상세: `page.tsx` 서버 + `_components/FeedDetailClient.tsx`, `generateMetadata` + `notFound()` (OG 이미지는 첫 기록 사진, 없으면 기본 카드)
 - [x] 개화 정보 최신성: 응답의 `bloom.baseDate` 로 "M.D 기준 개화 예측이에요" 화면 표시 + 설명문에 포함 (백엔드 요청 불필요)
 - [x] `/`·`/map` canonical, `/` 제목이 "Peakda | Peakda | …" 로 중복되던 것 수정
 - [x] 로컬 빌드(api-dev) 후 curl 검증

@@ -16,7 +16,8 @@ const config: CapacitorConfig = {
   android: {
     allowMixedContent: false,
     captureInput: false,
-    webContentsDebuggingEnabled: false,
+    // 실기기에서 chrome://inspect 로 콘솔을 볼 때만 CAPACITOR_DEBUG=true 로 빌드한다. 릴리스는 꺼 둔다.
+    webContentsDebuggingEnabled: process.env.CAPACITOR_DEBUG === 'true',
   },
   server: serverUrl
     ? {
