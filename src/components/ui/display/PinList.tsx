@@ -2,6 +2,7 @@ import Image from 'next/image'
 import { PinText } from './PinText'
 import { MultiImageProps } from '@/types/types'
 import { cn } from '@/lib/utils/cn'
+import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
 
 export function PinList(props: MultiImageProps) {
   const { title, location, description, badges, isFavorite, notifyEnabled, tagText, type, spotId } =
@@ -32,7 +33,7 @@ export function PinList(props: MultiImageProps) {
           >
             {src && (
               <Image
-                src={src}
+                src={toHttpsImageUrl(src) ?? src}
                 alt={`${title}-${idx}`}
                 fill
                 sizes="(max-width: 430px) 25vw, 100px"
