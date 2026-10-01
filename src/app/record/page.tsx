@@ -45,6 +45,8 @@ function RecordPageContent() {
   const [category, setCategory] = useState<Category>('유명명소')
   const [showCategoryPicker, setShowCategoryPicker] = useState(false)
   const [photoItems, setPhotoItems] = useState<PhotoItem[]>([])
+  // 고른 사진을 압축하는 동안의 장수 (그만큼 로딩 칸을 보여 준다)
+  const [pendingPhotoCount, setPendingPhotoCount] = useState(0)
   const [date, setDate] = useState('')
   const [isSearchMode, setIsSearchMode] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -101,13 +103,17 @@ function RecordPageContent() {
 
   const hasLocation = location.trim().length > 0
   const hasSearchQuery = searchQuery.trim().length > 0
-  const isValid = hasLocation && photoItems.length > 0 && date.trim().length > 0
+  const isValid =
+    pendingPhotoCount === 0 && hasLocation && photoItems.length > 0 && date.trim().length > 0
   const isSubmitting = matchSpot.isPending || uploadPhotos.isPending || createRecord.isPending
 
   const handlePhotoAdd = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? [])
+    // 갤러리에서 많이 골라도 남은 칸만큼만 처리한다(어차피 5장까지만 남는다).
+    const files = Array.from(e.target.files ?? []).slice(0, 5 - photoItems.length)
     e.target.value = ''
-    if (files.length > 0 && loadAppSettings().exifEnabled) {
+    if (files.length === 0) return
+    setPendingPhotoCount(files.length)
+    if (loadAppSettings().exifEnabled) {
       try {
         const { date: photoDate } = await readPhotoExif(files[0])
         if (photoDate) setDate((previous) => previous || photoDate)
@@ -116,8 +122,12 @@ function RecordPageContent() {
       }
     }
     // 미리보기도 업로드에 쓸 파일 그대로 보여 준다(원본 수 MB 를 메모리에 들고 있지 않도록).
-    // 갤러리에서 많이 골라도 남은 칸만큼만 압축한다(어차피 5장까지만 남는다).
-    const compressed = await compressImages(files.slice(0, 5 - photoItems.length))
+    let compressed: File[]
+    try {
+      compressed = await compressImages(files)
+    } finally {
+      setPendingPhotoCount(0)
+    }
     const newItems = compressed.map((file) => ({ file, previewUrl: URL.createObjectURL(file) }))
     setPhotoItems((prev) => [...prev, ...newItems].slice(0, 5))
   }
@@ -304,6 +314,7 @@ function RecordPageContent() {
       onOpenSearch={() => setIsSearchMode(true)}
       onLocationChange={setLocation}
       photoItems={photoItems}
+      pendingPhotoCount={pendingPhotoCount}
       onPhotoAdd={handlePhotoAdd}
       onRemovePhoto={handleRemovePhoto}
       fileInputRef={fileInputRef}
