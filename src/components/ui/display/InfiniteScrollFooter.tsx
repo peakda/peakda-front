@@ -31,7 +31,8 @@ export function InfiniteScrollFooter({
             <button
               type="button"
               onClick={onRetry}
-              className="border-border-primary rounded-xl border px-3 py-1.5 text-sm font-medium"
+              // 앱(안드로이드)에서 손가락으로 누르기 쉽도록 터치 영역을 44px 이상으로 둔다.
+              className="border-border-primary min-h-11 rounded-xl border px-4 text-sm font-medium"
             >
               다시 시도
             </button>
