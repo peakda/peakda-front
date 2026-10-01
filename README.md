@@ -108,14 +108,7 @@ pnpm install
 pnpm dev          # http://localhost:3000
 ```
 
-환경 변수 (`.env.local` 등):
 
-| 변수 | 용도 |
-| --- | --- |
-| `NEXT_PUBLIC_API_URL` | 백엔드 API 주소 (예: `https://api-dev.peakda.com`) |
-| `NEXT_PUBLIC_KAKAO_MAP_KEY` | 카카오맵 JavaScript 키 |
-| `CAPACITOR_SERVER_URL` | Android 앱이 띄울 웹 주소 (앱 빌드 시에만) |
-| `CAPACITOR_DEBUG` | `true` 면 앱 WebView 디버깅 허용 (릴리스 빌드에는 쓰지 않음) |
 
 ### 자주 쓰는 명령
 
