@@ -108,14 +108,7 @@ pnpm install
 pnpm dev          # http://localhost:3000
 ```
 
-환경 변수 (`.env.local` 등):
 
-| 변수 | 용도 |
-| --- | --- |
-| `NEXT_PUBLIC_API_URL` | 백엔드 API 주소 (예: `https://api-dev.peakda.com`) |
-| `NEXT_PUBLIC_KAKAO_MAP_KEY` | 카카오맵 JavaScript 키 |
-| `CAPACITOR_SERVER_URL` | Android 앱이 띄울 웹 주소 (앱 빌드 시에만) |
-| `CAPACITOR_DEBUG` | `true` 면 앱 WebView 디버깅 허용 (릴리스 빌드에는 쓰지 않음) |
 
 ### 자주 쓰는 명령
 
@@ -158,15 +151,5 @@ docs/              # 진행 현황·백엔드 요청서·설계 기록
 
 ---
 
-## 문서
 
-| 문서 | 내용 |
-| --- | --- |
-| [CLAUDE.md](CLAUDE.md) | 작업 원칙과 코딩 규칙 |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | API 호출·인증·카카오맵·상태 관리 흐름 |
-| [MEMORY.md](MEMORY.md) | 코드만 봐서는 알 수 없는 결정과 이유 |
-| [docs/TODO.md](docs/TODO.md) | Google Play 출시 기록과 이후 남은 일 |
-| [docs/UX_BACKLOG.md](docs/UX_BACKLOG.md) | 알고 있지만 아직 고치지 않은 사용자 흐름 문제 |
-| [docs/BACKEND_API_REQUESTS.md](docs/BACKEND_API_REQUESTS.md) | 백엔드에 전달한 요청서 |
-| [docs/SEO_GEO_AUDIT.md](docs/SEO_GEO_AUDIT.md) | 검색 노출(SEO) 점검과 진행 현황 |
-| [docs/design-tokens.md](docs/design-tokens.md) | Figma 디자인 토큰 원본 |
+
