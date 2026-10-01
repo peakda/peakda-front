@@ -78,13 +78,20 @@ export default function ProfilePage() {
     const original = e.target.files?.[0]
     if (!original) return
     const file = await compressImage(original)
-    setPreview(URL.createObjectURL(file))
+    const blobUrl = URL.createObjectURL(file)
+    setPreview(blobUrl)
     uploadImage(
       { data: { image: file } },
       {
         onSuccess: (res) => {
           const data = res.data.data
-          if (!data) return
+          // 키 없이 미리보기만 남으면 사진이 올라간 것처럼 보이지만 가입은 사진 없이 끝난다 — 실패로 안내한다
+          if (!data) {
+            setPreview(null)
+            setProfileImageKey(null)
+            toast.error('이미지 업로드에 실패했어요.')
+            return
+          }
           setPreview(data.profileImageUrl)
           setProfileImageKey(data.profileImageKey)
           toast.success('프로필 이미지가 업로드되었어요.')
@@ -95,6 +102,8 @@ export default function ProfilePage() {
           setProfileImageKey(null)
           toast.error(getApiErrorMessage(error) ?? '이미지 업로드에 실패했어요.')
         },
+        // 업로드가 끝나면 미리보기는 서버 URL(또는 null)로 바뀌므로 blob 은 더 필요 없다
+        onSettled: () => URL.revokeObjectURL(blobUrl),
       }
     )
   }

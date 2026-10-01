@@ -98,7 +98,7 @@ pnpm generate:facades   # 없는 도메인만 파사드 스텁 생성
 | [docs/BACKEND_API_REQUESTS.md](docs/BACKEND_API_REQUESTS.md) | **백엔드에 전달하는 요청서** — 요청 내용만. 백엔드와 공유하는 문서 |
 | [docs/API_CHANGE_REQUESTS.md](docs/API_CHANGE_REQUESTS.md) | 위 요청들의 프론트 대응 현황과 경위 (내부용) |
 | [docs/UNLINKED_ROUTES.md](docs/UNLINKED_ROUTES.md) | 생성됐지만 아직 화면에 연결되지 않은 라우트 목록 |
-| [docs/TODO.md](docs/TODO.md) | **Google Play 출시까지 남은 일과 확인된 사실** — 블로커, 담당, 실기기 체크리스트 |
+| [docs/TODO.md](docs/TODO.md) | **Google Play 출시(2026-10-01 프로덕션) 기록과 이후 남은 일** — 블로커, 담당, 실기기 체크리스트, 다음 네이티브 빌드 |
 | [docs/UX_BACKLOG.md](docs/UX_BACKLOG.md) | 동작은 하지만 사용자 흐름이 어색해 고쳐야 하는 것 (보류 중인 건만) |
 | [docs/ANDROID_APP_DECISION.md](docs/ANDROID_APP_DECISION.md) | Google Play 배포 방식(TWA vs Capacitor) 비교 기록 — **Capacitor 로 결정·구현됨** (`android/`, `capacitor.config.ts`) |
 | [docs/CAPACITOR_FRONT_PLAN.md](docs/CAPACITOR_FRONT_PLAN.md) | Capacitor 안드로이드 앱 프론트 개발 계획/TODO |
