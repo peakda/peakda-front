@@ -24,6 +24,8 @@
 | 지역 검색 최적화 | 미흡 | 장소·주소·좌표·축제 정보를 서버 HTML과 구조화 데이터로 제공하지 않음 |
 | 프로덕션 빌드 | 정상 | `pnpm build` 통과 |
 
+> **2026-10-01 현재**: 위 표는 2026-09-12 점검 당시 상태다. 비로그인 공개, `generateMetadata`(스팟·피드·축제·큐레이션), robots·sitemap, JSON-LD(홈·스팟·축제), noindex 헤더는 그 뒤 모두 구현됐다 — 현황은 [9장](#9-진행-현황과-남은-일)을 본다.
+
 ## 2. 주요 문제
 
 ### 2.1 핵심 콘텐츠가 로그인 뒤에 가려져 있음 — 최우선
@@ -308,17 +310,19 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 
 ## 6. 구현 완료 기준
 
-- [ ] 비로그인 상태에서 공개 상세 URL이 `200 OK`와 실제 본문을 반환한다.
-- [ ] 존재하지 않는 상세 ID가 실제 `404`를 반환한다.
-- [ ] 각 공개 상세 페이지의 title과 description이 고유하다.
-- [ ] 각 공개 상세 페이지에 절대 canonical URL이 있다.
-- [ ] 각 공개 상세 페이지에 대표 OG 이미지가 있다.
-- [ ] `/robots.txt`가 `200 OK`를 반환한다.
-- [ ] `/sitemap.xml`이 `200 OK`를 반환하고 공개 URL만 포함한다.
-- [ ] 앱 전용 경로에 `noindex`가 설정된다.
-- [ ] 명소·축제 JSON-LD가 실제 화면 내용과 일치한다.
-- [ ] 홈에서 공개 상세 페이지까지 일반 `<a>` 링크로 탐색할 수 있다.
-- [ ] 개화 상태에 업데이트 시각과 출처가 표시된다.
+> 2026-10-01 갱신: 체크 근거는 9.1 의 운영 curl 기록(09-16·09-22)과 코드다. 브라우저·검색 도구로만 확인할 수 있는 항목은 그대로 둔다.
+
+- [x] 비로그인 상태에서 공개 상세 URL이 `200 OK`와 실제 본문을 반환한다. — `/spot/527`·`/festivals/1`·`/creators/1` 200 (운영 curl)
+- [ ] 존재하지 않는 상세 ID가 실제 `404`를 반환한다. — 스팟·피드·축제·큐레이션 모두 `notFound()` 호출(코드). 운영에서 없는 id 로 404 를 확인한 기록은 없다(축제·큐레이션은 9.3-8 검증 항목)
+- [x] 각 공개 상세 페이지의 title과 description이 고유하다. — 상세 4종 `generateMetadata`
+- [x] 각 공개 상세 페이지에 절대 canonical URL이 있다.
+- [x] 각 공개 상세 페이지에 대표 OG 이미지가 있다. — 스팟 `toSpotShareImage`, 피드 첫 기록 사진, 없으면 기본 카드(`opengraph-image.tsx`)
+- [x] `/robots.txt`가 `200 OK`를 반환한다.
+- [x] `/sitemap.xml`이 `200 OK`를 반환하고 공개 URL만 포함한다. — 동네(LOCAL) 스팟·오분류 명소 제외
+- [x] 앱 전용 경로에 `noindex`가 설정된다. — `next.config.ts` `X-Robots-Tag`, `/onboarding` metadata
+- [ ] 명소·축제 JSON-LD가 실제 화면 내용과 일치한다. — Rich Results Test 검증 전 (9.3)
+- [ ] 홈에서 공개 상세 페이지까지 일반 `<a>` 링크로 탐색할 수 있다. — 내부 링크 결정 대기 (9.3-10)
+- [ ] 개화 상태에 업데이트 시각과 출처가 표시된다. — 시각은 "M.D 기준 개화 예측이에요"로 표시됨, 출처 표기는 없음
 - [ ] Search Console과 네이버 서치어드바이저에서 sitemap 오류가 없다.
 
 ## 7. 참고 문서
@@ -349,7 +353,7 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 
 ## 9. 진행 현황과 남은 일
 
-- 최종 갱신: 2026-09-22 (운영 도메인 curl 재점검 — 9.1 배포 표시 갱신)
+- 최종 갱신: 2026-10-01 (코드 대조 — 9.2-B·E, 9.3 피드 OG 항목, 6장 체크리스트·Phase 4 문서 항목 갱신. 운영 curl 수치는 09-22 기준 그대로)
 - 대표 도메인(canonical): `https://www.peakda.com` — 루트 `peakda.com` 은 `308` 으로 www 리다이렉트
 - DNS: AWS Route 53 (`peakda.com` 호스팅 영역, 백엔드 AWS 계정). `www` 는 Vercel CNAME
 
@@ -400,7 +404,7 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 
 - [ ] 백엔드에 확인: 의도된 공개인지, 스웨거 `security` 표기 정리
 - [x] 2026-09-16 `PROTECTED_PATHS` 에서 `/festivals`, `/creators` 제거 (커밋 `b0548c3`) — 운영 API 가 열려 있으니 배포 가능
-- [ ] 축제·큐레이션 상세 서버 렌더링 + sitemap 추가 — 작업 내용은 9.3-8
+- [x] 축제·큐레이션 상세 서버 렌더링 + sitemap 추가 — 2026-10-01 코드 확인: `festivals/[id]`·`creators/[id]` 의 `page.tsx` 가 서버 `generateMetadata` 를 갖고, `sitemap.ts` 가 `/festivals/{id}`·`/creators/{id}` 와 고정 경로 `/explore/festivals` 를 포함한다. 운영 반영은 확인하지 않음
 
 #### C. [디자이너] 로그인 바텀시트 시안
 
@@ -413,15 +417,14 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 
 - [x] 2026-09-14 일단 그대로 두기로 함 (가장 단순). 거슬리면 `SpotDetailClient.tsx` 에서 재조회 전까지 찜·알림 버튼만 로딩 표시로 바꾼다
 
-#### E. [백엔드] 기록 사진 영구 공개 URL — ⚠️ 아직 요청 안 함
+#### E. [백엔드] 기록 사진 영구 공개 URL — 요청은 `BACKEND_API_REQUESTS.md` 15번(사진 variants + CDN 고정 주소)으로 반영됨
 
-피드 상세 공유 카드(og:image)에 기록 사진을 쓰고 싶지만 `photos[].url` 이 만료되는 presigned URL 이라, SNS·검색 크롤러가 나중에 다시 가져가면 깨진다. 지금은 기본 카드(`/opengraph-image`)를 쓴다. 동네(LOCAL) 스팟 대표 사진도 같은 이유로 공유 카드·JSON-LD 에서 뺐다.
+피드 상세 공유 카드(og:image)에 기록 사진을 쓰고 싶지만 `photos[].url` 이 만료되는 presigned URL 이라, SNS·검색 크롤러가 나중에 다시 가져가면 깨진다. **2026-10-01 코드 기준**: 피드 상세는 이미 첫 기록 사진(`recordPhotoUrl(photos[0], 'medium')`)을 og:image·twitter 카드로 쓰고, 사진이 없을 때만 기본 카드로 폴백한다. 동네(LOCAL) 스팟 대표 사진은 여전히 공유 카드·JSON-LD 에서 뺀다(`toSpotShareImage` 가 `ATTRACTION` 만 통과).
 
-- [ ] `BACKEND_API_REQUESTS.md` 에 "기록 사진·스팟 대표 사진의 만료 없는 공개 URL(또는 CDN 경로) 필드" 요청 추가 후 전달
+- [x] 기록 사진 만료 없는 URL 요청 — `BACKEND_API_REQUESTS.md` 15번, 기록 사진은 `cdn.peakda.com` 고정 주소로 반영됨
+- [ ] 동네(LOCAL) 스팟 **대표 사진**에도 같은 고정 URL 이 내려오는지 확인 — 내려오면 `src/lib/utils/spotSeo.ts` `toSpotShareImage` 의 LOCAL 제외 조건 제거
 
-답변 오면:
-- [ ] `src/app/feed/[id]/page.tsx` openGraph.images 를 첫 사진으로 교체
-- [ ] `src/lib/utils/spotSeo.ts` `toSpotShareImage` 의 LOCAL 제외 조건 제거
+(완료) `src/app/feed/[id]/page.tsx` openGraph.images 첫 사진 사용 — 코드 반영됨
 
 #### F. [백엔드] 개화 카테고리 오분류 — ⚠️ 아직 요청 안 함 (2026-09-16 발견)
 
@@ -468,7 +471,7 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 - [x] `src/app/sitemap.ts` — 고정 5개(2026-09-28 `/explore/festivals` 추가) + 스팟 상세, 하루 단위 revalidate, 조회 실패 시 고정 페이지만
 - [x] `next.config.ts` `headers()` — `/login`, `/onboarding`, `/search`, `/profile`, `/auth/*` 에 `X-Robots-Tag: noindex`
 - [x] 스팟 상세 서버 렌더링: `page.tsx` 서버 + `_components/SpotDetailClient.tsx`, `generateMetadata`, `notFound()`, `TouristAttraction`/`Place` + `BreadcrumbList` JSON-LD
-- [x] 피드 상세: `page.tsx` 서버 + `_components/FeedDetailClient.tsx`, `generateMetadata` + `notFound()` (OG 이미지는 기본 카드 — 9.2-E)
+- [x] 피드 상세: `page.tsx` 서버 + `_components/FeedDetailClient.tsx`, `generateMetadata` + `notFound()` (OG 이미지는 첫 기록 사진, 없으면 기본 카드)
 - [x] 개화 정보 최신성: 응답의 `bloom.baseDate` 로 "M.D 기준 개화 예측이에요" 화면 표시 + 설명문에 포함 (백엔드 요청 불필요)
 - [x] `/`·`/map` canonical, `/` 제목이 "Peakda | Peakda | …" 로 중복되던 것 수정
 - [x] 로컬 빌드(api-dev) 후 curl 검증
@@ -483,9 +486,9 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 
 #### 4) Phase 4 — 문서
 
-- [ ] `BACKEND_API_REQUESTS.md` — 9.2-B 요청
-- [ ] `MEMORY.md` — 비로그인 모드 결정, 401 시 마커 없으면 리다이렉트 안 하는 이유, `LoginGuard` 전역 링크 가로채기, 막힌 경로와 이유
-- [ ] 이 문서 6장 체크리스트 갱신
+- [x] `BACKEND_API_REQUESTS.md` — 9.2-B 요청 (불필요해짐: 9.2-B 운영 반영 확인 2026-09-16)
+- [x] `MEMORY.md` — 비로그인 모드 결정, 401 시 마커 없으면 리다이렉트 안 하는 이유, `LoginGuard` 전역 링크 가로채기, 막힌 경로와 이유 (2026-10-01)
+- [x] 이 문서 6장 체크리스트 갱신 (2026-10-01)
 
 #### 5) 검색엔진 제출
 

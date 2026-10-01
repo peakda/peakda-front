@@ -32,16 +32,23 @@ sequenceDiagram
   C->>M: API 요청
   M->>B: fetch (credentials: include)
   B-->>M: 401 (access token 만료)
-  M->>B: POST /api/auth/refresh (동시 요청은 1회로 합침)
-  alt refresh 성공
-    B-->>M: 200
-    M->>B: 원요청 재시도
-    B-->>M: 200
-    M-->>C: 데이터 반환
-  else refresh 실패
-    M-->>C: /login 으로 리다이렉트
+  alt 인증 마커 없음 (비로그인 웹)
+    M-->>C: ApiError(401) — refresh·리다이렉트 없음
+  else 인증 마커 있음
+    M->>B: POST /api/auth/refresh (동시 요청은 1회로 합침)
+    alt refresh 성공
+      B-->>M: 200
+      M->>B: 원요청 재시도
+      B-->>M: 200
+      M-->>C: 데이터 반환
+    else refresh 실패
+      M-->>C: 마커 삭제 + 현재 화면 위에 로그인 바텀시트
+    end
   end
 ```
+
+- 네이티브 앱(Capacitor)은 쿠키 대신 Bearer 토큰을 쓰고 `POST /api/auth/app/token/refresh`로 갱신한다 (`src/lib/auth/nativeAuth.ts`).
+- 비로그인 사용자는 로그인 페이지로 보내지 않는다. 막힌 경로는 `src/lib/auth/session.ts`의 `PROTECTED_PATHS`이고, 링크는 `LoginGuard`, 버튼은 `useRequireLogin`, 주소 직접 입력은 `middleware.ts`(`/map?login=1`)가 바텀시트로 막는다 ([MEMORY.md](MEMORY.md) 비로그인 항목).
 
 > **Note**: 프런트(Vercel)·백엔드(AWS) 도메인이 달라 크로스사이트 쿠키(`SameSite=None; Secure`)로 인증을 주고받는다. 이 때문에 `src/api/mutator/index.ts`는 `NEXT_PUBLIC_API_URL`로 **브라우저/서버에서 백엔드를 직접 호출**하는 것이 의도된 설계다 (`CLAUDE.md` API 호출 규칙과 일치, 2026-07-19 정합). Route Handler 프록시는 어디에도 쓰지 않는다.
 

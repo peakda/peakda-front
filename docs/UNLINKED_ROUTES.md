@@ -1,6 +1,6 @@
 # 연동 안 된 API / 라우팅 안 된 페이지
 
-> 최종 갱신: 2026-08-18 (`refactor/18`) · 이전 판: 2026-08-08 (`feat/15`, Phase 0 직후)
+> 최종 갱신: 2026-10-01 (코드 대조) · 이전 판: 2026-08-18 (`refactor/18`), 2026-08-08 (`feat/15`, Phase 0 직후)
 > 8/8 판에서 "연동 예정"으로 적혀 있던 항목 대부분이 그 사이 실제로 연결되어 무효가 됐다. 확인 후 갱신했다.
 
 ## 아키텍처 요약
@@ -30,13 +30,13 @@
 | 파사드 | 상태 |
 |---|---|
 | `spot.ts` — `useSpotPreview` (훅) | **plain async 버전만 쓰인다.** 프리뷰는 핀 클릭·필터 결과처럼 렌더 밖 이벤트에서 부르므로 `spotPreviewApi` 를 쓰고 훅은 남은 껍데기다. 정리 대상 |
-| `device.ts` — `registerDeviceApi`, `unregisterDeviceApi` | 푸시 인프라(FCM 등) 도입 전까지 보류. 백엔드도 일정 미정 |
 | `auth.ts` — `refreshApi` | 실질 미사용. 토큰 갱신은 `src/api/mutator/index.ts`가 orval 부트스트랩 순환을 피하려고 **raw fetch로 직접** 호출한다. 파사드 쪽은 남은 껍데기 |
 
-### 2026-08-18에 해소된 것
+### 해소된 것
 
 | 파사드 | 연결된 곳 |
 |---|---|
+| `device.ts` — `registerDeviceApi`, `unregisterDeviceApi` | `src/lib/push/pushNotifications.ts` (2026-10-01 확인. 권한 요청 → 토큰 등록, 로그아웃 시 해제) |
 | `seasonal-bloom.ts` — `useBloomCalendar` | `src/app/feed/[id]/_components/SpotBloomSummary.tsx` (오늘 상태 뱃지 + 주말 절정 판정. `days[]`를 타임라인 UI로 그리지는 않는다) |
 | `spot-record.ts` — `useMySpotRecordsInfinite` | `src/app/my/records/page.tsx` |
 | `spot.ts` — `spotPreviewApi` | `Drawer.tsx`(필터 결과 목록), `MapContainer.tsx`(단일 핀 클릭). 2026-08-18에 단일 핀도 상세 대신 프리뷰로 통일 |
@@ -67,14 +67,13 @@
 
 | 필드 | 화면 |
 |---|---|
-| `SpotDetailResponse.recordCount` | `/spot/[id]` 헤더에 방문 기록 수 미표시 (다른 화면들은 각자의 `recordCount`를 쓰고 있다) |
 | `SpotPreviewItem.recordCount` | 핀 프리뷰 카드가 받아오지만 표시하지 않는다 |
-| `SpotSearchItem.notifyEnabled` · `SpotPreviewItem.notifyEnabled` | 카드의 종 아이콘이 아직 죽은 어포던스 → [UX_BACKLOG.md](UX_BACKLOG.md) 5번 |
-| `BloomBadge.peakDurationDays` | 프리뷰 카드에서 미사용 |
+| `BloomBadge.peakDurationDays` | 프리뷰 카드에서만 미사용 (스팟 상세·피드 상세는 사용) |
 
-### 2026-08-18에 해소된 것
+### 해소된 것
 
-`FestivalDetailResponse.latitude/longitude`(→ `buildMapUrl`), `UserSearchItem.profileImageUrl`, `SpotSearchItem.type`, `BloomMapPin.type`(→ 상단 명소/동네 칩), `ExploreFestivalItem.endsInDays`. 축제 상태 배지의 `"진행중"` 하드코딩도 서버 `phase`로 교체됐다.
+2026-10-01 코드 대조: `SpotDetailResponse.recordCount`(`SpotDetailClient.tsx` 에 표시), `notifyEnabled`(`BellBtn` 으로 연결), `BloomBadge.peakDurationDays` 는 스팟 상세·피드 상세에서 쓴다(프리뷰 카드만 미사용).
+2026-08-18: `FestivalDetailResponse.latitude/longitude`(→ `buildMapUrl`), `UserSearchItem.profileImageUrl`, `SpotSearchItem.type`, `BloomMapPin.type`(→ 상단 명소/동네 칩), `ExploreFestivalItem.endsInDays`. 축제 상태 배지의 `"진행중"` 하드코딩도 서버 `phase`로 교체됐다.
 
 ---
 

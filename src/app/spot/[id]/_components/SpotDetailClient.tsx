@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import { Bell, Heart, MapPin } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
@@ -12,7 +11,7 @@ import { Button } from '@/components/ui/button/Button'
 import { Badge } from '@/components/ui/display/Badge'
 import { CardBadge } from '@/components/ui/card/CardBadge'
 import { FeedCard } from '@/components/ui/card/FeedCard'
-import { Drawer } from '@/components/ui/layout/Drawer'
+import { LazyDrawer } from '@/components/ui/layout/LazyDrawer'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import { useRequireLogin } from '@/hooks/useRequireLogin'
 import { toFeedCardProps } from '@/lib/utils/spotRecordToFeed'
@@ -33,7 +32,7 @@ import { type BloomStageStatus, toStatusBadge } from '@/lib/utils/bloomStatus'
 import { BLOOM_CATEGORY_EMOJI, formatPeakPeriod, peakHeadline } from '@/lib/utils/bloomCalendar'
 import { formatMonthDay } from '@/lib/utils/explore'
 import { cn } from '@/lib/utils/cn'
-import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
+import { SafeImage } from '@/components/ui/display/SafeImage'
 
 // 캘린더(일별 타임라인)가 없으면 '이번 주말이 딱이에요' 판정을 못 하므로
 // 상세 응답 배너의 현재 상태만으로 문구를 대체한다.
@@ -124,8 +123,10 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
 
   // 추가는 "개화 알림 받기" 토글이라는 실제 선택지가 있어 시트가 필요하지만,
   // 해제는 선택지가 없어 시트가 순수 마찰이라 HeartBtn과 동일하게 즉시 토글한다.
+  // 해제·알림 토글은 응답을 기다리지 않고 상세 캐시에 먼저 반영하고, 실패하면 누르기 전 값으로 되돌린다.
   const handleSave = () => {
     if (favorited) {
+      setFavoriteCache({ favorited: false, notifyEnabled: false })
       removeFavorite.mutate(
         { spotId: id },
         {
@@ -135,6 +136,7 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
           },
           onError: (err) => {
             console.error(err)
+            setFavoriteCache({ favorited, notifyEnabled })
             toast.error('찜을 해제하지 못했어요')
           },
         }
@@ -151,6 +153,7 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
       openSaveSheet()
       return
     }
+    setFavoriteCache({ favorited, notifyEnabled: !notifyEnabled })
     updateNotify.mutate(
       { spotId: id, data: { enabled: !notifyEnabled } },
       {
@@ -160,6 +163,7 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
         },
         onError: (err) => {
           console.error(err)
+          setFavoriteCache({ favorited, notifyEnabled })
           toast.error('알림 설정을 바꾸지 못했어요')
         },
       }
@@ -171,8 +175,8 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
       {/* 대표 이미지 — 뒤로가기를 이미지 위에 겹친다 */}
       <div className="relative h-64 bg-gray-200">
         {spot.representativeImageUrl && (
-          <Image
-            src={toHttpsImageUrl(spot.representativeImageUrl) ?? spot.representativeImageUrl}
+          <SafeImage
+            src={spot.representativeImageUrl}
             alt={spot.name}
             fill
             priority
@@ -314,7 +318,7 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
         </Button>
       </div>
 
-      <Drawer />
+      <LazyDrawer />
     </div>
   )
 }

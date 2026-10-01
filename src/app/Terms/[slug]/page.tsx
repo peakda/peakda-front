@@ -15,6 +15,11 @@ const HEADER_TITLE: Record<LegalSlug, string> = {
   'location-policy': '위치정보 동의',
 }
 
+// 문서가 코드에 고정돼 있어 빌드 때 전부 만들어 둔다(SSG).
+export function generateStaticParams() {
+  return Object.keys(LEGAL_CONTENT).map((slug) => ({ slug }))
+}
+
 export default async function Page({ params }: PageProps) {
   const { slug } = await params
   const doc = LEGAL_CONTENT[slug as LegalSlug]

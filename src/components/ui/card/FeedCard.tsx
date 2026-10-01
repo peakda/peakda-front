@@ -60,6 +60,8 @@ export interface FeedCardProps {
   href?: string
   showMoreMenu?: boolean
   spotSummary?: SpotSummaryInfo
+  // 목록 첫 카드처럼 첫 화면에 보이는 카드만 넘긴다. 첫 이미지만 우선 로드한다.
+  priority?: boolean
 }
 
 export function FeedCard({
@@ -83,6 +85,7 @@ export function FeedCard({
   href,
   showMoreMenu = true,
   spotSummary,
+  priority = false,
 }: FeedCardProps) {
   const { emblaRef, selectedIndex, scrollSnaps, scrollTo } = useCarousel({ loop: true })
 
@@ -102,6 +105,7 @@ export function FeedCard({
           setReportModalOpen(false)
           toast.success('신고가 접수되었어요')
         },
+        onError: () => toast.error('신고를 접수하지 못했어요'),
       }
     )
   }
@@ -186,6 +190,7 @@ export function FeedCard({
                   width={430}
                   height={240}
                   sizes="(max-width: 430px) 100vw, 430px"
+                  priority={priority && i === 0}
                   className="h-[240px] w-full object-cover"
                 />
               </div>

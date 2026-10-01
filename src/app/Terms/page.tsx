@@ -1,5 +1,5 @@
 import { Header } from '@/components/ui/layout/Header'
-import { Drawer } from '@/components/ui/layout/Drawer'
+import { LazyDrawer } from '@/components/ui/layout/LazyDrawer'
 import { TermsAgreement } from '@/app/Terms/_components/TermsAgreement'
 
 export default function TermsPage() {
@@ -23,7 +23,7 @@ export default function TermsPage() {
         </div>
         <TermsAgreement />
       </div>
-      <Drawer />
+      <LazyDrawer />
     </>
   )
 }

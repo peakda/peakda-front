@@ -7,7 +7,7 @@ import { Header } from '@/components/ui/layout/Header'
 import { Nav } from '@/components/ui/layout/Nav'
 import { CategoryChip } from '@/components/ui/category/CategoryChip'
 import { FeedListItem } from '@/components/ui/card/FeedListItem'
-import { Drawer } from '@/components/ui/layout/Drawer'
+import { LazyDrawer } from '@/components/ui/layout/LazyDrawer'
 import { InfiniteScrollFooter } from '@/components/ui/display/InfiniteScrollFooter'
 import { QueryFeedback } from '@/components/ui/display/QueryFeedback'
 import { useFeedListInfinite } from '@/api/facades/feed'
@@ -112,10 +112,11 @@ export function FeedClient({ initialPage }: FeedClientProps) {
       ) : (
         <>
           <div className="divide-border-primary divide-y">
-            {records.map((record) => (
+            {records.map((record, idx) => (
               <FeedListItem
                 key={record.id}
                 record={record}
+                priority={idx === 0}
                 isOwner={record.user.id === currentUser?.id}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
@@ -126,7 +127,7 @@ export function FeedClient({ initialPage }: FeedClientProps) {
         </>
       )}
 
-      <Drawer />
+      <LazyDrawer />
       <Nav activeTab="feed" />
     </div>
   )

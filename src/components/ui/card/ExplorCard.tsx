@@ -8,6 +8,8 @@ interface ExplorCardBaseProps {
   onClick?: () => void
   // 슬라이더처럼 카드 폭을 바깥에서 정해야 하는 곳에서만 넘긴다.
   className?: string
+  // 첫 화면에 보이는 카드(LCP 후보)만 true. 전부 주면 우선순위가 의미 없어진다.
+  priority?: boolean
 }
 
 interface PeakCardProps extends ExplorCardBaseProps {
@@ -62,6 +64,7 @@ export function ExplorCard(props: ExplorCardProps) {
           alt={isCourse ? props.title : props.name}
           width={250}
           height={180}
+          priority={props.priority}
           className="h-[180px] w-full object-cover"
         />
 

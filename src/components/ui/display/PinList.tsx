@@ -1,5 +1,5 @@
-import Image from 'next/image'
 import { PinText } from './PinText'
+import { SafeImage } from './SafeImage'
 import { MultiImageProps } from '@/types/types'
 import { cn } from '@/lib/utils/cn'
 
@@ -31,7 +31,7 @@ export function PinList(props: MultiImageProps) {
             )}
           >
             {src && (
-              <Image
+              <SafeImage
                 src={src}
                 alt={`${title}-${idx}`}
                 fill

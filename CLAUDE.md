@@ -32,6 +32,7 @@ pnpm validate:context  # context 문서 경로 검증 (CI에서도 실행)
 ## 컴포넌트 규칙
 
 - named export 사용 (default export 금지)
+  - 예외: Next.js 가 요구하는 라우트 파일(`page`·`layout`·`loading`·`error`·`not-found`·`global-error`·`opengraph-image`·`robots`·`sitemap`)은 default export
 - props interface는 컴포넌트명 + Props로 명명
   예) ButtonProps, SpotCardProps
 - 'use client' 는 꼭 필요한 경우만 최하위 컴포넌트에 선언
@@ -99,9 +100,8 @@ pnpm generate:facades   # 없는 도메인만 파사드 스텁 생성
 | [docs/UNLINKED_ROUTES.md](docs/UNLINKED_ROUTES.md) | 생성됐지만 아직 화면에 연결되지 않은 라우트 목록 |
 | [docs/TODO.md](docs/TODO.md) | **Google Play 출시까지 남은 일과 확인된 사실** — 블로커, 담당, 실기기 체크리스트 |
 | [docs/UX_BACKLOG.md](docs/UX_BACKLOG.md) | 동작은 하지만 사용자 흐름이 어색해 고쳐야 하는 것 (보류 중인 건만) |
-| [docs/CONTEST_ACTION_PLAN.md](docs/CONTEST_ACTION_PLAN.md) | 공모전 1차 심사 대응 — 심사 기준별 현재 점수와 실행 우선순위 |
-| [docs/ANDROID_APP_DECISION.md](docs/ANDROID_APP_DECISION.md) | Google Play 배포 방식(TWA vs Capacitor) 논의용 — 아직 미정 |
-| [docs/CAPACITOR_FRONT_PLAN.md](docs/CAPACITOR_FRONT_PLAN.md) | Capacitor 안드로이드 앱 프론트 개발 계획/TODO (잠정 결정: Capacitor) |
+| [docs/ANDROID_APP_DECISION.md](docs/ANDROID_APP_DECISION.md) | Google Play 배포 방식(TWA vs Capacitor) 비교 기록 — **Capacitor 로 결정·구현됨** (`android/`, `capacitor.config.ts`) |
+| [docs/CAPACITOR_FRONT_PLAN.md](docs/CAPACITOR_FRONT_PLAN.md) | Capacitor 안드로이드 앱 프론트 개발 계획/TODO |
 | [docs/SEO_GEO_AUDIT.md](docs/SEO_GEO_AUDIT.md) | SEO·GEO 점검 보고서 + **9절: 검색엔진 등록·비로그인 모드 진행 현황과 남은 일** (외부 답변 대기 포함) |
 
 ## 버그 수정 시 설명

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
+import { toast } from 'sonner'
 import { MoreHorizontal } from 'lucide-react'
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
@@ -32,9 +33,27 @@ export default function UserProfilePage() {
   const handleToggleBlock = () => {
     setMenuOpen(false)
     if (blocked) {
-      unblockMutation.mutate({ userId }, { onSuccess: () => setBlockedOverride(false) })
+      unblockMutation.mutate(
+        { userId },
+        {
+          onSuccess: () => {
+            setBlockedOverride(false)
+            toast.success('차단을 해제했어요')
+          },
+          onError: () => toast.error('차단을 해제하지 못했어요'),
+        }
+      )
     } else {
-      blockMutation.mutate({ userId }, { onSuccess: () => setBlockedOverride(true) })
+      blockMutation.mutate(
+        { userId },
+        {
+          onSuccess: () => {
+            setBlockedOverride(true)
+            toast.success('차단했어요')
+          },
+          onError: () => toast.error('차단하지 못했어요'),
+        }
+      )
     }
   }
 

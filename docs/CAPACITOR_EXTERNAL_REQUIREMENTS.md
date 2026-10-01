@@ -10,8 +10,7 @@
 
 - [x] **정식 프런트 오리진 확정** — `https://peakda.com` (2026-09-06)
   - 사용처: `CAPACITOR_SERVER_URL`, 카카오 JavaScript 키 허용 도메인, OAuth 설정, 개인정보처리방침 URL
-  - **남은 작업: apex DNS 연결.** `peakda.com`·`www.peakda.com` 모두 아직 레코드가 없어 접속되지 않는다.
-    Vercel 프로젝트에 도메인을 붙이기 전까지는 이 값을 빌드에 넣어도 앱이 사이트를 못 띄운다.
+  - ~~남은 작업: apex DNS 연결~~ — **해소.** `www.peakda.com` 이 서비스 중이고 앱 `server.url` 로 쓴다(apex 는 www 로 308, [TODO.md](TODO.md) §6).
   - 백엔드 `api.peakda.com`·`api-dev.peakda.com`은 응답하므로 도메인 소유 자체는 확인됨
 - [x] **Android 패키지 ID 확정** — `com.peakda.app` (2026-09-06)
   - 보유 도메인 `peakda.com`의 역방향 표기라 관례에 맞는다.
@@ -26,7 +25,7 @@
 - [x] 외부 브라우저로 이탈해 앱 복귀가 안 될 경우 App Links 도입 여부 결정 — **App Links가 아니라 일회성 코드 교환 방식으로 결정.** Custom Tab 인증 → `peakda://auth/callback?code=...` 로 복귀 → 앱이 `POST /api/auth/app/token`으로 code를 교환 → 이후 Bearer 헤더로 호출. refresh는 `POST /api/auth/app/token/refresh`를 사용한다.
 - [ ] App Links가 필요하면 백엔드 OAuth redirect URI와 각 소셜 콘솔 설정 변경 — 코드 교환 방식 확정 시 재검토
 - [x] 네이버 개발자센터 앱은 백엔드에서 관리. dev callback: `https://api-dev.peakda.com/login/oauth2/code/naver`, `https://api-dev.peakda.com/login/oauth2/code/kakao`. 운영 도메인 확정 시 동일 패턴으로 추가 등록 예정
-- [x] 애플 로그인은 **미지원 확정** — 추후 구글 로그인으로 교체 예정. `SocialLoginBtns`의 애플 버튼은 당분간 무반응 상태로 둔다([UX_BACKLOG.md](UX_BACKLOG.md) 1번)
+- [x] 애플 로그인은 **미지원 확정** — 구글 로그인으로 교체 완료(2026-10-01 코드 확인: `SocialLoginBtns` 가 `handleGoogleLogin` 사용). 애플 버튼은 없다
 
 **앱 전용 로그인은 `/oauth2/authorization/{provider}?client=app`으로 시작한다.** 웹은 기존 쿠키 방식(`/oauth2/authorization/{provider}` 직행)을 유지하며, Android는 Custom Tab·딥링크·Bearer 토큰 교환 경로를 사용한다.
 
@@ -56,10 +55,10 @@ FCM 발송 구현과 SSE 구독 엔드포인트는 Swagger에 노출되어 있�
 
 ## P0 — Firebase 담당자 입력
 
-- [ ] Firebase 프로젝트 생성 주체와 관리자 확정
+- [x] Firebase 프로젝트 생성 주체와 관리자 확정 — 프로젝트 `peakda`, 소유·관리는 백엔드
 - [ ] 개발/운영 Firebase 프로젝트를 분리할지 결정
-- [ ] 확정된 패키지 ID로 Android 앱 등록
-- [ ] 환경별 `google-services.json` 전달
+- [x] 확정된 패키지 ID로 Android 앱 등록 — `google-services.json` 의 `package_name` 이 `com.peakda.app` ([TODO.md](TODO.md) §2)
+- [x] `google-services.json` 전달 — 단일 프로젝트 기준으로 받아 2026-09-06 빌드에 반영. 환경 분리는 위 항목 결정에 따름
 - [ ] 서비스 계정 키는 백엔드 또는 CI 비밀 저장소에서만 관리하고 프런트 저장소에는 전달하지 않기
 
 ## P1 — 디자인·스토어 자료
@@ -82,7 +81,7 @@ FCM 발송 구현과 SSE 구독 엔드포인트는 Swagger에 노출되어 있�
 - [x] 업로드 키/keystore 생성 담당자와 보관 위치 확정 — 프런트 담당자가 로컬에서 생성. 저장소 밖에 두고 `android/app/build.gradle`이 `PEAKDA_UPLOAD_*` Gradle 프로퍼티로 주입받는다(`~/.gradle/gradle.properties`). 키가 없는 환경에서는 경고 후 unsigned로 빌드된다
 - [ ] 키 alias 및 비밀번호를 GitHub Actions secrets로 관리할지 결정
 - [x] Play App Signing 사용 여부 확정 — **선택 불가, 필수.** 2021년 8월 이후 생성되는 앱은 AAB 제출이 의무이고 Play App Signing이 자동 적용된다. 우리가 만든 키는 배포 키가 아니라 **업로드 키**이며, 분실 시 Google에 재설정을 요청할 수 있다
-- [ ] 개인정보처리방침 공개 URL 확정 — 오리진은 `https://peakda.com`으로 정해졌으므로 DNS 연결 후 경로만 확정하면 된다
+- [x] 개인정보처리방침 공개 URL 확정 — `https://www.peakda.com/Terms/privacy-policy` (위치: `/Terms/location-policy`)
 - [ ] Play 데이터 보안 설문에 포함할 수집·공유 항목 확인
 - [ ] 앱 버전 정책 확정
   - `ANDROID_VERSION_CODE`: Play 업로드마다 증가하는 정수

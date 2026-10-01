@@ -38,6 +38,28 @@ export function toReactionSummary(response?: FeedReactionSummaryResponse | null)
   }
 }
 
+// 리액션을 누른 직후 서버 응답 전에 보여줄 요약 (낙관적 업데이트). 응답이 오면 서버 값으로 덮어쓴다.
+export function applyReactionToggle(
+  summary: ReactionSummary,
+  type: FeedReactionSummaryResponseMyReactionsItem,
+  action: 'add' | 'remove'
+): ReactionSummary {
+  const delta = action === 'add' ? 1 : -1
+  const hasCount = summary.counts.some((c) => c.reactionType === type)
+  const counts = hasCount
+    ? summary.counts.map((c) =>
+        c.reactionType === type ? { ...c, count: Math.max(0, c.count + delta) } : c
+      )
+    : action === 'add'
+      ? [...summary.counts, { reactionType: type, count: 1 }]
+      : summary.counts
+  const myReactions =
+    action === 'add'
+      ? [...summary.myReactions, type]
+      : summary.myReactions.filter((t) => t !== type)
+  return { counts, myReactions }
+}
+
 // 스팟 기록 신고 요청 페이로드 생성 (V1 은 SPOT_RECORD 만 지원)
 export function buildReportRequest(
   recordId: number,

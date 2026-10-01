@@ -1,6 +1,6 @@
 # TODO — Google Play 출시
 
-최종 갱신: 2026-09-06 20:00
+최종 갱신: 2026-10-01 (코드 대조. 2절·4절 일부는 09-06 기록 그대로이며 표시된 곳만 10-01 에 확인함)
 
 출시까지 남은 일과 확인된 사실을 모아둔다. 완료된 항목은 근거(파일·명령·측정값)를 함께 적어
 "됐다고 들었다"와 "확인했다"를 구분한다.
@@ -48,14 +48,16 @@
 
 ---
 
-## 2. 오늘 배포 예정 (2026-09-06)
+## 2. 2026-09-06 배포 예정이던 항목
+
+> 2026-10-01 상태. 백엔드 쪽 두 건(로그인 수정, FCM 발송)은 반영 여부를 프런트에서 확인할 수 없어 그대로 둔다.
 
 | 항목 | 담당 | 상태 |
 | --- | --- | --- |
-| 로그인 수정 | 백엔드 | 대기 — 배포 후 브라우저 재검증 (아래 절차) |
-| 피드 `photos` 배열 | 백엔드 | 대기 — 배포 후 `pnpm generate:api` → 임시 타입 제거 |
-| `google-services.json` 배치 | 프런트 | ✅ 완료 (19:59 빌드, §4) |
-| FCM 발송 (Admin SDK) | 백엔드 | 대기 — 서버만 켜지면 앱 재빌드 없이 수신 시작 |
+| 로그인 수정 | 백엔드 | **반영 여부 미확인** — 아래 절차로 브라우저 재검증 필요 (§1) |
+| 피드 `photos` 배열 | 백엔드 | ✅ 스펙 반영·`pnpm generate:api` 완료. **남은 건 프런트 임시 타입 제거뿐** (아래) |
+| `google-services.json` 배치 | 프런트 | ✅ 완료 (09-06 19:59 빌드, §4) |
+| FCM 발송 (Admin SDK) | 백엔드 | **반영 여부 미확인** — 서버만 켜지면 앱 재빌드 없이 수신 시작 |
 
 ### 로그인 재검증 절차
 
@@ -77,6 +79,9 @@ curl -s https://api-dev.peakda.com/v3/api-docs/05-feed | grep -o '"photos"'
 ```bash
 pnpm generate:api
 ```
+
+> **2026-10-01 확인**: 생성 타입 `SpotRecordSummaryResponse` 에 `photos: PhotoEntry[]` 가 이미 들어와 있다
+> (`pnpm generate:api` 반영됨). **남은 건 아래 임시 확장 제거뿐이다** — `spotRecordToFeed.ts:43` 에 `SummaryWithPhotos` 가 아직 있다.
 
 그다음 `src/lib/utils/spotRecordToFeed.ts` 의 임시 확장을 지우고 생성 타입을 직접 쓴다.
 
@@ -131,6 +136,13 @@ package_name    com.peakda.app   (gradle applicationId 와 일치 확인)
       `POST_NOTIFICATIONS` 는 `AndroidManifest.xml` 에 직접 없지만 firebase-messaging 에서
       병합돼 릴리스 manifest 37 행에 들어간다 (확인함)
 - [x] `NEXT_PUBLIC_API_URL` 프로덕션 값 `https://api.peakda.com` (라이브 청크에서 확인)
+- [x] 앱에서 관광공사 `http://` 사진 차단 (2026-10-01, PR #107) — Capacitor 는 `androidScheme: 'https'` +
+      `allowMixedContent: false` 라 WebView 가 `http://` 이미지를 막는다(웹은 브라우저가 https 로 올려 줘서 보였다).
+      지도 핀 드로어(`PinList`)만 `toHttpsImageUrl` 이 빠져 있었다. 외부 이미지는 `SafeImage`
+      (`src/components/ui/display/SafeImage.tsx`: https 변환 + 로드 실패 시 숨김)를 쓴다.
+      적용: `PinList`·`SpotCard`·`PinCard`·`SpotDetailClient`. **실기기 확인은 아직** — 아래 목록에 추가
+- [x] WebView 디버깅 토글 — `CAPACITOR_DEBUG=true` 로 빌드·sync 할 때만 `webContentsDebuggingEnabled` 가 켜진다
+      (`capacitor.config.ts`). 릴리스는 기본 꺼짐. 이 값은 네이티브 설정이라 **바꾸면 재빌드가 필요하다**
 
 ### 확인 안 된 것 (실기기 필요)
 
@@ -139,6 +151,7 @@ package_name    com.peakda.app   (gradle applicationId 와 일치 확인)
 - [ ] 카카오맵 렌더링·마커 터치·현재 위치
 - [ ] 로그인 왕복, 앱 재실행 후 세션 유지, 401 refresh 재시도
 - [ ] 사진 선택·촬영·업로드
+- [ ] 지도 핀 드로어·스팟 카드의 관광공사 사진이 앱에서 보이는지 (`SafeImage`, 위 완료 항목)
 - [ ] 네트워크 단절 시 `error.html` 폴백과 재시도
 - [ ] 푸시: **마이 → 설정에서 켜야** 권한 팝업이 뜬다 → 토큰 등록 → 수신 → 탭 이동
 - [ ] 다양한 화면 크기, 시스템 글꼴 크기
@@ -200,12 +213,16 @@ cd android; .\gradlew.bat bundleRelease
 - **증상**: 휴대폰이 다크 모드면 콜드 스타트 때 검은 배경 + 아이콘만 보이는 스플래시가 뜬다 (QA 보고).
 - **원인**: Android 12+ 는 시스템이 `windowSplashScreenBackground` 로 스플래시를 그린다. 지정이 없으면
   기기 테마 배경(다크 모드면 검정)을 쓴다. `splash.png` 자체는 흰 배경이라 문제없다.
-- **수정**: `c5eb02e`(09-28)에서 `styles.xml` 의 `AppTheme.NoActionBarLaunch` 에 흰 배경·로고 아이콘을 지정했다.
+- **수정**: `c5eb02e`(09-28)에서 `styles.xml` 의 `AppTheme.NoActionBarLaunch` 에 흰 배경·로고 아이콘을 지정했다
+  (10-01 `styles.xml` 에서 `windowSplashScreenBackground` 확인).
   **09-06 AAB 이후라 배포된 앱에는 없다** — 스플래시는 네이티브 리소스라 웹 배포로 반영되지 않는다.
 - **확인**: 재빌드 설치 후 다크 모드로 콜드 스타트. 여전히 검으면 먼저 앱 삭제 후 재설치·재부팅
   (삼성 등 일부 기기는 이전 스플래시를 캐시한다). 그래도 검으면 다른 원인이다.
 
-#### 🟡 상·하단 시스템 바 띠가 휴대폰 다크 모드를 따라 검게 보임 — 미수정 (2026-09-30 기록)
+#### 🟡 상·하단 시스템 바 띠가 휴대폰 다크 모드를 따라 검게 보임 — 미수정 (2026-09-30 기록, 10-01 코드로 재확인)
+
+> 재확인: `styles.xml` 의 `AppTheme.NoActionBar` 는 여전히 `DayNight`, `capacitor.config.ts` 에는
+> `SystemBars` 설정이 없고 `StatusBar.style` 도 `'DARK'` 그대로다. 아래 세 가지 모두 아직 안 했다.
 
 - **배경**: PR #102 로 `viewport-fit=cover` 를 빼 시스템 바 여백을 네이티브가 잡게 했다(웹 배포만으로 반영).
   그 결과 상태바·내비게이션바 영역은 앱 테마 배경색이 칠한다.
@@ -274,15 +291,16 @@ versionName 0.1.0 / versionCode 1
 - [x] 패키지 ID — `com.peakda.app`
 - [x] Play 개발자 계정 생성
 - [x] 업로드 키 생성·백업, 저장소 밖 보관
-- [x] **네이버 로그인은 이번 출시에서 제외** — `SocialLoginBtns.tsx` 에서 버튼이 주석 처리돼
-      UI 에 노출되지 않는다. 다른 진입점은 없다. 추가 작업 불필요
+- [x] **네이버 로그인 버튼은 노출돼 있다** (2026-10-01 코드 기준) — `SocialLoginBtns.tsx` 가 구글·카카오·네이버
+      세 버튼을 모두 렌더하고 네이버는 `handleNaverLogin`(`src/lib/auth/socialLogin.ts`)에 연결돼 있다.
+      (이전 기록의 "출시 제외, 버튼 주석 처리"는 현재 코드와 다르다.) 앱에서의 네이버 왕복은 실기기 검증 전
 
 ## 7. 결정 대기
 
 - [ ] Firebase 개발/운영 프로젝트 분리 여부 (현재 `peakda` 하나, 소유·관리는 백엔드)
 - [ ] 업로드 키를 GitHub Actions secrets 로 관리할지
 - [ ] 버전 정책 — versionCode 수동 증가 vs CI 자동 증가
-- [ ] **에러 모니터링(Sentry) 도입 — 곧 진행 예정** (2026-09-30 기록). 지금은 운영 에러가 수집되지 않는다 — `src/app/error.tsx`·`global-error.tsx` 에 잡힌 에러와 API 5xx 가 사용자 화면에서 끝난다. 도입 시 확인할 것:
+- [ ] **에러 모니터링(Sentry) 도입 — 곧 진행 예정** (2026-09-30 기록, 10-01 `package.json` 에 sentry 의존성 없음 확인). 지금은 운영 에러가 수집되지 않는다 — `src/app/error.tsx`·`global-error.tsx` 에 잡힌 에러와 API 5xx 가 사용자 화면에서 끝난다. 도입 시 확인할 것:
   - `@sentry/nextjs` 로 웹(Vercel) + Capacitor WebView 를 함께 잡을지, 앱은 `@sentry/capacitor` 를 따로 둘지
   - `error.tsx`/`global-error.tsx` 에서 `captureException` 호출, API 에러는 `src/api/mutator` 가 던지는 `ApiError`(스택 보존) 기준으로 5xx 만 보고 — 401/404 는 정상 흐름이라 노이즈
   - 소스맵 업로드용 `SENTRY_AUTH_TOKEN` 을 Vercel·GitHub Actions secrets 에 등록, 개인정보(닉네임·이메일) 스크러빙
@@ -291,7 +309,9 @@ versionName 0.1.0 / versionCode 1
 
 ## 8. 알아둘 것
 
-- **`src/lib/naver/naverLogin.ts` 는 아무데서도 임포트하지 않는 사용되지 않는 파일이다.**
+- **`android/app/google-services.json` 은 이 체크아웃에 없다** (gitignore 대상, 2026-10-01 확인). GitHub Actions `Android` 워크플로도 이 파일 없이 빌드하므로 **CI 산출물(APK·AAB)은 푸시가 빠지고 서명도 안 된 빌드다** (`android/app/build.gradle` 이 파일·업로드 키가 없으면 각각 건너뛴다) — 빌드가 깨지지 않는지 확인하는 용도로만 쓰고 스토어에 올리지 말 것. 2절의 "배치 완료"는
+  09-06 빌드한 PC 기준 기록이라 여기서는 검증하지 못했다. 다른 PC·CI 에서 빌드하면 파일을 따로 넣어야 한다
+- **`src/lib/naver/naverLogin.ts` 는 아무데서도 임포트하지 않는 사용되지 않는 파일이다** (10-01 재확인).
   로그인은 `src/lib/auth/socialLogin.ts` 를 쓴다. 네이버를 되살릴 때 헷갈리지 않도록 기록해둔다
 - 원격 저장소 Dependabot 경고 90건 (high 40, moderate 42, low 8). 출시 블로커는 아니다
 - FCM 실제 발송은 백엔드 스텁 상태다. 앱은 준비됐지만 **서버가 붙기 전까지 알림은 오지 않는다**

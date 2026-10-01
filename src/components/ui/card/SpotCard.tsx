@@ -7,7 +7,7 @@ import { BellBtn } from '@/components/ui/button/BellBtn'
 import { IconBtn } from '@/components/ui/button/IconBtn'
 import { Tag } from '@/components/ui/display/Tag'
 import { SPOTProps } from '@/app/search/_components/SpotPanel'
-import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
+import { SafeImage } from '@/components/ui/display/SafeImage'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 
 interface Props {
@@ -51,8 +51,8 @@ export function SpotCard({ spot }: Props) {
     <>
       <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-gray-200">
         {spot.imageUrl && (
-          <Image
-            src={toHttpsImageUrl(spot.imageUrl) ?? spot.imageUrl}
+          <SafeImage
+            src={spot.imageUrl}
             alt={spot.name}
             fill
             className="object-cover"

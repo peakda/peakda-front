@@ -26,6 +26,13 @@ const getRecord = cache(async (rawId: string) => {
   }
 })
 
+// 빌드 때는 만들지 않고 첫 요청 때 생성해 재사용한다(ISR). 주기는 기록 조회 fetch 와 같은 1분.
+export const revalidate = 60
+
+export async function generateStaticParams() {
+  return []
+}
+
 export async function generateMetadata({ params }: FeedDetailPageProps): Promise<Metadata> {
   const record = await getRecord((await params).id)
   if (!record) return {}

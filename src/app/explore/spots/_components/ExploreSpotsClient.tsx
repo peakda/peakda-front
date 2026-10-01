@@ -3,7 +3,7 @@
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { SpotCard } from '@/components/ui/card/SpotCard'
-import { Drawer } from '@/components/ui/layout/Drawer'
+import { LazyDrawer } from '@/components/ui/layout/LazyDrawer'
 import { InfiniteScrollFooter } from '@/components/ui/display/InfiniteScrollFooter'
 import { QueryFeedback } from '@/components/ui/display/QueryFeedback'
 import { useExploreSpotsInfinite } from '@/api/facades/explore'
@@ -75,7 +75,7 @@ export function ExploreSpotsClient({ section, initialPage }: ExploreSpotsClientP
           <InfiniteScrollFooter sentinelRef={sentinelRef} isLoading={isFetchingNextPage} />
         </>
       )}
-      <Drawer />
+      <LazyDrawer />
     </div>
   )
 }
