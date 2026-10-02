@@ -1244,7 +1244,7 @@ export interface SpotFavoriteResponse {
   categories: CategoryChip[];
   /** 게시된 방문 기록 수 */
   recordCount: number;
-  /** 카드 사진 URL. 최근 게시 기록 사진 최대 4장 */
+  /** 카드 사진 URL. 최근 게시 기록 사진 최대 4장. 기록 사진이 없는 명소형은 명소 이미지 1장(관광공사 썸네일 우선, 없으면 원본) */
   photoUrls: string[];
 }
 
@@ -3007,28 +3007,6 @@ export interface BloomMapPin {
 }
 
 /**
- * (deprecated) 명소형 핀 옛 구조 — `BloomMapPin` 사용 권장
- */
-export interface BloomMapItem {
-  /** 명소 id */
-  attractionId: number;
-  /** 명소명 */
-  title: string;
-  /**
-     * 위도
-     * @nullable
-     */
-  latitude?: number | null;
-  /**
-     * 경도
-     * @nullable
-     */
-  longitude?: number | null;
-  /** 이 명소의 꽃 슬롯들 */
-  blooms: BloomSlot[];
-}
-
-/**
  * 지도 영역 내 Spot 핀별 개화 상태 (핀 5단계)
  */
 export interface BloomMapResponse {
@@ -3041,11 +3019,6 @@ export interface BloomMapResponse {
   count: number;
   /** Spot 핀 목록 (명소형 + 동네형) */
   pins: BloomMapPin[];
-  /**
-     * (deprecated) `pins` 로 대체됨. 기존 클라 하위호환용으로 명소형(ATTRACTION) 핀만 옛 구조로 함께 제공한다. 신규 연동은 `pins` 를 사용하라. 동네형(LOCAL) 핀은 이 필드에 포함되지 않는다.
-     * @deprecated
-     */
-  attractions: BloomMapItem[];
 }
 
 /**
@@ -3377,7 +3350,7 @@ export interface SpotSearchItem {
   /** 경도 */
   longitude: number;
   /**
-     * 대표 이미지 URL. 명소 대표 이미지가 없으면 최근 게시 기록 사진, 없으면 null
+     * 카드 이미지 URL. 명소 이미지(관광공사 썸네일 우선, 없으면 원본)가 없으면 최근 게시 기록 사진, 없으면 null
      * @nullable
      */
   thumbnailUrl?: string | null;
@@ -3882,7 +3855,7 @@ export interface ExploreSpotItem {
      */
   address?: string | null;
   /**
-     * 대표 이미지 URL. 없으면 null
+     * 카드 이미지 URL. 관광공사 썸네일 우선, 없으면 원본. 둘 다 없으면 null
      * @nullable
      */
   thumbnailUrl?: string | null;
