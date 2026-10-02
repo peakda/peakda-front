@@ -210,6 +210,46 @@ PR #104 기준으로 표의 두 줄이 낡았습니다.
 
 **그동안 프런트 대응**: 좌표가 없으면 `venue`/`placeName` 을 카카오 키워드 검색해 위치를 잡고 있습니다. 20개 중 18개는 맞게 찾지만 '정선 병방치 메밀밭'처럼 검색되지 않는 곳이 있고, 동명 장소로 잘못 갈 수 있어 임시 방편입니다. 좌표가 내려오면 좌표를 먼저 쓰므로 프런트 추가 작업은 없습니다.
 
+## 2026-10-01 요청 1건
+
+### 17. 명소 대표 이미지(TourAPI)에도 사이즈 variant를 주세요
+
+기록 사진에 `variants`를 붙여 주신 덕분에(15번) 피드 사진은 화면 크기에 맞게 내려받고 있습니다. 감사합니다.
+
+그런데 **한국관광공사(TourAPI) 명소 이미지는 아직 원본만 내려와서**, 목록 화면에서 80px 썸네일에 원본을 통째로 받고 있습니다.
+
+**실측 (2026-10-01, 운영 API 명소 23개의 `representativeImageUrl`)**
+
+- 크기: 대부분 940px 폭
+- 용량: **48KB ~ 758KB** (중앙값 167KB, 500KB 이상 5개)
+- 23장 합계 약 5.6MB — 카드 20개짜리 목록 한 페이지가 수 MB입니다
+
+화면에서는 80px(`SpotCard`)·100px(`PinList`)로 그려서 대부분이 버려지는 데이터입니다. 모바일 데이터와 앱 첫 로딩에 그대로 영향이 갑니다.
+
+TourAPI가 주는 썸네일(`firstimage2`, `..._image3_1.jpg`)도 확인했는데, 26KB로 가볍지만 **150×113px**이라 고해상도 폰 화면의 80px 카드에서는 흐릿합니다.
+
+**요청** — TourAPI 이미지를 수집할 때 기록 사진처럼 CDN(`cdn.peakda.com`)에 리사이즈본을 만들어, 아래 필드에 `PhotoEntry.variants`와 같은 형태로 붙여 주실 수 있을까요?
+
+| 필드 | 쓰이는 곳 |
+|---|---|
+| `ExploreSpotItem.thumbnailUrl` | 탐색 목록 카드 (80px) |
+| `SpotSearchItem.thumbnailUrl` | 검색 결과 카드 (80px) |
+| `SpotPreviewItem.thumbnailUrl` · `photoUrls` | 지도 핀 미리보기 (100px / 430px) |
+| `SpotFavoriteResponse.photoUrls` | 찜 목록 카드 (80px) |
+| `SpotDetailResponse.representativeImageUrl` | 명소 상세 상단 (430px) |
+
+```jsonc
+// 예시 — 기존 필드는 그대로 두고 nullable 로 추가
+"thumbnailUrl": "https://tong.visitkorea.or.kr/...",
+"thumbnailVariants": { "thumbnail": "https://cdn.peakda.com/...", "medium": "..." }
+```
+
+- 크기는 기록 사진과 같은 기준이면 충분합니다: `thumbnail`=256px(정사각 크롭), `medium`=1080px. 원본이 940px이라 `medium`·`main`은 원본 그대로여도 됩니다.
+- 필드 추가라 기존 클라이언트는 깨지지 않습니다. 프런트는 variant가 있으면 쓰고, 없으면 지금처럼 원본을 씁니다.
+- **확인 부탁**: 관광공사 이미지는 공공누리 유형에 따라 변경 금지 조건이 붙은 것이 있을 수 있습니다. 리사이즈한 사본을 우리 CDN에 둬도 되는지 라이선스 조건을 한 번 봐 주세요.
+
+급한 건은 아닙니다 — 출시 후 목록 화면 체감 속도 개선용입니다.
+
 ## 요약 *(2026-08-10 요청 당시 원문 — 아래는 모두 처리 완료)*
 
 | # | 우선순위 | 대상 | 요청 |
