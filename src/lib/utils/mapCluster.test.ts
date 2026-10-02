@@ -90,10 +90,17 @@ describe('clusterSlices', () => {
 
 describe('clusterSpots', () => {
   describe('기본 그룹핑', () => {
-    it('같은 셀 안의 스팟은 하나로 묶인다', () => {
+    it('가까운 스팟은 하나로 묶인다', () => {
       const clusters = clusterSpots([spot(37.5, 127.0), spot(37.5001, 127.0001)], 8)
       expect(clusters).toHaveLength(1)
       expect(clusters[0].spots).toHaveLength(2)
+    })
+
+    // 격자 방식에서는 칸 경계를 사이에 둔 두 스팟이 따로 묶여 마커가 같은 자리에 겹쳐 그려졌다.
+    // (level 8 격자 칸 0.0384° 의 경계 127.0272° 양쪽, 화면상 1px 미만 거리)
+    it('예전 격자 칸 경계를 사이에 둔 가까운 스팟도 하나로 묶인다', () => {
+      const clusters = clusterSpots([spot(37.5, 127.02715), spot(37.5, 127.02725)], 8)
+      expect(clusters).toHaveLength(1)
     })
 
     it('멀리 떨어진 스팟은 분리된다', () => {
@@ -108,11 +115,11 @@ describe('clusterSpots', () => {
     })
   })
 
-  // 이 버그의 핵심. 셀이 화면보다 넓으면 (1) 구성원이 화면 밖으로 흩어지고
-  // (2) 확대해도 셀이 같은 비율로 커져 클러스터가 영원히 안 쪼개진다.
-  describe('셀 크기 불변식', () => {
+  // 이 버그의 핵심. 묶음이 화면보다 넓으면 (1) 구성원이 화면 밖으로 흩어지고
+  // (2) 확대해도 묶음이 같은 비율로 커져 클러스터가 영원히 안 쪼개진다.
+  describe('묶음 크기 불변식', () => {
     it.each(LEVELS)('level %i: 클러스터 구성원이 화면 안에 들어온다', (level) => {
-      // 셀보다 촘촘한 격자를 깔아 셀을 가득 채운다
+      // 묶음 반경보다 촘촘한 격자를 깔아 묶음을 가득 채운다
       const clusters = clusterSpots(denseGrid(level), level)
       const multi = clusters.filter((c) => c.spots.length >= 2)
       expect(multi.length).toBeGreaterThan(0)
@@ -124,9 +131,9 @@ describe('clusterSpots', () => {
       }
     })
 
-    // 셀이 화면 px 기준으로 일정해야 확대할수록 클러스터가 쪼개진다.
-    // 도(°) 단위로 고정하면 셀이 줌과 같은 비율로 커져 영원히 안 쪼개졌다.
-    it('셀의 화면상 크기는 모든 레벨에서 동일하다', () => {
+    // 묶음이 화면 px 기준으로 일정해야 확대할수록 클러스터가 쪼개진다.
+    // 도(°) 단위로 고정하면 묶음이 줌과 같은 비율로 커져 영원히 안 쪼개졌다.
+    it('묶음의 화면상 크기는 모든 레벨에서 동일하다', () => {
       const PROBE_STEP_PX = VIEWPORT_W / 20
       const widths = LEVELS.map((level) => {
         const clusters = clusterSpots(denseGrid(level), level)
