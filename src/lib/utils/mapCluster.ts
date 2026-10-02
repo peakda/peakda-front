@@ -1,3 +1,4 @@
+import Supercluster from 'supercluster'
 import type { FlowerItem } from '@/components/Map/Pin'
 import type { BloomMapPinType, BloomSlotCategory } from '@/api/facades/generated/peakdaApi.schemas'
 import type { BloomStageStatus } from '@/lib/utils/bloomStatus'
@@ -90,28 +91,59 @@ export function pinLabel(spot: MapSpot): string {
   return `${spot.title ?? '이름 없는 명소'}${flowers ? `, ${flowers}` : ''} 개화 정보`
 }
 
-// 셀 크기는 level 에 비례하므로 화면상 크기가 일정하다(≈106px @ 모바일 390px 폭).
-// 이 상수가 크면(이전 0.002 ≈ 706px) 셀이 화면보다 넓어 확대해도 클러스터가 쪼개지지 않는다.
-const CLUSTER_GRID_UNIT = 0.0003
+// 화면 px 기준 묶음 반경. 클러스터 마커(배지 포함 약 64×65px)보다 커야 마커끼리 겹치지 않는다.
+// 예전 격자 방식은 이웃 칸 경계에 붙은 두 묶음이 같은 자리에 그려져 겹쳤다.
+// 키우면 겹침은 줄지만 묶음이 넓게 퍼진다. 탭해서 한 단계라도 확대되려면 구성원 범위가
+// 모바일 화면(390px − setBounds 좌우 패딩 80px)의 절반(≈155px) 안이어야 하는데, 90px 부터
+// 이를 넘는 묶음이 생겼다(전국 665핀 시뮬레이션: 80px 최대 133px·겹침 23쌍 ← 격자 138쌍).
+const CLUSTER_RADIUS_PX = 80
 
+// 카카오 level 을 supercluster zoom(웹 메르카토르, 타일 512px)으로 옮긴다. 국내 위도에서
+// level L 의 m/px 가 zoom 19-L 과 거의 같아(±5%) radius 를 화면 px 로 그대로 쓸 수 있다.
+// level 1(최대 확대)이 zoom 18 이라 maxZoom 도 18 — 그보다 크면 묶지 않고 점을 그대로 준다.
+const toZoom = (level: number) => 19 - level
+const MAX_CLUSTER_ZOOM = 18
+
+interface SpotProps {
+  index: number
+}
+
+// 같은 spots 배열로 레벨만 바꿔 부르면 인덱스를 다시 만들지 않는다(전 레벨을 한 번에 만든다).
+const indexCache = new WeakMap<MapSpot[], Supercluster<SpotProps>>()
+
+function clusterIndex(spots: MapSpot[]): Supercluster<SpotProps> {
+  const cached = indexCache.get(spots)
+  if (cached) return cached
+
+  const index = new Supercluster<SpotProps>({
+    radius: CLUSTER_RADIUS_PX,
+    maxZoom: MAX_CLUSTER_ZOOM,
+  }).load(
+    spots.map((spot, i) => ({
+      type: 'Feature',
+      properties: { index: i },
+      geometry: { type: 'Point', coordinates: [spot.lng, spot.lat] },
+    }))
+  )
+  indexCache.set(spots, index)
+  return index
+}
+
+// 거리 기반이라 가까운 스팟끼리 묶이고, 줌 단계마다 아래 레벨 묶음을 합쳐 올라가므로
+// 확대하면 묶음이 갈라질 뿐 다른 묶음으로 옮겨 가지 않는다.
 export function clusterSpots(spots: MapSpot[], level: number): ClusterGroup[] {
-  const gridSize = CLUSTER_GRID_UNIT * Math.pow(2, level - 1)
-  const grid = new Map<string, MapSpot[]>()
+  const index = clusterIndex(spots)
 
-  for (const spot of spots) {
-    const cellX = Math.floor(spot.lng / gridSize)
-    const cellY = Math.floor(spot.lat / gridSize)
-    const key = `${cellX},${cellY}`
-    const cell = grid.get(key) ?? []
-    cell.push(spot)
-    grid.set(key, cell)
-  }
-
-  return Array.from(grid.values()).map((group) => ({
-    spots: group,
-    lat: group.reduce((s, sp) => s + sp.lat, 0) / group.length,
-    lng: group.reduce((s, sp) => s + sp.lng, 0) / group.length,
-  }))
+  return index.getClusters([-180, -85, 180, 85], toZoom(level)).map((feature) => {
+    const [lng, lat] = feature.geometry.coordinates
+    const members =
+      'cluster_id' in feature.properties
+        ? index
+            .getLeaves(feature.properties.cluster_id, Infinity)
+            .map((leaf) => spots[leaf.properties.index])
+        : [spots[feature.properties.index]]
+    return { spots: members, lat, lng }
+  })
 }
 
 // 카카오 지도의 최대 확대(= 최소 레벨).
@@ -119,7 +151,7 @@ const MAX_ZOOM_LEVEL = 1
 
 /**
  * 확대하면 이 클러스터가 갈라지는가.
- * 최대 줌의 격자에서도 한 셀에 남는(≈같은 좌표) 구성원은 아무리 확대해도 못 가른다.
+ * 최대 줌에서도 한 묶음으로 남는(≈같은 좌표) 구성원은 아무리 확대해도 못 가른다.
  */
 export function canSplitByZoom(spots: MapSpot[], level: number): boolean {
   return level > MAX_ZOOM_LEVEL && clusterSpots(spots, MAX_ZOOM_LEVEL).length > 1

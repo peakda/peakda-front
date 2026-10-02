@@ -250,6 +250,35 @@ TourAPI가 주는 썸네일(`firstimage2`, `..._image3_1.jpg`)도 확인했는�
 
 급한 건은 아닙니다 — 출시 후 목록 화면 체감 속도 개선용입니다.
 
+## 2026-10-02 요청 1건
+
+### 18. API 응답에 gzip 압축을 켜 주세요 (+ 지도 응답의 `attractions` 필드 정리)
+
+지도 핀이 600개를 넘으면서 지도 응답이 커졌는데, **API 응답이 압축 없이 내려오고 있습니다.** 클라이언트가 `Accept-Encoding: gzip, br` 을 보내도 `Content-Encoding` 없이 원본 그대로 옵니다.
+
+**실측 (2026-10-02, 운영 API `GET /api/seasonal/blooms?minLat=33&maxLat=39&minLng=124&maxLng=132`, 핀 665개)**
+
+| | 원본 | gzip 적용 시 |
+|---|---|---|
+| 지금 응답 | 299KB | 45KB |
+| `attractions` 제거 시 | 149KB | 25KB |
+
+**요청 1 — 응답 압축을 켜 주세요 (우선).** 전국 지도 기준 299KB → 45KB(-85%)로 줄어듭니다. 모바일 데이터·앱 지도 첫 로딩에 바로 효과가 있고, 지도뿐 아니라 피드·탐색 등 JSON 응답 전체에 적용됩니다.
+
+- Spring Boot 라면 아래 설정으로 켤 수 있습니다. 앞단(ALB·CloudFront·nginx 등)에서 켜셔도 됩니다.
+
+```yaml
+server:
+  compression:
+    enabled: true
+    mime-types: application/json
+    min-response-size: 1KB
+```
+
+- 프런트 작업은 없습니다. 브라우저·안드로이드 WebView 가 자동으로 풀어 줍니다.
+
+**요청 2 — 지도 응답의 deprecated `attractions` 필드 정리 (여유 있을 때).** `attractions` 는 `pins` 중 `type === 'ATTRACTION'` 인 것과 같은 내용이라 응답 절반이 중복입니다. 프런트는 `pins` 만 쓰고 명소·동네 구분도 `pins[].type` 으로 하고 있어 빼셔도 영향이 없습니다. 압축을 켜면 줄어드는 양이 20KB 정도라 급하지 않습니다 — 다른 클라이언트가 이 필드를 쓰지 않는지 확인되면 정리해 주세요.
+
 ## 요약 *(2026-08-10 요청 당시 원문 — 아래는 모두 처리 완료)*
 
 | # | 우선순위 | 대상 | 요청 |

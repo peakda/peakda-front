@@ -106,10 +106,16 @@ export function useMapCluster(
               // 더 확대할 수 있으면 확대만 한다(구성원이 벌어지면 다음 렌더에서 자동으로 갈라진다).
               // 평균 좌표로 2단계 확대하면 구성원이 화면 밖으로 흩어지므로 구성원 전체를 감싸는
               // 영역에 맞춘다. padding 은 헤더·카테고리·검색바(위)와 Nav(아래)에 가리지 않을 만큼.
-              if (canSplitByZoom(entry.spots, map.getLevel())) {
+              const level = map.getLevel()
+              if (canSplitByZoom(entry.spots, level)) {
                 const bounds = new kakao.maps.LatLngBounds()
                 entry.spots.forEach((s) => bounds.extend(new kakao.maps.LatLng(s.lat, s.lng)))
                 map.setBounds(bounds, 180, 40, 140, 40)
+                // 거리 기반 묶음은 구성원이 화면 절반보다 넓게 퍼질 수 있어, 그러면 setBounds 가
+                // 같은 레벨에 머물러 눌러도 아무 일이 없다. 그때는 한 단계만 확대한다.
+                if (map.getLevel() >= level) {
+                  map.setLevel(level - 1, { anchor: new kakao.maps.LatLng(lat, lng) })
+                }
                 return
               }
               // 최대 줌인데도 안 갈라지는 클러스터는 목록으로 보여 준다.
