@@ -34,13 +34,15 @@ export function ExploreFestivalsClient({ initialFestivals }: ExploreFestivalsCli
             <p className="text-text-tertiary text-base">다음 축제 소식을 기다려주세요</p>
           </div>
         ) : (
-          <ul className="flex flex-col items-center gap-4 px-4 pb-4">
+          <ul className="flex flex-col gap-4 px-4 pb-4">
             {festivals.map((item) => {
               const status = toFestivalStatus(item)
               return (
                 <li key={item.festivalId}>
                   <Link href={`/festivals/${item.festivalId}`}>
+                    {/* 카드 기본 폭(w-60)은 탐색 홈 슬라이더용이라 세로 목록에서는 화면 폭에 맞춘다 */}
                     <ExplorCard
+                      className="w-full"
                       type="festival"
                       image={item.thumbnailUrl ?? '/images/exploreEmpty.jpg'}
                       name={item.name}
