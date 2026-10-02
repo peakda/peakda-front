@@ -34,6 +34,7 @@ import { BLOOM_CATEGORY_EMOJI, formatPeakPeriod, peakHeadline } from '@/lib/util
 import { formatMonthDay } from '@/lib/utils/explore'
 import { cn } from '@/lib/utils/cn'
 import { SafeImage } from '@/components/ui/display/SafeImage'
+import { SpotOperatingInfo } from '@/app/spot/[id]/_components/SpotOperatingInfo'
 
 // 캘린더(일별 타임라인)가 없으면 '이번 주말이 딱이에요' 판정을 못 하므로
 // 상세 응답 배너의 현재 상태만으로 문구를 대체한다.
@@ -189,7 +190,7 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
         <Header left={<LeftArrow />} className="top-3" />
       </div>
 
-      <div className="flex flex-col gap-5 px-4 py-4">
+      <div className="flex flex-col gap-6 px-4 pt-4 pb-6">
         {/* 타이틀 + 위치 + 요약 */}
         <div className="flex flex-col gap-1.5">
           <div className="flex items-start justify-between gap-2">
@@ -259,10 +260,13 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
             </p>
           </div>
         )}
+
+        {/* 운영 정보 (운영 시간·입장료·주차) — 관광공사 데이터가 없으면 숨긴다 */}
+        {spot.operatingInfo && <SpotOperatingInfo info={spot.operatingInfo} />}
       </div>
 
       {/* 방문자 기록 (최대 3건) */}
-      <div className="border-border-primary border-t">
+      <div>
         <div className="flex items-center justify-between px-4 pt-4">
           <h2 className="text-text-primary text-base font-semibold">
             방문자 기록({spot.recordCount})
