@@ -11,6 +11,16 @@ const QUALITY = 0.82
  * - 브라우저가 디코드하지 못하는 포맷(HEIC 등)
  * - 결과가 원본보다 크거나 같은 경우(이미 잘 압축된 파일)
  */
+/**
+ * 여러 장을 한 장씩 차례로 압축한다.
+ * 동시에 돌리면 4000px 원본 비트맵(장당 약 48MB)이 한꺼번에 메모리에 올라가 저사양 기기에서 탭이 죽을 수 있다.
+ */
+export async function compressImages(files: File[]): Promise<File[]> {
+  const result: File[] = []
+  for (const file of files) result.push(await compressImage(file))
+  return result
+}
+
 export async function compressImage(file: File): Promise<File> {
   if (!file.type.startsWith('image/')) return file
 

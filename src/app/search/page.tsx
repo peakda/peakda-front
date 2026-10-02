@@ -17,6 +17,7 @@ import { useIsLoggedIn } from '@/hooks/useIsLoggedIn'
 import { useRequireLogin } from '@/hooks/useRequireLogin'
 import { track } from '@/lib/analytics'
 import { flattenPages } from '@/lib/utils/infinitePages'
+import { shouldLoadMore } from '@/lib/utils/myRecords'
 import { readStorage, writeStorage } from '@/lib/utils/storage'
 import {
   RECENT_SEARCH_KEY,
@@ -135,8 +136,15 @@ export default function SearchPage() {
                 isError={spotQuery.isError}
                 onRetry={() => void spotQuery.refetch()}
                 onLoadMore={spotQuery.fetchNextPage}
-                hasMore={spotQuery.hasNextPage && !spotQuery.isFetchingNextPage}
+                hasMore={shouldLoadMore(
+                  spotQuery.hasNextPage,
+                  spotQuery.isFetchingNextPage,
+                  spotQuery.isFetchNextPageError
+                )}
                 isLoadingMore={spotQuery.isFetchingNextPage}
+                onRetryMore={
+                  spotQuery.isFetchNextPageError ? () => void spotQuery.fetchNextPage() : undefined
+                }
               />
               <UserPanel
                 users={keyword === query.trim() ? users : []}
@@ -144,8 +152,15 @@ export default function SearchPage() {
                 isError={userQuery.isError}
                 onRetry={() => void userQuery.refetch()}
                 onLoadMore={userQuery.fetchNextPage}
-                hasMore={userQuery.hasNextPage && !userQuery.isFetchingNextPage}
+                hasMore={shouldLoadMore(
+                  userQuery.hasNextPage,
+                  userQuery.isFetchingNextPage,
+                  userQuery.isFetchNextPageError
+                )}
                 isLoadingMore={userQuery.isFetchingNextPage}
+                onRetryMore={
+                  userQuery.isFetchNextPageError ? () => void userQuery.fetchNextPage() : undefined
+                }
               />
             </TabPanels>
           </Tabs>

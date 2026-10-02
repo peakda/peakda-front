@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Button } from '@/components/ui/button/Button'
 import { Textarea } from '@/components/ui/form/Textarea'
 import { cn } from '@/lib/utils/cn'
@@ -23,7 +24,9 @@ export function ReportModal({ onSubmit, onCancel, isSubmitting = false }: Report
   const [reason, setReason] = useState<CreateReportRequestReason | null>(null)
   const [detail, setDetail] = useState('')
 
-  return (
+  // 피드 목록 카드는 content-visibility 래퍼(containment) 안에 있어 fixed 가 화면이 아니라 카드 기준으로 잡힌다.
+  // body 로 빼서 화면 전체를 덮는다. 신고를 눌러야 열리므로 렌더 시점엔 항상 브라우저다.
+  return createPortal(
     <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/40">
       <div className="w-full max-w-[430px] px-4">
         <div className="rounded-2xl bg-white p-5">
@@ -79,6 +82,7 @@ export function ReportModal({ onSubmit, onCancel, isSubmitting = false }: Report
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

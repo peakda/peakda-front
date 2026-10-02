@@ -7,6 +7,7 @@ import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { FeedListItem } from '@/components/ui/card/FeedListItem'
 import { LazyDrawer } from '@/components/ui/layout/LazyDrawer'
 import { InfiniteScrollFooter } from '@/components/ui/display/InfiniteScrollFooter'
+import { shouldLoadMore } from '@/lib/utils/myRecords'
 import { useSpotRecordsBySpotInfinite, useDeleteSpotRecord } from '@/api/facades/spot-record'
 import { useSpotDetail } from '@/api/facades/spot'
 import { useCurrentUser } from '@/api/facades/auth'
@@ -19,10 +20,13 @@ export default function SpotFeedPage() {
   const { id } = useParams<{ id: string }>()
   const { data: spot } = useSpotDetail(Number(id))
 
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage, isFetchNextPageError } =
     useSpotRecordsBySpotInfinite(Number(id))
   const records = flattenPages(data)
-  const sentinelRef = useInfiniteScroll(() => fetchNextPage(), hasNextPage && !isFetchingNextPage)
+  const sentinelRef = useInfiniteScroll(
+    () => fetchNextPage(),
+    shouldLoadMore(hasNextPage, isFetchingNextPage, isFetchNextPageError)
+  )
 
   const { data: currentUser } = useCurrentUser()
   const { mutate: deleteRecord } = useDeleteSpotRecord()
@@ -64,7 +68,11 @@ export default function SpotFeedPage() {
             />
           ))}
           {/* 하단에 닿으면 다음 페이지를 불러온다 */}
-          <InfiniteScrollFooter sentinelRef={sentinelRef} isLoading={isFetchingNextPage} />
+          <InfiniteScrollFooter
+            sentinelRef={sentinelRef}
+            isLoading={isFetchingNextPage}
+            onRetry={isFetchNextPageError ? () => void fetchNextPage() : undefined}
+          />
         </div>
       )}
 

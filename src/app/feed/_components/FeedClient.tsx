@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Header } from '@/components/ui/layout/Header'
@@ -10,10 +10,13 @@ import { FeedListItem } from '@/components/ui/card/FeedListItem'
 import { LazyDrawer } from '@/components/ui/layout/LazyDrawer'
 import { InfiniteScrollFooter } from '@/components/ui/display/InfiniteScrollFooter'
 import { QueryFeedback } from '@/components/ui/display/QueryFeedback'
+import { FeedCardSkeleton } from '@/app/feed/_components/FeedCardSkeleton'
 import { useFeedListInfinite } from '@/api/facades/feed'
 import { useCurrentUser } from '@/api/facades/auth'
 import { useDeleteSpotRecord } from '@/api/facades/spot-record'
 import { useDrawerStore } from '@/stores/useDrawerStore'
+import { useFeedTabStore } from '@/stores/useFeedTabStore'
+import { useIsLoggedIn } from '@/hooks/useIsLoggedIn'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { useRequireLogin } from '@/hooks/useRequireLogin'
 import { filterFromTab } from '@/lib/utils/feed'
@@ -31,18 +34,31 @@ interface FeedClientProps {
 
 export function FeedClient({ initialPage }: FeedClientProps) {
   const router = useRouter()
-  const [tab, setTab] = useState(FEED_CATEGORIES[0])
+  // 탭은 스토어에 둬서 기록 상세에 갔다 뒤로 와도 유지된다.
+  // 로그인 상태로 '팔로잉'을 고른 채 로그아웃하면 스토어 값이 남으므로, 비로그인이면 '전체'로 본다.
+  const isLoggedIn = useIsLoggedIn()
+  const storedTab = useFeedTabStore((s) => s.tab)
+  const setTab = useFeedTabStore((s) => s.setTab)
+  const tab = isLoggedIn ? storedTab : FEED_CATEGORIES[0]
   const filter = filterFromTab(tab)
 
-  const { data, isLoading, isError, refetch, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    useFeedListInfinite(
-      filter,
-      filter === GetFeedFilter.ALL ? (initialPage ?? undefined) : undefined
-    )
+  const {
+    data,
+    isLoading,
+    isError,
+    refetch,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetchNextPageError,
+    fetchNextPage,
+  } = useFeedListInfinite(
+    filter,
+    filter === GetFeedFilter.ALL ? (initialPage ?? undefined) : undefined
+  )
   const records = flattenPages(data)
   const sentinelRef = useInfiniteScroll(
     () => fetchNextPage(),
-    shouldLoadMore(hasNextPage, isFetchingNextPage)
+    shouldLoadMore(hasNextPage, isFetchingNextPage, isFetchNextPageError)
   )
 
   // 탭마다 무한 쿼리 키가 달라 목록이 처음부터 다시 쌓인다.
@@ -104,7 +120,15 @@ export function FeedClient({ initialPage }: FeedClientProps) {
 
       {/* 피드 목록 */}
       {isLoading ? (
-        <QueryFeedback state="loading" />
+        // 탭을 바꾸면 목록이 처음부터 다시 쌓인다. 글자 한 줄 대신 카드 모양으로 자리를 잡아 화면이 들썩이지 않게 한다.
+        <div
+          aria-busy="true"
+          aria-label="피드 불러오는 중"
+          className="divide-border-primary divide-y"
+        >
+          <FeedCardSkeleton />
+          <FeedCardSkeleton />
+        </div>
       ) : isError && records.length === 0 ? (
         <QueryFeedback state="error" onRetry={() => void refetch()} />
       ) : records.length === 0 ? (
@@ -123,7 +147,11 @@ export function FeedClient({ initialPage }: FeedClientProps) {
               />
             ))}
           </div>
-          <InfiniteScrollFooter sentinelRef={sentinelRef} isLoading={isFetchingNextPage} />
+          <InfiniteScrollFooter
+            sentinelRef={sentinelRef}
+            isLoading={isFetchingNextPage}
+            onRetry={isFetchNextPageError ? () => void fetchNextPage() : undefined}
+          />
         </>
       )}
 

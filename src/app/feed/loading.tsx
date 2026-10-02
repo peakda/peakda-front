@@ -1,25 +1,7 @@
 import { Nav } from '@/components/ui/layout/Nav'
+import { FeedCardSkeleton } from '@/app/feed/_components/FeedCardSkeleton'
 
 // FeedClient 레이아웃(헤더 → 탭 → 카드 목록)을 그대로 따른다.
-function FeedCardSkeleton() {
-  return (
-    <div className="flex flex-col gap-3 px-4 py-4">
-      <div className="flex items-center gap-2">
-        <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200" />
-        <div className="flex flex-1 flex-col gap-1.5">
-          <div className="h-3.5 w-24 animate-pulse rounded bg-gray-200" />
-          <div className="h-3 w-32 animate-pulse rounded bg-gray-100" />
-        </div>
-      </div>
-      <div className="h-[240px] w-full animate-pulse rounded-2xl bg-gray-200" />
-      <div className="flex flex-col gap-2">
-        <div className="h-3.5 w-full animate-pulse rounded bg-gray-100" />
-        <div className="h-3.5 w-2/3 animate-pulse rounded bg-gray-100" />
-      </div>
-    </div>
-  )
-}
-
 export default function Loading() {
   return (
     <div

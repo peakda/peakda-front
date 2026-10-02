@@ -30,16 +30,19 @@ describe('utils/myRecords', () => {
 
   describe('shouldLoadMore', () => {
     it('다음 페이지가 있고 가져오는 중이 아니면 true', () => {
-      expect(shouldLoadMore(true, false)).toBe(true)
+      expect(shouldLoadMore(true, false, false)).toBe(true)
     })
     it('다음 페이지가 있어도 이미 가져오는 중이면 false', () => {
-      expect(shouldLoadMore(true, true)).toBe(false)
+      expect(shouldLoadMore(true, true, false)).toBe(false)
     })
     it('다음 페이지가 없으면 false', () => {
-      expect(shouldLoadMore(false, false)).toBe(false)
+      expect(shouldLoadMore(false, false, false)).toBe(false)
     })
     it('다음 페이지가 없고 가져오는 중이어도 false', () => {
-      expect(shouldLoadMore(false, true)).toBe(false)
+      expect(shouldLoadMore(false, true, false)).toBe(false)
+    })
+    it('다음 페이지 요청이 실패했으면 false (자동 재요청 반복 방지)', () => {
+      expect(shouldLoadMore(true, false, true)).toBe(false)
     })
   })
 })

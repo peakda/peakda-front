@@ -15,7 +15,8 @@ import {
   useUpdateSpotRecord,
   useUploadSpotRecordPhotos,
 } from '@/api/facades/spot-record'
-import { compressImage } from '@/lib/utils/image'
+import { compressImages } from '@/lib/utils/image'
+import { usePreviewUrls } from '@/hooks/usePreviewUrls'
 import { readPhotoExif } from '@/lib/utils/photoExif'
 import { loadAppSettings } from '@/lib/utils/appSettings'
 import type {
@@ -60,6 +61,8 @@ function RecordEditForm({ record }: { record: SpotRecordResponse }) {
   const updateRecord = useUpdateSpotRecord()
 
   const [step, setStep] = useState(0)
+  // 고른 사진을 압축하는 동안의 장수 (그만큼 로딩 칸을 보여 준다)
+  const [pendingPhotoCount, setPendingPhotoCount] = useState(0)
   const [photoItems, setPhotoItems] = useState<EditPhoto[]>(() =>
     record.photos.map((photo) => ({
       kind: 'existing',
@@ -75,8 +78,9 @@ function RecordEditForm({ record }: { record: SpotRecordResponse }) {
   const [selectedPlantIds, setSelectedPlantIds] = useState<number[]>(record.plants.map((p) => p.id))
   const [plantDrawerOpen, setPlantDrawerOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const { createPreviewUrl, revokePreviewUrl, isUnmounted } = usePreviewUrls()
 
-  const isValid = photoItems.length > 0 && date.trim().length > 0
+  const isValid = pendingPhotoCount === 0 && photoItems.length > 0 && date.trim().length > 0
   const isSubmitting = uploadPhotos.isPending || updateRecord.isPending
 
   const togglePlant = (plantId: number) =>
@@ -85,9 +89,12 @@ function RecordEditForm({ record }: { record: SpotRecordResponse }) {
     )
 
   const handlePhotoAdd = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? [])
+    // 갤러리에서 많이 골라도 남은 칸만큼만 처리한다(어차피 5장까지만 남는다).
+    const files = Array.from(e.target.files ?? []).slice(0, 5 - photoItems.length)
     e.target.value = ''
-    if (files.length > 0 && loadAppSettings().exifEnabled) {
+    if (files.length === 0) return
+    setPendingPhotoCount(files.length)
+    if (loadAppSettings().exifEnabled) {
       try {
         const { date: photoDate } = await readPhotoExif(files[0])
         if (photoDate) setDate((previous) => previous || photoDate)
@@ -96,9 +103,15 @@ function RecordEditForm({ record }: { record: SpotRecordResponse }) {
       }
     }
     // 미리보기도 업로드에 쓸 파일 그대로 보여 준다(원본 수 MB 를 메모리에 들고 있지 않도록).
-    const compressed = await Promise.all(files.map(compressImage))
+    let compressed: File[]
+    try {
+      compressed = await compressImages(files)
+    } finally {
+      setPendingPhotoCount(0)
+    }
+    if (isUnmounted()) return
     const newItems = compressed.map(
-      (file): EditPhoto => ({ kind: 'new', file, previewUrl: URL.createObjectURL(file) })
+      (file): EditPhoto => ({ kind: 'new', file, previewUrl: createPreviewUrl(file) })
     )
     setPhotoItems((prev) => [...prev, ...newItems].slice(0, 5))
   }
@@ -107,7 +120,7 @@ function RecordEditForm({ record }: { record: SpotRecordResponse }) {
     setPhotoItems((prev) => {
       // 서버 url 은 revoke 대상이 아니다. 뺀 기존 사진은 photoKeys 에서 빠지고 서버가 정리한다.
       const target = prev[index]
-      if (target.kind === 'new') URL.revokeObjectURL(target.previewUrl)
+      if (target.kind === 'new') revokePreviewUrl(target.previewUrl)
       return prev.filter((_, i) => i !== index)
     })
   }
@@ -178,6 +191,7 @@ function RecordEditForm({ record }: { record: SpotRecordResponse }) {
       location={record.spot.name}
       category={record.spot.type === 'ATTRACTION' ? '유명명소' : '동네스팟'}
       photoItems={photoItems}
+      pendingPhotoCount={pendingPhotoCount}
       onPhotoAdd={handlePhotoAdd}
       onRemovePhoto={handleRemovePhoto}
       fileInputRef={fileInputRef}

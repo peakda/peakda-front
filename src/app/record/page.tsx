@@ -4,16 +4,21 @@ import { Suspense, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { useKakaoPlaces, type KakaoPlace } from '@/hooks/useKakaoPlaces'
+import { usePreviewUrls } from '@/hooks/usePreviewUrls'
 import { usePlants } from '@/api/facades/plant'
 import { useMatchSpot, useSpotDetail } from '@/api/facades/spot'
 import { useCreateSpotRecord, useUploadSpotRecordPhotos } from '@/api/facades/spot-record'
 import type { CreateSpotRecordRequest } from '@/api/facades/generated/peakdaApi.schemas'
-import { LocationStepForm, type Category, type PhotoItem } from '@/app/record/_components/LocationStepForm'
+import {
+  LocationStepForm,
+  type Category,
+  type PhotoItem,
+} from '@/app/record/_components/LocationStepForm'
 import { DetailsStepForm, type BloomStage } from '@/app/record/_components/DetailsStepForm'
 import { LocationSearchView } from '@/app/record/_components/LocationSearchView'
 import { RecordCompleteView } from '@/app/record/_components/RecordCompleteView'
 import { RecordSkeleton } from '@/app/record/_components/RecordSkeleton'
-import { compressImage } from '@/lib/utils/image'
+import { compressImages } from '@/lib/utils/image'
 import { readPhotoExif } from '@/lib/utils/photoExif'
 import { loadAppSettings } from '@/lib/utils/appSettings'
 import { track } from '@/lib/analytics'
@@ -41,6 +46,8 @@ function RecordPageContent() {
   const [category, setCategory] = useState<Category>('유명명소')
   const [showCategoryPicker, setShowCategoryPicker] = useState(false)
   const [photoItems, setPhotoItems] = useState<PhotoItem[]>([])
+  // 고른 사진을 압축하는 동안의 장수 (그만큼 로딩 칸을 보여 준다)
+  const [pendingPhotoCount, setPendingPhotoCount] = useState(0)
   const [date, setDate] = useState('')
   const [isSearchMode, setIsSearchMode] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -52,7 +59,8 @@ function RecordPageContent() {
   const [plantDrawerOpen, setPlantDrawerOpen] = useState(false)
   const [isComplete, setIsComplete] = useState(false)
 
-  const { results, search } = useKakaoPlaces()
+  const { isReady: isPlacesReady, results, search } = useKakaoPlaces()
+  const { createPreviewUrl, revokePreviewUrl, isUnmounted } = usePreviewUrls()
   const { data: plants } = usePlants()
   const { data: presetSpot } = useSpotDetail(spotIdParam)
   const matchSpot = useMatchSpot()
@@ -84,11 +92,12 @@ function RecordPageContent() {
   }, [presetSpot])
 
   // 검색어 변경 시 카카오 장소 검색 (디바운스)
+  // SDK 준비 전에 입력된 검색어는 결과가 비므로, 준비되면(isPlacesReady) 마지막 검색어로 다시 검색한다.
   useEffect(() => {
     if (!isSearchMode) return
     const timer = setTimeout(() => search(searchQuery), 300)
     return () => clearTimeout(timer)
-  }, [searchQuery, isSearchMode, search])
+  }, [searchQuery, isSearchMode, search, isPlacesReady])
 
   const togglePlant = (id: number) =>
     setSelectedPlantIds((prev) =>
@@ -97,13 +106,17 @@ function RecordPageContent() {
 
   const hasLocation = location.trim().length > 0
   const hasSearchQuery = searchQuery.trim().length > 0
-  const isValid = hasLocation && photoItems.length > 0 && date.trim().length > 0
+  const isValid =
+    pendingPhotoCount === 0 && hasLocation && photoItems.length > 0 && date.trim().length > 0
   const isSubmitting = matchSpot.isPending || uploadPhotos.isPending || createRecord.isPending
 
   const handlePhotoAdd = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? [])
+    // 갤러리에서 많이 골라도 남은 칸만큼만 처리한다(어차피 5장까지만 남는다).
+    const files = Array.from(e.target.files ?? []).slice(0, 5 - photoItems.length)
     e.target.value = ''
-    if (files.length > 0 && loadAppSettings().exifEnabled) {
+    if (files.length === 0) return
+    setPendingPhotoCount(files.length)
+    if (loadAppSettings().exifEnabled) {
       try {
         const { date: photoDate } = await readPhotoExif(files[0])
         if (photoDate) setDate((previous) => previous || photoDate)
@@ -112,14 +125,20 @@ function RecordPageContent() {
       }
     }
     // 미리보기도 업로드에 쓸 파일 그대로 보여 준다(원본 수 MB 를 메모리에 들고 있지 않도록).
-    const compressed = await Promise.all(files.map(compressImage))
-    const newItems = compressed.map((file) => ({ file, previewUrl: URL.createObjectURL(file) }))
+    let compressed: File[]
+    try {
+      compressed = await compressImages(files)
+    } finally {
+      setPendingPhotoCount(0)
+    }
+    if (isUnmounted()) return
+    const newItems = compressed.map((file) => ({ file, previewUrl: createPreviewUrl(file) }))
     setPhotoItems((prev) => [...prev, ...newItems].slice(0, 5))
   }
 
   const handleRemovePhoto = (index: number) => {
     setPhotoItems((prev) => {
-      URL.revokeObjectURL(prev[index].previewUrl)
+      revokePreviewUrl(prev[index].previewUrl)
       return prev.filter((_, i) => i !== index)
     })
   }
@@ -220,7 +239,7 @@ function RecordPageContent() {
 
   // 완료 화면 → "계속 기록하기": 입력값을 모두 초기화하고 Step1로 복귀
   const handleRecordAgain = () => {
-    photoItems.forEach((item) => URL.revokeObjectURL(item.previewUrl))
+    photoItems.forEach((item) => revokePreviewUrl(item.previewUrl))
     setStep(0)
     setLocation('')
     setSelectedSpot(null)
@@ -299,6 +318,7 @@ function RecordPageContent() {
       onOpenSearch={() => setIsSearchMode(true)}
       onLocationChange={setLocation}
       photoItems={photoItems}
+      pendingPhotoCount={pendingPhotoCount}
       onPhotoAdd={handlePhotoAdd}
       onRemovePhoto={handleRemovePhoto}
       fileInputRef={fileInputRef}
