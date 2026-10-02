@@ -16,6 +16,7 @@ import {
   useUploadSpotRecordPhotos,
 } from '@/api/facades/spot-record'
 import { compressImages } from '@/lib/utils/image'
+import { usePreviewUrls } from '@/hooks/usePreviewUrls'
 import { readPhotoExif } from '@/lib/utils/photoExif'
 import { loadAppSettings } from '@/lib/utils/appSettings'
 import type {
@@ -77,6 +78,7 @@ function RecordEditForm({ record }: { record: SpotRecordResponse }) {
   const [selectedPlantIds, setSelectedPlantIds] = useState<number[]>(record.plants.map((p) => p.id))
   const [plantDrawerOpen, setPlantDrawerOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const { createPreviewUrl, revokePreviewUrl, isUnmounted } = usePreviewUrls()
 
   const isValid = pendingPhotoCount === 0 && photoItems.length > 0 && date.trim().length > 0
   const isSubmitting = uploadPhotos.isPending || updateRecord.isPending
@@ -107,8 +109,9 @@ function RecordEditForm({ record }: { record: SpotRecordResponse }) {
     } finally {
       setPendingPhotoCount(0)
     }
+    if (isUnmounted()) return
     const newItems = compressed.map(
-      (file): EditPhoto => ({ kind: 'new', file, previewUrl: URL.createObjectURL(file) })
+      (file): EditPhoto => ({ kind: 'new', file, previewUrl: createPreviewUrl(file) })
     )
     setPhotoItems((prev) => [...prev, ...newItems].slice(0, 5))
   }
@@ -117,7 +120,7 @@ function RecordEditForm({ record }: { record: SpotRecordResponse }) {
     setPhotoItems((prev) => {
       // 서버 url 은 revoke 대상이 아니다. 뺀 기존 사진은 photoKeys 에서 빠지고 서버가 정리한다.
       const target = prev[index]
-      if (target.kind === 'new') URL.revokeObjectURL(target.previewUrl)
+      if (target.kind === 'new') revokePreviewUrl(target.previewUrl)
       return prev.filter((_, i) => i !== index)
     })
   }

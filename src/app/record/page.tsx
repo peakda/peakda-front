@@ -4,6 +4,7 @@ import { Suspense, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { useKakaoPlaces, type KakaoPlace } from '@/hooks/useKakaoPlaces'
+import { usePreviewUrls } from '@/hooks/usePreviewUrls'
 import { usePlants } from '@/api/facades/plant'
 import { useMatchSpot, useSpotDetail } from '@/api/facades/spot'
 import { useCreateSpotRecord, useUploadSpotRecordPhotos } from '@/api/facades/spot-record'
@@ -58,7 +59,8 @@ function RecordPageContent() {
   const [plantDrawerOpen, setPlantDrawerOpen] = useState(false)
   const [isComplete, setIsComplete] = useState(false)
 
-  const { results, search } = useKakaoPlaces()
+  const { isReady: isPlacesReady, results, search } = useKakaoPlaces()
+  const { createPreviewUrl, revokePreviewUrl, isUnmounted } = usePreviewUrls()
   const { data: plants } = usePlants()
   const { data: presetSpot } = useSpotDetail(spotIdParam)
   const matchSpot = useMatchSpot()
@@ -90,11 +92,12 @@ function RecordPageContent() {
   }, [presetSpot])
 
   // 검색어 변경 시 카카오 장소 검색 (디바운스)
+  // SDK 준비 전에 입력된 검색어는 결과가 비므로, 준비되면(isPlacesReady) 마지막 검색어로 다시 검색한다.
   useEffect(() => {
     if (!isSearchMode) return
     const timer = setTimeout(() => search(searchQuery), 300)
     return () => clearTimeout(timer)
-  }, [searchQuery, isSearchMode, search])
+  }, [searchQuery, isSearchMode, search, isPlacesReady])
 
   const togglePlant = (id: number) =>
     setSelectedPlantIds((prev) =>
@@ -128,13 +131,14 @@ function RecordPageContent() {
     } finally {
       setPendingPhotoCount(0)
     }
-    const newItems = compressed.map((file) => ({ file, previewUrl: URL.createObjectURL(file) }))
+    if (isUnmounted()) return
+    const newItems = compressed.map((file) => ({ file, previewUrl: createPreviewUrl(file) }))
     setPhotoItems((prev) => [...prev, ...newItems].slice(0, 5))
   }
 
   const handleRemovePhoto = (index: number) => {
     setPhotoItems((prev) => {
-      URL.revokeObjectURL(prev[index].previewUrl)
+      revokePreviewUrl(prev[index].previewUrl)
       return prev.filter((_, i) => i !== index)
     })
   }
@@ -235,7 +239,7 @@ function RecordPageContent() {
 
   // 완료 화면 → "계속 기록하기": 입력값을 모두 초기화하고 Step1로 복귀
   const handleRecordAgain = () => {
-    photoItems.forEach((item) => URL.revokeObjectURL(item.previewUrl))
+    photoItems.forEach((item) => revokePreviewUrl(item.previewUrl))
     setStep(0)
     setLocation('')
     setSelectedSpot(null)
