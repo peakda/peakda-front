@@ -8,7 +8,7 @@ export default function Loading() {
     >
       <div className="h-64 w-full animate-pulse bg-gray-200" />
 
-      <div className="flex flex-col gap-5 px-4 py-4">
+      <div className="flex flex-col gap-6 px-4 pt-4 pb-6">
         <div className="flex flex-col gap-2">
           <div className="h-6 w-2/3 animate-pulse rounded bg-gray-200" />
           <div className="h-4 w-1/2 animate-pulse rounded bg-gray-100" />
@@ -23,7 +23,7 @@ export default function Loading() {
         </div>
       </div>
 
-      <div className="border-border-primary border-t">
+      <div>
         <div className="flex items-center justify-between px-4 pt-4">
           <div className="h-5 w-28 animate-pulse rounded bg-gray-200" />
           <div className="h-4 w-10 animate-pulse rounded bg-gray-100" />

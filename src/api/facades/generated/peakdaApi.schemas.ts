@@ -2006,6 +2006,115 @@ export interface ApiResponsePlantAdminResponse {
 }
 
 /**
+ * 검토 결정
+ * @nullable
+ */
+export type ReviewCongestionLinkRequestAction = typeof ReviewCongestionLinkRequestAction[keyof typeof ReviewCongestionLinkRequestAction] | null;
+
+
+export const ReviewCongestionLinkRequestAction = {
+  CONFIRM: 'CONFIRM',
+  REJECT: 'REJECT',
+} as const;
+
+/**
+ * 혼잡도 연결 검토 요청
+ */
+export interface ReviewCongestionLinkRequest {
+  /**
+     * 검토 결정
+     * @nullable
+     */
+  action: ReviewCongestionLinkRequestAction;
+  /**
+     * CONFIRM 시 연결할 명소 id. 비우면 제안된 명소로 확정한다. REJECT 에서는 무시한다.
+     * @nullable
+     */
+  attractionId?: number | null;
+}
+
+/**
+ * 연결 상태
+ */
+export type CongestionLinkAdminResponseStatus = typeof CongestionLinkAdminResponseStatus[keyof typeof CongestionLinkAdminResponseStatus];
+
+
+export const CongestionLinkAdminResponseStatus = {
+  CONFIRMED: 'CONFIRMED',
+  PENDING_REVIEW: 'PENDING_REVIEW',
+  REJECTED: 'REJECTED',
+  UNMATCHED: 'UNMATCHED',
+} as const;
+
+/**
+ * 연결 근거
+ * @nullable
+ */
+export type CongestionLinkAdminResponseMatchType = typeof CongestionLinkAdminResponseMatchType[keyof typeof CongestionLinkAdminResponseMatchType] | null;
+
+
+export const CongestionLinkAdminResponseMatchType = {
+  EXACT: 'EXACT',
+  REGION_REFORM: 'REGION_REFORM',
+  CONTAINS: 'CONTAINS',
+  MANUAL: 'MANUAL',
+} as const;
+
+/**
+ * 후보 명소 요약
+ */
+export interface AttractionSummary {
+  /** 명소 id */
+  id: number;
+  /** 명소명 */
+  title: string;
+  /**
+     * 주소
+     * @nullable
+     */
+  address?: string | null;
+}
+
+/**
+ * 관리자 혼잡도 연결 검토 응답
+ */
+export interface CongestionLinkAdminResponse {
+  /** 연결 id */
+  id: number;
+  /** 집중률 지역 코드 (개편 전 법정동 시도) */
+  areaCode: string;
+  /** 집중률 시군구 코드 (개편 전 법정동 시군구) */
+  sigunguCode: string;
+  /** 집중률 관광지명 */
+  touristAttractionName: string;
+  /** 연결 상태 */
+  status: CongestionLinkAdminResponseStatus;
+  /**
+     * 연결 근거
+     * @nullable
+     */
+  matchType?: CongestionLinkAdminResponseMatchType;
+  attraction?: AttractionSummary | null;
+  /** 검토용 후보 명소 (최대 5건) */
+  candidates: AttractionSummary[];
+  /** 수정 시각 */
+  updatedAt: string;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseCongestionLinkAdminResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: CongestionLinkAdminResponse | null;
+}
+
+/**
  * 공통 페이지 요청 (0-based)
  */
 export interface PageRequest {
@@ -2375,6 +2484,191 @@ export interface BloomBanner {
 }
 
 /**
+ * 혼잡 등급
+ */
+export type DailyCongestionLevel = typeof DailyCongestionLevel[keyof typeof DailyCongestionLevel];
+
+
+export const DailyCongestionLevel = {
+  QUIET: 'QUIET',
+  NORMAL: 'NORMAL',
+  BUSY: 'BUSY',
+  VERY_BUSY: 'VERY_BUSY',
+} as const;
+
+/**
+ * 하루 혼잡도
+ */
+export interface DailyCongestion {
+  /** 날짜 */
+  date: string;
+  /** 집중률 (관광지 자체 기준 0~100 상대 지수, 방문객 수 아님) */
+  rate: number;
+  /** 혼잡 등급 */
+  level: DailyCongestionLevel;
+}
+
+/**
+ * 일별 혼잡도 예측 (한국관광공사 관광지 집중률 기반, 일 단위)
+ */
+export interface CongestionForecast {
+  today?: DailyCongestion | null;
+  /** 오늘부터 날짜순 예측 */
+  days: DailyCongestion[];
+  /**
+     * 기간 중 가장 한산한 날
+     * @nullable
+     */
+  quietestDate?: string | null;
+}
+
+/**
+ * 하늘 상태 (낮 시간대 대표값)
+ * @nullable
+ */
+export type DailyWeatherSky = typeof DailyWeatherSky[keyof typeof DailyWeatherSky] | null;
+
+
+export const DailyWeatherSky = {
+  CLEAR: 'CLEAR',
+  PARTLY_CLOUDY: 'PARTLY_CLOUDY',
+  CLOUDY: 'CLOUDY',
+  SHOWER: 'SHOWER',
+  RAIN: 'RAIN',
+  RAIN_SNOW: 'RAIN_SNOW',
+  SNOW: 'SNOW',
+} as const;
+
+/**
+ * 하루 날씨
+ */
+export interface DailyWeather {
+  /** 날짜 */
+  date: string;
+  /**
+     * 하늘 상태 (낮 시간대 대표값)
+     * @nullable
+     */
+  sky?: DailyWeatherSky;
+  /**
+     * 낮 시간대 최대 강수확률(%)
+     * @nullable
+     */
+  precipitationProbability?: number | null;
+  /**
+     * 최저기온(℃)
+     * @nullable
+     */
+  minTemperature?: number | null;
+  /**
+     * 최고기온(℃)
+     * @nullable
+     */
+  maxTemperature?: number | null;
+}
+
+/**
+ * 강수 형태
+ */
+export type RainWindowSky = typeof RainWindowSky[keyof typeof RainWindowSky];
+
+
+export const RainWindowSky = {
+  CLEAR: 'CLEAR',
+  PARTLY_CLOUDY: 'PARTLY_CLOUDY',
+  CLOUDY: 'CLOUDY',
+  SHOWER: 'SHOWER',
+  RAIN: 'RAIN',
+  RAIN_SNOW: 'RAIN_SNOW',
+  SNOW: 'SNOW',
+} as const;
+
+/**
+ * 비·눈 구간 (start 포함, end 제외)
+ */
+export interface RainWindow {
+  /** 시작 시각 */
+  start: string;
+  /** 종료 시각 */
+  end: string;
+  /** 강수 형태 */
+  sky: RainWindowSky;
+}
+
+/**
+ * 향후 날씨 (3일 이내 단기예보, 이후 중기예보)
+ */
+export interface WeatherForecast {
+  /** 오늘부터 날짜순 일별 요약 */
+  days: DailyWeather[];
+  /** 3일 이내 비·눈이 이어지는 시간 구간 (현재 이후만) */
+  rainWindows: RainWindow[];
+}
+
+/**
+ * 진행 상태
+ */
+export type NearbyFestivalItemPhase = typeof NearbyFestivalItemPhase[keyof typeof NearbyFestivalItemPhase];
+
+
+export const NearbyFestivalItemPhase = {
+  UPCOMING: 'UPCOMING',
+  ONGOING: 'ONGOING',
+  ENDING_SOON: 'ENDING_SOON',
+  ENDED: 'ENDED',
+} as const;
+
+/**
+ * 주변 축제
+ */
+export interface NearbyFestivalItem {
+  /** 축제 id */
+  festivalId: number;
+  /** 축제명 */
+  name: string;
+  /** 진행 상태 */
+  phase: NearbyFestivalItemPhase;
+  /** 시작일 */
+  startsOn: string;
+  /** 종료일 */
+  endsOn: string;
+  /** 명소로부터 거리(m) */
+  distanceMeters: number;
+}
+
+/**
+ * 방문 타이밍 — 개화 상태와 함께 볼 향후 혼잡도·날씨·주변 축제와 추천 방문일. 데이터가 없는 항목은 null(목록은 빈 배열)로 내려간다.
+ */
+export interface VisitTimingResponse {
+  congestion?: CongestionForecast | null;
+  weather?: WeatherForecast | null;
+  /** 주변(기본 5km)에서 진행 중이거나 곧 시작하는 축제. 진행 중 우선, 가까운 순 */
+  nearbyFestivals: NearbyFestivalItem[];
+  recommendation?: Recommendation | null;
+}
+
+/**
+ * 운영 정보 — 관광공사 원문을 그대로 담고 줄바꿈(\n)만 정리한다. 관광공사가 비워 둔 항목은 null
+ */
+export interface OperatingInfo {
+  /**
+     * 운영 시간 — 관광공사 이용시간. 쉬는 날이 있으면 마지막 줄에 '쉬는 날: …' 으로 붙인다
+     * @nullable
+     */
+  operatingHours?: string | null;
+  /**
+     * 입장료
+     * @nullable
+     */
+  admissionFee?: string | null;
+  /**
+     * 주차
+     * @nullable
+     */
+  parking?: string | null;
+}
+
+/**
  * 현재 사용자의 찜 상태
  */
 export interface FavoriteState {
@@ -2414,6 +2708,8 @@ export interface SpotDetailResponse {
      */
   representativeImageUrl?: string | null;
   bloom?: BloomBanner | null;
+  visitTiming?: VisitTimingResponse | null;
+  operatingInfo?: OperatingInfo | null;
   /** 게시된 방문 기록 수 */
   recordCount: number;
   /** 방문자 기록 프리뷰 (최신 게시순, 최대 3건) */
@@ -5158,6 +5454,37 @@ export interface ApiResponseCurationAdminDetailResponse {
 }
 
 /**
+ * 공통 페이지 응답 (0-based)
+ */
+export interface PageResponseCongestionLinkAdminResponse {
+  /** 현재 페이지의 항목 리스트 */
+  content: CongestionLinkAdminResponse[];
+  /** 0-based 현재 페이지 */
+  page: number;
+  /** 페이지 크기 */
+  size: number;
+  /** 전체 항목 수 */
+  totalElements: number;
+  /** 전체 페이지 수 */
+  totalPages: number;
+  /** 다음 페이지 존재 여부 */
+  hasNext: boolean;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponsePageResponseCongestionLinkAdminResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: PageResponseCongestionLinkAdminResponse | null;
+}
+
+/**
  * 관리자 조치 종류
  */
 export type AdminAuditLogResponseAction = typeof AdminAuditLogResponseAction[keyof typeof AdminAuditLogResponseAction];
@@ -5183,6 +5510,8 @@ export const AdminAuditLogResponseAction = {
   USER_SUSPEND: 'USER_SUSPEND',
   USER_UNSUSPEND: 'USER_UNSUSPEND',
   SCHEDULER_JOB_TRIGGER: 'SCHEDULER_JOB_TRIGGER',
+  CONGESTION_LINK_CONFIRM: 'CONGESTION_LINK_CONFIRM',
+  CONGESTION_LINK_REJECT: 'CONGESTION_LINK_REJECT',
 } as const;
 
 /**
@@ -5199,6 +5528,7 @@ export const AdminAuditLogResponseTargetType = {
   FESTIVAL: 'FESTIVAL',
   NOTICE: 'NOTICE',
   SCHEDULER_JOB: 'SCHEDULER_JOB',
+  CONGESTION_LINK: 'CONGESTION_LINK',
 } as const;
 
 /**
@@ -5940,6 +6270,24 @@ q?: string;
 pageRequest: PageRequest;
 };
 
+export type GetAdminCongestionLinksParams = {
+/**
+ * 연결 상태
+ */
+status?: GetAdminCongestionLinksStatus;
+pageRequest: PageRequest;
+};
+
+export type GetAdminCongestionLinksStatus = typeof GetAdminCongestionLinksStatus[keyof typeof GetAdminCongestionLinksStatus];
+
+
+export const GetAdminCongestionLinksStatus = {
+  CONFIRMED: 'CONFIRMED',
+  PENDING_REVIEW: 'PENDING_REVIEW',
+  REJECTED: 'REJECTED',
+  UNMATCHED: 'UNMATCHED',
+} as const;
+
 export type GetAdminAuditLogsParams = {
 /**
  * 조치 대상 종류
@@ -5967,5 +6315,6 @@ export const GetAdminAuditLogsTargetType = {
   FESTIVAL: 'FESTIVAL',
   NOTICE: 'NOTICE',
   SCHEDULER_JOB: 'SCHEDULER_JOB',
+  CONGESTION_LINK: 'CONGESTION_LINK',
 } as const;
 
