@@ -8,14 +8,22 @@ export type FilterSurface = 'map' | 'explore'
 export type LocationPermission = 'granted' | 'denied'
 export type ExploreSection = 'peak_now' | 'next_week' | 'festival' | 'creator'
 export type SpotAction = 'save' | 'unsave' | 'alert_on' | 'alert_off' | 'record'
+export type RecordLocationMethod = 'typed' | 'search' | 'from_spot'
 
 // GA4·Mixpanel 로 보내는 이벤트 이름과 파라미터는 여기서만 정한다 — 화면마다 문자열을 쓰면 오타 하나로 데이터가 갈라진다.
 // 이벤트 목록과 각 이벤트가 언제 기록되는지는 docs/ANALYTICS_EVENTS.md 에 둔다.
 // 파라미터로 나눠 보려면 GA 관리 → 맞춤 정의에 측정기준으로 등록해야 한다 (등록 전에 쌓인 데이터에는 적용 안 됨).
 // 어느 화면에서 일어났는지는 GA 가 page_location 으로 자동으로 붙이므로 따로 보내지 않는다.
 interface AnalyticsEvents {
-  login: Record<string, never>
-  sign_up: Record<string, never>
+  // provider: 로그인 버튼을 누를 때 저장해 둔 값(google/kakao/naver). 다른 경로로 왔으면 없다.
+  login: { provider?: string }
+  login_click: { provider: string }
+  sign_up: { provider?: string }
+  onboarding_step: { step: number }
+  onboarding_skip: { step: number }
+  logout: Record<string, never>
+  account_delete: Record<string, never>
+  location_setting_change: { enabled: boolean }
   // trigger: 검색어를 직접 쳤는지, 인기 검색어·최근 검색어를 눌렀는지
   search: { search_term: string; result_count?: number; trigger: SearchTrigger }
   search_result_click: {
@@ -75,7 +83,25 @@ interface AnalyticsEvents {
   push_permission: { result: string }
   // 알림으로 어느 스팟에 갔는지는 뒤따르는 spot_view 로 알 수 있어 대상 id 는 보내지 않는다.
   push_open: { notification_type?: string }
-  notification_click: { notification_type: string }
+  notification_click: { notification_type: string; was_unread: boolean }
+  // 안 읽은 알림 점이 보임. 화면을 오갈 때마다 쌓이지 않게 앱(페이지)을 새로 열 때마다 한 번만 보낸다.
+  notification_badge_shown: { unread_count: number }
+  notification_icon_click: { surface: 'map' | 'my'; has_unread: boolean; unread_count: number }
+  notification_tab_change: { tab: string }
+  notification_read_all: { unread_count: number }
+  feed_view: { record_id: number; spot_id: number }
+  feed_tab_change: { tab: string }
+  feed_photo_swipe: { record_id: number; photo_count: number; surface: 'feed_list' | 'feed_detail' }
+  reaction_add: { record_id: number; reaction_type: string }
+  reaction_remove: { record_id: number; reaction_type: string }
+  follow: { target_user_id: number }
+  unfollow: { target_user_id: number }
+  report_submit: { target_type: string }
+  record_location_select: { method: RecordLocationMethod; photo_count: number }
+  record_plant_select: { plant_id: number }
+  record_edit_start: { record_id: number }
+  record_edit: { record_id: number }
+  record_delete: { record_id: number }
   // 앱을 백그라운드에서 다시 연 것. 새로 켠 경우는 페이지뷰가 잡으므로 보내지 않는다.
   app_open: Record<string, never>
   // 실사용자 성능(Core Web Vitals). metric_value 는 ms 단위, CLS 만 1000배 한 정수다(GA value 는 정수 집계).
@@ -108,7 +134,13 @@ function sendWhenReady(args: unknown[], retries = 0) {
 // null 은 GA 에만 보낸다 — 성능 지표는 제품 분석과 무관하고 Mixpanel 무료 한도만 쓴다.
 const MIXPANEL_EVENT_NAMES: Record<keyof AnalyticsEvents, string | null> = {
   login: 'Login Completed',
+  login_click: 'Login Started',
   sign_up: 'Sign Up Completed',
+  onboarding_step: 'Onboarding Step Viewed',
+  onboarding_skip: 'Onboarding Skipped',
+  logout: 'Logout',
+  account_delete: 'Account Deleted',
+  location_setting_change: 'Location Setting Changed',
   search: 'Search Performed',
   search_result_click: 'Search Result Clicked',
   search_tab_change: 'Search Tab Changed',
@@ -134,6 +166,23 @@ const MIXPANEL_EVENT_NAMES: Record<keyof AnalyticsEvents, string | null> = {
   push_permission: 'Push Permission Responded',
   push_open: 'Push Opened',
   notification_click: 'Notification Clicked',
+  notification_badge_shown: 'Notification Badge Shown',
+  notification_icon_click: 'Notification Icon Clicked',
+  notification_tab_change: 'Notification Tab Changed',
+  notification_read_all: 'Notifications All Read',
+  feed_view: 'Feed Viewed',
+  feed_tab_change: 'Feed Tab Changed',
+  feed_photo_swipe: 'Feed Photos Swiped',
+  reaction_add: 'Reaction Added',
+  reaction_remove: 'Reaction Removed',
+  follow: 'User Followed',
+  unfollow: 'User Unfollowed',
+  report_submit: 'Report Submitted',
+  record_location_select: 'Record Location Selected',
+  record_plant_select: 'Record Plant Selected',
+  record_edit_start: 'Record Edit Started',
+  record_edit: 'Record Edited',
+  record_delete: 'Record Deleted',
   app_open: 'App Opened',
   web_vitals: null,
 }
@@ -202,6 +251,30 @@ const SIGNUP_PENDING_KEY = 'peakda_analytics_signup'
 
 export function markSignedUp() {
   writeStorage(SIGNUP_PENDING_KEY, '1')
+}
+
+let isBadgeShownTracked = false
+
+// 지도·마이 상단 알림 버튼에 안 읽은 표시가 처음 보일 때. 이후 버튼을 누르는지(notification_icon_click)와 비교한다.
+export function trackNotificationBadgeShown(unreadCount: number) {
+  if (isBadgeShownTracked || unreadCount <= 0) return
+  isBadgeShownTracked = true
+  track('notification_badge_shown', { unread_count: unreadCount })
+}
+
+// 소셜 로그인은 외부 화면에 다녀오므로(웹은 전체 이동) 고른 수단을 저장소에 남겨 두고, 로그인·가입 완료 때 꺼낸다.
+const LOGIN_PROVIDER_KEY = 'peakda_analytics_login_provider'
+
+export function trackLoginStart(provider: string) {
+  writeStorage(LOGIN_PROVIDER_KEY, provider)
+  track('login_click', { provider })
+}
+
+// 신규 회원은 로그인 콜백에서 꺼내지 않고 약관·가입을 거쳐 sign_up 에서 꺼낸다.
+export function takeLoginProvider(): string | undefined {
+  const provider = readStorage(LOGIN_PROVIDER_KEY) ?? undefined
+  removeStorage(LOGIN_PROVIDER_KEY)
+  return provider
 }
 
 interface AnalyticsUser {

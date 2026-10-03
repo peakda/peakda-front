@@ -157,6 +157,7 @@ export const useUpdateSpotRecord = () => {
   return useUpdateGen({
     mutation: {
       onSuccess: (res, { id }) => {
+        track('record_edit', { record_id: id })
         queryClient.invalidateQueries({ queryKey: getGetSpotsRecordsQueryKey() })
         queryClient.invalidateQueries({ queryKey: getGetSpotsRecordsMeQueryKey() })
         queryClient.invalidateQueries({ queryKey: [`/api/spots/records/${id}`] })
@@ -175,7 +176,8 @@ export const useDeleteSpotRecord = () => {
   const queryClient = useQueryClient()
   return useDeleteGen({
     mutation: {
-      onSuccess: () => {
+      onSuccess: (_res, { id }) => {
+        track('record_delete', { record_id: id })
         recordListKeys.forEach((queryKey) => queryClient.invalidateQueries({ queryKey }))
         invalidateSpotDetail(queryClient)
         invalidateBloomMap(queryClient)

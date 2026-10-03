@@ -191,6 +191,38 @@ describe('lib/analytics trackLocationPermission', () => {
   })
 })
 
+describe('lib/analytics 로그인 수단·알림 표시', () => {
+  afterEach(() => {
+    delete window.gtag
+    vi.unstubAllEnvs()
+    vi.clearAllMocks()
+    localStorage.clear()
+  })
+
+  it('로그인 버튼에서 고른 수단을 완료 때 한 번 꺼내 쓴다', async () => {
+    const analytics = await loadAnalytics('token')
+    await analytics.initMixpanel()
+
+    analytics.trackLoginStart('kakao')
+
+    expect(mixpanel.track).toHaveBeenCalledWith('Login Started', { provider: 'kakao' })
+    expect(analytics.takeLoginProvider()).toBe('kakao')
+    expect(analytics.takeLoginProvider()).toBeUndefined()
+  })
+
+  it('안 읽은 알림 표시는 처음 보일 때 한 번만 보내고, 0건이면 보내지 않는다', async () => {
+    const analytics = await loadAnalytics('token')
+    await analytics.initMixpanel()
+
+    analytics.trackNotificationBadgeShown(0)
+    analytics.trackNotificationBadgeShown(3)
+    analytics.trackNotificationBadgeShown(5)
+
+    expect(mixpanel.track).toHaveBeenCalledOnce()
+    expect(mixpanel.track).toHaveBeenCalledWith('Notification Badge Shown', { unread_count: 3 })
+  })
+})
+
 describe('lib/analytics isAppReopen', () => {
   const now = 1_000_000_000
 

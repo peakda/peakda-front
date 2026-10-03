@@ -26,7 +26,7 @@ vi.mock('@capacitor/app', () => ({
 vi.mock('@capacitor/browser', () => ({ Browser: { close: () => Promise.resolve() } }))
 vi.mock('next/navigation', () => ({ useRouter: () => ({ replace: vi.fn() }) }))
 vi.mock('@/api/facades/generated/auth/auth', () => ({ getAuthMe: () => Promise.resolve() }))
-vi.mock('@/lib/analytics', () => ({ track: vi.fn() }))
+vi.mock('@/lib/analytics', () => ({ track: vi.fn(), takeLoginProvider: vi.fn() }))
 vi.mock('sonner', () => ({ toast: { error: vi.fn() } }))
 // 서버의 로그인 code 는 일회성이다 — 같은 code 의 두 번째 교환은 실패한다.
 vi.mock('@/lib/auth/nativeAuth', () => ({

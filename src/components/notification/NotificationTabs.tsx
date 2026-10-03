@@ -6,6 +6,7 @@ import {
   useMarkAllNotificationsRead,
   useMarkNotificationRead,
   useNotificationListInfinite,
+  useUnreadNotificationCount,
 } from '@/api/facades/notification'
 import { Alarm } from '@/components/ui/display/Alarm'
 import { InfiniteScrollFooter } from '@/components/ui/display/InfiniteScrollFooter'
@@ -91,7 +92,7 @@ function NotificationPanel({ tabValue, label }: { tabValue: string; label: strin
         const item = toAlarmItem(n)
         const link = toNotificationHref(n)
         const handleSelect = () => {
-          track('notification_click', { notification_type: n.type })
+          track('notification_click', { notification_type: n.type, was_unread: !n.read })
           if (!n.read) markRead.mutate({ id: n.id })
           if (!link) return
           if (link.isExternal) window.open(link.href, '_blank', 'noopener,noreferrer')
@@ -123,17 +124,25 @@ function NotificationPanel({ tabValue, label }: { tabValue: string; label: strin
 
 export function NotificationTabs() {
   const markAll = useMarkAllNotificationsRead()
+  const { data: unread } = useUnreadNotificationCount()
 
   return (
-    <Tabs tabs={TABS} defaultValue="All">
+    <Tabs
+      tabs={TABS}
+      defaultValue="All"
+      onValueChange={(tab) => track('notification_tab_change', { tab })}
+    >
       <div className="flex justify-end px-4 pt-2">
         <button
           type="button"
-          onClick={() =>
+          onClick={() => {
+            // 처리 전 개수 — 성공 후에는 0 으로 다시 조회된다.
+            const unreadCount = unread?.unreadCount ?? 0
             markAll.mutate(undefined, {
+              onSuccess: () => track('notification_read_all', { unread_count: unreadCount }),
               onError: () => toast.error('알림을 읽음 처리하지 못했어요'),
             })
-          }
+          }}
           className="text-text-tertiary text-sm"
         >
           모두 읽음
