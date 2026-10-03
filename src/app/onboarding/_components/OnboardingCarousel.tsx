@@ -64,7 +64,7 @@ export function OnboardingCarousel({ steps }: Props) {
         }
       />
 
-      <div ref={emblaRef} className="slide-in-from-bottom-2 flex-1 overflow-hidden">
+      <div ref={emblaRef} className="mp-no-track slide-in-from-bottom-2 flex-1 overflow-hidden">
         <OnboardingMain steps={steps} selectedIndex={selectedIndex} />
       </div>
 

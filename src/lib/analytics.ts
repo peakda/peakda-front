@@ -1,5 +1,5 @@
 import { Capacitor } from '@capacitor/core'
-import type { OverridedMixpanel } from 'mixpanel-browser'
+import type { AutocaptureConfig, OverridedMixpanel } from 'mixpanel-browser'
 import { hasAuthMarker } from '@/lib/auth/session'
 import { readStorage, removeStorage, writeStorage } from '@/lib/utils/storage'
 
@@ -191,6 +191,25 @@ const MIXPANEL_EVENT_NAMES: Record<keyof AnalyticsEvents, string | null> = {
 // 토큰은 페이지에 공개되는 값이라 비밀이 아니다.
 const MIXPANEL_TOKEN = process.env.NEXT_PUBLIC_MIXPANEL_TOKEN
 
+// 이름 붙인 이벤트 밖의 버튼 클릭은 자동 수집으로 본다. 클릭·연타(rage)·반응 없는 클릭(dead)만 받는다.
+// - 입력·스크롤·제출은 무료 한도만 쓰고, 버튼 문구는 닉네임·기록 본문이 섞일 수 있어 받지 않는다.
+//   버튼은 aria-label 로 구분한다(기본 수집 속성) — 아이콘만 있는 버튼에는 aria-label 을 붙일 것.
+// - 원래 반응이 없는 영역(지도·사진 캐러셀·바텀시트 손잡이)은 'mp-no-track' 클래스로 뺀다. 조상에 붙어도 막힌다.
+// - 성수기에 한도가 위험하면 Vercel 에서 NEXT_PUBLIC_MIXPANEL_AUTOCAPTURE=off 로 끈다(재배포 필요).
+const AUTOCAPTURE_CONFIG: AutocaptureConfig | false =
+  process.env.NEXT_PUBLIC_MIXPANEL_AUTOCAPTURE === 'off'
+    ? false
+    : {
+        pageview: false,
+        click: true,
+        dead_click: true,
+        rage_click: true,
+        input: false,
+        scroll: false,
+        submit: false,
+        capture_text_content: false,
+      }
+
 // SDK 는 첫 화면이 그려진 뒤 import() 로 받는다. 그 전에 생긴 호출은 순서대로 모아 두었다가 로드 후 실행한다.
 let mixpanel: OverridedMixpanel | null = null
 let pending: ((mp: OverridedMixpanel) => void)[] = []
@@ -213,7 +232,7 @@ export async function initMixpanel() {
   try {
     const { default: mp } = await import('mixpanel-browser')
     // 페이지뷰는 trackPageView 가 직접 보낸다 — 자동 페이지뷰는 prev_path 가 갱신되기 전에 나갈 수 있다.
-    mp.init(MIXPANEL_TOKEN, { track_pageview: false, autocapture: false })
+    mp.init(MIXPANEL_TOKEN, { track_pageview: false, autocapture: AUTOCAPTURE_CONFIG })
     baseProperties.platform = Capacitor.getPlatform()
     mp.register({ ...baseProperties, is_logged_in: hasAuthMarker() })
     mixpanel = mp

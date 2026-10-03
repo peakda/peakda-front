@@ -117,6 +117,7 @@ export function ExploreClient({ initialExplore }: ExploreClientProps) {
               <p className="text-text-secondary text-sm">필터</p>
               <button
                 type="button"
+                aria-label="꽃 필터 열기"
                 className="cursor-pointer"
                 onClick={() => {
                   track('filter_open', { surface: 'explore' })

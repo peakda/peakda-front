@@ -98,7 +98,7 @@ export function PlantSelectDrawer({
             방문 기록에 추가할 식물 종류를 검색하고 선택합니다.
           </VaulDrawer.Description>
 
-          <div className="mx-auto mt-4 mb-2 h-1.5 w-12 shrink-0 rounded-full bg-zinc-300" />
+          <div className="mp-no-track mx-auto mt-4 mb-2 h-1.5 w-12 shrink-0 rounded-full bg-zinc-300" />
 
           <h2 className="px-4 pt-2 text-lg font-semibold">식물 선택</h2>
 
