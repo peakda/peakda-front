@@ -16,6 +16,8 @@ export interface UserProps {
 
 interface Props {
   users: UserProps[]
+  // 결과를 눌러 프로필로 갈 때. position 은 0부터
+  onOpenUser?: (userId: number, position: number) => void
   isLoginRequired?: boolean
   onLogin?: () => void
   // 목록 하단에 닿았을 때 다음 페이지를 부른다. hasMore 가 false 면 관찰하지 않는다.
@@ -32,6 +34,7 @@ interface Props {
 
 export function UserPanel({
   users,
+  onOpenUser,
   isLoginRequired = false,
   onLogin,
   onLoadMore,
@@ -79,8 +82,8 @@ export function UserPanel({
   return (
     <>
       <ul className="divide-y divide-gray-100">
-        {users.map((user) => (
-          <UserList user={user} key={user.id} />
+        {users.map((user, idx) => (
+          <UserList user={user} key={user.id} onOpen={() => onOpenUser?.(user.id, idx)} />
         ))}
       </ul>
       <InfiniteScrollFooter

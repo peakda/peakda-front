@@ -107,12 +107,17 @@ export async function prepareInitialMapLocation(
   })
 }
 
-export function panToCurrentLocation(map: kakao.maps.Map, onPermissionDenied?: () => void) {
+// onPermission 은 권한 결과를 알려준다. 시간 초과·위치 확인 실패는 권한은 있는 것이라 granted 다.
+export function panToCurrentLocation(
+  map: kakao.maps.Map,
+  onPermission?: (permission: 'granted' | 'denied') => void
+) {
   navigator.geolocation.getCurrentPosition(
-    ({ coords }) => map.panTo(new kakao.maps.LatLng(coords.latitude, coords.longitude)),
-    (err) => {
-      if (err.code === err.PERMISSION_DENIED) onPermissionDenied?.()
+    ({ coords }) => {
+      map.panTo(new kakao.maps.LatLng(coords.latitude, coords.longitude))
+      onPermission?.('granted')
     },
+    (err) => onPermission?.(err.code === err.PERMISSION_DENIED ? 'denied' : 'granted'),
     LOCATION_OPTIONS
   )
 }

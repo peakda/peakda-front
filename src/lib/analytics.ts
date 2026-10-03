@@ -3,6 +3,12 @@ import type { OverridedMixpanel } from 'mixpanel-browser'
 import { hasAuthMarker } from '@/lib/auth/session'
 import { readStorage, removeStorage, writeStorage } from '@/lib/utils/storage'
 
+export type SearchTrigger = 'typed' | 'hot' | 'recent'
+export type FilterSurface = 'map' | 'explore'
+export type LocationPermission = 'granted' | 'denied'
+export type ExploreSection = 'peak_now' | 'next_week' | 'festival' | 'creator'
+export type SpotAction = 'save' | 'unsave' | 'alert_on' | 'alert_off' | 'record'
+
 // GA4·Mixpanel 로 보내는 이벤트 이름과 파라미터는 여기서만 정한다 — 화면마다 문자열을 쓰면 오타 하나로 데이터가 갈라진다.
 // 이벤트 목록과 각 이벤트가 언제 기록되는지는 docs/ANALYTICS_EVENTS.md 에 둔다.
 // 파라미터로 나눠 보려면 GA 관리 → 맞춤 정의에 측정기준으로 등록해야 한다 (등록 전에 쌓인 데이터에는 적용 안 됨).
@@ -10,10 +16,55 @@ import { readStorage, removeStorage, writeStorage } from '@/lib/utils/storage'
 interface AnalyticsEvents {
   login: Record<string, never>
   sign_up: Record<string, never>
-  search: { search_term: string; result_count?: number }
-  map_filter_apply: { region: string; timing: string; categories: string }
+  // trigger: 검색어를 직접 쳤는지, 인기 검색어·최근 검색어를 눌렀는지
+  search: { search_term: string; result_count?: number; trigger: SearchTrigger }
+  search_result_click: {
+    result_type: 'spot' | 'user'
+    item_id: number
+    position: number
+    search_term: string
+  }
+  search_tab_change: { tab: string; has_keyword: boolean }
+  // categories 는 목록이다 — GA 에는 쉼표로 이어 보내고, Mixpanel 에는 꽃별로 셀 수 있게 목록 그대로 보낸다.
+  // 지도는 목록 결과가 나온 뒤 result_count(0건 포함)와 함께 보낸다. 탐색 화면은 보여줄 목록이 없어 비운다.
+  map_filter_apply: {
+    surface: FilterSurface
+    region: string
+    timing: string
+    categories: string[]
+    flower_count: number
+    result_count?: number
+  }
+  filter_open: { surface: FilterSurface }
   map_pin_click: { spot_id: number }
-  spot_view: { spot_id: number; spot_type: string; bloom_category?: string; bloom_status?: string }
+  // 핀을 누르면 뜨는 목록에서 몇 번째 카드를 눌러 상세로 갔는지
+  map_preview_click: { spot_id: number; position: number }
+  // 위치를 쓸 수 있었는지. 앱 설정에서 꺼 두었으면 app_off
+  map_my_location_click: { permission: LocationPermission | 'app_off' }
+  // 값이 바뀔 때만 보낸다(trackLocationPermission). 이미 허용한 사람이 지도에 올 때마다 쌓이지 않게.
+  location_permission: { result: LocationPermission; trigger: 'map_open' | 'my_location_button' }
+  explore_card_click: {
+    section: ExploreSection
+    item_id: number
+    position: number
+    view: 'main' | 'list'
+  }
+  explore_see_all: { section: ExploreSection }
+  spot_view: {
+    spot_id: number
+    spot_name: string
+    spot_type: string
+    bloom_category?: string
+    bloom_status?: string
+  }
+  // 로그인 여부와 상관없이 누른 순간 보낸다. 성공(spot_save 등)과의 차이가 로그인 안내에서 멈춘 사람이다.
+  spot_action_click: {
+    action: SpotAction
+    spot_id: number
+  }
+  festival_view: { festival_id: number; festival_name: string }
+  // 공식 홈페이지 — 서비스 밖으로 나가는 지점
+  festival_homepage_click: { festival_id: number }
   spot_save: { spot_id: number }
   spot_unsave: { spot_id: number }
   login_prompt: { reason: string }
@@ -59,9 +110,20 @@ const MIXPANEL_EVENT_NAMES: Record<keyof AnalyticsEvents, string | null> = {
   login: 'Login Completed',
   sign_up: 'Sign Up Completed',
   search: 'Search Performed',
+  search_result_click: 'Search Result Clicked',
+  search_tab_change: 'Search Tab Changed',
   map_filter_apply: 'Filter Applied',
+  filter_open: 'Filter Opened',
   map_pin_click: 'Map Pin Clicked',
+  map_preview_click: 'Map Preview Clicked',
+  map_my_location_click: 'My Location Clicked',
+  location_permission: 'Location Permission Responded',
+  explore_card_click: 'Explore Card Clicked',
+  explore_see_all: 'Explore See All Clicked',
   spot_view: 'Spot Viewed',
+  spot_action_click: 'Spot Action Clicked',
+  festival_view: 'Festival Viewed',
+  festival_homepage_click: 'Festival Homepage Clicked',
   spot_save: 'Spot Saved',
   spot_unsave: 'Spot Unsaved',
   login_prompt: 'Login Prompt Shown',
@@ -189,12 +251,31 @@ export function isAppReopen(pausedAt: number | null, now: number): boolean {
   return pausedAt != null && now - pausedAt >= APP_REOPEN_THRESHOLD_MS
 }
 
+// 이 기기에서 마지막으로 보낸 위치 권한 결과. 같으면 다시 보내지 않는다.
+const LOCATION_PERMISSION_KEY = 'peakda_analytics_location_permission'
+
+export function trackLocationPermission(
+  result: LocationPermission,
+  trigger: AnalyticsEvents['location_permission']['trigger']
+) {
+  if (readStorage(LOCATION_PERMISSION_KEY) === result) return
+  writeStorage(LOCATION_PERMISSION_KEY, result)
+  track('location_permission', { result, trigger })
+}
+
 export function track<E extends keyof AnalyticsEvents>(event: E, params: AnalyticsEvents[E]) {
   if (typeof window === 'undefined') return
 
   const defined = Object.fromEntries(Object.entries(params).filter(([, value]) => value != null))
+  // GA 파라미터는 목록을 받지 않아 쉼표로 잇는다.
+  const gaParams = Object.fromEntries(
+    Object.entries(defined).map(([key, value]) => [
+      key,
+      Array.isArray(value) ? value.join(',') : value,
+    ])
+  )
   // 앱(Capacitor)도 운영 웹을 그대로 띄우므로 같은 GA 로 들어온다. 웹·앱을 이 값으로 가른다.
-  sendWhenReady(['event', event, { ...defined, platform: Capacitor.getPlatform() }])
+  sendWhenReady(['event', event, { ...gaParams, platform: Capacitor.getPlatform() }])
 
   // platform·is_logged_in·prev_path 는 공통 속성으로 등록돼 있어 Mixpanel 에는 따로 붙이지 않는다.
   const mixpanelName = MIXPANEL_EVENT_NAMES[event]

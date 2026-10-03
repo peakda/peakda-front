@@ -27,6 +27,8 @@ export interface SPOTProps {
 
 interface Props {
   spots: SPOTProps[]
+  // 결과를 눌러 상세로 갈 때. position 은 0부터
+  onOpenSpot?: (spotId: number, position: number) => void
   // 목록 하단에 닿았을 때 다음 페이지를 부른다. hasMore 가 false 면 관찰하지 않는다.
   onLoadMore?: () => void
   hasMore?: boolean
@@ -41,6 +43,7 @@ interface Props {
 
 export function SpotPanel({
   spots,
+  onOpenSpot,
   onLoadMore,
   hasMore = false,
   isLoadingMore = false,
@@ -69,8 +72,12 @@ export function SpotPanel({
   return (
     <>
       <ul className="divide-y divide-gray-100">
-        {spots.map((spot) => (
-          <SpotCard spot={spot} key={spot.id} />
+        {spots.map((spot, idx) => (
+          <SpotCard
+            spot={spot}
+            key={spot.id}
+            onOpen={() => spot.id != null && onOpenSpot?.(spot.id, idx)}
+          />
         ))}
       </ul>
       <InfiniteScrollFooter

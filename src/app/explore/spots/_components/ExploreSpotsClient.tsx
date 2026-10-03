@@ -16,6 +16,12 @@ import { hasSpotId, toExploreSpotProps } from '@/lib/utils/explore'
 import { flattenPages } from '@/lib/utils/infinitePages'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { useFilterStore } from '@/stores/useFilterStore'
+import { track, type ExploreSection } from '@/lib/analytics'
+
+const ANALYTICS_SECTION: Record<GetExploreSpotsSection, ExploreSection> = {
+  PEAK_NOW: 'peak_now',
+  NEXT_WEEK: 'next_week',
+}
 
 const SECTION_TITLE: Record<GetExploreSpotsSection, string> = {
   PEAK_NOW: '지금이 절정이에요',
@@ -77,10 +83,19 @@ export function ExploreSpotsClient({ section, initialPage }: ExploreSpotsClientP
       ) : (
         <>
           <ul className="divide-y divide-gray-100">
-            {spots.map((item) => (
+            {spots.map((item, idx) => (
               <SpotCard
                 key={`${item.attractionId}-${item.category}`}
                 spot={toExploreSpotProps(item)}
+                onOpen={() =>
+                  item.spotId != null &&
+                  track('explore_card_click', {
+                    section: ANALYTICS_SECTION[section],
+                    item_id: item.spotId,
+                    position: idx,
+                    view: 'list',
+                  })
+                }
               />
             ))}
           </ul>
