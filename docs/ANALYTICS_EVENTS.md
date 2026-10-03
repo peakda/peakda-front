@@ -11,6 +11,15 @@ PM 공유용 전체 설계(퍼널·대시보드·예정 이벤트 포함): https
 - Mixpanel 초기화·페이지뷰·로그인 식별·앱 재방문은 `src/app/_components/AnalyticsManager.tsx`가 맡는다.
 - 서버에 저장되는 행동(찜·기록 등)은 파사드의 `onSuccess`에서 보낸다 — 실패한 시도가 성공으로 잡히지 않게.
 
+## 자동 수집 (Mixpanel autocapture)
+
+이름 붙인 이벤트 밖의 버튼 클릭은 Mixpanel 이 자동으로 모은다. 설정은 `src/lib/analytics.ts`의 `AUTOCAPTURE_CONFIG`.
+
+- 받는 것: 클릭(`$mp_click`), 연타(`$mp_rage_click`), 반응 없는 클릭(`$mp_dead_click`). 입력·스크롤·제출·버튼 문구는 받지 않는다.
+- **버튼은 `aria-label`로 구분한다** — 문구를 받지 않으므로 이름표가 없으면 클래스명만 남아 읽을 수 없다. 아이콘만 있는 버튼에는 `aria-label`을 붙인다.
+- **원래 반응이 없는 영역은 `mp-no-track` 클래스로 뺀다** — 조상에 붙어도 하위 클릭이 모두 빠진다. 지금 붙은 곳: 지도(`#kakao-map`), 기록 사진 캐러셀(`FeedCard`·`FeedDetailView`), 온보딩 캐러셀, 바텀시트 손잡이(`Drawer`·`LoginSheet`·`PlantSelectDrawer`). 탭·드래그가 기본 동작이라 "반응 없는 클릭"이 대량으로 잘못 잡히고 무료 한도(월 100만 이벤트)를 쓴다.
+- 끄기: Vercel 에 `NEXT_PUBLIC_MIXPANEL_AUTOCAPTURE=off` (빌드 때 들어가는 값이라 재배포 필요).
+
 ## 공통 속성 (Mixpanel super property)
 
 | 속성 | 값 |

@@ -55,7 +55,7 @@ export function FeedDetailView({
     <div className="flex flex-col gap-3">
       {/* 이미지 캐러셀 — 화면 폭 전체, 헤더가 위에 겹친다 */}
       <div className="relative">
-        <div ref={emblaRef} className="overflow-hidden">
+        <div ref={emblaRef} className="mp-no-track overflow-hidden">
           <div className="flex touch-pan-y">
             {images.map((src, i) => (
               <div key={i} className="min-w-0 flex-[0_0_100%]">

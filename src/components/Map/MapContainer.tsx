@@ -462,7 +462,7 @@ export const MapContainer = () => {
 
   return (
     <div className="relative h-dvh w-full contain-strict">
-      <div ref={containerRef} id="kakao-map" className="absolute inset-0 z-0 bg-green-50" />
+      <div ref={containerRef} id="kakao-map" className="mp-no-track absolute inset-0 z-0 bg-green-50" />
 
       {!areTilesLoaded && (
         <div className="pointer-events-none absolute inset-0 z-[1]">

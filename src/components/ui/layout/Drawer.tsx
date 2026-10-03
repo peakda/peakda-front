@@ -232,7 +232,7 @@ export function Drawer() {
           <VaulDrawer.Content className="fixed right-0 bottom-0 left-0 z-100 mx-auto flex max-w-[430px] flex-col rounded-t-[20px] bg-white outline-none">
             <VaulDrawer.Title className="sr-only">{title}</VaulDrawer.Title>
             <VaulDrawer.Description className="sr-only">{description}</VaulDrawer.Description>
-            <div className="mx-auto mt-4 mb-2 h-1.5 w-12 shrink-0 rounded-full bg-zinc-300" />
+            <div className="mp-no-track mx-auto mt-4 mb-2 h-1.5 w-12 shrink-0 rounded-full bg-zinc-300" />
             {type === 'logout' ? (
               <LogoutDrawerContent onClose={closeDrawer} />
             ) : type === 'withdraw' ? (
@@ -301,7 +301,7 @@ export function Drawer() {
           </VaulDrawer.Title>
           <VaulDrawer.Description className="sr-only">{description}</VaulDrawer.Description>
 
-          <div className="bg-icon-quaternary mx-auto mt-4 mb-2 h-1 w-12 shrink-0 rounded-full" />
+          <div className="mp-no-track bg-icon-quaternary mx-auto mt-4 mb-2 h-1 w-12 shrink-0 rounded-full" />
 
           {type === 'filter' || type === 'flower-filter' ? (
             <FilterDrawerContent

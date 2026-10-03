@@ -14,7 +14,7 @@ export function LoginSheet() {
       <VaulDrawer.Portal>
         <VaulDrawer.Overlay className="fixed inset-0 z-100 bg-black/40" />
         <VaulDrawer.Content className="fixed right-0 bottom-0 left-0 z-100 mx-auto flex max-w-[430px] flex-col rounded-t-[20px] bg-white outline-none">
-          <div className="mx-auto mt-3 h-1 w-10 shrink-0 rounded-full bg-gray-300" />
+          <div className="mp-no-track mx-auto mt-3 h-1 w-10 shrink-0 rounded-full bg-gray-300" />
           <div className="flex flex-col px-5 pt-7 pb-8">
             <VaulDrawer.Title className="text-text-primary text-xl font-bold">
               로그인이 필요해요

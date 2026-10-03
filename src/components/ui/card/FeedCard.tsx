@@ -182,7 +182,7 @@ export function FeedCard({
         }}
         className={cn('relative overflow-hidden rounded-2xl', onOpen && 'cursor-pointer')}
       >
-        <div ref={emblaRef} className="overflow-hidden">
+        <div ref={emblaRef} className="mp-no-track overflow-hidden">
           <div className="flex touch-pan-y">
             {images.map((src, i) => (
               <div key={i} className="min-w-0 flex-[0_0_100%]">
