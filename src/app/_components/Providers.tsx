@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic'
 import { Toaster } from '@/components/ui/sonner'
 import { LoginGuard } from '@/components/auth/LoginGuard'
 import { useLoginSheetStore } from '@/stores/useLoginSheetStore'
+import { AnalyticsManager } from '@/app/_components/AnalyticsManager'
 import { AuthCacheReset } from '@/app/_components/AuthCacheReset'
 import { NativeAuthManager } from '@/app/_components/NativeAuthManager'
 import { NativeBackButton } from '@/app/_components/NativeBackButton'
@@ -49,6 +50,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <NativeAuthManager />
       <PushNotificationManager />
       <WebVitalsReporter />
+      <AnalyticsManager />
       {children}
       <LoginGuard />
       <LazyLoginSheet />
