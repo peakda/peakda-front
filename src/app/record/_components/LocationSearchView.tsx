@@ -6,11 +6,21 @@ import { SearchInput } from '@/app/search/_components/SearchInput'
 import { Button } from '@/components/ui/button/Button'
 import type { KakaoPlace } from '@/hooks/useKakaoPlaces'
 
+export type LocationSearchState =
+  | 'sdk-loading'
+  | 'search-loading'
+  | 'results'
+  | 'empty'
+  | 'error'
+  | 'sdk-error'
+
 interface LocationSearchViewProps {
   searchQuery: string
   hasSearchQuery: boolean
   onSearchQueryChange: Dispatch<SetStateAction<string>>
   results: KakaoPlace[]
+  searchState: LocationSearchState
+  onRetry: () => void
   selectedPlace: KakaoPlace | null
   onSelectPlace: (place: KakaoPlace) => void
   onConfirm: () => void
@@ -23,6 +33,8 @@ export function LocationSearchView({
   hasSearchQuery,
   onSearchQueryChange,
   results,
+  searchState,
+  onRetry,
   selectedPlace,
   onSelectPlace,
   onConfirm,
@@ -59,7 +71,7 @@ export function LocationSearchView({
         />
       </div>
 
-      {hasSearchQuery && (
+      {hasSearchQuery && searchState === 'results' && (
         <div className="min-h-0 flex-1 overflow-y-auto">
           {results.map((result) => (
             <button
@@ -81,12 +93,52 @@ export function LocationSearchView({
         </div>
       )}
 
+      {hasSearchQuery && searchState !== 'results' && (
+        <div
+          className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 px-4 text-center"
+          role={searchState === 'error' || searchState === 'sdk-error' ? 'alert' : 'status'}
+        >
+          {(searchState === 'sdk-loading' || searchState === 'search-loading') && (
+            <span
+              aria-hidden="true"
+              className="border-brand-secondary mb-2 h-6 w-6 animate-spin rounded-full border-2 border-t-transparent motion-reduce:animate-none"
+            />
+          )}
+          <p className="text-text-primary text-base font-semibold">
+            {searchState === 'sdk-loading'
+              ? '위치 검색을 준비하고 있어요'
+              : searchState === 'search-loading'
+                ? '장소를 찾고 있어요'
+                : searchState === 'empty'
+                  ? '검색 결과가 없어요'
+                  : searchState === 'sdk-error'
+                    ? '위치 검색을 시작하지 못했어요'
+                    : '장소를 불러오지 못했어요'}
+          </p>
+          {searchState === 'empty' && (
+            <p className="text-text-tertiary text-sm">장소명이나 주소를 다르게 입력해 보세요</p>
+          )}
+          {(searchState === 'error' || searchState === 'sdk-error') && (
+            <>
+              <p className="text-text-tertiary text-sm">연결 상태를 확인하고 다시 시도해 주세요</p>
+              <button
+                type="button"
+                onClick={onRetry}
+                className="border-border-primary mt-2 rounded-xl border px-4 py-2 text-sm font-medium"
+              >
+                다시 시도
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
       <div className="mt-auto shrink-0 p-4 pb-8">
         <Button
           variant="filled"
           color="primary"
           size="lg"
-          disabled={!selectedPlace || isConfirming}
+          disabled={!selectedPlace || isConfirming || searchState !== 'results'}
           onClick={onConfirm}
         >
           선택

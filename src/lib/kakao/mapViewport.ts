@@ -56,13 +56,64 @@ export const mapBox = (map: kakao.maps.Map): Viewport => {
   }
 }
 
+const LOCATION_OPTIONS: PositionOptions = {
+  enableHighAccuracy: false,
+  maximumAge: 5 * 60 * 1000,
+  timeout: 8_000,
+}
+
+export type InitialMapLocation =
+  | { permission: 'granted'; center: { lat: number; lng: number } | null }
+  | { permission: 'prompt' | 'denied' | 'unknown' }
+
+// 이미 허용한 위치만 지도 SDK와 병렬로 조회한다. 미결정 권한은 지도 생성 후
+// 기존 흐름에서 요청해 첫 방문의 권한 팝업 시점을 유지한다.
+export async function prepareInitialMapLocation(
+  permissions: Pick<Permissions, 'query'> | undefined = navigator.permissions,
+  geolocation: Pick<Geolocation, 'getCurrentPosition'> | undefined = navigator.geolocation
+): Promise<InitialMapLocation> {
+  if (!permissions?.query) return { permission: 'unknown' }
+
+  let state: PermissionState
+  try {
+    const result = await permissions.query({ name: 'geolocation' })
+    state = result.state
+  } catch {
+    return { permission: 'unknown' }
+  }
+
+  if (state !== 'granted') return { permission: state }
+  if (!geolocation) return { permission: 'granted', center: null }
+
+  return new Promise((resolve) => {
+    try {
+      geolocation.getCurrentPosition(
+        ({ coords }) =>
+          resolve({
+            permission: 'granted',
+            center: { lat: coords.latitude, lng: coords.longitude },
+          }),
+        (error) =>
+          resolve(
+            error.code === error.PERMISSION_DENIED
+              ? { permission: 'denied' }
+              : { permission: 'granted', center: null }
+          ),
+        LOCATION_OPTIONS
+      )
+    } catch {
+      resolve({ permission: 'granted', center: null })
+    }
+  })
+}
+
 export function panToCurrentLocation(map: kakao.maps.Map, onPermissionDenied?: () => void) {
   navigator.geolocation.getCurrentPosition(
     ({ coords }) => map.panTo(new kakao.maps.LatLng(coords.latitude, coords.longitude)),
     (err) => {
       if (err.code === err.PERMISSION_DENIED) onPermissionDenied?.()
     },
-    { enableHighAccuracy: false, maximumAge: 5 * 60 * 1000, timeout: 8_000 }
+    LOCATION_OPTIONS
   )
 }
 
