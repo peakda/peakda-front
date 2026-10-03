@@ -6,7 +6,6 @@ import { useKakaoPlaces, type KakaoPlace } from './useKakaoPlaces'
 vi.mock('@/lib/kakao/kakaoLoader', () => ({
   kakaoLoader: { load: () => Promise.resolve() },
 }))
-
 ;(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true
 
 type SearchCallback = (data: KakaoPlace[], status: string) => void
@@ -20,7 +19,7 @@ beforeEach(() => {
   ;(window as unknown as { kakao: unknown }).kakao = {
     maps: {
       services: {
-        Status: { OK: 'OK' },
+        Status: { OK: 'OK', ZERO_RESULT: 'ZERO_RESULT', ERROR: 'ERROR' },
         Places: class {
           keywordSearch(keyword: string, callback: SearchCallback) {
             pending[keyword] = callback
@@ -64,6 +63,20 @@ describe('useKakaoPlaces', () => {
     act(() => hook.current.search(''))
     act(() => pending['공원']([place('올림픽공원')], 'OK'))
 
+    expect(hook.current.results).toEqual([])
+  })
+
+  it('검색 중, 결과 없음, 오류를 구분한다', async () => {
+    const hook = await renderHook()
+
+    act(() => hook.current.search('벚꽃'))
+    expect(hook.current.searchStatus).toBe('loading')
+    act(() => pending['벚꽃']([], 'ZERO_RESULT'))
+    expect(hook.current.searchStatus).toBe('empty')
+
+    act(() => hook.current.search('공원'))
+    act(() => pending['공원']([], 'ERROR'))
+    expect(hook.current.searchStatus).toBe('error')
     expect(hook.current.results).toEqual([])
   })
 })

@@ -26,8 +26,10 @@ import {
   initMap,
   mapBox,
   panToCurrentLocation,
+  prepareInitialMapLocation,
   sameBbox,
   snapBbox,
+  type InitialMapLocation,
   type Viewport,
 } from '@/lib/kakao/mapViewport'
 import { REGION_MAP_CENTERS } from '@/constants/region'
@@ -78,6 +80,10 @@ export const MapContainer = () => {
   const [areTilesLoaded, setAreTilesLoaded] = useState(false)
   const [bbox, setBbox] = useState<GetSeasonalBloomsParams | null>(null)
   const [viewport, setViewport] = useState<Viewport | null>(null)
+  const initialLocationRef = useRef<{
+    promise: Promise<InitialMapLocation>
+    result: InitialMapLocation | null
+  } | null>(null)
   // idle 은 mapInstance 당 한 번만 등록한다. region 을 deps 에 넣으면 권역이 바뀔 때 effect 가
   // 다시 돌면서 '아직 이동 전 bounds + 새 region' 으로 조회해 버리므로 ref 로 읽는다.
   const appliedRegionRef = useRef<GetSeasonalBloomsParams['region']>(undefined)
@@ -106,7 +112,11 @@ export const MapContainer = () => {
   }, [latParam, lngParam])
   // 좌표가 없는 축제·큐레이션은 주소·장소명(?q)으로 넘어온다. 괄호 속 부연(예: '(효석문화제)')은
   // 키워드 검색을 실패하게 만들어 떼고 찾는다.
-  const targetQuery = searchParams.get('q')?.replace(/\(.*?\)/g, '').trim() || null
+  const targetQuery =
+    searchParams
+      .get('q')
+      ?.replace(/\(.*?\)/g, '')
+      .trim() || null
   const targetSpotId = toCoord(searchParams.get('spotId'))
 
   // ?spotId 로 들어오면 그 명소 핀을 찾아 드로어를 연다. 좌표가 정해진 뒤에만 채운다.
@@ -341,6 +351,29 @@ export const MapContainer = () => {
   }, [])
 
   useEffect(() => {
+    if (
+      initialLocationRef.current ||
+      readMapView() ||
+      initialCenter ||
+      targetQuery ||
+      !loadAppSettings().locationEnabled
+    ) {
+      return
+    }
+
+    // SDK와 권한 상태·위치 조회를 병렬로 시작한다. 아직 권한을 묻지 않은 사용자에게는
+    // 여기서 위치를 요청하지 않으므로 기존 지도 진입 시점의 팝업 흐름이 유지된다.
+    const request = {
+      promise: prepareInitialMapLocation(),
+      result: null as InitialMapLocation | null,
+    }
+    initialLocationRef.current = request
+    void request.promise.then((result) => {
+      request.result = result
+    })
+  }, [initialCenter, targetQuery])
+
+  useEffect(() => {
     if (!isSdkReady || !containerRef.current) return
 
     let map = mapRef.current
@@ -348,7 +381,10 @@ export const MapContainer = () => {
       // 이 히스토리 엔트리에 값이 있다는 건 여기서 지도를 보다가 상세로 갔다 돌아왔다는 뜻이라
       // 쿼리 좌표보다 우선한다. ?lat/?lng 는 그 화면에 '처음' 들어올 때만 의미가 있다.
       const savedView = readMapView()
-      const center = savedView ?? initialCenter ?? DEFAULT_CENTER
+      const preparedLocation = initialLocationRef.current?.result
+      const currentCenter =
+        preparedLocation?.permission === 'granted' ? preparedLocation.center : null
+      const center = savedView ?? initialCenter ?? currentCenter ?? DEFAULT_CENTER
       const createdMap = initMap(containerRef.current, center, savedView?.level ?? INITIAL_LEVEL)
       map = createdMap
       mapRef.current = map
@@ -375,7 +411,24 @@ export const MapContainer = () => {
           createdMap.setCenter(new kakao.maps.LatLng(lat, lng))
         })
       } else if (!savedView && !initialCenter && canUseLocation) {
-        panToCurrentLocation(map)
+        const request = initialLocationRef.current
+        if (!request) {
+          panToCurrentLocation(map)
+        } else if (
+          request.result?.permission === 'prompt' ||
+          request.result?.permission === 'unknown'
+        ) {
+          panToCurrentLocation(map)
+        } else if (!request.result) {
+          void request.promise.then((result) => {
+            if (mapRef.current !== createdMap || !containerRef.current?.isConnected) return
+            if (result.permission === 'granted' && result.center) {
+              createdMap.panTo(new kakao.maps.LatLng(result.center.lat, result.center.lng))
+            } else if (result.permission === 'prompt' || result.permission === 'unknown') {
+              panToCurrentLocation(createdMap)
+            }
+          })
+        }
       }
     }
 

@@ -79,10 +79,7 @@ export default function RootLayout({
         {/* DNS 미리 해석 */}
         <link rel="dns-prefetch" href="//dapi.kakao.com" />
         <link rel="dns-prefetch" href="//t1.daumcdn.net" />
-        {/* 지도 타일 호스트. map1~4.daumcdn.net 은 실제로 요청되지 않는다 */}
-        <link rel="dns-prefetch" href="//mts.daumcdn.net" />
-
-        {/* TCP + TLS 핸드셰이크까지 미리. SDK·타일은 crossorigin 없이 요청되므로
+        {/* TCP + TLS 핸드셰이크까지 미리. SDK와 t1 자원은 crossorigin 없이 요청되므로
             여기에 crossOrigin 을 붙이면 다른 연결로 취급돼 재사용되지 않는다 */}
         <link rel="preconnect" href="//dapi.kakao.com" />
         <link rel="preconnect" href="//t1.daumcdn.net" />

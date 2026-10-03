@@ -18,9 +18,15 @@ export const metadata: Metadata = createPageMetadata({
 // 맞춰 지도로 교체될 때 레이아웃이 밀리지 않는다.
 export default function MapPage() {
   const appKey = process.env.NEXT_PUBLIC_KAKAO_MAP_KEY
+  const apiOrigin = process.env.NEXT_PUBLIC_API_URL
+    ? new URL(process.env.NEXT_PUBLIC_API_URL).origin
+    : null
 
   return (
     <>
+      <link rel="preconnect" href="https://mts.daumcdn.net" />
+      {/* API는 credentials: 'include'로 호출하므로 기본 credential 모드로 연결한다. */}
+      {apiOrigin && <link rel="preconnect" href={apiOrigin} />}
       {appKey && <link rel="preload" as="script" href={getKakaoMapSdkUrl(appKey)} />}
       <Suspense
         fallback={
