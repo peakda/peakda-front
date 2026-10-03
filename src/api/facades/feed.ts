@@ -24,6 +24,7 @@ import type {
 } from '@/api/facades/generated/peakdaApi.schemas'
 import { feedDetailApi } from '@/api/facades/feed-detail'
 import { feedListApi } from '@/api/facades/feed-list'
+import { track } from '@/lib/analytics'
 
 // 트레이드 규칙: res.data (Orval 래퍼) → res.data.data (백엔드 실제 payload)
 
@@ -87,13 +88,23 @@ export const useFeedDetail = (id: number | undefined, initialRecord?: SpotRecord
 export const useAddReaction = () => {
   const queryClient = useQueryClient()
   return useAddReactionGen({
-    mutation: { onSuccess: (_res, { id }) => invalidateFeedDetail(queryClient, id) },
+    mutation: {
+      onSuccess: (_res, { id, params }) => {
+        track('reaction_add', { record_id: id, reaction_type: params.reactionType })
+        invalidateFeedDetail(queryClient, id)
+      },
+    },
   })
 }
 
 export const useRemoveReaction = () => {
   const queryClient = useQueryClient()
   return useRemoveReactionGen({
-    mutation: { onSuccess: (_res, { id }) => invalidateFeedDetail(queryClient, id) },
+    mutation: {
+      onSuccess: (_res, { id, params }) => {
+        track('reaction_remove', { record_id: id, reaction_type: params.reactionType })
+        invalidateFeedDetail(queryClient, id)
+      },
+    },
   })
 }

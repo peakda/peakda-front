@@ -12,6 +12,7 @@ import { CardBadge } from '@/components/ui/card/CardBadge'
 import { Badge } from '@/components/ui/display/Badge'
 import { ReactionBar } from '@/components/ui/card/ReactionBar'
 import { useCarousel } from '@/hooks/useEmblaCarousel'
+import { useTrackPhotoSwipe } from '@/hooks/useTrackPhotoSwipe'
 import { useRequireLogin } from '@/hooks/useRequireLogin'
 import { Indecator } from '@/app/onboarding/_components/Indecator'
 import { useReport } from '@/api/facades/report'
@@ -88,6 +89,7 @@ export function FeedCard({
   priority = false,
 }: FeedCardProps) {
   const { emblaRef, selectedIndex, scrollSnaps, scrollTo } = useCarousel({ loop: true })
+  useTrackPhotoSwipe(selectedIndex, recordId, images.length, 'feed_list')
 
   const [isReportModalOpen, setReportModalOpen] = useState(false)
   const report = useReport()

@@ -6,6 +6,7 @@ import { logoutApi } from '@/api/facades/auth'
 import { clearNativeAuthSession } from '@/lib/auth/nativeAuth'
 import { clearAuthMarker } from '@/lib/auth/session'
 import { stopPushNotifications } from '@/lib/push/pushNotifications'
+import { track } from '@/lib/analytics'
 
 interface Props {
   onClose: () => void
@@ -21,6 +22,8 @@ export function LogoutDrawerContent({ onClose }: Props) {
     } catch (e) {
       console.error('로그아웃 실패', e)
     }
+    // 마커를 지우는 순간 분석 사용자가 새 익명으로 바뀌므로 그 전에 보낸다.
+    track('logout', {})
     await clearNativeAuthSession()
     clearAuthMarker()
     onClose()

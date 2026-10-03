@@ -18,6 +18,7 @@ import {
   type AppSettings,
 } from '@/lib/utils/appSettings'
 import type { LegalSlug } from '@/app/Terms/_data/legal-content'
+import { track } from '@/lib/analytics'
 import {
   isNativeAndroid,
   requestAndStartPushNotifications,
@@ -92,7 +93,10 @@ export default function SettingsPage() {
           <Toggle
             label="위치 정보 활용"
             initialStatus={settings.locationEnabled}
-            onChange={updateSetting('locationEnabled')}
+            onChange={(isOn) => {
+              track('location_setting_change', { enabled: isOn })
+              updateSetting('locationEnabled')(isOn)
+            }}
           />
         )}
       </div>

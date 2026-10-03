@@ -1,7 +1,7 @@
 'use client'
 
 import { getGetAuthMeUrl } from '@/api/facades/generated/auth/auth'
-import { track } from '@/lib/analytics'
+import { takeLoginProvider, track } from '@/lib/analytics'
 import { setAuthMarker, takeReturnTo } from '@/lib/auth/session'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
@@ -26,7 +26,7 @@ export function AuthCallbackHandler() {
         }
         setAuthMarker()
         // 신규 유저는 약관·가입을 마친 뒤 sign_up 으로 따로 잡힌다.
-        track('login', {})
+        track('login', { provider: takeLoginProvider() })
         router.replace(takeReturnTo() ?? '/map')
       })
       .catch((error) => {

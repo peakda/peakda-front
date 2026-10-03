@@ -24,7 +24,7 @@ import { RecordSkeleton } from '@/app/record/_components/RecordSkeleton'
 import { compressImages } from '@/lib/utils/image'
 import { readPhotoExif } from '@/lib/utils/photoExif'
 import { loadAppSettings } from '@/lib/utils/appSettings'
-import { track } from '@/lib/analytics'
+import { track, type RecordLocationMethod } from '@/lib/analytics'
 
 // 매칭/생성에 필요한 스팟 정보 (카카오 검색 + 스팟 매칭 결과)
 // kakaoPlaceId: 스팟 상세(?spotId=)에서 넘어오면 응답에 없으므로 null 이다.
@@ -46,6 +46,8 @@ function RecordPageContent() {
   const [step, setStep] = useState(0)
   const [location, setLocation] = useState('')
   const [selectedSpot, setSelectedSpot] = useState<SelectedSpot | null>(null)
+  // 1단계 위치가 어떻게 정해졌는지. "다음"을 누를 때 record_location_select 로 보낸다.
+  const locationMethodRef = useRef<RecordLocationMethod>('typed')
   const [category, setCategory] = useState<Category>('유명명소')
   const [showCategoryPicker, setShowCategoryPicker] = useState(false)
   const [photoItems, setPhotoItems] = useState<PhotoItem[]>([])
@@ -99,6 +101,7 @@ function RecordPageContent() {
       attractionId: presetSpot.attractionId ?? null,
     })
     setLocation(presetSpot.name)
+    locationMethodRef.current = 'from_spot'
     setCategory(presetSpot.type === 'ATTRACTION' ? '유명명소' : '동네스팟')
   }, [presetSpot])
 
@@ -110,10 +113,13 @@ function RecordPageContent() {
     return () => clearTimeout(timer)
   }, [searchQuery, isSearchMode, search, isPlacesReady])
 
-  const togglePlant = (id: number) =>
+  const togglePlant = (id: number) => {
+    // 고를 때만 보낸다. 해제는 세지 않는다.
+    if (!selectedPlantIds.includes(id)) track('record_plant_select', { plant_id: id })
     setSelectedPlantIds((prev) =>
       prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
     )
+  }
 
   const hasLocation = location.trim().length > 0
   const hasSearchQuery = searchQuery.trim().length > 0
@@ -199,6 +205,7 @@ function RecordPageContent() {
         attractionId: matchData?.spot?.attractionId ?? null,
       })
       setLocation(selectedPlace.place_name)
+      locationMethodRef.current = 'search'
       setCategory(suggestedType === 'ATTRACTION' ? '유명명소' : '동네스팟')
     } catch (err) {
       console.error(err)
@@ -349,7 +356,10 @@ function RecordPageContent() {
       onToggleCategoryPicker={() => setShowCategoryPicker((v) => !v)}
       onSelectCategory={setCategory}
       onOpenSearch={() => setIsSearchMode(true)}
-      onLocationChange={setLocation}
+      onLocationChange={(value) => {
+        locationMethodRef.current = 'typed'
+        setLocation(value)
+      }}
       photoItems={photoItems}
       pendingPhotoCount={pendingPhotoCount}
       onPhotoAdd={handlePhotoAdd}
@@ -358,7 +368,13 @@ function RecordPageContent() {
       date={date}
       onDateChange={setDate}
       isValid={isValid}
-      onNext={() => setStep(1)}
+      onNext={() => {
+        track('record_location_select', {
+          method: locationMethodRef.current,
+          photo_count: photoItems.length,
+        })
+        setStep(1)
+      }}
     />
   )
 }

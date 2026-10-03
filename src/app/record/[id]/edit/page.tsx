@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Header } from '@/components/ui/layout/Header'
@@ -19,6 +19,7 @@ import { compressImages } from '@/lib/utils/image'
 import { usePreviewUrls } from '@/hooks/usePreviewUrls'
 import { readPhotoExif } from '@/lib/utils/photoExif'
 import { loadAppSettings } from '@/lib/utils/appSettings'
+import { track } from '@/lib/analytics'
 import type {
   SpotRecordResponse,
   UpdateSpotRecordRequest,
@@ -32,7 +33,13 @@ type EditPhoto =
 
 export default function RecordEditPage() {
   const { id } = useParams<{ id: string }>()
-  const { data: record, isLoading } = useSpotRecord(Number(id))
+  const recordId = Number(id)
+  const { data: record, isLoading } = useSpotRecord(recordId)
+
+  // 수정하기 메뉴가 여러 화면에 있어 여기서 한 번 보낸다. 어디서 왔는지는 prev_path 로 본다.
+  useEffect(() => {
+    track('record_edit_start', { record_id: recordId })
+  }, [recordId])
 
   if (isLoading) return <RecordSkeleton />
 
