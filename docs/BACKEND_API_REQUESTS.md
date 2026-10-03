@@ -210,51 +210,55 @@ PR #104 기준으로 표의 두 줄이 낡았습니다.
 
 **그동안 프런트 대응**: 좌표가 없으면 `venue`/`placeName` 을 카카오 키워드 검색해 위치를 잡고 있습니다. 20개 중 18개는 맞게 찾지만 '정선 병방치 메밀밭'처럼 검색되지 않는 곳이 있고, 동명 장소로 잘못 갈 수 있어 임시 방편입니다. 좌표가 내려오면 좌표를 먼저 쓰므로 프런트 추가 작업은 없습니다.
 
-## 2026-10-01 요청 1건
+## 2026-10-01 요청 1건 *(2026-10-02 서버 코드 확인 후 수정)*
 
-### 17. 명소 대표 이미지(TourAPI)에도 사이즈 variant를 주세요
+### 17. 목록 화면 명소 썸네일은 `thumbnailImageUrl` 을 먼저 주세요
+
+> ✅ **요청 1 반영 완료** (peakda-server PR #138, 2026-10-03 운영 확인) — 탐색 첫 페이지 20장 모두 관광공사 썸네일, 합계 약 4MB → 약 300KB. 썸네일 주소가 404 인 경우는 19번 참고. 요청 2 는 보류.
 
 기록 사진에 `variants`를 붙여 주신 덕분에(15번) 피드 사진은 화면 크기에 맞게 내려받고 있습니다. 감사합니다.
 
-그런데 **한국관광공사(TourAPI) 명소 이미지는 아직 원본만 내려와서**, 목록 화면에서 80px 썸네일에 원본을 통째로 받고 있습니다.
+그런데 **한국관광공사(TourAPI) 명소 이미지는 목록에서도 원본이 내려와서**, 80px 썸네일에 원본(대부분 940px 폭)을 통째로 받고 있습니다.
 
-**실측 (2026-10-01, 운영 API 명소 23개의 `representativeImageUrl`)**
+**실측 (2026-10-02, 운영 `GET /api/explore/spots?section=PEAK_NOW` 첫 페이지 20개)**
 
-- 크기: 대부분 940px 폭
-- 용량: **48KB ~ 758KB** (중앙값 167KB, 500KB 이상 5개)
-- 23장 합계 약 5.6MB — 카드 20개짜리 목록 한 페이지가 수 MB입니다
+- 이미지 합계 **약 4MB** (장당 58KB ~ 958KB, 중앙값 156KB)
+- 브라우저가 화면 밖 이미지도 미리 받기 때문에(지연 로딩 거리 1,250~2,500px) 스크롤하지 않아도 20장 중 19장을 바로 받습니다 — 목록이 길어질수록 첫 화면이 느려집니다
 
-화면에서는 80px(`SpotCard`)·100px(`PinList`)로 그려서 대부분이 버려지는 데이터입니다. 모바일 데이터와 앱 첫 로딩에 그대로 영향이 갑니다.
+**원인** — 서버는 수집할 때 원본(`firstimage` → `primaryImageUrl`)과 관광공사 썸네일(`firstimage2` → `thumbnailImageUrl`)을 **둘 다 저장**하고 있는데(`AttractionMapper.kt`), 목록 응답이 모두 원본을 먼저 고릅니다.
 
-TourAPI가 주는 썸네일(`firstimage2`, `..._image3_1.jpg`)도 확인했는데, 26KB로 가볍지만 **150×113px**이라 고해상도 폰 화면의 80px 카드에서는 흐릿합니다.
+| 응답 필드 | 쓰이는 곳 | 서버 위치 (`primaryImageUrl ?: thumbnailImageUrl`) |
+|---|---|---|
+| `ExploreSpotItem.thumbnailUrl` | 탐색 목록 카드 (80px) | `ExploreService.kt:188` |
+| `SpotSearchItem.thumbnailUrl` | 검색 결과 카드 (80px) | `SpotThumbnailResolver.kt:42` |
+| `SpotPreviewItem.thumbnailUrl` | 지도 핀 미리보기 (100px) | `SpotThumbnailResolver.kt:42` |
+| `SpotFavoriteResponse.photoUrls` | 찜 목록 카드 (80px) | `SpotFavoriteListAssembler.kt:133` |
 
-**요청** — TourAPI 이미지를 수집할 때 기록 사진처럼 CDN(`cdn.peakda.com`)에 리사이즈본을 만들어, 아래 필드에 `PhotoEntry.variants`와 같은 형태로 붙여 주실 수 있을까요?
+**요청 1 (우선) — 위 목록용 필드는 순서를 바꿔 `thumbnailImageUrl ?: primaryImageUrl` 로 주세요.** 같은 20장 기준 **약 4MB → 약 300KB(-93%)** 입니다.
 
-| 필드 | 쓰이는 곳 |
-|---|---|
-| `ExploreSpotItem.thumbnailUrl` | 탐색 목록 카드 (80px) |
-| `SpotSearchItem.thumbnailUrl` | 검색 결과 카드 (80px) |
-| `SpotPreviewItem.thumbnailUrl` · `photoUrls` | 지도 핀 미리보기 (100px / 430px) |
-| `SpotFavoriteResponse.photoUrls` | 찜 목록 카드 (80px) |
-| `SpotDetailResponse.representativeImageUrl` | 명소 상세 상단 (430px) |
+- 관광공사가 직접 주는 썸네일이라 새 저장소·리사이즈·라이선스 검토가 필요 없습니다.
+- 명소 상세 상단(`SpotDetailResponse.representativeImageUrl`, 430px)은 지금처럼 원본을 주시면 됩니다.
+- 썸네일 화질은 대부분 충분합니다. 목록 이미지 약 70장 확인 결과:
 
-```jsonc
-// 예시 — 기존 필드는 그대로 두고 nullable 로 추가
-"thumbnailUrl": "https://tong.visitkorea.or.kr/...",
-"thumbnailVariants": { "thumbnail": "https://cdn.peakda.com/...", "medium": "..." }
-```
+| 썸네일 크기 | 비율 | 80px 카드에서 |
+|---|---|---|
+| 300×200 내외 | 약 80% | 충분 |
+| 150×100 내외 | 약 13% | 고해상도 폰에서 살짝 흐릿할 수 있음 |
 
-- 크기는 기록 사진과 같은 기준이면 충분합니다: `thumbnail`=256px(정사각 크롭), `medium`=1080px. 원본이 940px이라 `medium`·`main`은 원본 그대로여도 됩니다.
-- 필드 추가라 기존 클라이언트는 깨지지 않습니다. 프런트는 variant가 있으면 쓰고, 없으면 지금처럼 원본을 씁니다.
-- **확인 부탁**: 관광공사 이미지는 공공누리 유형에 따라 변경 금지 조건이 붙은 것이 있을 수 있습니다. 리사이즈한 사본을 우리 CDN에 둬도 되는지 라이선스 조건을 한 번 봐 주세요.
+- 프런트 작업은 없습니다. 같은 필드에 더 작은 이미지가 오는 것뿐입니다.
+- (프런트에서 URL 을 `_image2_1` → `_image3_1` 로 추측해 바꾸는 우회도 시험했지만 4장이 404 여서 쓰지 않았습니다. 서버에 저장된 `firstimage2` 는 실제 주소라 이 문제가 없습니다.)
 
-급한 건은 아닙니다 — 출시 후 목록 화면 체감 속도 개선용입니다.
+**요청 2 (선택, 나중에) — 흐릿한 썸네일이 거슬리면 CDN 리사이즈본.** 기록 사진의 `ImageResizer`·variant 백필(`SpotRecordPhotoVariantBackfillService`)을 재사용해 관광공사 이미지를 `cdn.peakda.com` 에 256px 정사각 크롭으로 만들어 두는 방식입니다. 관광공사 이미지는 공공누리 유형에 따라 변경 금지 조건이 있을 수 있어 라이선스 확인이 먼저 필요합니다. 요청 1 반영 후 실제로 화질이 문제가 될 때 진행해도 됩니다.
 
 ## 2026-10-02 요청 1건
 
-### 18. API 응답에 gzip 압축을 켜 주세요 (+ 지도 응답의 `attractions` 필드 정리)
+### 18. 운영 API 응답에 gzip 압축을 켜 주세요 (+ 지도 응답의 `attractions` 필드 정리)
 
-지도 핀이 600개를 넘으면서 지도 응답이 커졌는데, **API 응답이 압축 없이 내려오고 있습니다.** 클라이언트가 `Accept-Encoding: gzip, br` 을 보내도 `Content-Encoding` 없이 원본 그대로 옵니다.
+> ✅ **요청 1·2 반영 완료** (peakda-server PR #138, 2026-10-03 운영 확인) — `Content-Encoding: gzip` 응답, 지도 응답 키는 `baseDate`·`count`·`pins` 만. 전국 지도 299KB → 압축 후 약 25KB.
+
+지도 핀이 600개를 넘으면서 지도 응답이 커졌는데, **운영 API 응답이 압축 없이 내려오고 있습니다.** 클라이언트가 `Accept-Encoding: gzip, br` 을 보내도 `Content-Encoding` 없이 원본 그대로 옵니다.
+
+**원인** — dev 는 Caddy 의 `encode gzip`(`infra/server/Caddyfile`)으로 압축되지만, **운영은 ALB → ECS(Spring) 구조라 Caddy 를 거치지 않습니다.** ALB 는 응답을 압축하지 않고, `application.yml`·`application-prod.yml` 에도 `server.compression` 설정이 없습니다.
 
 **실측 (2026-10-02, 운영 API `GET /api/seasonal/blooms?minLat=33&maxLat=39&minLng=124&maxLng=132`, 핀 665개)**
 
@@ -263,9 +267,9 @@ TourAPI가 주는 썸네일(`firstimage2`, `..._image3_1.jpg`)도 확인했는�
 | 지금 응답 | 299KB | 45KB |
 | `attractions` 제거 시 | 149KB | 25KB |
 
-**요청 1 — 응답 압축을 켜 주세요 (우선).** 전국 지도 기준 299KB → 45KB(-85%)로 줄어듭니다. 모바일 데이터·앱 지도 첫 로딩에 바로 효과가 있고, 지도뿐 아니라 피드·탐색 등 JSON 응답 전체에 적용됩니다.
+**요청 1 — 운영 응답 압축을 켜 주세요 (우선).** 전국 지도 기준 299KB → 45KB(-85%)로 줄어듭니다. 지도뿐 아니라 피드·탐색 등 JSON 응답 전체에 적용됩니다.
 
-- Spring Boot 라면 아래 설정으로 켤 수 있습니다. 앞단(ALB·CloudFront·nginx 등)에서 켜셔도 됩니다.
+- `application.yml` 에 아래를 추가하면 됩니다. dev 는 Caddy 가 이미 압축된 응답(`Content-Encoding` 있음)을 다시 압축하지 않으므로 공통 파일에 넣어도 됩니다.
 
 ```yaml
 server:
@@ -277,7 +281,11 @@ server:
 
 - 프런트 작업은 없습니다. 브라우저·안드로이드 WebView 가 자동으로 풀어 줍니다.
 
-**요청 2 — 지도 응답의 deprecated `attractions` 필드 정리 (여유 있을 때).** `attractions` 는 `pins` 중 `type === 'ATTRACTION'` 인 것과 같은 내용이라 응답 절반이 중복입니다. 프런트는 `pins` 만 쓰고 명소·동네 구분도 `pins[].type` 으로 하고 있어 빼셔도 영향이 없습니다. 압축을 켜면 줄어드는 양이 20KB 정도라 급하지 않습니다 — 다른 클라이언트가 이 필드를 쓰지 않는지 확인되면 정리해 주세요.
+**요청 2 — 지도 응답의 deprecated `attractions` 필드 제거 (여유 있을 때).** `pins` 에서 명소형만 걸러 옛 구조로 다시 만든 하위호환 필드라(`SpotBloomMapService.kt:80`) 응답 절반이 중복입니다.
+
+- 이 필드를 쓸 수 있는 클라이언트는 프런트(`peakda-front`)뿐인데, 프런트는 `pins` 만 쓰고 명소·동네 구분도 `pins[].type` 으로 합니다. 안드로이드 앱도 웹을 그대로 띄우는(`server.url`) 구조라 이 필드를 쓰는 옛 버전 앱이 없습니다.
+- 제거 시 `SpotBloomMapServiceTest` 의 `attractions` 검증(85~88행, 143행 부근)만 함께 정리하면 됩니다.
+- 압축을 켜면 줄어드는 양이 20KB 정도라 급하지 않습니다.
 
 ## 요약 *(2026-08-10 요청 당시 원문 — 아래는 모두 처리 완료)*
 
@@ -506,3 +514,20 @@ GET /api/spots/preview    category → categories?: enum[]
 | `GET /api/curations` | **큐레이션 목록 화면이 기획에 있나요?** 없으면 이 엔드포인트는 쓰이지 않습니다 |
 | `POST /api/devices`, `DELETE /api/devices/{token}` | **푸시 인프라(FCM 등) 도입 일정**이 잡히면 알려주세요 |
 | `POST /api/spots/match` | 지도 핀 클릭 시 `spotId` 없는 명소를 이 API 로 생성하고 있습니다. **조회 동작에 POST 생성이 일어나는 구조**인데 의도하신 게 맞나요? 4번을 A안으로 해결하면 호출부가 사라집니다 |
+
+## 2026-10-03 요청 1건
+
+### 19. 관광공사 썸네일 주소가 404 인 명소는 원본으로 대체해 주세요 (17번 후속)
+
+17번 반영 후 운영 탐색 첫 페이지(`GET /api/explore/spots?section=PEAK_NOW`)를 확인해 보니 **20장 중 1장의 썸네일이 404** 입니다.
+
+| 명소 (spotId) | 썸네일 (`thumbnailImageUrl`) | 원본 (`primaryImageUrl`) |
+|---|---|---|
+| 신선대와 억새평전 (무등산권 국가지질공원) (2483) | `…/cms/resource/30/2614830_image3_1.bmp` → **404** (http·https 모두) | `…/2614830_image2_1.bmp` → 200 |
+
+관광공사가 준 `firstimage2` 주소 자체가 끊긴 경우입니다. 프런트는 로드 실패 시 회색 배경만 보이게 처리하고 있어 화면이 깨지지는 않지만, **목록 응답에는 원본 주소가 없어 프런트에서 대체할 수 없습니다.**
+
+**요청** — 수집(또는 배치) 시 `thumbnailImageUrl` 이 응답하지 않으면 비워 두어 `thumbnailImageUrl ?: primaryImageUrl` 이 원본으로 떨어지게 해 주세요. 관광공사 이미지 서버는 `HEAD` 요청에 405 를 주므로 `GET`(또는 `Range: bytes=0-0`)으로 확인해야 합니다.
+
+- 첫 페이지 20장 중 1장이라 전체 비율도 비슷할 수 있습니다(전수 확인은 안 함).
+- 프런트 작업은 없습니다.

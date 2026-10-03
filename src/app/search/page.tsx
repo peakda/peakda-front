@@ -35,6 +35,7 @@ const SEARCH_TABS: TabItem[] = [
 
 export default function SearchPage() {
   const [query, setQuery] = useState('')
+  const [urlHydrated, setUrlHydrated] = useState(false)
   const [recentSearches, setRecentSearches] = useState<string[]>([])
   // localStorage 를 읽기 전에 빈 배열로 덮어쓰지 않도록 로드 완료를 기다린다
   const [recentLoaded, setRecentLoaded] = useState(false)
@@ -52,16 +53,46 @@ export default function SearchPage() {
   const [activeTab, setActiveTab] = useState(SEARCH_TABS[0].value)
   const isLoggedIn = useIsLoggedIn()
   const requireLogin = useRequireLogin()
+  const openUserLogin = () => {
+    const params = new URLSearchParams({ q: query.trim(), tab: 'user' })
+    requireLogin(() => {}, '유저를 검색하려면 로그인이 필요해요.', `/search?${params}`)
+  }
   const handleTabChange = (value: string) => {
     setActiveTab(value)
-    if (value === 'user') requireLogin(() => {})
+    if (value === 'user' && !isLoggedIn) openUserLogin()
   }
   const spotQuery = useSearchSpotsInfinite(keyword)
   const userQuery = useSearchUsersInfinite(keyword, activeTab === 'user' && isLoggedIn)
+  const isCurrentSpotResult = keyword === query.trim() && !spotQuery.isPlaceholderData
+  const isCurrentUserResult = keyword === query.trim() && !userQuery.isPlaceholderData
   const spots = flattenPages(spotQuery.data).map(toSpotProps)
   const users = flattenPages(userQuery.data).map(toUserProps)
   // 로드된 개수가 아니라 전체 건수를 보여준다(스크롤해도 숫자가 늘지 않도록)
   const spotTotal = spotQuery.data?.pages[0]?.totalElements ?? 0
+  const isSpotCountLoading =
+    keyword !== query.trim() || spotQuery.isPending || spotQuery.isPlaceholderData
+  const spotCountLabel = isSpotCountLoading
+    ? '검색 중'
+    : spotQuery.isError && !spotQuery.data
+      ? '결과 확인 실패'
+      : `${spotTotal}개`
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    setQuery(params.get('q') ?? '')
+    setActiveTab(params.get('tab') === 'user' ? 'user' : 'spot')
+    setUrlHydrated(true)
+  }, [])
+
+  useEffect(() => {
+    if (!urlHydrated) return
+    const url = new URL(window.location.href)
+    if (query.trim()) url.searchParams.set('q', query)
+    else url.searchParams.delete('q')
+    if (query.trim() && activeTab === 'user') url.searchParams.set('tab', 'user')
+    else url.searchParams.delete('tab')
+    window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`)
+  }, [query, activeTab, urlHydrated])
 
   // SSR 에는 localStorage 가 없으므로 마운트 후에 읽는다
   useEffect(() => {
@@ -99,7 +130,10 @@ export default function SearchPage() {
       <SearchInput
         query={query}
         hasQuery={hasQuery}
-        setQuery={setQuery}
+        setQuery={(value) => {
+          setQuery(value)
+          if (typeof value === 'string' && !value.trim()) setActiveTab('spot')
+        }}
         isCancle
         autoFocus
         placeholder={searchPlaceholder}
@@ -121,42 +155,48 @@ export default function SearchPage() {
       ) : (
         /* 검색 결과 */
         <div onClickCapture={() => submitSearch(query)}>
-          <Tabs
-            tabs={SEARCH_TABS}
-            defaultValue={SEARCH_TABS[0].value}
-            onValueChange={handleTabChange}
-          >
-            <span className="px-4 pt-2 pb-2 text-xs text-gray-400">
-              스팟 결과 <span className="text-text-secondary font-medium">{spotTotal}</span>개
+          <Tabs tabs={SEARCH_TABS} defaultValue={activeTab} onValueChange={handleTabChange}>
+            <span className="px-4 pt-2 pb-2 text-xs text-gray-400" aria-live="polite">
+              스팟 결과 <span className="text-text-secondary font-medium">{spotCountLabel}</span>
             </span>
             <TabPanels tabs={SEARCH_TABS} className="mt-0">
               <SpotPanel
-                spots={keyword === query.trim() ? spots : []}
-                isLoading={keyword !== query.trim() || spotQuery.isPending}
+                spots={isCurrentSpotResult ? spots : []}
+                isLoading={!spotQuery.isError && (!isCurrentSpotResult || spotQuery.isPending)}
                 isError={spotQuery.isError}
                 onRetry={() => void spotQuery.refetch()}
                 onLoadMore={spotQuery.fetchNextPage}
-                hasMore={shouldLoadMore(
-                  spotQuery.hasNextPage,
-                  spotQuery.isFetchingNextPage,
-                  spotQuery.isFetchNextPageError
-                )}
+                hasMore={
+                  isCurrentSpotResult &&
+                  shouldLoadMore(
+                    spotQuery.hasNextPage,
+                    spotQuery.isFetchingNextPage,
+                    spotQuery.isFetchNextPageError
+                  )
+                }
                 isLoadingMore={spotQuery.isFetchingNextPage}
                 onRetryMore={
                   spotQuery.isFetchNextPageError ? () => void spotQuery.fetchNextPage() : undefined
                 }
               />
               <UserPanel
-                users={keyword === query.trim() ? users : []}
-                isLoading={isLoggedIn && (keyword !== query.trim() || userQuery.isPending)}
+                users={isCurrentUserResult ? users : []}
+                isLoginRequired={!isLoggedIn}
+                onLogin={openUserLogin}
+                isLoading={
+                  isLoggedIn && !userQuery.isError && (!isCurrentUserResult || userQuery.isPending)
+                }
                 isError={userQuery.isError}
                 onRetry={() => void userQuery.refetch()}
                 onLoadMore={userQuery.fetchNextPage}
-                hasMore={shouldLoadMore(
-                  userQuery.hasNextPage,
-                  userQuery.isFetchingNextPage,
-                  userQuery.isFetchNextPageError
-                )}
+                hasMore={
+                  isCurrentUserResult &&
+                  shouldLoadMore(
+                    userQuery.hasNextPage,
+                    userQuery.isFetchingNextPage,
+                    userQuery.isFetchNextPageError
+                  )
+                }
                 isLoadingMore={userQuery.isFetchingNextPage}
                 onRetryMore={
                   userQuery.isFetchNextPageError ? () => void userQuery.fetchNextPage() : undefined

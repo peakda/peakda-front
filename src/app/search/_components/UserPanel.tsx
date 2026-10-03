@@ -16,6 +16,8 @@ export interface UserProps {
 
 interface Props {
   users: UserProps[]
+  isLoginRequired?: boolean
+  onLogin?: () => void
   // 목록 하단에 닿았을 때 다음 페이지를 부른다. hasMore 가 false 면 관찰하지 않는다.
   onLoadMore?: () => void
   hasMore?: boolean
@@ -30,6 +32,8 @@ interface Props {
 
 export function UserPanel({
   users,
+  isLoginRequired = false,
+  onLogin,
   onLoadMore,
   hasMore = false,
   isLoadingMore = false,
@@ -39,6 +43,21 @@ export function UserPanel({
   onRetry,
 }: Props) {
   const sentinelRef = useInfiniteScroll(() => onLoadMore?.(), hasMore)
+
+  if (isLoginRequired) {
+    return (
+      <div className="flex h-96 flex-col items-center justify-center gap-3 px-4 text-center">
+        <p className="text-text-primary text-lg font-semibold">유저 검색은 로그인이 필요해요</p>
+        <button
+          type="button"
+          onClick={onLogin}
+          className="bg-brand-secondary rounded-3xl px-5 py-3 text-sm font-medium text-white"
+        >
+          로그인하기
+        </button>
+      </div>
+    )
+  }
 
   if (isLoading) return <QueryFeedback state="loading" />
   if (isError && users.length === 0) return <QueryFeedback state="error" onRetry={onRetry} />

@@ -15,7 +15,10 @@ import {
   type PhotoItem,
 } from '@/app/record/_components/LocationStepForm'
 import { DetailsStepForm, type BloomStage } from '@/app/record/_components/DetailsStepForm'
-import { LocationSearchView } from '@/app/record/_components/LocationSearchView'
+import {
+  LocationSearchView,
+  type LocationSearchState,
+} from '@/app/record/_components/LocationSearchView'
 import { RecordCompleteView } from '@/app/record/_components/RecordCompleteView'
 import { RecordSkeleton } from '@/app/record/_components/RecordSkeleton'
 import { compressImages } from '@/lib/utils/image'
@@ -59,7 +62,15 @@ function RecordPageContent() {
   const [plantDrawerOpen, setPlantDrawerOpen] = useState(false)
   const [isComplete, setIsComplete] = useState(false)
 
-  const { isReady: isPlacesReady, results, search } = useKakaoPlaces()
+  const {
+    isReady: isPlacesReady,
+    sdkStatus,
+    searchStatus,
+    searchedKeyword,
+    results,
+    search,
+    retrySdk,
+  } = useKakaoPlaces()
   const { createPreviewUrl, revokePreviewUrl, isUnmounted } = usePreviewUrls()
   const { data: plants } = usePlants()
   const { data: presetSpot } = useSpotDetail(spotIdParam)
@@ -106,6 +117,20 @@ function RecordPageContent() {
 
   const hasLocation = location.trim().length > 0
   const hasSearchQuery = searchQuery.trim().length > 0
+  const locationSearchState: LocationSearchState =
+    sdkStatus === 'error'
+      ? 'sdk-error'
+      : sdkStatus !== 'ready'
+        ? 'sdk-loading'
+        : searchQuery.trim() !== searchedKeyword ||
+            searchStatus === 'loading' ||
+            searchStatus === 'idle'
+          ? 'search-loading'
+          : searchStatus === 'success'
+            ? 'results'
+            : searchStatus === 'empty'
+              ? 'empty'
+              : 'error'
   const isValid =
     pendingPhotoCount === 0 && hasLocation && photoItems.length > 0 && date.trim().length > 0
   const isSubmitting = matchSpot.isPending || uploadPhotos.isPending || createRecord.isPending
@@ -297,8 +322,16 @@ function RecordPageContent() {
       <LocationSearchView
         searchQuery={searchQuery}
         hasSearchQuery={hasSearchQuery}
-        onSearchQueryChange={setSearchQuery}
+        onSearchQueryChange={(value) => {
+          setSearchQuery(value)
+          setSelectedPlace(null)
+        }}
         results={results}
+        searchState={locationSearchState}
+        onRetry={() => {
+          if (sdkStatus === 'error') retrySdk()
+          else search(searchQuery)
+        }}
         selectedPlace={selectedPlace}
         onSelectPlace={setSelectedPlace}
         onConfirm={handleSelectPlace}
