@@ -35,13 +35,14 @@ describe('lib/analytics Mixpanel', () => {
   it('토큰이 없으면(로컬·프리뷰) SDK 를 받지도, 보내지도 않는다', async () => {
     const analytics = await loadAnalytics('')
 
-    analytics.track('spot_view', { spot_id: 1, spot_type: 'ATTRACTION' })
+    analytics.track('spot_view', { spot_id: 1, spot_name: '여의도', spot_type: 'ATTRACTION' })
     await analytics.initMixpanel()
 
     expect(mixpanel.init).not.toHaveBeenCalled()
     expect(mixpanel.track).not.toHaveBeenCalled()
     expect(window.gtag).toHaveBeenCalledWith('event', 'spot_view', {
       spot_id: 1,
+      spot_name: '여의도',
       spot_type: 'ATTRACTION',
       platform: 'web',
     })
@@ -141,6 +142,55 @@ describe('lib/analytics Mixpanel', () => {
   })
 })
 
+describe('lib/analytics trackLocationPermission', () => {
+  afterEach(() => {
+    delete window.gtag
+    vi.unstubAllEnvs()
+    vi.clearAllMocks()
+    localStorage.clear()
+  })
+
+  it('결과가 이전과 같으면 보내지 않고, 바뀌면 보낸다', async () => {
+    const analytics = await loadAnalytics('token')
+    await analytics.initMixpanel()
+
+    analytics.trackLocationPermission('granted', 'map_open')
+    analytics.trackLocationPermission('granted', 'map_open')
+    analytics.trackLocationPermission('denied', 'my_location_button')
+
+    expect(mixpanel.track).toHaveBeenCalledTimes(2)
+    expect(mixpanel.track).toHaveBeenNthCalledWith(1, 'Location Permission Responded', {
+      result: 'granted',
+      trigger: 'map_open',
+    })
+    expect(mixpanel.track).toHaveBeenNthCalledWith(2, 'Location Permission Responded', {
+      result: 'denied',
+      trigger: 'my_location_button',
+    })
+  })
+
+  it('Mixpanel 에는 목록 파라미터를 목록 그대로 보낸다', async () => {
+    const analytics = await loadAnalytics('token')
+    await analytics.initMixpanel()
+
+    analytics.track('map_filter_apply', {
+      surface: 'explore',
+      region: 'all',
+      timing: 'all',
+      categories: ['CHERRY_BLOSSOM'],
+      flower_count: 1,
+    })
+
+    expect(mixpanel.track).toHaveBeenCalledWith('Filter Applied', {
+      surface: 'explore',
+      region: 'all',
+      timing: 'all',
+      categories: ['CHERRY_BLOSSOM'],
+      flower_count: 1,
+    })
+  })
+})
+
 describe('lib/analytics isAppReopen', () => {
   const now = 1_000_000_000
 
@@ -165,13 +215,22 @@ describe('lib/analytics track', () => {
     const gtag = vi.fn()
     window.gtag = gtag
 
-    track('search', { search_term: '벚꽃', result_count: undefined })
+    track('search', { search_term: '벚꽃', result_count: undefined, trigger: 'typed' })
 
-    expect(gtag).toHaveBeenCalledWith('event', 'search', { search_term: '벚꽃', platform: 'web' })
+    expect(gtag).toHaveBeenCalledWith('event', 'search', {
+      search_term: '벚꽃',
+      trigger: 'typed',
+      platform: 'web',
+    })
   })
 
   it('GA 초기화 전에 보낸 이벤트는 gtag 가 생긴 뒤에 보낸다', () => {
-    track('spot_view', { spot_id: 1, spot_type: 'ATTRACTION', bloom_status: 'PEAK' })
+    track('spot_view', {
+      spot_id: 1,
+      spot_name: '여의도',
+      spot_type: 'ATTRACTION',
+      bloom_status: 'PEAK',
+    })
 
     const gtag = vi.fn()
     window.gtag = gtag
@@ -179,8 +238,33 @@ describe('lib/analytics track', () => {
 
     expect(gtag).toHaveBeenCalledWith('event', 'spot_view', {
       spot_id: 1,
+      spot_name: '여의도',
       spot_type: 'ATTRACTION',
       bloom_status: 'PEAK',
+      platform: 'web',
+    })
+  })
+
+  it('목록 파라미터는 GA 에 쉼표로 이어 보낸다', () => {
+    const gtag = vi.fn()
+    window.gtag = gtag
+
+    track('map_filter_apply', {
+      surface: 'map',
+      region: 'all',
+      timing: 'all',
+      categories: ['CHERRY_BLOSSOM', 'CANOLA'],
+      flower_count: 2,
+      result_count: 0,
+    })
+
+    expect(gtag).toHaveBeenCalledWith('event', 'map_filter_apply', {
+      surface: 'map',
+      region: 'all',
+      timing: 'all',
+      categories: 'CHERRY_BLOSSOM,CANOLA',
+      flower_count: 2,
+      result_count: 0,
       platform: 'web',
     })
   })

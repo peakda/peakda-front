@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import { AlertCircle, Calendar, Clock, Globe, MapPin, Ticket } from 'lucide-react'
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
@@ -11,6 +12,7 @@ import { cn } from '@/lib/utils/cn'
 import type { FestivalDetailResponse } from '@/api/facades/generated/peakdaApi.schemas'
 import { buildMapUrl } from '@/lib/utils/spotCta'
 import { FESTIVAL_PHASE_LABEL as PHASE_LABEL } from '@/lib/utils/explore'
+import { track } from '@/lib/analytics'
 
 // 축제에는 대표 이미지가 없을 수 있다(에디토리얼이 없으면 heroImageUrl 도 없다).
 const HERO_PLACEHOLDER = '/images/explore.png'
@@ -47,6 +49,11 @@ interface FestivalDetailClientProps {
 // 본문은 서버(page.tsx)가 조회한 응답으로 그린다. 없는 id 는 서버에서 404 로 끝난다.
 export function FestivalDetailClient({ festival }: FestivalDetailClientProps) {
   const router = useRouter()
+  const { festivalId, name } = festival
+
+  useEffect(() => {
+    track('festival_view', { festival_id: festivalId, festival_name: name })
+  }, [festivalId, name])
 
   const editorial = festival.editorial
   const phaseLabel = festival.phase ? PHASE_LABEL[festival.phase] : null
@@ -206,6 +213,7 @@ export function FestivalDetailClient({ festival }: FestivalDetailClientProps) {
             href={festival.homepageUrl}
             target="_blank"
             rel="noreferrer noopener"
+            onClick={() => track('festival_homepage_click', { festival_id: festivalId })}
             className="text-text-secondary flex items-center gap-1.5 text-sm underline"
           >
             <Globe className="h-4 w-4 shrink-0" />

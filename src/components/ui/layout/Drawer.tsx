@@ -13,11 +13,11 @@ import { SaveSpotDrawerContent } from './SaveSpotDrawerContent'
 import { DeleteConfirmDrawerContent } from './DeleteConfirmDrawerContent'
 import { ReactionDrawerContent } from './ReactionDrawerContent'
 import { PinList } from '@/components/ui/display/PinList'
-import { useFilterStore } from '@/stores/useFilterStore'
+import { useFilterStore, type FilterValues } from '@/stores/useFilterStore'
 import { spotPreviewApi } from '@/api/facades/spot'
 import { toPinListItems } from '@/lib/utils/spotPreview'
 import { timingToStatus } from '@/lib/utils/timing'
-import { track } from '@/lib/analytics'
+import { track, type FilterSurface } from '@/lib/analytics'
 import { toast } from 'sonner'
 
 // 필터 시트와 날짜 선택 달력은 드로어 중 가장 무거운 두 덩어리인데, <Drawer /> 를 올리는
@@ -33,6 +33,18 @@ const DateSelectDrawerContent = dynamic(
 
 // 닫힘 애니메이션이 끝난 뒤 목록 드로어를 띄우기 위한 대기 시간(vaul 슬라이드 아웃 기준).
 const DRAWER_CLOSE_MS = 350
+
+// 꽃을 하나도 안 고르면 전체다. 목록으로 보내 Mixpanel 에서 꽃별로 셀 수 있게 한다.
+function trackFilterApply(surface: FilterSurface, filter: FilterValues, resultCount?: number) {
+  track('map_filter_apply', {
+    surface,
+    region: filter.region ?? 'all',
+    timing: filter.timing ?? 'all',
+    categories: filter.categories.length > 0 ? filter.categories : ['all'],
+    flower_count: filter.categories.length,
+    result_count: resultCount,
+  })
+}
 
 export function Drawer() {
   // snapHeight 는 여기서 쓰지 않는다 — 전체 구독하면 스냅 변경마다 드로어 전체가 다시 그려진다.
@@ -84,8 +96,10 @@ export function Drawer() {
   // 꽃 종류는 클라 필터라 개수를 미리 셀 수 있다. 지역·시기는 서버를 다녀와야 알 수 있다.
   const showsCount = type === 'filter' && activeTab === 'flowers'
 
-  const handleOpenSpot = (spotId?: number) => {
+  // position: 목록에서 몇 번째(0부터) 카드였는지
+  const handleOpenSpot = (spotId: number | undefined, position: number) => {
     if (spotId == null) return
+    track('map_preview_click', { spot_id: spotId, position })
     closeDrawer()
     router.push(`/spot/${spotId}`)
   }
@@ -109,6 +123,7 @@ export function Drawer() {
         status: timingToStatus(applied.timing),
       })
       const items = preview ? toPinListItems(preview.items) : []
+      trackFilterApply('map', applied, items.length)
 
       // 필터 드로어를 먼저 닫고, 결과가 있을 때만 목록 드로어를 새로 띄운다.
       // 내용만 갈아끼우면 필터에서 확장해 둔 스냅(0.9)이 목록에 그대로 남는다.
@@ -122,6 +137,7 @@ export function Drawer() {
       }
     } catch (error) {
       console.error(error)
+      trackFilterApply('map', applied)
       toast.error('명소 목록을 불러오지 못했어요')
     } finally {
       setIsLoadingPreview(false)
@@ -131,15 +147,12 @@ export function Drawer() {
   // 하단 버튼 → 필터 커밋. 지도 조회가 끝나야 목록을 열 수 있어 대기 플래그를 세운다.
   const handleApplyFilter = () => {
     const { draft } = useFilterStore.getState()
-    track('map_filter_apply', {
-      region: draft.region ?? 'all',
-      timing: draft.timing ?? 'all',
-      categories: draft.categories.length > 0 ? draft.categories.join(',') : 'all',
-    })
     applyDraft()
 
     // 탐색 화면의 꽃 필터는 뒤에 지도가 없어 보여줄 핀 목록이 없다. 적용만 하고 닫는다.
+    // 지도 필터는 목록 결과가 나온 뒤(openPreviewList) 결과 수와 함께 보낸다.
     if (type === 'flower-filter') {
+      trackFilterApply('explore', draft)
       closeDrawer()
       return
     }
@@ -310,9 +323,9 @@ export function Drawer() {
                   role="button"
                   tabIndex={0}
                   className={pin.spotId != null ? 'cursor-pointer' : undefined}
-                  onClick={() => handleOpenSpot(pin.spotId)}
+                  onClick={() => handleOpenSpot(pin.spotId, i)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') handleOpenSpot(pin.spotId)
+                    if (e.key === 'Enter' || e.key === ' ') handleOpenSpot(pin.spotId, i)
                   }}
                 >
                   <PinList {...pin} />
@@ -333,7 +346,7 @@ export function Drawer() {
                 className="bg-brand-secondary active:bg-brand-secondary hover:bg-brand-secondary w-full cursor-pointer text-white"
                 disabled={isFilterMode && (isLoadingPreview || isPendingList)}
                 onClick={
-                  isFilterMode ? handleApplyFilter : () => handleOpenSpot(pinListData[0]?.spotId)
+                  isFilterMode ? handleApplyFilter : () => handleOpenSpot(pinListData[0]?.spotId, 0)
                 }
               >
                 {type === 'flower-filter'
