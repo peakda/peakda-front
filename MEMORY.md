@@ -60,6 +60,7 @@
 - **분석은 GA4 + Mixpanel 을 같은 `track()`으로 보낸다** (2026-10-03): GA4 는 유입·SEO, Mixpanel 은 퍼널·리텐션용. 이벤트 사전은 [docs/ANALYTICS_EVENTS.md](docs/ANALYTICS_EVENTS.md).
   - **Mixpanel 토큰은 Vercel Production 에만 둔다** — 로컬·프리뷰 데이터가 섞이지 않게 하려는 것이고, 토큰이 없으면 아무것도 보내지 않는다. 그래서 운영 배포 전에는 단위 테스트로만 검증하고, 실제 전송은 운영의 Mixpanel Live View 로 확인한다.
   - **토큰 등록 = 수집 시작이다.** Mixpanel(미국 저장)은 국외 이전이라 개인정보처리방침·Google Play 데이터 보안 양식이 먼저 갱신돼야 한다. 코드를 머지해도 토큰 전에는 수집되지 않는다.
+  - **Mixpanel 무료 플랜이라 커스텀 이벤트·코호트 저장이 없다** (2026-10-05 확인) — 그래서 Activation 은 `Activation Action`을 코드에서 함께 보내고, 회원/비회원은 리포트 필터로 나눈다. 저장 리포트는 계정당 5개. 자세한 건 이벤트 사전의 "무료 플랜 제한".
   - 로그아웃 이벤트처럼 "이 회원의 마지막 행동"은 `clearAuthMarker()` **전에** 보내야 한다. 마커가 지워지는 순간 `AnalyticsManager`가 `reset()`해 이후 이벤트는 새 익명 사용자로 간다.
 - **PR은 `main` 대상이고, `main`은 보호돼 있다** (2026-10-01): PR 필수 + `ci` 체크 통과 필수(관리자 우회 가능). 로컬 `develop`은 크게 뒤처져 있어 기준으로 쓰지 않는다. Android 워크플로는 필수 체크가 아니다.
 

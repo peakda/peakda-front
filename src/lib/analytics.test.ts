@@ -244,6 +244,60 @@ describe('lib/analytics 로그인 수단·알림 표시', () => {
   })
 })
 
+describe('lib/analytics Activation·이탈 전송', () => {
+  afterEach(() => {
+    delete window.gtag
+    vi.unstubAllEnvs()
+    vi.clearAllMocks()
+    localStorage.clear()
+  })
+
+  it('찜·만개 알림·기록 등록 성공에는 Activation Action 을 함께 보내고, 다른 이벤트에는 보내지 않는다', async () => {
+    const analytics = await loadAnalytics('token')
+    await analytics.initMixpanel()
+
+    analytics.track('spot_save', { spot_id: 1 })
+    analytics.track('bloom_alert_on', { spot_id: 1 })
+    analytics.track('record_create', { spot_type: 'LOCAL', photo_count: 1 })
+    analytics.track('bloom_alert_off', { spot_id: 1 })
+    analytics.track('spot_unsave', { spot_id: 1 })
+
+    const activations = mixpanel.track.mock.calls.filter(([name]) => name === 'Activation Action')
+    expect(activations).toEqual([
+      ['Activation Action', { action: 'spot_saved' }],
+      ['Activation Action', { action: 'bloom_alert_enabled' }],
+      ['Activation Action', { action: 'record_created' }],
+    ])
+  })
+
+  it('beacon 옵션이면 페이지가 닫혀도 보내지도록 sendBeacon 으로 보낸다', async () => {
+    const analytics = await loadAnalytics('token')
+    await analytics.initMixpanel()
+
+    analytics.track(
+      'record_abandon',
+      {
+        screen: 'location_search',
+        last_action: 'location_search_open',
+        photo_count: 2,
+        has_location: false,
+        has_date: true,
+        plant_count: 0,
+        has_bloom_stage: false,
+        has_memo: false,
+        duration_sec: 40,
+      },
+      { beacon: true }
+    )
+
+    expect(mixpanel.track).toHaveBeenCalledWith(
+      'Record Abandoned',
+      expect.objectContaining({ screen: 'location_search', last_action: 'location_search_open' }),
+      { transport: 'sendBeacon' }
+    )
+  })
+})
+
 describe('lib/analytics isAppReopen', () => {
   const now = 1_000_000_000
 

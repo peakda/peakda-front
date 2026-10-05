@@ -71,9 +71,14 @@ PM 공유용 전체 설계(퍼널·대시보드·예정 이벤트 포함): https
 | `festival_view` | Festival Viewed | 축제 상세 진입 | `festival_id`, `festival_name` |
 | `festival_homepage_click` | Festival Homepage Clicked | 축제 공식 홈페이지 링크 (외부 이동) | `festival_id` |
 | `record_start` | Record Started | 기록 작성 화면 진입 | `spot_id` |
+| `record_photo_add` | Record Photo Added | 사진 추가 완료(압축 후) | `added`, `photo_count` |
+| `record_location_search_open` | Record Location Search Opened | 장소 검색 화면 열기 | — |
+| `record_place_select` | Record Place Selected | 검색에서 장소 확정(스팟 매칭 성공) | — |
 | `record_location_select` | Record Location Selected | 1단계(사진·위치·날짜)에서 "다음" | `method`(typed/search/from_spot), `photo_count` |
 | `record_plant_select` | Record Plant Selected | 2단계에서 식물을 고름 (해제는 세지 않음) | `plant_id` |
+| `record_submit_click` | Record Submit Clicked | 2단계 "등록"을 누른 순간. `record_create`와의 차이가 업로드·저장 실패 | `photo_count`, `plant_count` |
 | `record_create` | Record Created | 기록 등록 성공 | `spot_id`, `spot_type`, `bloom_stage`, `photo_count` |
+| `record_abandon` | Record Abandoned | **등록하지 않고 기록 화면을 떠난 순간**의 상태. 화면 이동(언마운트)·탭/앱 닫힘(`pagehide`, sendBeacon) 중 먼저 오는 쪽에서 한 번. 백그라운드 전환은 이탈로 보지 않는다. 안드로이드 앱을 스와이프로 강제 종료하면 빠질 수 있다 | `screen`(step1/location_search/step2), `last_action`(start/photo_picker_open/photo_add/photo_remove/location_search_open/location_search_close/place_select/location_type/category/date/step1_next/back_to_step1/plant/bloom_stage/memo/submit), `photo_count`, `has_location`, `has_date`, `plant_count`, `has_bloom_stage`, `has_memo`, `duration_sec` |
 | `record_edit_start` | Record Edit Started | 기록 수정 화면 진입 (수정하기 메뉴가 여러 곳이라 화면에서 보냄. 출처는 `prev_path`) | `record_id` |
 | `record_edit` / `record_delete` | Record Edited / Record Deleted | 수정·삭제 성공 | `record_id` |
 | `feed_view` | Feed Viewed | 기록 상세 진입 | `record_id`, `spot_id` |
@@ -91,3 +96,24 @@ PM 공유용 전체 설계(퍼널·대시보드·예정 이벤트 포함): https
 | `notification_read_all` | Notifications All Read | "모두 읽음" 성공 | `unread_count`(처리 전) |
 | `app_open` | App Opened | 앱을 백그라운드에 30분 이상 두었다가 다시 엶 (새로 켜면 페이지뷰가 잡음) | — |
 | `web_vitals` | (보내지 않음) | Core Web Vitals. GA 전용 | `metric_name`, `metric_value`, `metric_rating`, `metric_id`, `navigation_type` |
+| (Mixpanel 전용) | Activation Action | `spot_save`·`bloom_alert_on`·`record_create`를 보낼 때 함께 보낸다 (`track()` 안의 `ACTIVATION_ACTIONS`) | `action`(spot_saved/bloom_alert_enabled/record_created) |
+
+## 지표 정의 (Mixpanel 에서 설정)
+
+| 지표 | 정의 | 설정 |
+| --- | --- | --- |
+| DAU | 하루 동안 이벤트를 하나라도 남긴 사용자 수 | Insights → 전체 이벤트 → Unique users → 일 단위 |
+| Activation (7일) | 첫 방문 후 7일 안에 찜·만개 알림 켜기·기록 등록 중 하나를 한 사용자 비율 | Funnels: `Page Viewed`(First Time Ever 필터) → `Activation Action`, 전환 기간 7일 |
+| Activation (한 세션) | 위 행동을 첫 방문과 같은 세션 안에 한 비율 | 같은 퍼널, 전환 기간 1 session (세션 = 30분 무활동 시 종료, Mixpanel 기본값) |
+
+- 무료 플랜에는 여러 이벤트를 하나로 묶는 커스텀 이벤트가 없어서([요금제](https://mixpanel.com/pricing/)에서 Growth 기능) `Activation Action`을 코드에서 보낸다. 조건을 바꾸려면 `ACTIVATION_ACTIONS`를 고친다.
+- 세 행동 모두 로그인이 필요하다. 비회원까지 분모에 들어가면 낮게 나오므로 "전체 신규 방문자"와 `is_logged_in = true` 기준을 같이 본다.
+- 수집을 시작한 뒤 약 2주는 기존 사용자도 "첫 방문"으로 잡힌다. 그 기간 수치는 빼고 본다.
+
+## Mixpanel 무료 플랜 제한
+
+[요금 문서](https://docs.mixpanel.com/docs/pricing) 원문: "Limited to a maximum of 5 saved reports per user account and 1M total events. You can create cohorts but not save them, and features like lookup tables, custom properties, or permissions are not included."
+
+- **코호트는 저장할 수 없다** — 회원/비회원은 리포트에서 `is_logged_in`으로 나눠 보고, 웹·앱 함께 쓰는 회원은 사용자 속성 `platforms_used` 필터로 본다(필터는 리포트에 함께 저장된다).
+- **저장 리포트는 계정당 5개** — 기본 구성: DAU, Activation, 기록 작성 퍼널, 지도 퍼널, 리텐션. 계정 수(seat)는 무제한이라 팀원마다 5개씩 쓸 수 있다.
+- 커스텀 이벤트·커스텀 속성 없음 — 묶음 지표가 필요하면 `Activation Action`처럼 코드에서 보낸다.

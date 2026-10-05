@@ -37,6 +37,8 @@ interface LocationStepFormProps {
   photoItems: PhotoPreview[]
   // 압축 중인 사진 수. 그만큼 로딩 칸을 보여 주고, 끝날 때까지 사진 추가를 막는다.
   pendingPhotoCount?: number
+  // 사진 선택 창을 열 때 (분석: 사진을 고르다 나갔는지)
+  onOpenPhotoPicker?: () => void
   onPhotoAdd: (e: React.ChangeEvent<HTMLInputElement>) => void
   onRemovePhoto: (index: number) => void
   fileInputRef: React.RefObject<HTMLInputElement | null>
@@ -57,6 +59,7 @@ export function LocationStepForm({
   onLocationChange = () => {},
   photoItems,
   pendingPhotoCount = 0,
+  onOpenPhotoPicker = () => {},
   onPhotoAdd,
   onRemovePhoto,
   fileInputRef,
@@ -150,7 +153,10 @@ export function LocationStepForm({
               variant="outlined"
               size="md"
               leftIcon={<Plus size={16} />}
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => {
+                onOpenPhotoPicker()
+                fileInputRef.current?.click()
+              }}
               disabled={pendingPhotoCount > 0}
               className="w-fit rounded-2xl py-5"
             >
