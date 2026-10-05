@@ -14,7 +14,7 @@
 |---|---|---|---|
 | 1 | **P0** | `GET /api/festivals/{id}`, `GET /api/curations/{id}`, `GET /api/curations` | 비로그인 조회 허용 |
 | 2 | P1 | 기록 사진·동네 스팟 대표 사진 (+ 에디토리얼 이미지 확인) | 만료 없는 공개 이미지 URL |
-| 3 | P2 | sitemap 용 목록 | 공개 스팟·축제·큐레이션 id + 수정일 목록 |
+| 3 | P2 | sitemap 용 목록 | 공개 스팟·축제·큐레이션 id + 수정일 목록 — ✅ `GET /api/sitemap` 반영 (PEAK-80, 2026-10-05 운영 배포) |
 | 4 | P2 | 개화 추정 | 데이터 출처·판정 기준 설명 |
 
 ---
@@ -80,6 +80,8 @@ GET /api/curations          인증 필요 → 비로그인 허용
 ## P2
 
 ### 3. sitemap 용 공개 페이지 목록
+
+> ✅ 2026-10-05 `GET /api/sitemap` 운영 배포 (PEAK-80, 서버 PR #145·#147). dev swagger 에는 아직 노출되지 않아 프론트는 생성 코드 없이 직접 호출한다 (`src/api/facades/sitemap.ts`).
 
 `/sitemap.xml` 에 스팟 상세 주소를 넣으려면 전체 스팟 id가 필요한데, 목록 API가 없어서 **개화 지도(`GET /api/seasonal/blooms`)를 한반도 전체 범위로 한 번 조회**해 모으고 있습니다.
 
