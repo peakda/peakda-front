@@ -24,6 +24,7 @@ import { GetFeedFilter } from '@/api/facades/generated/peakdaApi.schemas'
 import type { PageResponseSpotRecordSummaryResponse } from '@/api/facades/generated/peakdaApi.schemas'
 import { flattenPages } from '@/lib/utils/infinitePages'
 import { shouldLoadMore } from '@/lib/utils/myRecords'
+import { track } from '@/lib/analytics'
 
 const FEED_CATEGORIES = ['전체', '관심 식물', '팔로잉']
 
@@ -66,6 +67,7 @@ export function FeedClient({ initialPage }: FeedClientProps) {
   // 비로그인은 전체 탭만 볼 수 있다(관심 식물·팔로잉은 서버가 401).
   const requireLogin = useRequireLogin()
   const handleTabClick = (cate: string) => {
+    track('feed_tab_change', { tab: cate })
     const select = () => {
       setTab(cate)
       window.scrollTo({ top: 0 })

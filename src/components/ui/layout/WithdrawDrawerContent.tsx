@@ -6,6 +6,7 @@ import { Check } from 'lucide-react'
 import { Button } from '@/components/ui/button/Button'
 import { cn } from '@/lib/utils/cn'
 import { withdrawApi } from '@/api/facades/user'
+import { track } from '@/lib/analytics'
 import { clearAuthMarker } from '@/lib/auth/session'
 
 interface Props {
@@ -32,6 +33,8 @@ export function WithdrawDrawerContent({ onClose }: Props) {
       setIsWithdrawing(false)
       return
     }
+    // 마커를 지우는 순간 분석 사용자가 새 익명으로 바뀌므로 그 전에 보낸다.
+    track('account_delete', {})
     clearAuthMarker()
     onClose()
     router.replace('/map')

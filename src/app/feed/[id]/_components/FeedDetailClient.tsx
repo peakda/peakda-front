@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Header } from '@/components/ui/layout/Header'
@@ -18,6 +18,7 @@ import { useDrawerStore } from '@/stores/useDrawerStore'
 import { useRequireLogin } from '@/hooks/useRequireLogin'
 import { detailToFeedCardProps } from '@/lib/utils/spotRecordToFeed'
 import { buildReportRequest } from '@/lib/utils/feed'
+import { track } from '@/lib/analytics'
 import type { CreateReportRequestReason } from '@/api/facades/generated/peakdaApi.schemas'
 import type { SpotRecordResponse } from '@/api/facades/generated/peakdaApi.schemas'
 
@@ -28,6 +29,11 @@ export function FeedDetailClient({ initialRecord }: { initialRecord: SpotRecordR
   const { id } = useParams<{ id: string }>()
   const recordId = Number(id)
   const { data: record, isLoading } = useFeedDetail(recordId, initialRecord)
+  const initialSpotId = initialRecord.spot.id
+
+  useEffect(() => {
+    track('feed_view', { record_id: recordId, spot_id: initialSpotId })
+  }, [recordId, initialSpotId])
   const { data: currentUser } = useCurrentUser()
   const { data: spot } = useSpotDetail(record?.spot.id)
   const deleteRecord = useDeleteSpotRecord()

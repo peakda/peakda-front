@@ -1,4 +1,5 @@
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
+import { track } from '@/lib/analytics'
 import {
   postUsersByUserIdFollow,
   getUsersByUserIdFollowers,
@@ -77,10 +78,24 @@ export const useFollowingListInfinite = (userId: number) =>
 
 export const useFollow = () => {
   const queryClient = useQueryClient()
-  return useFollowGen({ mutation: { onSuccess: () => invalidateFollow(queryClient) } })
+  return useFollowGen({
+    mutation: {
+      onSuccess: (_res, { userId }) => {
+        track('follow', { target_user_id: userId })
+        invalidateFollow(queryClient)
+      },
+    },
+  })
 }
 
 export const useUnfollow = () => {
   const queryClient = useQueryClient()
-  return useUnfollowGen({ mutation: { onSuccess: () => invalidateFollow(queryClient) } })
+  return useUnfollowGen({
+    mutation: {
+      onSuccess: (_res, { userId }) => {
+        track('unfollow', { target_user_id: userId })
+        invalidateFollow(queryClient)
+      },
+    },
+  })
 }
