@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type SetStateAction } from 'react'
 import { Tabs } from '@/components/ui/Tab/Tab'
 import { TabPanels } from '@/components/ui/Tab/TabPanel'
 import { TabItem } from '@/context/TabContext'
@@ -15,7 +15,7 @@ import { useSearchSpotsInfinite, useSearchUsersInfinite } from '@/api/facades/se
 import { useDebounce } from '@/hooks/useDebounce'
 import { useIsLoggedIn } from '@/hooks/useIsLoggedIn'
 import { useRequireLogin } from '@/hooks/useRequireLogin'
-import { track } from '@/lib/analytics'
+import { track, type SearchTrigger } from '@/lib/analytics'
 import { flattenPages } from '@/lib/utils/infinitePages'
 import { shouldLoadMore } from '@/lib/utils/myRecords'
 import { readStorage, writeStorage } from '@/lib/utils/storage'
@@ -58,6 +58,7 @@ export default function SearchPage() {
     requireLogin(() => {}, '유저를 검색하려면 로그인이 필요해요.', `/search?${params}`)
   }
   const handleTabChange = (value: string) => {
+    track('search_tab_change', { tab: value, has_keyword: query.trim().length > 0 })
     setActiveTab(value)
     if (value === 'user' && !isLoggedIn) openUserLogin()
   }
@@ -112,6 +113,12 @@ export default function SearchPage() {
   // 입력 중에는 글자마다 결과가 바뀌므로, 엔터나 결과 클릭으로 검색어를 확정했을 때만 search 를 보낸다.
   // 결과 영역 클릭마다 불리므로 같은 검색어는 한 번만 보낸다.
   const lastTrackedTermRef = useRef('')
+  // 검색어가 어디서 정해졌는지. 칩·최근 검색어를 누르면 바뀌고, 다시 타이핑하면 typed 로 돌아간다.
+  const queryTriggerRef = useRef<SearchTrigger>('typed')
+  const pickQuery = (trigger: SearchTrigger) => (value: SetStateAction<string>) => {
+    queryTriggerRef.current = trigger
+    setQuery(value)
+  }
 
   const submitSearch = (value: string) => {
     setRecentSearches((prev) => addRecentSearch(prev, value))
@@ -121,8 +128,20 @@ export default function SearchPage() {
     lastTrackedTermRef.current = term
     // 디바운스가 따라잡기 전에 엔터를 치면 결과 수가 직전 검색어 기준이라 이때는 빼고 보낸다.
     const isCountReady = keyword === term && spotQuery.isSuccess && !spotQuery.isFetching
-    track('search', { search_term: term, result_count: isCountReady ? spotTotal : undefined })
+    track('search', {
+      search_term: term,
+      result_count: isCountReady ? spotTotal : undefined,
+      trigger: queryTriggerRef.current,
+    })
   }
+
+  const trackResultClick = (resultType: 'spot' | 'user', itemId: number, position: number) =>
+    track('search_result_click', {
+      result_type: resultType,
+      item_id: itemId,
+      position,
+      search_term: query.trim(),
+    })
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
@@ -131,6 +150,7 @@ export default function SearchPage() {
         query={query}
         hasQuery={hasQuery}
         setQuery={(value) => {
+          queryTriggerRef.current = 'typed'
           setQuery(value)
           if (typeof value === 'string' && !value.trim()) setActiveTab('spot')
         }}
@@ -144,13 +164,13 @@ export default function SearchPage() {
         <div className="flex flex-col gap-6 px-4 py-2">
           {/* 최근 검색 */}
           <RecentList
-            setQuery={setQuery}
+            setQuery={pickQuery('recent')}
             recentSearches={recentSearches}
             setRecentSearches={setRecentSearches}
             removeRecent={removeRecent}
           />
           {/* 요즘 급하게 찾는 */}
-          <HotChipList setQuery={setQuery} />
+          <HotChipList setQuery={pickQuery('hot')} />
         </div>
       ) : (
         /* 검색 결과 */
@@ -162,6 +182,7 @@ export default function SearchPage() {
             <TabPanels tabs={SEARCH_TABS} className="mt-0">
               <SpotPanel
                 spots={isCurrentSpotResult ? spots : []}
+                onOpenSpot={(spotId, position) => trackResultClick('spot', spotId, position)}
                 isLoading={!spotQuery.isError && (!isCurrentSpotResult || spotQuery.isPending)}
                 isError={spotQuery.isError}
                 onRetry={() => void spotQuery.refetch()}
@@ -181,6 +202,7 @@ export default function SearchPage() {
               />
               <UserPanel
                 users={isCurrentUserResult ? users : []}
+                onOpenUser={(userId, position) => trackResultClick('user', userId, position)}
                 isLoginRequired={!isLoggedIn}
                 onLogin={openUserLogin}
                 isLoading={

@@ -39,12 +39,23 @@ PM 공유용 전체 설계(퍼널·대시보드·예정 이벤트 포함): https
 | `login` | Login Completed | 로그인 성공 (웹 콜백·앱 코드 교환) | — |
 | `sign_up` | Sign Up Completed | 가입 완료 | — |
 | `login_prompt` | Login Prompt Shown | 로그인이 필요한 기능을 눌러 로그인 시트가 뜸 | `reason` |
-| `search` | Search Performed | 엔터나 결과 클릭으로 검색어 확정 | `search_term`, `result_count` |
+| `search` | Search Performed | 엔터나 결과 클릭으로 검색어 확정 | `search_term`, `result_count`, `trigger`(typed/hot/recent) |
+| `search_result_click` | Search Result Clicked | 검색 결과를 눌러 이동 | `result_type`(spot/user), `item_id`, `position`, `search_term` |
+| `search_tab_change` | Search Tab Changed | 스팟/유저 탭 전환 | `tab`, `has_keyword` |
 | `map_pin_click` | Map Pin Clicked | 지도 핀·클러스터 클릭 | `spot_id` |
-| `map_filter_apply` | Filter Applied | 필터 적용 | `region`, `timing`, `categories` |
-| `spot_view` | Spot Viewed | 명소 상세 진입 | `spot_id`, `spot_type`, `bloom_category`, `bloom_status` |
+| `map_preview_click` | Map Preview Clicked | 핀·필터 결과 목록에서 카드를 눌러 상세로 | `spot_id`, `position` |
+| `filter_open` | Filter Opened | 필터 시트 열기 (지도·탐색) | `surface`(map/explore) |
+| `map_filter_apply` | Filter Applied | 필터 적용. 지도는 목록 결과가 나온 뒤 보낸다 | `surface`, `region`, `timing`, `categories`(목록, 미선택은 `['all']`), `flower_count`, `result_count`(지도만, 0 포함) |
+| `map_my_location_click` | My Location Clicked | 지도 "내 위치" 버튼 | `permission`(granted/denied/app_off) |
+| `location_permission` | Location Permission Responded | 위치 권한 결과가 **이 기기에서 마지막으로 보낸 값과 다를 때만** | `result`(granted/denied), `trigger`(map_open/my_location_button) |
+| `explore_card_click` | Explore Card Clicked | 탐색 카드 클릭 | `section`(peak_now/next_week/festival/creator), `item_id`, `position`, `view`(main/list) |
+| `explore_see_all` | Explore See All Clicked | 탐색 섹션 "전체" | `section` |
+| `spot_view` | Spot Viewed | 명소 상세 진입 | `spot_id`, `spot_name`, `spot_type`, `bloom_category`, `bloom_status` |
+| `spot_action_click` | Spot Action Clicked | 명소 상세의 하트·종·"방문 기록 남기기"를 누른 순간 (로그인 여부 무관) | `action`(save/unsave/alert_on/alert_off/record), `spot_id` |
 | `spot_save` / `spot_unsave` | Spot Saved / Spot Unsaved | 찜 저장·해제 성공 | `spot_id` |
 | `bloom_alert_on` / `bloom_alert_off` | Bloom Alert Enabled / Disabled | 만개 알림 설정 성공 | `spot_id` |
+| `festival_view` | Festival Viewed | 축제 상세 진입 | `festival_id`, `festival_name` |
+| `festival_homepage_click` | Festival Homepage Clicked | 축제 공식 홈페이지 링크 (외부 이동) | `festival_id` |
 | `record_start` | Record Started | 기록 작성 화면 진입 | `spot_id` |
 | `record_create` | Record Created | 기록 등록 성공 | `spot_id`, `spot_type`, `bloom_stage`, `photo_count` |
 | `push_permission` | Push Permission Responded | 앱 알림 권한 응답 | `result` |
