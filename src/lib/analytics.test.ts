@@ -57,7 +57,16 @@ describe('lib/analytics Mixpanel', () => {
 
     expect(mixpanel.init).toHaveBeenCalledWith('token', {
       track_pageview: false,
-      autocapture: false,
+      autocapture: {
+        pageview: false,
+        click: true,
+        dead_click: true,
+        rage_click: true,
+        input: false,
+        scroll: false,
+        submit: false,
+        capture_text_content: false,
+      },
     })
     expect(mixpanel.register).toHaveBeenCalledWith({ platform: 'web', is_logged_in: false })
     expect(mixpanel.track).toHaveBeenCalledWith('Spot Saved', { spot_id: 3 })
@@ -67,6 +76,18 @@ describe('lib/analytics Mixpanel', () => {
     expect(mixpanel.track.mock.invocationCallOrder[0]).toBeLessThan(
       mixpanel.track_pageview.mock.invocationCallOrder[0]
     )
+  })
+
+  it('자동 수집 스위치를 끄면(off) 자동 클릭 수집 없이 초기화한다', async () => {
+    vi.stubEnv('NEXT_PUBLIC_MIXPANEL_AUTOCAPTURE', 'off')
+    const analytics = await loadAnalytics('token')
+
+    await analytics.initMixpanel()
+
+    expect(mixpanel.init).toHaveBeenCalledWith('token', {
+      track_pageview: false,
+      autocapture: false,
+    })
   })
 
   it('GA 전용 이벤트(web_vitals)는 Mixpanel 에 보내지 않는다', async () => {

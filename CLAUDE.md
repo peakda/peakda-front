@@ -36,6 +36,7 @@ pnpm validate:context  # context 문서 경로 검증 (CI에서도 실행)
 - props interface는 컴포넌트명 + Props로 명명
   예) ButtonProps, SpotCardProps
 - 'use client' 는 꼭 필요한 경우만 최하위 컴포넌트에 선언
+- 아이콘만 있는 버튼에는 `aria-label`을 붙인다 — Mixpanel 자동 수집이 이 값으로 버튼을 구분한다 ([docs/ANALYTICS_EVENTS.md](docs/ANALYTICS_EVENTS.md))
 
 ## 스타일 규칙
 
