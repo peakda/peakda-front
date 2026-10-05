@@ -12,9 +12,11 @@ import { useDrawerStore } from '@/stores/useDrawerStore'
 
 interface Props {
   spot: SPOTProps
+  // 상세로 이동할 때 (분석 이벤트용)
+  onOpen?: () => void
 }
 
-export function SpotCard({ spot }: Props) {
+export function SpotCard({ spot, onOpen }: Props) {
   // 알림은 찜에 종속이라, 이 자리에서 하트를 누르면 종도 같이 켜지고 꺼져야 한다.
   const [favorited, setFavorited] = useState(spot.favorited ?? false)
   const [notifyEnabled, setNotifyEnabled] = useState(spot.notifyEnabled ?? false)
@@ -89,7 +91,11 @@ export function SpotCard({ spot }: Props) {
     <div className="flex items-center gap-3 px-4 py-3">
       {/* Spot 행이 아직 없으면(spotId null) 이동할 상세가 없어 링크로 감싸지 않는다 */}
       {spot.id != null ? (
-        <Link href={`/spot/${spot.id}`} className="flex min-w-0 flex-1 items-center gap-3">
+        <Link
+          href={`/spot/${spot.id}`}
+          onClick={onOpen}
+          className="flex min-w-0 flex-1 items-center gap-3"
+        >
           {info}
         </Link>
       ) : (

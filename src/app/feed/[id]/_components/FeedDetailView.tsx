@@ -8,6 +8,7 @@ import { ReactionBar } from '@/components/ui/card/ReactionBar'
 import { Badge } from '@/components/ui/display/Badge'
 import { Indecator } from '@/app/onboarding/_components/Indecator'
 import { useCarousel } from '@/hooks/useEmblaCarousel'
+import { useTrackPhotoSwipe } from '@/hooks/useTrackPhotoSwipe'
 import { SpotBloomSummary } from './SpotBloomSummary'
 import type { SpotBloomSummaryProps } from './SpotBloomSummary'
 import type { FeedCardProps } from '@/components/ui/card/FeedCard'
@@ -47,13 +48,14 @@ export function FeedDetailView({
   spotSummary,
 }: FeedDetailViewProps) {
   const { emblaRef, selectedIndex, scrollSnaps, scrollTo } = useCarousel({ loop: true })
+  useTrackPhotoSwipe(selectedIndex, recordId, images.length, 'feed_detail')
   const safeAuthorImageUrl = toHttpsImageUrl(authorImageUrl)
 
   return (
     <div className="flex flex-col gap-3">
       {/* 이미지 캐러셀 — 화면 폭 전체, 헤더가 위에 겹친다 */}
       <div className="relative">
-        <div ref={emblaRef} className="overflow-hidden">
+        <div ref={emblaRef} className="mp-no-track overflow-hidden">
           <div className="flex touch-pan-y">
             {images.map((src, i) => (
               <div key={i} className="min-w-0 flex-[0_0_100%]">

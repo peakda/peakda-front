@@ -57,6 +57,11 @@
   - `/users`는 백엔드 조회 API가 아직 인증을 요구해서 막혀 있다. 공개되면 `PROTECTED_PATHS`에서 빼면 된다.
 - **`loading.tsx` 스켈레톤은 ISR 캐시 미스일 때만 보인다** (2026-10-01 PR #109): `feed`·`feed/[id]`·`spot/[id]`·`explore` 서버 페이지는 `revalidate`로 캐시돼 대부분 즉시 응답한다. 그리고 `loading.tsx`는 **하위 라우트에도 상속**되므로 모양이 다른 하위 화면(`explore/spots`·`explore/festivals`·`spot/[id]/feed`)에는 각자 `loading.tsx`를 둬서 덮어썼다. 상위 화면 UI를 바꾸면 스켈레톤도 함께 맞출 것.
 - **낙관적 업데이트는 `onMutate` 가 아니라 로컬 상태·캐시를 먼저 바꾸고 `onError`에서 되돌리는 방식이다**: `HeartBtn`·`BellBtn`·`FollowButton`·찜 시트·`ReactionBar`(`applyReactionToggle`)·스팟 상세(`setFavoriteCache`). `onMutate`로 검색하면 하나도 안 나오지만 낙관적 업데이트가 없는 게 아니다. 새 토글 버튼도 같은 방식으로 맞추고, 실패 시 `toast.error`를 띄운다.
+- **분석은 GA4 + Mixpanel 을 같은 `track()`으로 보낸다** (2026-10-03): GA4 는 유입·SEO, Mixpanel 은 퍼널·리텐션용. 이벤트 사전은 [docs/ANALYTICS_EVENTS.md](docs/ANALYTICS_EVENTS.md).
+  - **Mixpanel 토큰은 Vercel Production 에만 둔다** — 로컬·프리뷰 데이터가 섞이지 않게 하려는 것이고, 토큰이 없으면 아무것도 보내지 않는다. 그래서 운영 배포 전에는 단위 테스트로만 검증하고, 실제 전송은 운영의 Mixpanel Live View 로 확인한다.
+  - **토큰 등록 = 수집 시작이다.** Mixpanel(미국 저장)은 국외 이전이라 개인정보처리방침·Google Play 데이터 보안 양식이 먼저 갱신돼야 한다. 코드를 머지해도 토큰 전에는 수집되지 않는다.
+  - **Mixpanel 무료 플랜이라 커스텀 이벤트·코호트 저장이 없다** (2026-10-05 확인) — 그래서 Activation 은 `Activation Action`을 코드에서 함께 보내고, 회원/비회원은 리포트 필터로 나눈다. 저장 리포트는 계정당 5개. 자세한 건 이벤트 사전의 "무료 플랜 제한".
+  - 로그아웃 이벤트처럼 "이 회원의 마지막 행동"은 `clearAuthMarker()` **전에** 보내야 한다. 마커가 지워지는 순간 `AnalyticsManager`가 `reset()`해 이후 이벤트는 새 익명 사용자로 간다.
 - **PR은 `main` 대상이고, `main`은 보호돼 있다** (2026-10-01): PR 필수 + `ci` 체크 통과 필수(관리자 우회 가능). 로컬 `develop`은 크게 뒤처져 있어 기준으로 쓰지 않는다. Android 워크플로는 필수 체크가 아니다.
 
 ## 자주 하는 작업

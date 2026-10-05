@@ -25,6 +25,7 @@ import { useRequireLogin } from '@/hooks/useRequireLogin'
 import { useEffect, useState } from 'react'
 import { usePlants } from '@/api/facades/plant'
 import { readCustomFavoritePlantIds } from '@/lib/utils/customFavoritePlants'
+import { track, trackNotificationBadgeShown } from '@/lib/analytics'
 
 export default function MyPage() {
   const router = useRouter()
@@ -46,7 +47,12 @@ export default function MyPage() {
       ]
     : []
   const { data: unread } = useUnreadNotificationCount()
-  const unreadBadge = formatUnreadBadge(unread?.unreadCount ?? 0)
+  const unreadCount = unread?.unreadCount ?? 0
+  const unreadBadge = formatUnreadBadge(unreadCount)
+
+  useEffect(() => {
+    trackNotificationBadgeShown(unreadCount)
+  }, [unreadCount])
   const { data: favoriteData } = useFavoriteList()
   const savedSpots = (favoriteData?.favorites ?? []).slice(0, 3).map(toFavoriteSpotProps)
   const safeProfileImageUrl = toHttpsImageUrl(myPage?.profileImageUrl)
@@ -62,7 +68,14 @@ export default function MyPage() {
                 type="button"
                 aria-label="알림"
                 className="relative cursor-pointer"
-                onClick={() => requireLogin(() => router.push('/notification'))}
+                onClick={() => {
+                  track('notification_icon_click', {
+                    surface: 'my',
+                    has_unread: unreadCount > 0,
+                    unread_count: unreadCount,
+                  })
+                  requireLogin(() => router.push('/notification'))
+                }}
               >
                 <Image src="/icons/alram.svg" alt="알림" width={22} height={22} />
                 {unreadBadge && (

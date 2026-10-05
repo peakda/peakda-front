@@ -16,6 +16,7 @@ import { QueryFeedback } from '@/components/ui/display/QueryFeedback'
 import { useHomeSuggestion } from '@/api/facades/home'
 import { useExploreCuration } from '@/api/facades/explore'
 import type { ExploreResponse, ExploreSpotItem } from '@/api/facades/generated/peakdaApi.schemas'
+import { track, type ExploreSection } from '@/lib/analytics'
 import {
   formatMonthDay,
   hasSpotId,
@@ -41,15 +42,17 @@ interface SectionHeaderProps {
   title: string
   // 전체 보기 페이지가 있는 섹션만 넘긴다.
   href?: string
+  section?: ExploreSection
 }
 
-function SectionHeader({ title, href }: SectionHeaderProps) {
+function SectionHeader({ title, href, section }: SectionHeaderProps) {
   return (
     <div className="flex items-center justify-between px-4 py-3">
       <span className="text-lg font-bold text-gray-900">{title}</span>
       {href && (
         <Link
           href={href}
+          onClick={() => section && track('explore_see_all', { section })}
           className="text-text-secondary flex cursor-pointer items-center gap-0.5 text-sm"
         >
           전체
@@ -60,6 +63,12 @@ function SectionHeader({ title, href }: SectionHeaderProps) {
 }
 
 // 개화 시즌이 아니면 섹션이 통째로 비는 게 정상이라, 섹션 자체는 남기고 안내만 보여줌.
+// 어느 섹션의 몇 번째(0부터) 카드가 눌리는지 본다. 상세가 없는 항목(id 없음)은 링크도 없어 보내지 않는다.
+function trackCardClick(section: ExploreSection, itemId: number | null | undefined, position: number) {
+  if (itemId == null) return
+  track('explore_card_click', { section, item_id: itemId, position, view: 'main' })
+}
+
 function EmptySection({ text }: { text: string }) {
   return <p className="text-text-tertiary px-4 py-8 text-center text-sm">{text}</p>
 }
@@ -106,7 +115,15 @@ export function ExploreClient({ initialExplore }: ExploreClientProps) {
           right={
             <div className="flex items-center gap-1">
               <p className="text-text-secondary text-sm">필터</p>
-              <button type="button" className="cursor-pointer" onClick={openFlowerFilterDrawer}>
+              <button
+                type="button"
+                aria-label="꽃 필터 열기"
+                className="cursor-pointer"
+                onClick={() => {
+                  track('filter_open', { surface: 'explore' })
+                  openFlowerFilterDrawer()
+                }}
+              >
                 <Image src="/icons/filter.svg" alt="필터" width={24} height={24} />
               </button>
             </div>
@@ -130,6 +147,7 @@ export function ExploreClient({ initialExplore }: ExploreClientProps) {
             <SectionHeader
               title="지금이 절정이에요"
               href={peakNow.length > 0 ? '/explore/spots?section=PEAK_NOW' : undefined}
+              section="peak_now"
             />
             {peakNow.length === 0 ? (
               <EmptySection text="지금 절정인 명소가 없어요" />
@@ -140,7 +158,11 @@ export function ExploreClient({ initialExplore }: ExploreClientProps) {
                     key={`${item.attractionId}-${item.category}`}
                     className="flex-[0_0_72%] pr-3"
                   >
-                    <Link href={`/spot/${item.spotId}`} className="block">
+                    <Link
+                      href={`/spot/${item.spotId}`}
+                      onClick={() => trackCardClick('peak_now', item.spotId, idx)}
+                      className="block"
+                    >
                       {/* 카드 폭이 72% 라 첫 화면에는 1장 + 2번째 일부가 보인다. */}
                       <ExplorCard
                         type="peak"
@@ -162,15 +184,17 @@ export function ExploreClient({ initialExplore }: ExploreClientProps) {
             <SectionHeader
               title="다음 주에 가면 좋을 곳"
               href={nextWeek.length > 0 ? '/explore/spots?section=NEXT_WEEK' : undefined}
+              section="next_week"
             />
             {nextWeek.length === 0 ? (
               <EmptySection text="다음 주에 개화가 예상되는 곳이 없어요" />
             ) : (
               <ul className="divide-y divide-gray-100">
-                {nextWeek.map((item) => (
+                {nextWeek.map((item, idx) => (
                   <SpotCard
                     key={`${item.attractionId}-${item.category}`}
                     spot={toExploreSpotProps(item)}
+                    onOpen={() => trackCardClick('next_week', item.spotId, idx)}
                   />
                 ))}
               </ul>
@@ -182,16 +206,21 @@ export function ExploreClient({ initialExplore }: ExploreClientProps) {
             <SectionHeader
               title="요즘 뜨는 축제"
               href={festivals.length > 0 ? '/explore/festivals' : undefined}
+              section="festival"
             />
             {festivals.length === 0 ? (
               <EmptySection text="진행 중인 축제가 없어요" />
             ) : (
               <Carousel className="px-4 pb-4">
-                {festivals.map((item) => {
+                {festivals.map((item, idx) => {
                   const status = toFestivalStatus(item)
                   return (
                     <CarouselItem key={item.festivalId} className="flex-[0_0_72%] pr-3">
-                      <Link href={`/festivals/${item.festivalId}`} className="block">
+                      <Link
+                        href={`/festivals/${item.festivalId}`}
+                        onClick={() => trackCardClick('festival', item.festivalId, idx)}
+                        className="block"
+                      >
                         <ExplorCard
                           type="festival"
                           className="w-full"
@@ -218,9 +247,13 @@ export function ExploreClient({ initialExplore }: ExploreClientProps) {
             ) : (
               // 시안대로 다음 카드가 살짝 보이게 두어 더 있다는 걸 알린다(슬라이드 폭 72%).
               <Carousel className="px-4 pb-4">
-                {curations.map((item) => (
+                {curations.map((item, idx) => (
                   <CarouselItem key={item.id} className="flex-[0_0_72%] pr-3">
-                    <Link href={`/creators/${item.id}`} className="block">
+                    <Link
+                      href={`/creators/${item.id}`}
+                      onClick={() => trackCardClick('creator', item.id, idx)}
+                      className="block"
+                    >
                       <ExplorCard
                         type="course"
                         className="w-full"

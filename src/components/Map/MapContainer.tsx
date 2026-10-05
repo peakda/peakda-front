@@ -22,6 +22,7 @@ import { useHomeSuggestion } from '@/api/facades/home'
 import { bloomToMapSpots } from '@/lib/utils/bloomToMapSpots'
 import { readMapView, rememberMapView } from '@/lib/utils/mapViewHistory'
 import { loadAppSettings } from '@/lib/utils/appSettings'
+import { track, trackLocationPermission } from '@/lib/analytics'
 import {
   initMap,
   mapBox,
@@ -62,6 +63,10 @@ const PIN_TYPE_LABEL: Record<PinTypeFilter, string> = {
   LOCAL: '동네',
 }
 const PIN_TYPE_LABELS = PIN_TYPES.map((type) => PIN_TYPE_LABEL[type])
+
+// 지도 첫 진입 때 확인된 위치 권한. 결과가 이전과 같으면 보내지 않는다.
+const trackMapOpenPermission = (permission: 'granted' | 'denied') =>
+  trackLocationPermission(permission, 'map_open')
 
 // 축제 상세 등에서 /map?lat=..&lng=.. 로 넘어오면 그 좌표를 초기 중심으로 쓴다.
 function toCoord(value: string | null) {
@@ -340,10 +345,14 @@ export const MapContainer = () => {
   const handleLocate = useCallback(() => {
     if (!mapRef.current) return
     if (!loadAppSettings().locationEnabled) {
+      track('map_my_location_click', { permission: 'app_off' })
       toast.error('설정에서 위치 정보 사용을 켜주세요.')
       return
     }
-    panToCurrentLocation(mapRef.current, () => {
+    panToCurrentLocation(mapRef.current, (permission) => {
+      track('map_my_location_click', { permission })
+      trackLocationPermission(permission, 'my_location_button')
+      if (permission !== 'denied') return
       toast.error('위치 권한이 필요합니다.', {
         description: '브라우저 설정에서 위치 권한을 허용해주세요.',
       })
@@ -370,6 +379,10 @@ export const MapContainer = () => {
     initialLocationRef.current = request
     void request.promise.then((result) => {
       request.result = result
+      // 이미 정해 둔 권한(설정에서 바꾼 경우 포함)도 여기서 확인된다. 아직 안 정했으면 이후 팝업 결과로 잡힌다.
+      if (result.permission === 'granted' || result.permission === 'denied') {
+        trackMapOpenPermission(result.permission)
+      }
     })
   }, [initialCenter, targetQuery])
 
@@ -402,7 +415,7 @@ export const MapContainer = () => {
         new kakao.maps.services.Places().keywordSearch(targetQuery, (data, status) => {
           const place = status === kakao.maps.services.Status.OK ? data[0] : undefined
           if (!place) {
-            if (canUseLocation) panToCurrentLocation(createdMap)
+            if (canUseLocation) panToCurrentLocation(createdMap, trackMapOpenPermission)
             return
           }
           const lat = Number(place.y)
@@ -413,19 +426,19 @@ export const MapContainer = () => {
       } else if (!savedView && !initialCenter && canUseLocation) {
         const request = initialLocationRef.current
         if (!request) {
-          panToCurrentLocation(map)
+          panToCurrentLocation(map, trackMapOpenPermission)
         } else if (
           request.result?.permission === 'prompt' ||
           request.result?.permission === 'unknown'
         ) {
-          panToCurrentLocation(map)
+          panToCurrentLocation(map, trackMapOpenPermission)
         } else if (!request.result) {
           void request.promise.then((result) => {
             if (mapRef.current !== createdMap || !containerRef.current?.isConnected) return
             if (result.permission === 'granted' && result.center) {
               createdMap.panTo(new kakao.maps.LatLng(result.center.lat, result.center.lng))
             } else if (result.permission === 'prompt' || result.permission === 'unknown') {
-              panToCurrentLocation(createdMap)
+              panToCurrentLocation(createdMap, trackMapOpenPermission)
             }
           })
         }
@@ -449,7 +462,7 @@ export const MapContainer = () => {
 
   return (
     <div className="relative h-dvh w-full contain-strict">
-      <div ref={containerRef} id="kakao-map" className="absolute inset-0 z-0 bg-green-50" />
+      <div ref={containerRef} id="kakao-map" className="mp-no-track absolute inset-0 z-0 bg-green-50" />
 
       {!areTilesLoaded && (
         <div className="pointer-events-none absolute inset-0 z-[1]">
@@ -472,7 +485,10 @@ export const MapContainer = () => {
       <SearchBar
         placeholder="지금 피크인 곳을 검색해보세요."
         description={searchDescription}
-        onFilterClick={openFilterDrawer}
+        onFilterClick={() => {
+          track('filter_open', { surface: 'map' })
+          openFilterDrawer()
+        }}
         hasActiveFilter={hasActiveFilter(applied)}
       />
       <MapLocationBtn onLocate={handleLocate} />

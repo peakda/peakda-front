@@ -24,7 +24,7 @@ import { RecordSkeleton } from '@/app/record/_components/RecordSkeleton'
 import { compressImages } from '@/lib/utils/image'
 import { readPhotoExif } from '@/lib/utils/photoExif'
 import { loadAppSettings } from '@/lib/utils/appSettings'
-import { track } from '@/lib/analytics'
+import { track, type RecordAction, type RecordLocationMethod } from '@/lib/analytics'
 
 // 매칭/생성에 필요한 스팟 정보 (카카오 검색 + 스팟 매칭 결과)
 // kakaoPlaceId: 스팟 상세(?spotId=)에서 넘어오면 응답에 없으므로 null 이다.
@@ -46,6 +46,8 @@ function RecordPageContent() {
   const [step, setStep] = useState(0)
   const [location, setLocation] = useState('')
   const [selectedSpot, setSelectedSpot] = useState<SelectedSpot | null>(null)
+  // 1단계 위치가 어떻게 정해졌는지. "다음"을 누를 때 record_location_select 로 보낸다.
+  const locationMethodRef = useRef<RecordLocationMethod>('typed')
   const [category, setCategory] = useState<Category>('유명명소')
   const [showCategoryPicker, setShowCategoryPicker] = useState(false)
   const [photoItems, setPhotoItems] = useState<PhotoItem[]>([])
@@ -61,6 +63,51 @@ function RecordPageContent() {
   const [memo, setMemo] = useState('')
   const [plantDrawerOpen, setPlantDrawerOpen] = useState(false)
   const [isComplete, setIsComplete] = useState(false)
+
+  // 등록하지 않고 나갈 때(record_abandon) 어디서 멈췄는지 남긴다.
+  const lastActionRef = useRef<RecordAction>('start')
+  const startedAtRef = useRef(0)
+  const markAction = (action: RecordAction) => {
+    lastActionRef.current = action
+  }
+  // 나가는 순간의 최신 상태로 보내도록 렌더마다 갈아 끼운다.
+  const sendAbandonRef = useRef(() => {})
+  useEffect(() => {
+    sendAbandonRef.current = () => {
+      if (isComplete) return
+      track(
+        'record_abandon',
+        {
+          screen: isSearchMode ? 'location_search' : step === 1 ? 'step2' : 'step1',
+          last_action: lastActionRef.current,
+          photo_count: photoItems.length,
+          has_location: location.trim().length > 0,
+          has_date: date.trim().length > 0,
+          plant_count: selectedPlantIds.length,
+          has_bloom_stage: selectedStatus !== '',
+          has_memo: memo.trim().length > 0,
+          duration_sec: Math.round((Date.now() - startedAtRef.current) / 1000),
+        },
+        { beacon: true }
+      )
+    }
+  })
+  // 화면 이동(언마운트)과 탭·앱 닫힘(pagehide) 중 먼저 오는 쪽에서 한 번만 보낸다.
+  // 앱을 잠깐 백그라운드로 보내는 건 이탈이 아니라 보내지 않는다.
+  useEffect(() => {
+    startedAtRef.current = Date.now()
+    let isSent = false
+    const sendOnce = () => {
+      if (isSent) return
+      isSent = true
+      sendAbandonRef.current()
+    }
+    window.addEventListener('pagehide', sendOnce)
+    return () => {
+      window.removeEventListener('pagehide', sendOnce)
+      sendOnce()
+    }
+  }, [])
 
   const {
     isReady: isPlacesReady,
@@ -99,6 +146,7 @@ function RecordPageContent() {
       attractionId: presetSpot.attractionId ?? null,
     })
     setLocation(presetSpot.name)
+    locationMethodRef.current = 'from_spot'
     setCategory(presetSpot.type === 'ATTRACTION' ? '유명명소' : '동네스팟')
   }, [presetSpot])
 
@@ -110,10 +158,14 @@ function RecordPageContent() {
     return () => clearTimeout(timer)
   }, [searchQuery, isSearchMode, search, isPlacesReady])
 
-  const togglePlant = (id: number) =>
+  const togglePlant = (id: number) => {
+    markAction('plant')
+    // 고를 때만 보낸다. 해제는 세지 않는다.
+    if (!selectedPlantIds.includes(id)) track('record_plant_select', { plant_id: id })
     setSelectedPlantIds((prev) =>
       prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
     )
+  }
 
   const hasLocation = location.trim().length > 0
   const hasSearchQuery = searchQuery.trim().length > 0
@@ -159,9 +211,15 @@ function RecordPageContent() {
     if (isUnmounted()) return
     const newItems = compressed.map((file) => ({ file, previewUrl: createPreviewUrl(file) }))
     setPhotoItems((prev) => [...prev, ...newItems].slice(0, 5))
+    markAction('photo_add')
+    track('record_photo_add', {
+      added: newItems.length,
+      photo_count: Math.min(photoItems.length + newItems.length, 5),
+    })
   }
 
   const handleRemovePhoto = (index: number) => {
+    markAction('photo_remove')
     setPhotoItems((prev) => {
       revokePreviewUrl(prev[index].previewUrl)
       return prev.filter((_, i) => i !== index)
@@ -199,6 +257,9 @@ function RecordPageContent() {
         attractionId: matchData?.spot?.attractionId ?? null,
       })
       setLocation(selectedPlace.place_name)
+      locationMethodRef.current = 'search'
+      markAction('place_select')
+      track('record_place_select', {})
       setCategory(suggestedType === 'ATTRACTION' ? '유명명소' : '동네스팟')
     } catch (err) {
       console.error(err)
@@ -214,6 +275,12 @@ function RecordPageContent() {
 
   // 사진 업로드 → photoKeys 확보 → PUBLISHED 기록 생성
   const handlePublish = async () => {
+    // 누른 순간 보낸다. record_create(성공)와의 차이가 업로드·저장 실패다.
+    markAction('submit')
+    track('record_submit_click', {
+      photo_count: photoItems.length,
+      plant_count: selectedPlantIds.length,
+    })
     if (!selectedSpot || selectedStatus === '') return
 
     // 매칭 실패로 attractionId 를 못 받은 상태에서 사용자가 유명 명소로 수동 전환하면
@@ -280,6 +347,9 @@ function RecordPageContent() {
     setMemo('')
     setPlantDrawerOpen(false)
     setIsComplete(false)
+    // 새 기록을 시작한 것으로 보고 이탈 기준을 처음부터 다시 잡는다.
+    lastActionRef.current = 'start'
+    startedAtRef.current = Date.now()
   }
 
   if (isComplete) {
@@ -305,14 +375,23 @@ function RecordPageContent() {
         selectedPlantIds={selectedPlantIds}
         onTogglePlant={togglePlant}
         selectedStatus={selectedStatus}
-        onSelectStatus={setSelectedStatus}
+        onSelectStatus={(value) => {
+          markAction('bloom_stage')
+          setSelectedStatus(value)
+        }}
         memo={memo}
-        onMemoChange={setMemo}
+        onMemoChange={(value) => {
+          markAction('memo')
+          setMemo(value)
+        }}
         isSubmitting={isSubmitting}
         onPublish={handlePublish}
         plantDrawerOpen={plantDrawerOpen}
         onPlantDrawerOpenChange={setPlantDrawerOpen}
-        onBack={() => setStep(0)}
+        onBack={() => {
+          markAction('back_to_step1')
+          setStep(0)
+        }}
       />
     )
   }
@@ -336,7 +415,10 @@ function RecordPageContent() {
         onSelectPlace={setSelectedPlace}
         onConfirm={handleSelectPlace}
         isConfirming={matchSpot.isPending}
-        onClose={() => setIsSearchMode(false)}
+        onClose={() => {
+          markAction('location_search_close')
+          setIsSearchMode(false)
+        }}
       />
     )
   }
@@ -347,18 +429,40 @@ function RecordPageContent() {
       category={category}
       showCategoryPicker={showCategoryPicker}
       onToggleCategoryPicker={() => setShowCategoryPicker((v) => !v)}
-      onSelectCategory={setCategory}
-      onOpenSearch={() => setIsSearchMode(true)}
-      onLocationChange={setLocation}
+      onSelectCategory={(value) => {
+        markAction('category')
+        setCategory(value)
+      }}
+      onOpenSearch={() => {
+        markAction('location_search_open')
+        track('record_location_search_open', {})
+        setIsSearchMode(true)
+      }}
+      onLocationChange={(value) => {
+        locationMethodRef.current = 'typed'
+        markAction('location_type')
+        setLocation(value)
+      }}
       photoItems={photoItems}
       pendingPhotoCount={pendingPhotoCount}
+      onOpenPhotoPicker={() => markAction('photo_picker_open')}
       onPhotoAdd={handlePhotoAdd}
       onRemovePhoto={handleRemovePhoto}
       fileInputRef={fileInputRef}
       date={date}
-      onDateChange={setDate}
+      onDateChange={(value) => {
+        markAction('date')
+        setDate(value)
+      }}
       isValid={isValid}
-      onNext={() => setStep(1)}
+      onNext={() => {
+        markAction('step1_next')
+        track('record_location_select', {
+          method: locationMethodRef.current,
+          photo_count: photoItems.length,
+        })
+        setStep(1)
+      }}
     />
   )
 }

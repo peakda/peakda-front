@@ -18,7 +18,7 @@ import { toFeedCardProps } from '@/lib/utils/spotRecordToFeed'
 import { useSpotDetail } from '@/api/facades/spot'
 import { useBloomCalendar } from '@/api/facades/seasonal-bloom'
 import { useRemoveFavorite, useUpdateFavoriteNotify } from '@/api/facades/spot-favorite'
-import { track } from '@/lib/analytics'
+import { track, type SpotAction } from '@/lib/analytics'
 import { enablePushForBloomAlert } from '@/lib/push/pushNotifications'
 import {
   getGetSpotsByIdQueryKey,
@@ -62,17 +62,23 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
 
   // 상세 진입 1회. "지금 가기 좋은 곳"에 더 반응하는지 보려고 개화 단계를 같이 보낸다.
   // 개화 정보는 사용자와 무관해 서버 응답(initialSpot) 값으로 충분하다.
+  const spotName = initialSpot.name
   const spotType = initialSpot.type
   const bloomCategory = initialSpot.bloom?.category
   const bloomStatus = initialSpot.bloom?.status
   useEffect(() => {
     track('spot_view', {
       spot_id: id,
+      spot_name: spotName,
       spot_type: spotType,
       bloom_category: bloomCategory,
       bloom_status: bloomStatus,
     })
-  }, [id, spotType, bloomCategory, bloomStatus])
+  }, [id, spotName, spotType, bloomCategory, bloomStatus])
+
+  // 로그인 안내가 뜨기 전, 누른 순간에 보낸다.
+  const trackAction = (action: SpotAction) =>
+    track('spot_action_click', { action, spot_id: id })
 
   // 서버 응답에는 사용자 쿠키가 없어 찜·알림이 항상 false 다. 클라이언트가 쿠키를 실어 다시 조회해 덮어쓰고,
   // 그 전까지(또는 재조회 실패 시)는 서버 값을 그대로 보여준다.
@@ -205,9 +211,10 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
                 type="button"
                 aria-label="만개 알림 받기"
                 aria-pressed={favorited && notifyEnabled}
-                onClick={() =>
+                onClick={() => {
+                  trackAction(favorited && notifyEnabled ? 'alert_off' : 'alert_on')
                   requireLogin(handleNotify, '알림 설정을 하고 싶다면 로그인이 필요해요.')
-                }
+                }}
                 disabled={updateNotify.isPending}
               >
                 <Bell
@@ -300,7 +307,10 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
         <button
           type="button"
           aria-label="찜하기"
-          onClick={() => requireLogin(handleSave, '해당 장소를 찜하고 싶다면 로그인이 필요해요.')}
+          onClick={() => {
+            trackAction(favorited ? 'unsave' : 'save')
+            requireLogin(handleSave, '해당 장소를 찜하고 싶다면 로그인이 필요해요.')
+          }}
           disabled={removeFavorite.isPending}
           className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-gray-200"
         >
@@ -313,12 +323,13 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
           color="primary"
           size="lg"
           className="flex-1"
-          onClick={() =>
+          onClick={() => {
+            trackAction('record')
             requireLogin(
               () => router.push(buildRecordUrl(spot.id)),
               '스팟 기록을 남기려면 로그인이 필요해요.'
             )
-          }
+          }}
         >
           방문 기록 남기기
         </Button>
