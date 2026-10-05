@@ -1,11 +1,10 @@
 'use client'
 
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
-import { Button } from '@/components/ui/button/Button'
 import { Badge } from '@/components/ui/display/Badge'
 import { CardBadge } from '@/components/ui/card/CardBadge'
 import type { CurationDetailResponse } from '@/api/facades/generated/peakdaApi.schemas'
@@ -211,24 +210,22 @@ function MapLinkButton({
   latitude?: number | null
   longitude?: number | null
 }) {
-  const router = useRouter()
-
   const href =
     (latitude == null || longitude == null) && !placeName?.trim() && spotId
       ? `/spot/${spotId}`
       : buildMapUrl({ latitude, longitude, query: placeName, spotId })
 
+  // 이동은 크롤러가 따라갈 수 있게 <a> 로 둔다. 클래스는 Button(outlined·default·md)이 합쳐 내던 값 그대로라 모양이 같다.
   return (
-    <Button
-      variant="outlined"
-      color="default"
-      size="md"
-      className="text-text-primary h-11 w-full gap-2.5 rounded-full border-gray-200 font-semibold"
-      rightIcon={<ChevronRight className="h-4 w-4" />}
-      onClick={() => router.push(href)}
+    <Link
+      href={href}
+      className="text-text-primary inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2.5 rounded-full border border-gray-200 px-4 text-sm font-semibold transition-colors duration-150 select-none hover:bg-gray-50"
     >
       지도에서 보기
-    </Button>
+      <span className="flex items-center text-[1em]" aria-hidden>
+        <ChevronRight className="h-4 w-4" />
+      </span>
+    </Link>
   )
 }
 

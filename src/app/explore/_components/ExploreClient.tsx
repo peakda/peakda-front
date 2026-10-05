@@ -48,7 +48,7 @@ interface SectionHeaderProps {
 function SectionHeader({ title, href, section }: SectionHeaderProps) {
   return (
     <div className="flex items-center justify-between px-4 py-3">
-      <span className="text-lg font-bold text-gray-900">{title}</span>
+      <h2 className="text-lg font-bold text-gray-900">{title}</h2>
       {href && (
         <Link
           href={href}
@@ -111,7 +111,7 @@ export function ExploreClient({ initialExplore }: ExploreClientProps) {
     <div className="relative flex min-h-screen w-full flex-col bg-white pb-24">
       <div className="h-14">
         <Header
-          left={<div className="text-xl font-semibold text-[#000000]">탐색</div>}
+          left={<h1 className="text-xl font-semibold text-[#000000]">탐색</h1>}
           right={
             <div className="flex items-center gap-1">
               <p className="text-text-secondary text-sm">필터</p>

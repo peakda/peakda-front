@@ -9,7 +9,10 @@ interface NavProps {
 export function Nav({ activeTab }: NavProps) {
   const itemClass = 'flex cursor-pointer flex-col items-center gap-1 justify-center'
   return (
-    <div className="border-border shadow-background fixed right-0 bottom-0 left-0 z-10 mx-auto min-h-20 max-w-[430px] border bg-white px-4 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
+    <nav
+      aria-label="주요 메뉴"
+      className="border-border shadow-background fixed right-0 bottom-0 left-0 z-10 mx-auto min-h-20 max-w-[430px] border bg-white px-4 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]"
+    >
       <div className="flex justify-around text-sm">
         {/* 지도 */}
         <Link href="/map" className={itemClass} aria-current={activeTab === 'map' ? 'page' : undefined}>
@@ -70,6 +73,6 @@ export function Nav({ activeTab }: NavProps) {
           <p className={activeTab === 'my' ? 'text-black' : 'text-gray-400'}>My</p>
         </Link>
       </div>
-    </div>
+    </nav>
   )
 }

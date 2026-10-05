@@ -66,7 +66,7 @@ export function ExploreSpotsClient({ section, initialPage }: ExploreSpotsClientP
         <Header
           left={<LeftArrow />}
           center={
-            <div className="text-[15px] font-medium text-[#000000]">{SECTION_TITLE[section]}</div>
+            <h1 className="text-[15px] font-medium text-[#000000]">{SECTION_TITLE[section]}</h1>
           }
         />
       </div>
