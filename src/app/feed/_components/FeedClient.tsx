@@ -91,7 +91,7 @@ export function FeedClient({ initialPage }: FeedClientProps) {
     <div className="bg-bg-primary relative flex min-h-screen flex-col pb-24">
       <div className="h-14">
         <Header
-          left={<div className="text-text-primary text-xl font-semibold">피드</div>}
+          left={<h1 className="text-text-primary text-xl font-semibold">피드</h1>}
           right={
             <div className="flex items-center gap-3">
               <button

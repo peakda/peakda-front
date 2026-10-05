@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 import { useBloomCalendar } from '@/api/facades/seasonal-bloom'
 import { formatPeakPeriod, peakHeadline } from '@/lib/utils/bloomCalendar'
@@ -28,7 +28,6 @@ export function SpotBloomSummary({
   attractionId,
   category,
 }: SpotBloomSummaryProps) {
-  const router = useRouter()
   const { data: calendar } = useBloomCalendar(
     attractionId && category ? { attractionId, category } : null
   )
@@ -37,9 +36,8 @@ export function SpotBloomSummary({
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => router.push(`/spot/${spotId}`)}
+      <Link
+        href={`/spot/${spotId}`}
         className="border-border-primary flex items-center justify-between gap-2 border-y px-4 py-3.5 text-left"
       >
         <span className="flex flex-col gap-1">
@@ -49,7 +47,7 @@ export function SpotBloomSummary({
           </span>
         </span>
         <ChevronRight className="text-icon-quaternary h-5 w-5 shrink-0" />
-      </button>
+      </Link>
 
       {calendar && (
         <section className="mx-4 flex flex-col gap-2">
