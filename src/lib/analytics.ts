@@ -9,6 +9,24 @@ export type LocationPermission = 'granted' | 'denied'
 export type ExploreSection = 'peak_now' | 'next_week' | 'festival' | 'creator'
 export type SpotAction = 'save' | 'unsave' | 'alert_on' | 'alert_off' | 'record'
 export type RecordLocationMethod = 'typed' | 'search' | 'from_spot'
+// 기록 작성 중 마지막으로 한 행동. 등록하지 않고 나갈 때(record_abandon) 어디서 멈췄는지 본다.
+export type RecordAction =
+  | 'start'
+  | 'photo_picker_open'
+  | 'photo_add'
+  | 'photo_remove'
+  | 'location_search_open'
+  | 'location_search_close'
+  | 'place_select'
+  | 'location_type'
+  | 'category'
+  | 'date'
+  | 'step1_next'
+  | 'back_to_step1'
+  | 'plant'
+  | 'bloom_stage'
+  | 'memo'
+  | 'submit'
 
 // GA4·Mixpanel 로 보내는 이벤트 이름과 파라미터는 여기서만 정한다 — 화면마다 문자열을 쓰면 오타 하나로 데이터가 갈라진다.
 // 이벤트 목록과 각 이벤트가 언제 기록되는지는 docs/ANALYTICS_EVENTS.md 에 둔다.
@@ -97,7 +115,23 @@ interface AnalyticsEvents {
   follow: { target_user_id: number }
   unfollow: { target_user_id: number }
   report_submit: { target_type: string }
+  record_photo_add: { added: number; photo_count: number }
+  record_location_search_open: Record<string, never>
+  record_place_select: Record<string, never>
   record_location_select: { method: RecordLocationMethod; photo_count: number }
+  record_submit_click: { photo_count: number; plant_count: number }
+  // 등록하지 않고 기록 화면을 떠난 순간의 상태. 화면 이동·탭/앱 닫힘에서 한 번만 보낸다.
+  record_abandon: {
+    screen: 'step1' | 'location_search' | 'step2'
+    last_action: RecordAction
+    photo_count: number
+    has_location: boolean
+    has_date: boolean
+    plant_count: number
+    has_bloom_stage: boolean
+    has_memo: boolean
+    duration_sec: number
+  }
   record_plant_select: { plant_id: number }
   record_edit_start: { record_id: number }
   record_edit: { record_id: number }
@@ -178,7 +212,12 @@ const MIXPANEL_EVENT_NAMES: Record<keyof AnalyticsEvents, string | null> = {
   follow: 'User Followed',
   unfollow: 'User Unfollowed',
   report_submit: 'Report Submitted',
+  record_photo_add: 'Record Photo Added',
+  record_location_search_open: 'Record Location Search Opened',
+  record_place_select: 'Record Place Selected',
   record_location_select: 'Record Location Selected',
+  record_submit_click: 'Record Submit Clicked',
+  record_abandon: 'Record Abandoned',
   record_plant_select: 'Record Plant Selected',
   record_edit_start: 'Record Edit Started',
   record_edit: 'Record Edited',
@@ -355,7 +394,25 @@ export function trackLocationPermission(
   track('location_permission', { result, trigger })
 }
 
-export function track<E extends keyof AnalyticsEvents>(event: E, params: AnalyticsEvents[E]) {
+// Activation: 찜·만개 알림·기록 중 하나라도 하면 "관심 장소를 만든 사용자"로 본다.
+// Mixpanel 무료 플랜은 여러 이벤트를 하나로 묶는 커스텀 이벤트가 없어, 퍼널에 쓸 대표 이벤트를 함께 보낸다.
+// 퍼널: Page Viewed(처음) → Activation Action, 전환 기간 7일 또는 1세션 (docs/ANALYTICS_EVENTS.md)
+const ACTIVATION_ACTIONS: Partial<Record<keyof AnalyticsEvents, string>> = {
+  spot_save: 'spot_saved',
+  bloom_alert_on: 'bloom_alert_enabled',
+  record_create: 'record_created',
+}
+
+interface TrackOptions {
+  // 페이지가 닫히는 순간(pagehide)에 보낼 때. 일반 요청은 닫히면서 취소될 수 있다.
+  beacon?: boolean
+}
+
+export function track<E extends keyof AnalyticsEvents>(
+  event: E,
+  params: AnalyticsEvents[E],
+  options: TrackOptions = {}
+) {
   if (typeof window === 'undefined') return
 
   const defined = Object.fromEntries(Object.entries(params).filter(([, value]) => value != null))
@@ -371,5 +428,16 @@ export function track<E extends keyof AnalyticsEvents>(event: E, params: Analyti
 
   // platform·is_logged_in·prev_path 는 공통 속성으로 등록돼 있어 Mixpanel 에는 따로 붙이지 않는다.
   const mixpanelName = MIXPANEL_EVENT_NAMES[event]
-  if (mixpanelName) withMixpanel((mp) => mp.track(mixpanelName, defined))
+  if (mixpanelName) {
+    withMixpanel((mp) =>
+      options.beacon
+        ? mp.track(mixpanelName, defined, { transport: 'sendBeacon' })
+        : mp.track(mixpanelName, defined)
+    )
+  }
+
+  const activationAction = ACTIVATION_ACTIONS[event]
+  if (activationAction) {
+    withMixpanel((mp) => mp.track('Activation Action', { action: activationAction }))
+  }
 }
