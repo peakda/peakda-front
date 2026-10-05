@@ -468,7 +468,7 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 - [x] `src/app/layout.tsx`: `metadataBase`, `applicationName`, `openGraph.siteName`, Twitter 카드. 공통값은 `src/constants/site.ts`
 - [x] 기본 OG 이미지 `src/app/opengraph-image.tsx` (next/og + 로고. 기본 폰트에 한글이 없어 문구는 영문)
 - [x] `src/app/robots.ts` — 로그인 필요 경로·`/auth/` disallow + sitemap 위치
-- [x] `src/app/sitemap.ts` — 고정 5개(2026-09-28 `/explore/festivals` 추가) + 스팟 상세, 하루 단위 revalidate, 조회 실패 시 고정 페이지만
+- [x] `src/app/sitemap.ts` — 고정 5개(2026-09-28 `/explore/festivals` 추가) + 스팟 상세, 하루 단위 revalidate, 조회 실패 시 고정 페이지만 (2026-10-05 축제·큐레이션·`lastmod` 는 `GET /api/sitemap` 으로 전환 — 9절)
 - [x] `next.config.ts` `headers()` — `/login`, `/onboarding`, `/search`, `/profile`, `/auth/*` 에 `X-Robots-Tag: noindex`
 - [x] 스팟 상세 서버 렌더링: `page.tsx` 서버 + `_components/SpotDetailClient.tsx`, `generateMetadata`, `notFound()`, `TouristAttraction`/`Place` + `BreadcrumbList` JSON-LD
 - [x] 피드 상세: `page.tsx` 서버 + `_components/FeedDetailClient.tsx`, `generateMetadata` + `notFound()` (OG 이미지는 첫 기록 사진, 없으면 기본 카드)
@@ -531,6 +531,10 @@ Google Event 전용 검색 기능은 지역별 지원 범위가 있으므로 한
 - [x] 2026-09-22 `/creators/[id]` (큐레이션) — 같은 구조로 적용 (JSON-LD 없음). 제목은 큐레이션 제목, 설명은 부제·주차 라벨
 - [x] 2026-09-28 `src/app/sitemap.ts` 에 추가 — 축제 id 는 `GET /api/explore/festivals`, 큐레이션 id 는 `GET /api/curations`(첫 페이지 50개). 목록마다 실패를 따로 삼킨다
   - 공개 축제 목록 API 가 **진행 중 축제만** 준다. 끝났거나 시작 전인 축제 상세는 sitemap 에서 빠진다(전체 목록은 `/api/admin/festivals` 로 인증 필요)
+- [x] 2026-10-05 sitemap 을 `GET /api/sitemap`(PEAK-80)으로 전환 — 축제(끝난·시작 전 포함 전체)·큐레이션은 이 목록을 그대로 쓰고, 모든 상세 URL 에 `lastmod`(= 서버 `updatedAt`)를 넣는다. 로컬에서 운영 API 로 생성해 URL 2,383개 확인(고정 5 · 스팟 628 · 축제 1,744 · 큐레이션 6)
+  - 스팟은 **개화 지도 핀 + `isSitemapSpotPin` 으로 고르고** 수정일만 이 API 에서 가져온다. API 의 스팟 12,600곳 중 핀이 없는 11,938곳은 표본 25곳 모두 개화 정보·방문 기록이 없는 관광공사 관광지라(설명문도 모두 같은 문구) 넣지 않았다. 색인율을 본 뒤 넓힐 때는 기록이 있는 스팟부터 — 그러려면 응답에 기록 수·분류가 필요하다
+  - 개화 기준일(`baseDate`)은 매일 바뀌어 `lastmod` 로 쓰지 않는다 — 모든 스팟이 매일 바뀐 것처럼 보이면 `lastmod` 신호 자체가 무시될 수 있다
+  - [ ] 배포 후 Search Console·네이버 서치어드바이저에서 sitemap 다시 제출·오류 확인
   - `NEXT_PUBLIC_API_URL` 이 없으면(Vercel Preview 등) 고정 페이지만 낸다 — 상대 URL 로 조회하면 빌드가 60초 타임아웃으로 멈춘다
 - [ ] 검증: 없는 id `404`, 로컬 빌드 후 curl 로 제목·설명·canonical·JSON-LD, Rich Results Test (Event 리치 결과는 한국에서 보장되지 않음 — 3.2)
 
