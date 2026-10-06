@@ -24,7 +24,7 @@ export default function MapPage() {
 
   return (
     <>
-      <link rel="preconnect" href="https://mts.daumcdn.net" />
+      <link rel="preconnect" href="https://mts.kakaocdn.net" />
       {/* API는 credentials: 'include'로 호출하므로 기본 credential 모드로 연결한다. */}
       {apiOrigin && <link rel="preconnect" href={apiOrigin} />}
       {appKey && <link rel="preload" as="script" href={getKakaoMapSdkUrl(appKey)} />}
