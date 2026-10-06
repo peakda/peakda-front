@@ -40,6 +40,13 @@ function inViewChecker(map: kakao.maps.Map) {
     lat >= minLat && lat <= maxLat && lng >= minLng && lng <= maxLng
 }
 
+// 오버레이 하나의 렌더 결과. key 는 재사용 판정용이다.
+interface OverlayView {
+  key: string
+  html: string
+  label: string
+}
+
 interface OverlayEntry {
   overlay: kakao.maps.CustomOverlay
   // 클릭 시점의 최신 데이터. 오버레이를 재사용해도 리스너가 옛 spot 을 붙들지 않도록 여기서 읽는다.
@@ -57,6 +64,9 @@ export function useMapCluster(
   // key 에 렌더 결과 HTML 을 넣어 내용이 달라지면 자동으로 다른 key 가 되게 한다(오래된 핀 재사용 방지).
   const entriesRef = useRef(new Map<string, OverlayEntry>())
   const clusterCacheRef = useRef(new Map<number, ClusterGroup[]>())
+  // 클러스터·핀 객체별 렌더 결과. 드래그 중 render 가 반복돼도 HTML 문자열을 다시 만들지 않는다.
+  // spots 가 바뀌면 객체도 새로 생기므로 따로 비우지 않아도 된다.
+  const viewCacheRef = useRef(new WeakMap<ClusterGroup | MapSpot, OverlayView>())
   const spotsRef = useRef(spots)
   const onPinClickRef = useRef(onPinClick)
   const onClusterClickRef = useRef(onClusterClick)
@@ -142,15 +152,27 @@ export function useMapCluster(
       entries.set(key, entry)
     }
 
+    const viewCache = viewCacheRef.current
+    const viewOf = (target: ClusterGroup | MapSpot, make: () => OverlayView) => {
+      let view = viewCache.get(target)
+      if (!view) {
+        view = make()
+        viewCache.set(target, view)
+      }
+      return view
+    }
+
     const nextKeys = new Set<string>()
 
     for (const cluster of clusters) {
       if (cluster.spots.length >= 2 && level >= 4) {
         if (!inView(cluster.lat, cluster.lng)) continue
-        const html = createClusterHTML(cluster.spots)
-        const label = `명소 ${cluster.spots.length}곳 묶음`
-        // 라벨은 HTML 밖(setAttribute)에 붙으므로 재사용 판정 키에 함께 넣는다(배지는 99+ 에서 멈춘다).
-        const key = `c:${cluster.lat},${cluster.lng}|${label}|${html}`
+        const { key, html, label } = viewOf(cluster, () => {
+          const html = createClusterHTML(cluster.spots)
+          const label = `명소 ${cluster.spots.length}곳 묶음`
+          // 라벨은 HTML 밖(setAttribute)에 붙으므로 재사용 판정 키에 함께 넣는다(배지는 99+ 에서 멈춘다).
+          return { key: `c:${cluster.lat},${cluster.lng}|${label}|${html}`, html, label }
+        })
         nextKeys.add(key)
         add(key, cluster.lat, cluster.lng, html, cluster.spots, label)
         continue
@@ -158,9 +180,11 @@ export function useMapCluster(
 
       for (const spot of cluster.spots) {
         if (!inView(spot.lat, spot.lng)) continue
-        const html = createPinHTML(spot.flowers, spot.maxStage)
-        const label = pinLabel(spot)
-        const key = `p:${spot.lat},${spot.lng}|${label}|${html}`
+        const { key, html, label } = viewOf(spot, () => {
+          const html = createPinHTML(spot.flowers, spot.maxStage)
+          const label = pinLabel(spot)
+          return { key: `p:${spot.lat},${spot.lng}|${label}|${html}`, html, label }
+        })
         nextKeys.add(key)
         add(key, spot.lat, spot.lng, html, [spot], label)
       }
