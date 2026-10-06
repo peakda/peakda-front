@@ -78,11 +78,11 @@ export default function RootLayout({
       <head>
         {/* DNS 미리 해석 */}
         <link rel="dns-prefetch" href="//dapi.kakao.com" />
-        <link rel="dns-prefetch" href="//t1.daumcdn.net" />
+        <link rel="dns-prefetch" href="//t1.kakaocdn.net" />
         {/* TCP + TLS 핸드셰이크까지 미리. SDK와 t1 자원은 crossorigin 없이 요청되므로
             여기에 crossOrigin 을 붙이면 다른 연결로 취급돼 재사용되지 않는다 */}
         <link rel="preconnect" href="//dapi.kakao.com" />
-        <link rel="preconnect" href="//t1.daumcdn.net" />
+        <link rel="preconnect" href="//t1.kakaocdn.net" />
       </head>
       <body vaul-drawer-wrapper="" className="bg-gray-100" suppressHydrationWarning>
         <div className="relative mx-auto flex min-h-dvh w-full max-w-107.5 flex-col overflow-hidden bg-[#FFFFFF]">
