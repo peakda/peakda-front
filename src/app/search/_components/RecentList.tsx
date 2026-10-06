@@ -9,12 +9,7 @@ interface Props {
   removeRecent: (item: string) => void
 }
 
-export function RecentList({
-  setQuery,
-  setRecentSearches,
-  recentSearches,
-  removeRecent,
-}: Props) {
+export function RecentList({ setQuery, setRecentSearches, recentSearches, removeRecent }: Props) {
   return (
     <section>
       <div className="mb-3 flex items-center justify-between">
@@ -34,7 +29,7 @@ export function RecentList({
             <Clock className="text-icon-secondary h-10 w-10" strokeWidth={1} />
           </IconBtn>
           <p className="text-text-primary text-lg font-semibold">최근 검색이 없어요</p>
-          <p className="text-text-tertiary text-base">검색한 내용은 여기에 모이에요</p>
+          <p className="text-text-tertiary text-base">검색한 내용은 여기에 모아둘게요</p>
         </div>
       ) : (
         <ul className="flex flex-col gap-3">
@@ -44,7 +39,11 @@ export function RecentList({
                 <Clock className="text-icon-secondary h-4 w-4 shrink-0" strokeWidth={1} />
                 <span className="text-text-secondary cursor-pointer text-sm">{item}</span>
               </button>
-              <button type="button" aria-label={`최근 검색어 ${item} 삭제`} onClick={() => removeRecent(item)}>
+              <button
+                type="button"
+                aria-label={`최근 검색어 ${item} 삭제`}
+                onClick={() => removeRecent(item)}
+              >
                 <X className="text-icon-quaternary h-5 w-5 cursor-pointer" />
               </button>
             </li>
