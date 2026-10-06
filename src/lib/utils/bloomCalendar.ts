@@ -1,29 +1,10 @@
 import type {
   BloomCalendarDay,
   BloomCalendarResponse,
-  BloomCalendarResponseCategory,
 } from '@/api/facades/generated/peakdaApi.schemas'
 import type { BloomStageStatus } from '@/lib/utils/bloomStatus'
 
 const WEEKDAY = ['일', '월', '화', '수', '목', '금', '토']
-
-export const BLOOM_CATEGORY_EMOJI: Record<BloomCalendarResponseCategory, string> = {
-  PLUM: '🌸',
-  FORSYTHIA: '🌼',
-  AZALEA_KR: '🌺',
-  CHERRY: '🌸',
-  CANOLA: '🌻',
-  AZALEA: '🌺',
-  HYDRANGEA: '💐',
-  LOTUS: '🪷',
-  SUNFLOWER: '🌻',
-  COSMOS: '🌸',
-  CHRYSANTHEMUM: '🌼',
-  PINK_MUHLY: '🌸',
-  SILVERGRASS: '🍂',
-  MAPLE: '🍁',
-  CAMELLIA: '🌹',
-}
 
 // 'YYYY-MM-DD'(또는 일시) → 로컬 Date. new Date(iso) 는 날짜만 오면 UTC 로 읽어
 // KST 기준 하루가 밀리므로 직접 분해한다.

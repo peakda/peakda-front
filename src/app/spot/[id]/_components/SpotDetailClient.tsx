@@ -1,6 +1,7 @@
 'use client'
 
 import { Bell, Heart, MapPin } from 'lucide-react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useEffect } from 'react'
@@ -31,7 +32,8 @@ import type {
 } from '@/api/facades/generated/peakdaApi.schemas'
 import { buildRecordUrl } from '@/lib/utils/spotCta'
 import { type BloomStageStatus, toStatusBadge } from '@/lib/utils/bloomStatus'
-import { BLOOM_CATEGORY_EMOJI, formatPeakPeriod, peakHeadline } from '@/lib/utils/bloomCalendar'
+import { formatPeakPeriod, peakHeadline } from '@/lib/utils/bloomCalendar'
+import { CATEGORY_ICON } from '@/constants/map'
 import { formatMonthDay } from '@/lib/utils/explore'
 import { cn } from '@/lib/utils/cn'
 import { SafeImage } from '@/components/ui/display/SafeImage'
@@ -244,7 +246,7 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
             <div className="pt-1">
               <Badge
                 label={spot.bloom.displayName}
-                leftIcon={<span>{BLOOM_CATEGORY_EMOJI[spot.bloom.category]}</span>}
+                leftIcon={<Image src={CATEGORY_ICON[spot.bloom.category]} alt="" width={14} height={14} />}
                 variant="filled"
                 color="pink"
               />
