@@ -1,14 +1,12 @@
 import type { MetadataRoute } from 'next'
 import { bloomMapApi } from '@/api/facades/seasonal-bloom'
 import { sitemapApi, type SitemapResponse } from '@/api/facades/sitemap'
+import { KOREA_BBOX } from '@/constants/region'
 import { SITE_URL } from '@/constants/site'
 import { isSitemapSpotPin } from '@/lib/utils/spotSeo'
 
 // 개화 추정은 하루 단위로 산출되므로 sitemap 도 하루에 한 번 다시 만든다. (/api/sitemap 도 하루 1회 호출 전제)
 export const revalidate = 86400
-
-// 제주(마라도)~독도를 모두 덮는 범위. 개화 지도를 한 번에 조회해 sitemap 에 넣을 spotId 를 고른다.
-const KOREA_BBOX = { minLat: 33, maxLat: 38.7, minLng: 124.5, maxLng: 131.9 }
 
 // 공개·정상 응답하는 canonical URL 만 넣는다. /explore/spots 는 ?section 마다 목록이 달라 canonical 이 없어 제외.
 const STATIC_PATHS = ['', '/map', '/explore', '/explore/festivals', '/feed']

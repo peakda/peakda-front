@@ -9,7 +9,7 @@ export interface RegionMeta {
 /**
  * 필터 드로어의 권역 목록. key 는 `GET /api/seasonal/blooms` 의 `region` 파라미터로 그대로 나간다.
  *
- * 서버가 권역을 bbox 와 AND 로 적용하므로, 보고 있는 지도 밖의 권역을 고르면 결과가 비는 게 정상이다.
+ * 서버는 권역을 bbox 와 AND 로 적용한다. 지도는 KOREA_BBOX 로 조회하므로 권역 전체가 내려온다.
  * 표시 문구는 서버가 내려주지 않아(권역 목록 API 가 없다) 여기서 관리한다.
  */
 export const REGIONS: RegionMeta[] = [
@@ -31,3 +31,6 @@ export const REGION_MAP_CENTERS: Record<RegionKey, { lat: number; lng: number }>
   JEOLLA: { lat: 35.7175, lng: 127.153 },
   JEJU: { lat: 33.4996, lng: 126.5312 },
 }
+
+// 제주(마라도)~독도를 모두 덮는 범위. 지도·sitemap 모두 개화 지도를 이 범위로 한 번에 조회한다.
+export const KOREA_BBOX = { minLat: 33, maxLat: 38.7, minLng: 124.5, maxLng: 131.9 }
