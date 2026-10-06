@@ -96,7 +96,8 @@ interface AnalyticsEvents {
   login_prompt: { reason: string }
   record_start: { spot_id?: number }
   record_create: { spot_id?: number; spot_type: string; bloom_stage?: string; photo_count: number }
-  bloom_alert_on: { spot_id: number }
+  // source: 찜 시트에서 알림을 켠 채로 찜했는지(save_sheet), 이미 찜한 명소에서 종으로 켰는지(toggle)
+  bloom_alert_on: { spot_id: number; source: 'save_sheet' | 'toggle' }
   bloom_alert_off: { spot_id: number }
   push_permission: { result: string }
   // 알림으로 어느 스팟에 갔는지는 뒤따르는 spot_view 로 알 수 있어 대상 id 는 보내지 않는다.

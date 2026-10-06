@@ -257,7 +257,7 @@ describe('lib/analytics Activation·이탈 전송', () => {
     await analytics.initMixpanel()
 
     analytics.track('spot_save', { spot_id: 1 })
-    analytics.track('bloom_alert_on', { spot_id: 1 })
+    analytics.track('bloom_alert_on', { spot_id: 1, source: 'toggle' })
     analytics.track('record_create', { spot_type: 'LOCAL', photo_count: 1 })
     analytics.track('bloom_alert_off', { spot_id: 1 })
     analytics.track('spot_unsave', { spot_id: 1 })

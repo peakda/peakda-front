@@ -9,6 +9,7 @@ import { Toggle } from '@/components/ui/display/Toggle'
 import { useAddFavorite, useUpdateFavoriteNotify } from '@/api/facades/spot-favorite'
 import { getGetSpotsByIdQueryKey } from '@/api/facades/generated/spot/spot'
 import { enablePushForBloomAlert } from '@/lib/push/pushNotifications'
+import { track } from '@/lib/analytics'
 import type { SaveSpotData } from '@/stores/useDrawerStore'
 
 interface Props {
@@ -43,6 +44,8 @@ export function SaveSpotDrawerContent({ spot, onClose }: Props) {
     // 찜 추가 시 만개 알림이 기본 활성화되므로, 토글을 끈 경우에만 알림 해제 요청.
     // 켠 채로 찜했으면 기기 푸시도 켜야 실제로 알림이 온다.
     if (notify) {
+      // 알림 요청이 따로 나가지 않아 여기서 보낸다. 안 보내면 "찜 → 알림" 퍼널의 알림 단계가 비어 보인다.
+      track('bloom_alert_on', { spot_id: spot.spotId, source: 'save_sheet' })
       void enablePushForBloomAlert()
       return
     }
