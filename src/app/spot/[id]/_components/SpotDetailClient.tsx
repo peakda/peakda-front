@@ -3,6 +3,7 @@
 import { Bell, Heart, MapPin } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useEffect } from 'react'
 import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
@@ -280,13 +281,9 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
           <h2 className="text-text-primary text-base font-semibold">
             방문자 기록({spot.recordCount})
           </h2>
-          <button
-            type="button"
-            className="text-text-tertiary cursor-pointer text-sm"
-            onClick={() => router.push(`/spot/${id}/feed`)}
-          >
+          <Link href={`/spot/${id}/feed`} className="text-text-tertiary cursor-pointer text-sm">
             더보기
-          </button>
+          </Link>
         </div>
         {previewRecords.length === 0 ? (
           <p className="text-text-tertiary py-10 text-center text-sm">아직 기록이 없어요</p>

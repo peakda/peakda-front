@@ -24,7 +24,7 @@ export function ExploreFestivalsClient({ initialFestivals }: ExploreFestivalsCli
       <div className="h-14">
         <Header
           left={<LeftArrow />}
-          center={<div className="text-[15px] font-medium text-[#000000]">요즘 뜨는 축제</div>}
+          center={<h1 className="text-[15px] font-medium text-[#000000]">요즘 뜨는 축제</h1>}
         />
       </div>
 

@@ -43,8 +43,12 @@ const HOME_JSON_LD = {
       alternateName: SITE_NAME_KO,
       url: SITE_URL,
       logo: `${SITE_URL}/images/logo.png`,
-      // 공식 SNS 계정. 검색엔진이 사이트와 같은 주체로 묶는다.
-      sameAs: ['https://www.instagram.com/peakda.official/', 'https://www.youtube.com/@peakda'],
+      // 공식 SNS 계정·앱 스토어. 검색엔진이 사이트와 같은 주체로 묶는다.
+      sameAs: [
+        'https://www.instagram.com/peakda.official/',
+        'https://www.youtube.com/@peakda',
+        'https://play.google.com/store/apps/details?id=com.peakda.app',
+      ],
     },
     {
       '@type': 'WebSite',
