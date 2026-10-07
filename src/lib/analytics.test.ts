@@ -11,7 +11,7 @@ const mixpanel = vi.hoisted(() => ({
   people: { set: vi.fn(), set_once: vi.fn(), union: vi.fn() },
 }))
 
-vi.mock('mixpanel-browser', () => ({ default: mixpanel }))
+vi.mock('mixpanel-browser/src/loaders/loader-module-core', () => ({ default: mixpanel }))
 
 // 토큰은 모듈을 읽을 때 정해지므로 테스트마다 새로 불러온다.
 async function loadAnalytics(token: string) {
@@ -257,7 +257,7 @@ describe('lib/analytics Activation·이탈 전송', () => {
     await analytics.initMixpanel()
 
     analytics.track('spot_save', { spot_id: 1 })
-    analytics.track('bloom_alert_on', { spot_id: 1 })
+    analytics.track('bloom_alert_on', { spot_id: 1, source: 'toggle' })
     analytics.track('record_create', { spot_type: 'LOCAL', photo_count: 1 })
     analytics.track('bloom_alert_off', { spot_id: 1 })
     analytics.track('spot_unsave', { spot_id: 1 })

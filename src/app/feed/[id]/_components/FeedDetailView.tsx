@@ -6,6 +6,7 @@ import { IconBtn } from '@/components/ui/button/IconBtn'
 import { CardBadge } from '@/components/ui/card/CardBadge'
 import { ReactionBar } from '@/components/ui/card/ReactionBar'
 import { Badge } from '@/components/ui/display/Badge'
+import { TimeAgoText } from '@/components/ui/display/TimeAgoText'
 import { Indecator } from '@/app/onboarding/_components/Indecator'
 import { useCarousel } from '@/hooks/useEmblaCarousel'
 import { useTrackPhotoSwipe } from '@/hooks/useTrackPhotoSwipe'
@@ -21,6 +22,7 @@ type FeedDetailViewProps = Pick<
   | 'authorName'
   | 'authorImageUrl'
   | 'timeAgo'
+  | 'location'
   | 'visitDate'
   | 'statusLabel'
   | 'statusVariant'
@@ -38,6 +40,7 @@ export function FeedDetailView({
   authorName,
   authorImageUrl,
   timeAgo,
+  location,
   visitDate,
   statusLabel,
   statusVariant,
@@ -61,7 +64,11 @@ export function FeedDetailView({
               <div key={i} className="min-w-0 flex-[0_0_100%]">
                 <Image
                   src={src}
-                  alt={`피드 이미지 ${i + 1}`}
+                  alt={
+                    src === '/images/explore.png'
+                      ? '방문 사진 없음'
+                      : `${location} 방문 사진 ${i + 1}`
+                  }
                   width={430}
                   height={322}
                   className="aspect-[4/3] w-full object-cover"
@@ -94,7 +101,13 @@ export function FeedDetailView({
         <Link href={`/users/${authorId}`}>
           <IconBtn size="md" className="relative overflow-hidden">
             {safeAuthorImageUrl ? (
-              <Image src={safeAuthorImageUrl} alt="프로필" fill className="object-cover" sizes="32px" />
+              <Image
+                src={safeAuthorImageUrl}
+                alt="프로필"
+                fill
+                className="object-cover"
+                sizes="32px"
+              />
             ) : (
               <Image src="/icons/person.svg" alt="프로필" width={16} height={16} />
             )}
@@ -103,7 +116,7 @@ export function FeedDetailView({
         <div className="flex flex-col gap-1">
           <Link href={`/users/${authorId}`} className="flex items-center gap-2">
             <span className="text-text-primary text-sm font-semibold">{authorName}</span>
-            <span className="text-text-quaternary text-xs">{timeAgo}</span>
+            <TimeAgoText text={timeAgo} className="text-text-quaternary text-xs" />
           </Link>
           <div className="flex items-center gap-1.5">
             <span className="text-text-tertiary text-xs">{visitDate} 방문</span>

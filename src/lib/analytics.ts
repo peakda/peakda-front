@@ -96,7 +96,8 @@ interface AnalyticsEvents {
   login_prompt: { reason: string }
   record_start: { spot_id?: number }
   record_create: { spot_id?: number; spot_type: string; bloom_stage?: string; photo_count: number }
-  bloom_alert_on: { spot_id: number }
+  // source: 찜 시트에서 알림을 켠 채로 찜했는지(save_sheet), 이미 찜한 명소에서 종으로 켰는지(toggle)
+  bloom_alert_on: { spot_id: number; source: 'save_sheet' | 'toggle' }
   bloom_alert_off: { spot_id: number }
   push_permission: { result: string }
   // 알림으로 어느 스팟에 갔는지는 뒤따르는 spot_view 로 알 수 있어 대상 id 는 보내지 않는다.
@@ -149,7 +150,7 @@ interface AnalyticsEvents {
   }
 }
 
-// GA 초기화 스크립트(layout 의 GoogleAnalytics)는 화면 컴포넌트의 effect 보다 늦게 돈다.
+// GA 초기화 스크립트(layout 의 ga-init)는 화면 컴포넌트의 effect 보다 늦게 돈다.
 // 첫 화면에서 보낸 이벤트가 사라지지 않게 gtag 가 생길 때까지 잠깐 기다리고,
 // 운영 배포가 아니라 끝내 생기지 않으면 버린다.
 const RETRY_MS = 500
@@ -249,7 +250,7 @@ const AUTOCAPTURE_CONFIG: AutocaptureConfig | false =
         capture_text_content: false,
       }
 
-// SDK 는 첫 화면이 그려진 뒤 import() 로 받는다. 그 전에 생긴 호출은 순서대로 모아 두었다가 로드 후 실행한다.
+// SDK 는 페이지 load 뒤(AnalyticsManager) import() 로 받는다. 그 전에 생긴 호출은 순서대로 모아 두었다가 로드 후 실행한다.
 let mixpanel: OverridedMixpanel | null = null
 let pending: ((mp: OverridedMixpanel) => void)[] = []
 let isStarted = false
@@ -269,7 +270,12 @@ export async function initMixpanel() {
   isStarted = true
 
   try {
-    const { default: mp } = await import('mixpanel-browser')
+    // 기본 번들('mixpanel-browser')은 세션 리플레이 녹화기(rrweb)까지 실어 약 430KB 다. 녹화를 쓰지 않으므로
+    // README 가 안내하는 코어 로더만 받는다(약 130KB). 녹화를 켜려면 loader-module-with-async-modules 로 바꾼다.
+    // 이 경로의 타입 선언은 export * 라 default 가 실제(인스턴스)와 다르게 잡혀 패키지 본체의 타입으로 맞춘다.
+    const { default: mp } = (await import(
+      'mixpanel-browser/src/loaders/loader-module-core'
+    )) as unknown as { default: OverridedMixpanel }
     // 페이지뷰는 trackPageView 가 직접 보낸다 — 자동 페이지뷰는 prev_path 가 갱신되기 전에 나갈 수 있다.
     mp.init(MIXPANEL_TOKEN, { track_pageview: false, autocapture: AUTOCAPTURE_CONFIG })
     baseProperties.platform = Capacitor.getPlatform()

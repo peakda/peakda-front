@@ -96,9 +96,10 @@ export const useUpdateFavoriteNotify = () => {
   const queryClient = useQueryClient()
   return useUpdateNotifyGen({
     mutation: {
-      // 찜을 추가하면 만개 알림이 기본으로 켜져 이 요청 없이도 알림이 걸린다. 여기서는 사용자가 바꾼 것만 잡힌다.
+      // 찜을 추가하면 만개 알림이 기본으로 켜져 이 요청 없이도 알림이 걸린다. 그 경우는 찜 시트가 따로 보낸다.
       onSuccess: (_, { spotId, data }) => {
-        track(data.enabled ? 'bloom_alert_on' : 'bloom_alert_off', { spot_id: spotId })
+        if (data.enabled) track('bloom_alert_on', { spot_id: spotId, source: 'toggle' })
+        else track('bloom_alert_off', { spot_id: spotId })
         invalidateFavoriteViews(queryClient)
       },
     },

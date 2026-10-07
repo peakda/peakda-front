@@ -67,7 +67,8 @@ PM 공유용 전체 설계(퍼널·대시보드·예정 이벤트 포함): https
 | `spot_view` | Spot Viewed | 명소 상세 진입 | `spot_id`, `spot_name`, `spot_type`, `bloom_category`, `bloom_status` |
 | `spot_action_click` | Spot Action Clicked | 명소 상세의 하트·종·"방문 기록 남기기"를 누른 순간 (로그인 여부 무관) | `action`(save/unsave/alert_on/alert_off/record), `spot_id` |
 | `spot_save` / `spot_unsave` | Spot Saved / Spot Unsaved | 찜 저장·해제 성공 | `spot_id` |
-| `bloom_alert_on` / `bloom_alert_off` | Bloom Alert Enabled / Disabled | 만개 알림 설정 성공 | `spot_id` |
+| `bloom_alert_on` | Bloom Alert Enabled | 만개 알림이 켜짐. ① 찜 시트에서 알림을 켠 채로 찜 성공(찜하면 서버가 알림을 기본으로 켜 별도 요청이 없으므로 시트가 보냄) ② 이미 찜한 명소에서 종으로 켜기 성공 | `spot_id`, `source`(save_sheet/toggle) |
+| `bloom_alert_off` | Bloom Alert Disabled | 만개 알림 끄기 성공 (찜 시트에서 알림을 끄고 찜한 경우 포함) | `spot_id` |
 | `festival_view` | Festival Viewed | 축제 상세 진입 | `festival_id`, `festival_name` |
 | `festival_homepage_click` | Festival Homepage Clicked | 축제 공식 홈페이지 링크 (외부 이동) | `festival_id` |
 | `record_start` | Record Started | 기록 작성 화면 진입 | `spot_id` |

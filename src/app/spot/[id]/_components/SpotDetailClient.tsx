@@ -187,16 +187,20 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
       {/* 대표 이미지 — 뒤로가기를 이미지 위에 겹친다 */}
       <div className="relative h-64 bg-gray-200">
         {spot.representativeImageUrl && (
-          <SafeImage
-            src={spot.representativeImageUrl}
-            alt={spot.name}
-            fill
-            priority
-            sizes="(max-width: 430px) 100vw, 430px"
-            className="object-cover"
-          />
+          <>
+            <SafeImage
+              src={spot.representativeImageUrl}
+              alt={spot.name}
+              fill
+              priority
+              sizes="(max-width: 430px) 100vw, 430px"
+              className="object-cover"
+            />
+            {/* 흰 뒤로가기가 밝은 사진 위에서도 보일 만큼만 상단을 어둡게 한다 */}
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/60 to-transparent" />
+          </>
         )}
-        <Header left={<LeftArrow />} className="top-3" />
+        <Header left={<LeftArrow isLight={!!spot.representativeImageUrl} />} className="top-3" />
       </div>
 
       <div className="flex flex-col gap-6 px-4 pt-4 pb-6">

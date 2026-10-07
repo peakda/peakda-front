@@ -14,7 +14,7 @@ export interface MapCoords {
 export interface FilterValues {
   /** 권역 → 서버 region 파라미터. bbox 와 AND 로 적용된다 */
   region: RegionKey | null
-  /** 시기 탭 → 서버 status 파라미터 (방문예정일이 아니라 현재 개화 상태다) */
+  /** 시기 탭 — 방문예정일이 아니라 현재 개화 상태다. 지도는 클라이언트에서 거르고 프리뷰 API 에는 status 로 보낸다 */
   timing: TimingKey | null
   /** 서버로 보내지 않고 응답을 받아 클라이언트에서 거른다 — 이유는 MapContainer 의 bloomParams 참고 */
   categories: BloomSlotCategory[]
@@ -25,7 +25,7 @@ interface VisibleSpots {
   center: MapCoords | null
   /** 지도 데이터가 아직 이전 조건의 결과인지 (React Query placeholderData) */
   isStale: boolean
-  /** draft 기준으로 세어 둔 개수 — 꽃 종류 탭 버튼의 'N개' */
+  /** draft 기준으로 세어 둔 개수 — 꽃 종류·시기 탭 버튼의 'N개' */
   draftCount: number
   /** 이 결과가 어떤 applied 기준으로 계산됐는지 — 드로어가 최신 여부를 참조 비교로 판단한다 */
   appliedFor: FilterValues
@@ -103,7 +103,7 @@ export const useFilterStore = create<FilterState>((set) => ({
   toggleDraftRegion: (region) =>
     set((s) => ({ draft: { ...s.draft, region: toggleSingle(s.draft.region, region) } })),
 
-  // 시기는 status 파라미터 하나로 나가므로 복수 선택이 성립하지 않는다.
+  // 시기는 프리뷰 API 의 status 파라미터 하나로 나가므로 복수 선택이 성립하지 않는다.
   toggleDraftTiming: (timing) =>
     set((s) => ({ draft: { ...s.draft, timing: toggleSingle(s.draft.timing, timing) } })),
 

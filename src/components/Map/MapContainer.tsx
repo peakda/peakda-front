@@ -16,7 +16,7 @@ import type { MapSpot } from '@/lib/utils/mapCluster'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import { hasActiveFilter, useFilterStore, type PinTypeFilter } from '@/stores/useFilterStore'
 import { filterMapSpots } from '@/lib/utils/mapFilter'
-import { timingToStatus, timingToStatuses } from '@/lib/utils/timing'
+import { timingToStatuses } from '@/lib/utils/timing'
 import { useBloomMap } from '@/api/facades/seasonal-bloom'
 import { useHomeSuggestion } from '@/api/facades/home'
 import { bloomToMapSpots } from '@/lib/utils/bloomToMapSpots'
@@ -32,7 +32,7 @@ import {
   type Viewport,
 } from '@/lib/kakao/mapViewport'
 import { KOREA_BBOX, REGION_MAP_CENTERS } from '@/constants/region'
-import { useSearchParams } from 'next/navigation'
+import { kakaoLoader } from '@/lib/kakao/kakaoLoader'
 
 const Drawer = dynamic(
   () => import('@/components/ui/layout/Drawer').then((m) => ({ default: m.Drawer })),
@@ -48,6 +48,11 @@ const NETWORK_TOAST_ID = 'map-network-error'
 
 const INITIAL_LEVEL = 8
 
+// 위치 권한을 이미 허용한 사용자는 현재 위치가 올 때까지 최대 이만큼(ms) 기다렸다 지도를 만든다.
+// SDK 를 HTML 에서 미리 받아 위치보다 먼저 준비되면, 기본 위치(서울)로 만들어 서울 타일을 받다가 위치가 오면
+// 그리로 튄다. 권한을 아직 안 정했거나 거부했으면 권한 조회만 하고 바로 끝나 사실상 기다리지 않는다.
+const INITIAL_LOCATION_WAIT_MS = 1000
+
 // 상단 칩. 서버 파라미터가 없어 응답의 pin.type 으로 클라이언트에서 거른다.
 const PIN_TYPES: PinTypeFilter[] = ['ALL', 'ATTRACTION', 'LOCAL']
 const PIN_TYPE_LABEL: Record<PinTypeFilter, string> = {
@@ -61,6 +66,13 @@ const PIN_TYPE_LABELS = PIN_TYPES.map((type) => PIN_TYPE_LABEL[type])
 const trackMapOpenPermission = (permission: 'granted' | 'denied') =>
   trackLocationPermission(permission, 'map_open')
 
+// 이 모듈은 /map 번들에서만 실행된다. SDK 로드를 컴포넌트 effect 까지 미루지 않고 번들이 평가되는
+// 즉시 시작해, 하이드레이션·첫 렌더 동안 카카오 엔진(kakao.js → services.js)을 함께 받는다.
+// useLazyMapLoad 가 다시 부르면 진행 중인 같은 Promise 를 받고, 여기서 실패하면 거기서 다시 시도한다.
+if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_KAKAO_MAP_KEY) {
+  kakaoLoader.load(process.env.NEXT_PUBLIC_KAKAO_MAP_KEY).catch(() => {})
+}
+
 // 축제 상세 등에서 /map?lat=..&lng=.. 로 넘어오면 그 좌표를 초기 중심으로 쓴다.
 function toCoord(value: string | null) {
   if (value == null || value.trim() === '') return null
@@ -68,10 +80,32 @@ function toCoord(value: string | null) {
   return Number.isFinite(num) ? num : null
 }
 
+interface InitialTarget {
+  center: { lat: number; lng: number } | null
+  // 좌표가 없는 축제·큐레이션은 주소·장소명(?q)으로 넘어온다. 괄호 속 부연(예: '(효석문화제)')은
+  // 키워드 검색을 실패하게 만들어 떼고 찾는다.
+  query: string | null
+  spotId: number | null
+}
+
+// 쿼리(?lat/?lng/?q/?spotId)는 지도를 처음 만들 때만 쓴다(지도가 생긴 뒤엔 바뀌어도 무시된다).
+// useSearchParams 로 읽으면 정적 페이지인 /map 전체가 클라이언트 렌더링으로 빠져(CSR bailout)
+// 서버 HTML 에 헤더·검색바·내비가 없고 스켈레톤만 남는다. 그래서 effect 안에서 주소를 직접 읽는다.
+function readInitialTarget(): InitialTarget {
+  const params = new URLSearchParams(window.location.search)
+  const lat = toCoord(params.get('lat'))
+  const lng = toCoord(params.get('lng'))
+  return {
+    center: lat != null && lng != null ? { lat, lng } : null,
+    query: params.get('q')?.replace(/\(.*?\)/g, '').trim() || null,
+    spotId: toCoord(params.get('spotId')),
+  }
+}
+
 export const MapContainer = () => {
   const containerRef = useRef<HTMLDivElement>(null)
   const isRegionMovePendingRef = useRef(false)
-  const searchParams = useSearchParams()
+  const initialTargetRef = useRef<InitialTarget | null>(null)
   const [isRegionMovePending, setIsRegionMovePending] = useState(false)
   const mapRef = useRef<kakao.maps.Map | null>(null)
   const [mapInstance, setMapInstance] = useState<kakao.maps.Map | null>(null)
@@ -81,31 +115,19 @@ export const MapContainer = () => {
     promise: Promise<InitialMapLocation>
     result: InitialMapLocation | null
   } | null>(null)
+  // 첫 위치 조회가 끝났거나(또는 기다릴 필요가 없거나) 기다림 상한이 지났는지. 지도는 이 뒤에 만든다.
+  const [isInitialLocationSettled, setIsInitialLocationSettled] = useState(false)
   const { isReady: isSdkReady, error, retry } = useLazyMapLoad()
   const openFilterDrawer = useDrawerStore((s) => s.openFilterDrawer)
   const pinType = useFilterStore((s) => s.pinType)
   const applied = useFilterStore((s) => s.applied)
   const draftCategories = useFilterStore((s) => s.draft.categories)
+  const draftTiming = useFilterStore((s) => s.draft.timing)
   const setPinType = useFilterStore((s) => s.setPinType)
   const setVisibleSpots = useFilterStore((s) => s.setVisibleSpots)
 
   const statuses = useMemo(() => timingToStatuses(applied.timing), [applied.timing])
-
-  const latParam = searchParams.get('lat')
-  const lngParam = searchParams.get('lng')
-  const initialCenter = useMemo(() => {
-    const lat = toCoord(latParam)
-    const lng = toCoord(lngParam)
-    return lat != null && lng != null ? { lat, lng } : null
-  }, [latParam, lngParam])
-  // 좌표가 없는 축제·큐레이션은 주소·장소명(?q)으로 넘어온다. 괄호 속 부연(예: '(효석문화제)')은
-  // 키워드 검색을 실패하게 만들어 떼고 찾는다.
-  const targetQuery =
-    searchParams
-      .get('q')
-      ?.replace(/\(.*?\)/g, '')
-      .trim() || null
-  const targetSpotId = toCoord(searchParams.get('spotId'))
+  const draftStatuses = useMemo(() => timingToStatuses(draftTiming), [draftTiming])
 
   // ?spotId 로 들어오면 그 명소 핀을 찾아 드로어를 연다. 좌표가 정해진 뒤에만 채운다.
   const pendingTargetRef = useRef<{ spotId: number; lat: number; lng: number } | null>(null)
@@ -114,19 +136,20 @@ export const MapContainer = () => {
   // 클러스터·핀 오버레이도 다시 만들지 않는다. 화면 범위로 조회하면 이동할 때마다 데이터가
   // 갈려 화면의 핀을 전부 지웠다 다시 만들었다(앱에서 줌·드래그가 끊기던 원인).
   //
-  // 서버로 나가는 건 개화상태(status)·권역(region)뿐이다. 전부 applied 기준이라
-  // 드로어에서 필터를 만지는 것만으로는 요청이 나가지 않는다.
+  // 서버로 나가는 건 권역(region)뿐이다. applied 기준이라 드로어에서 필터를 만지는 것만으로는
+  // 요청이 나가지 않는다.
   //
   // 꽃 종류(categories)는 일부러 보내지 않는다. 서버가 걸러 주면 ①드로어 하단의
   // 'N개의 명소 보기' 를 draft 기준으로 셀 수 없고 ②응답에서 안 고른 꽃이 빠져
   // 핀 아이콘을 선택에 맞게 좁힐 수 없다. 대신 응답의 category 로 클라에서 거른다.
+  // 개화 상태(status)도 보내지 않는다. 서버 결과와 같게 클라에서 거를 수 있어(mapFilter 참고)
+  // 시기 탭끼리 같은 조회 캐시를 쓰므로 탭을 바꿔도 요청이 나가지 않고, 시기도 draft 기준으로 셀 수 있다.
   const bloomParams = useMemo(
     () => ({
       ...KOREA_BBOX,
       region: applied.region ?? undefined,
-      status: timingToStatus(applied.timing),
     }),
-    [applied.region, applied.timing]
+    [applied.region]
   )
   const { data: bloomData, isPlaceholderData } = useBloomMap(bloomParams)
   const allSpots = useMemo(() => (bloomData ? bloomToMapSpots(bloomData) : []), [bloomData])
@@ -141,16 +164,16 @@ export const MapContainer = () => {
     [allSpots, pinType, statuses, applied.categories]
   )
 
-  // 꽃 종류는 클라 필터라 서버를 다녀오지 않고도 draft 기준 개수를 미리 셀 수 있다.
-  // (지역·시기는 서버를 다녀와야 알 수 있어 버튼이 '명소 보기' 로 고정된다)
+  // 꽃 종류·시기는 클라 필터라 서버를 다녀오지 않고도 draft 기준 개수를 미리 셀 수 있다.
+  // (지역은 서버를 다녀와야 알 수 있어 지역 탭에서는 버튼이 '명소 보기' 로 고정된다)
   const draftSpots = useMemo(
     () =>
       filterMapSpots(allSpots, {
         pinType,
-        statuses,
+        statuses: draftStatuses,
         categories: draftCategories,
       }),
-    [allSpots, pinType, statuses, draftCategories]
+    [allSpots, pinType, draftStatuses, draftCategories]
   )
 
   // 드로어의 'N개의 명소 보기' 버튼이 쓸 현재 화면의 필터 결과를 올려준다.
@@ -305,13 +328,12 @@ export const MapContainer = () => {
   }, [])
 
   useEffect(() => {
-    if (
-      initialLocationRef.current ||
-      readMapView() ||
-      initialCenter ||
-      targetQuery ||
-      !loadAppSettings().locationEnabled
-    ) {
+    // 이미 시작한 조회가 있으면 그 조회(또는 기다림 상한)가 지도 생성을 풀어 준다.
+    if (initialLocationRef.current) return
+    initialTargetRef.current ??= readInitialTarget()
+    const { center: initialCenter, query: targetQuery } = initialTargetRef.current
+    if (readMapView() || initialCenter || targetQuery || !loadAppSettings().locationEnabled) {
+      setIsInitialLocationSettled(true)
       return
     }
 
@@ -322,20 +344,33 @@ export const MapContainer = () => {
       result: null as InitialMapLocation | null,
     }
     initialLocationRef.current = request
+    const waitTimer = window.setTimeout(
+      () => setIsInitialLocationSettled(true),
+      INITIAL_LOCATION_WAIT_MS
+    )
     void request.promise.then((result) => {
       request.result = result
+      window.clearTimeout(waitTimer)
+      setIsInitialLocationSettled(true)
       // 이미 정해 둔 권한(설정에서 바꾼 경우 포함)도 여기서 확인된다. 아직 안 정했으면 이후 팝업 결과로 잡힌다.
       if (result.permission === 'granted' || result.permission === 'denied') {
         trackMapOpenPermission(result.permission)
       }
     })
-  }, [initialCenter, targetQuery])
+  }, [])
 
   useEffect(() => {
-    if (!isSdkReady || !containerRef.current) return
+    // 첫 위치 조회를 기다린다(INITIAL_LOCATION_WAIT_MS 참고). 상한이 지나 위치 없이 만들면 아래에서 나중에 옮긴다.
+    if (!isSdkReady || !isInitialLocationSettled || !containerRef.current) return
 
     let map = mapRef.current
     if (!map) {
+      initialTargetRef.current ??= readInitialTarget()
+      const {
+        center: initialCenter,
+        query: targetQuery,
+        spotId: targetSpotId,
+      } = initialTargetRef.current
       // 이 히스토리 엔트리에 값이 있다는 건 여기서 지도를 보다가 상세로 갔다 돌아왔다는 뜻이라
       // 쿼리 좌표보다 우선한다. ?lat/?lng 는 그 화면에 '처음' 들어올 때만 의미가 있다.
       const savedView = readMapView()
@@ -403,7 +438,7 @@ export const MapContainer = () => {
       kakao.maps.event.removeListener(map, 'tilesloaded', handleTilesLoaded)
       if (frameId != null) window.cancelAnimationFrame(frameId)
     }
-  }, [isSdkReady, initialCenter, targetQuery, targetSpotId])
+  }, [isSdkReady, isInitialLocationSettled])
 
   return (
     <div className="relative h-dvh w-full contain-strict">
@@ -438,7 +473,9 @@ export const MapContainer = () => {
       />
       <MapLocationBtn onLocate={handleLocate} />
       <Nav activeTab="map" />
-      {isSdkReady && <Drawer />}
+      {/* 드로어 코드(~30KB)를 SDK 준비 직후 받으면 첫 타일과 대역폭·메인 스레드를 다툰다.
+          첫 타일이 그려진 뒤 받는다. 그 전에 핀·필터를 눌러도 상태는 스토어에 있어 마운트되면 열린다. */}
+      {areTilesLoaded && <Drawer />}
     </div>
   )
 }

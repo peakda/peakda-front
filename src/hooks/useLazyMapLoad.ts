@@ -21,7 +21,15 @@ export const useLazyMapLoad = () => {
       })
   }, [retryCount])
 
-  const retry = useCallback(() => setRetryCount((c) => c + 1), [])
+  const retry = useCallback(() => {
+    // sdk.js 는 실행됐는데 maps.load 가 못 끝난 상태. SDK 내부 스크립트 로더에 onerror 가 없어
+    // 요청이 실패했다면 다시 load() 해도 콜백이 영영 오지 않으므로 새로 고침으로만 복구된다.
+    if (window.kakao?.maps && !window.kakao.maps.Map) {
+      window.location.reload()
+      return
+    }
+    setRetryCount((c) => c + 1)
+  }, [])
 
   return { isReady, error, retry }
 }

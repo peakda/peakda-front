@@ -19,6 +19,7 @@ import { useReport } from '@/api/facades/report'
 import { buildReportRequest } from '@/lib/utils/feed'
 import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
 import { ReportModal } from '@/components/ui/card/ReportModal'
+import { TimeAgoText } from '@/components/ui/display/TimeAgoText'
 import { cn } from '@/lib/utils/cn'
 import type {
   CreateReportRequestReason,
@@ -116,7 +117,7 @@ export function FeedCard({
     <>
       <div className="flex items-center gap-2">
         <span className="text-text-primary text-sm font-semibold">{authorName}</span>
-        <span className="text-text-quaternary mt-1 text-xs">{timeAgo}</span>
+        <TimeAgoText text={timeAgo} className="text-text-quaternary mt-1 text-xs" />
       </div>
       <div className="flex items-center gap-1">
         <Image src={'/icons/Pin.svg'} alt="지역" width={15} height={15} color="#8C95A4" />
@@ -182,7 +183,8 @@ export function FeedCard({
         }}
         className={cn('relative overflow-hidden rounded-2xl', onOpen && 'cursor-pointer')}
       >
-        <div ref={emblaRef} className="mp-no-track overflow-hidden">
+        {/* 사진이 1장이면 캐러셀이 필요 없다. ref 를 안 달면 Embla 인스턴스(측정·옵저버)를 만들지 않는다 */}
+        <div ref={images.length > 1 ? emblaRef : undefined} className="mp-no-track overflow-hidden">
           <div className="flex touch-pan-y">
             {images.map((src, i) => (
               <div key={i} className="min-w-0 flex-[0_0_100%]">
