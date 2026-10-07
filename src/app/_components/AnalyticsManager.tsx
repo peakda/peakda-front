@@ -4,6 +4,7 @@ import { App } from '@capacitor/app'
 import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
 import { useCurrentUser } from '@/api/facades/auth'
+import { useIsPageLoaded } from '@/hooks/useIsPageLoaded'
 import {
   identifyUser,
   initMixpanel,
@@ -21,10 +22,13 @@ import { AUTH_MARKER_CHANGED_EVENT } from '@/lib/auth/session'
 export function AnalyticsManager() {
   const pathname = usePathname()
   const { data: user } = useCurrentUser()
+  const isPageLoaded = useIsPageLoaded()
 
+  // SDK(약 130KB)는 페이지 load 뒤에 받는다. 하이드레이션 직후 받으면 /map 에서 지도 타일과 대역폭을 다퉜다.
+  // 그 전 이벤트는 analytics 쪽에 쌓였다가 초기화 후 나간다. 대가: load 전에 떠난 방문은 Mixpanel 에 남지 않는다.
   useEffect(() => {
-    void initMixpanel()
-  }, [])
+    if (isPageLoaded) void initMixpanel()
+  }, [isPageLoaded])
 
   useEffect(() => {
     trackPageView(pathname)

@@ -68,6 +68,9 @@
   - **Mixpanel SDK는 코어 로더로 받는다** (2026-10-07): 기본 `mixpanel-browser`는 세션 리플레이 녹화기(rrweb)를 함께 실어 434KB(br 약 98KB, Buffer 폴리필 청크 별도)이고, 녹화를 쓰지 않는데도 하이드레이션 직후 받아 지도 SDK 로딩과 겹쳤다. `mixpanel-browser/src/loaders/loader-module-core`(약 128KB)로 바꿨다. 세션 리플레이를 켜려면 `loader-module-with-async-modules`로 바꾼다.
   - **GA 본체(gtag.js)는 페이지 로드가 끝난 뒤 받는다** (2026-10-07): br 179KB(원본 535KB)로 `/map` 자체 JS와 맞먹는데, `@next/third-parties`의 `GoogleAnalytics`는 `afterInteractive`라 `<head>`에 높은 우선순위 preload가 붙어 첫 화면 번들·지도 SDK와 대역폭을 다퉜다. 그래서 `layout.tsx`에서 `next/script`로 직접 넣고 본체만 `lazyOnload`로 바꿨다. gtag 스텁(`ga-init`)은 예전처럼 하이드레이션 직후 심으므로 `sendWhenReady`는 그대로이고, 그 사이 이벤트는 dataLayer에 쌓였다가 본체가 뜨면 나간다.
     - 대가: 본체가 뜨기 전에 나간 아주 짧은 방문은 GA에 잡히지 않고, 그 사이 다른 화면으로 넘어가면 쌓여 있던 이벤트가 넘어간 화면 주소로 붙을 수 있다. 느린 망에서는 `load`가 타일까지 기다려 늦어진다.
+  - **Mixpanel 초기화와 다른 화면 prefetch 도 페이지 `load` 뒤로 미룬다** (2026-10-07): Slow 4G(1.6Mbps) 실측에서 `/map` LCP 는 요청 순서가 아니라 LCP 전까지 받는 총량(약 1.8MB, 그중 HD 지도 타일 1.1MB)으로 정해졌다 — 카카오 엔진 요청을 0.9초 앞당겨도 LCP 는 그대로였다. 하이드레이션 직후 받던 Mixpanel 청크(37KB)와 내비·검색바 `<Link>`의 화면 진입 prefetch(RSC + 각 화면 JS, 약 110KB)를 빼자 LCP 가 약 0.8초 줄었다. 그래서 `useIsPageLoaded`로 load 뒤에 `initMixpanel`을 부르고, `Nav`·`SearchBar`의 `<Link prefetch>`는 load 전엔 `false`, 뒤엔 `'auto'`다.
+    - 대가: load 전에 떠난 방문은 Mixpanel 에도 남지 않고(GA 본체와 같음), load 전에 누른 탭은 prefetch 없이 이동한다.
+    - 일반 해상도 타일(`kakao.maps.disableHD()`, 타일 총량 1.1MB → 0.45MB)은 LCP 를 3초 넘게 더 줄이지만 고해상도 폰에서 지명·도로가 흐려져 쓰지 않았다. 실사용 LCP(GA4 `web_vitals`)를 보고 다시 판단한다.
 - **PR은 `main` 대상이고, `main`은 보호돼 있다** (2026-10-01): PR 필수 + `ci` 체크 통과 필수(관리자 우회 가능). 로컬 `develop`은 크게 뒤처져 있어 기준으로 쓰지 않는다. Android 워크플로는 필수 체크가 아니다.
 
 ## 자주 하는 작업

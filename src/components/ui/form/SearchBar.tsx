@@ -1,5 +1,8 @@
+'use client'
+
 import Image from 'next/image'
 import Link from 'next/link'
+import { useIsPageLoaded } from '@/hooks/useIsPageLoaded'
 import { cn } from '@/lib/utils/cn'
 
 interface SearchBarProps {
@@ -19,6 +22,8 @@ export const SearchBar = ({
   hasActiveFilter = false,
   className,
 }: SearchBarProps) => {
+  // 검색 화면 prefetch 도 내비 탭과 같은 이유로 페이지 load 뒤에 시작한다 (Nav 참고).
+  const prefetch = useIsPageLoaded() ? 'auto' : false
   return (
     <div className={cn('absolute top-12 z-10 w-full px-4 py-1', className)}>
       <div className="border-border-primary bg-bg-primary-80 flex items-center gap-2 rounded-4xl border px-4 py-1.5 backdrop-blur-[8px]">
@@ -26,6 +31,7 @@ export const SearchBar = ({
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <Link
             href="/search"
+            prefetch={prefetch}
             aria-label="검색 페이지 열기"
             className="text-text-primary block w-full truncate text-base leading-tight font-medium"
           >
