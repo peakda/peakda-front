@@ -6,6 +6,7 @@ import { IconBtn } from '@/components/ui/button/IconBtn'
 import { CardBadge } from '@/components/ui/card/CardBadge'
 import { ReactionBar } from '@/components/ui/card/ReactionBar'
 import { Badge } from '@/components/ui/display/Badge'
+import { TimeAgoText } from '@/components/ui/display/TimeAgoText'
 import { Indecator } from '@/app/onboarding/_components/Indecator'
 import { useCarousel } from '@/hooks/useEmblaCarousel'
 import { useTrackPhotoSwipe } from '@/hooks/useTrackPhotoSwipe'
@@ -103,7 +104,7 @@ export function FeedDetailView({
         <div className="flex flex-col gap-1">
           <Link href={`/users/${authorId}`} className="flex items-center gap-2">
             <span className="text-text-primary text-sm font-semibold">{authorName}</span>
-            <span className="text-text-quaternary text-xs">{timeAgo}</span>
+            <TimeAgoText text={timeAgo} className="text-text-quaternary text-xs" />
           </Link>
           <div className="flex items-center gap-1.5">
             <span className="text-text-tertiary text-xs">{visitDate} 방문</span>

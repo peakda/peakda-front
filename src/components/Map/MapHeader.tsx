@@ -7,6 +7,8 @@ import { Header } from '@/components/ui/layout/Header'
 import { useUnreadNotificationCount } from '@/api/facades/notification'
 import { useRequireLogin } from '@/hooks/useRequireLogin'
 import { track, trackNotificationBadgeShown } from '@/lib/analytics'
+import { adventPro } from '@/lib/fonts'
+import { cn } from '@/lib/utils/cn'
 
 // 지도 상단 로고 + 알림 버튼. 안 읽은 알림이 있을 때만 알림 버튼에 점을 표시한다.
 export function MapHeader() {
@@ -26,7 +28,12 @@ export function MapHeader() {
       left={
         <div className="flex items-center justify-center gap-2">
           <Image src={'/images/logo.png'} alt="로고" width={36} height={32} className="h-8 w-8.5" />
-          <p className="font-advent text-center text-[30px] font-semibold! tracking-tight text-green-700">
+          <p
+            className={cn(
+              adventPro.className,
+              'text-center text-[30px] font-semibold! tracking-tight text-green-700'
+            )}
+          >
             Peakda
           </p>
         </div>
