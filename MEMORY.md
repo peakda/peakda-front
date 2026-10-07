@@ -64,6 +64,9 @@
   - **토큰 등록 = 수집 시작이다.** Mixpanel(미국 저장)은 국외 이전이라 개인정보처리방침·Google Play 데이터 보안 양식이 먼저 갱신돼야 한다. 코드를 머지해도 토큰 전에는 수집되지 않는다.
   - **Mixpanel 무료 플랜이라 커스텀 이벤트·코호트 저장이 없다** (2026-10-05 확인) — 그래서 Activation 은 `Activation Action`을 코드에서 함께 보내고, 회원/비회원은 리포트 필터로 나눈다. 저장 리포트는 계정당 5개. 자세한 건 이벤트 사전의 "무료 플랜 제한".
   - 로그아웃 이벤트처럼 "이 회원의 마지막 행동"은 `clearAuthMarker()` **전에** 보내야 한다. 마커가 지워지는 순간 `AnalyticsManager`가 `reset()`해 이후 이벤트는 새 익명 사용자로 간다.
+  - **Mixpanel SDK는 코어 로더로 받는다** (2026-10-07): 기본 `mixpanel-browser`는 세션 리플레이 녹화기(rrweb)를 함께 실어 434KB(br 약 98KB, Buffer 폴리필 청크 별도)이고, 녹화를 쓰지 않는데도 하이드레이션 직후 받아 지도 SDK 로딩과 겹쳤다. `mixpanel-browser/src/loaders/loader-module-core`(약 128KB)로 바꿨다. 세션 리플레이를 켜려면 `loader-module-with-async-modules`로 바꾼다.
+  - **GA 본체(gtag.js)는 페이지 로드가 끝난 뒤 받는다** (2026-10-07): br 179KB(원본 535KB)로 `/map` 자체 JS와 맞먹는데, `@next/third-parties`의 `GoogleAnalytics`는 `afterInteractive`라 `<head>`에 높은 우선순위 preload가 붙어 첫 화면 번들·지도 SDK와 대역폭을 다퉜다. 그래서 `layout.tsx`에서 `next/script`로 직접 넣고 본체만 `lazyOnload`로 바꿨다. gtag 스텁(`ga-init`)은 예전처럼 하이드레이션 직후 심으므로 `sendWhenReady`는 그대로이고, 그 사이 이벤트는 dataLayer에 쌓였다가 본체가 뜨면 나간다.
+    - 대가: 본체가 뜨기 전에 나간 아주 짧은 방문은 GA에 잡히지 않고, 그 사이 다른 화면으로 넘어가면 쌓여 있던 이벤트가 넘어간 화면 주소로 붙을 수 있다. 느린 망에서는 `load`가 타일까지 기다려 늦어진다.
 - **PR은 `main` 대상이고, `main`은 보호돼 있다** (2026-10-01): PR 필수 + `ci` 체크 통과 필수(관리자 우회 가능). 로컬 `develop`은 크게 뒤처져 있어 기준으로 쓰지 않는다. Android 워크플로는 필수 체크가 아니다.
 
 ## 자주 하는 작업

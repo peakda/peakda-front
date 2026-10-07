@@ -11,7 +11,7 @@ const mixpanel = vi.hoisted(() => ({
   people: { set: vi.fn(), set_once: vi.fn(), union: vi.fn() },
 }))
 
-vi.mock('mixpanel-browser', () => ({ default: mixpanel }))
+vi.mock('mixpanel-browser/src/loaders/loader-module-core', () => ({ default: mixpanel }))
 
 // 토큰은 모듈을 읽을 때 정해지므로 테스트마다 새로 불러온다.
 async function loadAnalytics(token: string) {
