@@ -1,6 +1,9 @@
+'use client'
+
 import { Plus } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useIsPageLoaded } from '@/hooks/useIsPageLoaded'
 
 interface NavProps {
   activeTab: 'map' | 'explore' | 'feed' | 'my' | 'none'
@@ -8,6 +11,9 @@ interface NavProps {
 
 export function Nav({ activeTab }: NavProps) {
   const itemClass = 'flex cursor-pointer flex-col items-center gap-1 justify-center'
+  // 다른 탭 prefetch(RSC + 화면 JS)는 페이지 load 뒤에 시작한다. 내비가 보이자마자 받으면 첫 화면(지도 타일 등)과
+  // 대역폭을 다퉈 느린 망에서 LCP 가 늦어졌다. load 뒤에는 기본값(auto)으로 돌아가 화면에 보이는 링크를 prefetch 한다.
+  const prefetch = useIsPageLoaded() ? 'auto' : false
   return (
     <nav
       aria-label="주요 메뉴"
@@ -15,7 +21,12 @@ export function Nav({ activeTab }: NavProps) {
     >
       <div className="flex justify-around text-sm">
         {/* 지도 */}
-        <Link href="/map" className={itemClass} aria-current={activeTab === 'map' ? 'page' : undefined}>
+        <Link
+          href="/map"
+          prefetch={prefetch}
+          className={itemClass}
+          aria-current={activeTab === 'map' ? 'page' : undefined}
+        >
           <Image
             src={'/icons/explore.svg'}
             alt="지도"
@@ -29,6 +40,7 @@ export function Nav({ activeTab }: NavProps) {
         {/* 추천 */}
         <Link
           href="/explore"
+          prefetch={prefetch}
           className={itemClass}
           aria-current={activeTab === 'explore' ? 'page' : undefined}
         >
@@ -45,6 +57,7 @@ export function Nav({ activeTab }: NavProps) {
         {/* 플러스 버튼 (중앙) */}
         <Link
           href="/record"
+          prefetch={prefetch}
           aria-label="기록 작성"
           className="bg-brand-secondary mt-2 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full"
         >
@@ -52,7 +65,12 @@ export function Nav({ activeTab }: NavProps) {
         </Link>
 
         {/* 피드 */}
-        <Link href="/feed" className={itemClass} aria-current={activeTab === 'feed' ? 'page' : undefined}>
+        <Link
+          href="/feed"
+          prefetch={prefetch}
+          className={itemClass}
+          aria-current={activeTab === 'feed' ? 'page' : undefined}
+        >
           <Image
             src={'/icons/feed.svg'}
             alt="피드"
@@ -64,7 +82,12 @@ export function Nav({ activeTab }: NavProps) {
         </Link>
 
         {/* My */}
-        <Link href="/my" className={itemClass} aria-current={activeTab === 'my' ? 'page' : undefined}>
+        <Link
+          href="/my"
+          prefetch={prefetch}
+          className={itemClass}
+          aria-current={activeTab === 'my' ? 'page' : undefined}
+        >
           <div
             className={`rounded-full bg-gray-200 p-1 ${activeTab === 'my' ? 'opacity-100' : 'opacity-50'}`}
           >

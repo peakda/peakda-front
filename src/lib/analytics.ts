@@ -250,7 +250,7 @@ const AUTOCAPTURE_CONFIG: AutocaptureConfig | false =
         capture_text_content: false,
       }
 
-// SDK 는 첫 화면이 그려진 뒤 import() 로 받는다. 그 전에 생긴 호출은 순서대로 모아 두었다가 로드 후 실행한다.
+// SDK 는 페이지 load 뒤(AnalyticsManager) import() 로 받는다. 그 전에 생긴 호출은 순서대로 모아 두었다가 로드 후 실행한다.
 let mixpanel: OverridedMixpanel | null = null
 let pending: ((mp: OverridedMixpanel) => void)[] = []
 let isStarted = false
