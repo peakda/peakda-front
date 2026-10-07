@@ -11,26 +11,29 @@ import {
 // 핀치줌 중 zoom_changed 가 연속 발화하므로 마지막 한 번만 다시 그린다.
 const ZOOM_DEBOUNCE_MS = 120
 
-// 드래그 중에는 이 간격으로만 다시 그린다(drag 는 매 프레임 발화한다).
-const DRAG_THROTTLE_MS = 100
+// 드래그·관성 이동 중 한 프레임에 새 핀을 만드는 데 쓸 시간(ms). 카카오 CustomOverlay 는 지도에
+// 붙을 때마다 콘텐츠 크기를 읽어(강제 레이아웃) 여러 개를 한 번에 만들면 프레임이 끊긴다.
+// 개수가 아니라 시간으로 자르므로 빠른 기기는 많이, 느린 기기는 적게 만들고 나머지는 다음 프레임에 이어 간다.
+// 멈추면(idle) 남은 것을 한 번에 마저 만든다. 실기기 측정으로 조정할 값은 이것 하나다.
+const FRAME_BUDGET_MS = 4
 
 // 화면 밖 이만큼(px)까지 미리 그려 둔다. 좌표는 꼬리 끝이라 핀 몸통이 좌우 ~63px·위 ~65px
-// 걸치므로 그보다 커야 가장자리 핀이 잘리지 않고, 드래그 throttle 사이의 이동도 흡수한다.
+// 걸치므로 그보다 커야 가장자리 핀이 잘리지 않고, 프레임 예산에 밀려 늦게 붙는 핀의 여유도 된다.
 // 화면 비율로 잡으면 넓은 화면에서 여유가 bbox 를 다시 거의 다 덮어 효과가 없다.
 const VIEW_MARGIN_PX = 100
 
-/** 현재 화면 + 여유분 안에 있는 좌표인지 판정하는 함수 */
-function inViewChecker(map: kakao.maps.Map) {
+/** 현재 화면 + 여유분(margin px) 안에 있는 좌표인지 판정하는 함수 */
+function inViewChecker(map: kakao.maps.Map, margin: number) {
   const proj = map.getProjection()
   const bounds = map.getBounds()
   // 화면 좌표로 남서 = (0, 높이), 북동 = (폭, 0) 이라 컨테이너 크기를 따로 재지 않아도 된다.
   const height = proj.containerPointFromCoords(bounds.getSouthWest()).y
   const width = proj.containerPointFromCoords(bounds.getNorthEast()).x
   const sw = proj.coordsFromContainerPoint(
-    new kakao.maps.Point(-VIEW_MARGIN_PX, height + VIEW_MARGIN_PX)
+    new kakao.maps.Point(-margin, height + margin)
   )
   const ne = proj.coordsFromContainerPoint(
-    new kakao.maps.Point(width + VIEW_MARGIN_PX, -VIEW_MARGIN_PX)
+    new kakao.maps.Point(width + margin, -margin)
   )
   const minLat = sw.getLat()
   const maxLat = ne.getLat()
@@ -76,7 +79,9 @@ export function useMapCluster(
     onClusterClickRef.current = onClusterClick
   })
 
-  const render = useCallback((map: kakao.maps.Map) => {
+  // budgetMs 안에서만 새 오버레이를 만든다. 화면 밖으로 나간 것은 예산과 상관없이 모두 걷어낸다.
+  // 다 못 만들고 남았으면 true 를 돌려준다(다음 프레임에 이어서 그린다).
+  const render = useCallback((map: kakao.maps.Map, budgetMs = Infinity): boolean => {
     const level = map.getLevel()
     const entries = entriesRef.current
 
@@ -86,7 +91,9 @@ export function useMapCluster(
     const clusters = clusterCacheRef.current.get(level)!
     // 조회 bbox 는 격자 스냅으로 화면보다 넓다. 클러스터는 전체로 계산해 팬해도 묶음이
     // 바뀌지 않게 하고, DOM 오버레이는 화면 근처 것만 만든다.
-    const inView = inViewChecker(map)
+    const inView = inViewChecker(map, VIEW_MARGIN_PX)
+    // 예산이 모자라면 실제 화면 안 핀부터 만든다(여유 영역 핀은 아직 안 보인다).
+    const onScreen = inViewChecker(map, 0)
 
     const add = (
       key: string,
@@ -163,6 +170,26 @@ export function useMapCluster(
     }
 
     const nextKeys = new Set<string>()
+    const screenAdds: (() => void)[] = []
+    const marginAdds: (() => void)[] = []
+    const queueAdd = (
+      key: string,
+      lat: number,
+      lng: number,
+      html: string,
+      members: MapSpot[],
+      label: string
+    ) => {
+      nextKeys.add(key)
+      const existing = entries.get(key)
+      if (existing) {
+        existing.spots = members
+        return
+      }
+      ;(onScreen(lat, lng) ? screenAdds : marginAdds).push(() =>
+        add(key, lat, lng, html, members, label)
+      )
+    }
 
     for (const cluster of clusters) {
       if (cluster.spots.length >= 2 && level >= 4) {
@@ -173,8 +200,7 @@ export function useMapCluster(
           // 라벨은 HTML 밖(setAttribute)에 붙으므로 재사용 판정 키에 함께 넣는다(배지는 99+ 에서 멈춘다).
           return { key: `c:${cluster.lat},${cluster.lng}|${label}|${html}`, html, label }
         })
-        nextKeys.add(key)
-        add(key, cluster.lat, cluster.lng, html, cluster.spots, label)
+        queueAdd(key, cluster.lat, cluster.lng, html, cluster.spots, label)
         continue
       }
 
@@ -185,8 +211,7 @@ export function useMapCluster(
           const label = pinLabel(spot)
           return { key: `p:${spot.lat},${spot.lng}|${label}|${html}`, html, label }
         })
-        nextKeys.add(key)
-        add(key, spot.lat, spot.lng, html, [spot], label)
+        queueAdd(key, spot.lat, spot.lng, html, [spot], label)
       }
     }
 
@@ -196,6 +221,13 @@ export function useMapCluster(
       entry.overlay.setMap(null)
       entries.delete(key)
     }
+
+    const start = performance.now()
+    for (const create of [...screenAdds, ...marginAdds]) {
+      if (performance.now() - start >= budgetMs) return true
+      create()
+    }
+    return false
   }, [])
 
   // spots 가 바뀌면 클러스터 계산 캐시를 버리고 다시 그린다.
@@ -214,28 +246,51 @@ export function useMapCluster(
       timer = setTimeout(() => render(map), ZOOM_DEBOUNCE_MS)
     }
 
-    // 화면 안 핀만 그리므로 팬할 때도 다시 그려야 한다. 드래그 중엔 throttle 로,
-    // 관성 이동·panTo·setBounds 까지 끝나면 idle 에서 한 번 더 맞춘다.
-    let dragTimer: ReturnType<typeof setTimeout> | undefined
-    const onDrag = () => {
-      if (dragTimer) return
-      dragTimer = setTimeout(() => {
-        dragTimer = undefined
-        render(map)
-      }, DRAG_THROTTLE_MS)
+    // 화면 안 핀만 그리므로 팬할 때도 다시 그려야 한다. 드래그를 시작하면 매 프레임 예산만큼만
+    // 새 핀을 만들고, 손을 뗀 뒤 관성 이동 중에도 이어 간다. 멈추면(idle) 남은 것을 모두 만든다.
+    // idle 은 지도가 실제로 움직였을 때만 오므로, 움직임 없이 끝난 드래그는 중심이 그대로이고
+    // 남은 핀이 없을 때 루프가 스스로 멈춘다.
+    let frameId: number | null = null
+    let isDragging = false
+    let lastCenter: { lat: number; lng: number } | null = null
+    const tick = () => {
+      const hasPending = render(map, FRAME_BUDGET_MS)
+      const latLng = map.getCenter()
+      const center = { lat: latLng.getLat(), lng: latLng.getLng() }
+      const isMoving =
+        lastCenter == null || lastCenter.lat !== center.lat || lastCenter.lng !== center.lng
+      lastCenter = center
+      frameId = isDragging || isMoving || hasPending ? requestAnimationFrame(tick) : null
     }
-    const onIdle = () => render(map)
+    const stopLoop = () => {
+      if (frameId != null) cancelAnimationFrame(frameId)
+      frameId = null
+    }
+    const onDragStart = () => {
+      isDragging = true
+      lastCenter = null
+      if (frameId == null) frameId = requestAnimationFrame(tick)
+    }
+    const onDragEnd = () => {
+      isDragging = false
+    }
+    const onIdle = () => {
+      stopLoop()
+      render(map)
+    }
 
     kakao.maps.event.addListener(map, 'zoom_changed', onZoom)
-    kakao.maps.event.addListener(map, 'drag', onDrag)
+    kakao.maps.event.addListener(map, 'dragstart', onDragStart)
+    kakao.maps.event.addListener(map, 'dragend', onDragEnd)
     kakao.maps.event.addListener(map, 'idle', onIdle)
     const entries = entriesRef.current
     const clusterCache = clusterCacheRef.current
     return () => {
       clearTimeout(timer)
-      clearTimeout(dragTimer)
+      stopLoop()
       kakao.maps.event.removeListener(map, 'zoom_changed', onZoom)
-      kakao.maps.event.removeListener(map, 'drag', onDrag)
+      kakao.maps.event.removeListener(map, 'dragstart', onDragStart)
+      kakao.maps.event.removeListener(map, 'dragend', onDragEnd)
       kakao.maps.event.removeListener(map, 'idle', onIdle)
       entries.forEach((e) => e.overlay.setMap(null))
       entries.clear()
