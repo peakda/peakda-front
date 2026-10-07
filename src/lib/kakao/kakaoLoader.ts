@@ -12,8 +12,10 @@ class KakaoSDKLoader {
   load(appKey: string): Promise<void> {
     if (!appKey) return Promise.reject(new Error('카카오맵 앱 키가 없습니다.'))
 
-    // 이미 로드됨
-    if (window.kakao?.maps) {
+    // 이미 로드됨. autoload=false 라 sdk.js 실행 직후엔 kakao.maps.load 만 있는 껍데기이고,
+    // 실제 클래스(Map 등)는 maps.load 가 끝나야 생긴다. 껍데기만 보고 ready 로 두면
+    // 타임아웃 후 재시도에서 new kakao.maps.Map 이 undefined 로 터진다.
+    if (window.kakao?.maps?.Map) {
       this.status = 'ready'
       return Promise.resolve()
     }
