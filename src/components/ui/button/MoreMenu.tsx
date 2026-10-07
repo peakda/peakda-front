@@ -2,15 +2,18 @@
 
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
+import { cn } from '@/lib/utils/cn'
 
 interface MoreMenuProps {
   isOwner: boolean
   onEdit?: () => void
   onDelete?: () => void
   onReport?: () => void
+  // 사진 위에 겹칠 때 흰색으로 그린다 (상단 그라데이션과 함께 쓴다)
+  isLight?: boolean
 }
 
-export function MoreMenu({ isOwner, onEdit, onDelete, onReport }: MoreMenuProps) {
+export function MoreMenu({ isOwner, onEdit, onDelete, onReport, isLight = false }: MoreMenuProps) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -29,9 +32,19 @@ export function MoreMenu({ isOwner, onEdit, onDelete, onReport }: MoreMenuProps)
       <button
         onClick={() => setOpen((prev) => !prev)}
         aria-label="더보기"
-        className="text-text-secondary hover:bg-bg-secondary flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-lg leading-none"
+        className={cn(
+          'text-text-secondary flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-lg leading-none',
+          // 흰 아이콘 뒤에 밝은 hover 배경이 깔리면 아이콘이 사라진다
+          isLight ? 'hover:bg-white/20' : 'hover:bg-bg-secondary'
+        )}
       >
-        <Image src={'/icons/more.svg'} alt="더보기" width={25} height={20} />
+        <Image
+          src={'/icons/more.svg'}
+          alt="더보기"
+          width={25}
+          height={20}
+          className={cn(isLight && 'brightness-0 invert')}
+        />
       </button>
       {open && (
         <div className="border-border-primary absolute top-9 right-0 z-20 min-w-[100px] overflow-hidden rounded-xl border bg-white shadow-lg">
