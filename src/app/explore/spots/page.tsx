@@ -1,11 +1,33 @@
+import type { Metadata } from 'next'
 import { exploreSpotsApi } from '@/api/facades/explore-spots'
 import { PAGE_SIZE } from '@/api/facades/pagination'
-import type { GetExploreSpotsSection } from '@/api/facades/generated/peakdaApi.schemas'
+import { GetExploreSpotsSection } from '@/api/facades/generated/peakdaApi.schemas'
 import { toExploreSection } from '@/lib/utils/explore'
+import { createPageMetadata } from '@/lib/utils/pageMetadata'
 import { ExploreSpotsClient } from './_components/ExploreSpotsClient'
 
 interface ExploreSpotsPageProps {
   searchParams: Promise<{ section?: string | string[] }>
+}
+
+const SECTION_METADATA = {
+  PEAK_NOW: {
+    title: '지금 절정인 계절 명소',
+    description:
+      '지금 절정인 꽃과 계절 명소를 찾아보세요. 각 명소의 개화 상태와 위치를 확인하고 여행지를 골라보세요.',
+    path: '/explore/spots',
+  },
+  NEXT_WEEK: {
+    title: '다음 주에 가면 좋을 계절 명소',
+    description:
+      '다음 주에 가기 좋은 꽃구경·계절 명소를 찾아보세요. 예상 개화 상태와 위치를 확인하고 여행을 계획해 보세요.',
+    path: '/explore/spots?section=NEXT_WEEK',
+  },
+} satisfies Record<GetExploreSpotsSection, { title: string; description: string; path: string }>
+
+export async function generateMetadata({ searchParams }: ExploreSpotsPageProps): Promise<Metadata> {
+  const section = toExploreSection((await searchParams).section)
+  return createPageMetadata(SECTION_METADATA[section])
 }
 
 // 검색엔진이 받는 첫 HTML 에 첫 페이지 명소 카드와 링크가 담기도록 서버에서 먼저 조회한다.

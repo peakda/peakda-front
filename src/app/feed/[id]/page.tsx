@@ -37,13 +37,14 @@ export async function generateMetadata({ params }: FeedDetailPageProps): Promise
   const record = await getRecord((await params).id)
   if (!record) return {}
 
-  const title = `${record.spot.name} 방문 기록`
+  const visitDate = (record.visitedDate ?? record.createdAt).slice(0, 10).replaceAll('-', '.')
+  const title = `${record.spot.name} ${visitDate} 방문 기록`
   const memo = record.memo?.trim()
   const description = memo
     ? memo.length > DESCRIPTION_MAX_LENGTH
       ? `${memo.slice(0, DESCRIPTION_MAX_LENGTH - 1)}…`
       : memo
-    : `${record.user.nickname}님이 남긴 ${record.spot.name} 방문 기록이에요.`
+    : `${record.user.nickname}님이 ${visitDate}에 남긴 ${record.spot.name} 방문 기록이에요.`
   const path = `/feed/${record.id}`
 
   return {
