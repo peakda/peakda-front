@@ -16,7 +16,7 @@ import type { MapSpot } from '@/lib/utils/mapCluster'
 import { useDrawerStore } from '@/stores/useDrawerStore'
 import { hasActiveFilter, useFilterStore, type PinTypeFilter } from '@/stores/useFilterStore'
 import { filterMapSpots } from '@/lib/utils/mapFilter'
-import { timingToStatus, timingToStatuses } from '@/lib/utils/timing'
+import { timingToStatuses } from '@/lib/utils/timing'
 import { useBloomMap } from '@/api/facades/seasonal-bloom'
 import { useHomeSuggestion } from '@/api/facades/home'
 import { bloomToMapSpots } from '@/lib/utils/bloomToMapSpots'
@@ -115,10 +115,12 @@ export const MapContainer = () => {
   const pinType = useFilterStore((s) => s.pinType)
   const applied = useFilterStore((s) => s.applied)
   const draftCategories = useFilterStore((s) => s.draft.categories)
+  const draftTiming = useFilterStore((s) => s.draft.timing)
   const setPinType = useFilterStore((s) => s.setPinType)
   const setVisibleSpots = useFilterStore((s) => s.setVisibleSpots)
 
   const statuses = useMemo(() => timingToStatuses(applied.timing), [applied.timing])
+  const draftStatuses = useMemo(() => timingToStatuses(draftTiming), [draftTiming])
 
   // ?spotId 로 들어오면 그 명소 핀을 찾아 드로어를 연다. 좌표가 정해진 뒤에만 채운다.
   const pendingTargetRef = useRef<{ spotId: number; lat: number; lng: number } | null>(null)
@@ -127,19 +129,20 @@ export const MapContainer = () => {
   // 클러스터·핀 오버레이도 다시 만들지 않는다. 화면 범위로 조회하면 이동할 때마다 데이터가
   // 갈려 화면의 핀을 전부 지웠다 다시 만들었다(앱에서 줌·드래그가 끊기던 원인).
   //
-  // 서버로 나가는 건 개화상태(status)·권역(region)뿐이다. 전부 applied 기준이라
-  // 드로어에서 필터를 만지는 것만으로는 요청이 나가지 않는다.
+  // 서버로 나가는 건 권역(region)뿐이다. applied 기준이라 드로어에서 필터를 만지는 것만으로는
+  // 요청이 나가지 않는다.
   //
   // 꽃 종류(categories)는 일부러 보내지 않는다. 서버가 걸러 주면 ①드로어 하단의
   // 'N개의 명소 보기' 를 draft 기준으로 셀 수 없고 ②응답에서 안 고른 꽃이 빠져
   // 핀 아이콘을 선택에 맞게 좁힐 수 없다. 대신 응답의 category 로 클라에서 거른다.
+  // 개화 상태(status)도 보내지 않는다. 서버 결과와 같게 클라에서 거를 수 있어(mapFilter 참고)
+  // 시기 탭끼리 같은 조회 캐시를 쓰므로 탭을 바꿔도 요청이 나가지 않고, 시기도 draft 기준으로 셀 수 있다.
   const bloomParams = useMemo(
     () => ({
       ...KOREA_BBOX,
       region: applied.region ?? undefined,
-      status: timingToStatus(applied.timing),
     }),
-    [applied.region, applied.timing]
+    [applied.region]
   )
   const { data: bloomData, isPlaceholderData } = useBloomMap(bloomParams)
   const allSpots = useMemo(() => (bloomData ? bloomToMapSpots(bloomData) : []), [bloomData])
@@ -154,16 +157,16 @@ export const MapContainer = () => {
     [allSpots, pinType, statuses, applied.categories]
   )
 
-  // 꽃 종류는 클라 필터라 서버를 다녀오지 않고도 draft 기준 개수를 미리 셀 수 있다.
-  // (지역·시기는 서버를 다녀와야 알 수 있어 버튼이 '명소 보기' 로 고정된다)
+  // 꽃 종류·시기는 클라 필터라 서버를 다녀오지 않고도 draft 기준 개수를 미리 셀 수 있다.
+  // (지역은 서버를 다녀와야 알 수 있어 지역 탭에서는 버튼이 '명소 보기' 로 고정된다)
   const draftSpots = useMemo(
     () =>
       filterMapSpots(allSpots, {
         pinType,
-        statuses,
+        statuses: draftStatuses,
         categories: draftCategories,
       }),
-    [allSpots, pinType, statuses, draftCategories]
+    [allSpots, pinType, draftStatuses, draftCategories]
   )
 
   // 드로어의 'N개의 명소 보기' 버튼이 쓸 현재 화면의 필터 결과를 올려준다.

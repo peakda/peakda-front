@@ -6,7 +6,7 @@ export interface TimingMeta {
   key: TimingKey
   label: string
   subLabel: string
-  /** 이 탭이 고르는 개화 상태 — 서버 status 파라미터로 그대로 나간다 */
+  /** 이 탭이 고르는 개화 상태 — 지도는 클라이언트에서 거르고, 프리뷰 API 에는 status 파라미터로 그대로 나간다 */
   status: BloomSlotStatus
 }
 
@@ -25,17 +25,17 @@ export const TIMINGS: TimingMeta[] = [
 
 const TIMING_BY_KEY = new Map(TIMINGS.map((t) => [t.key, t]))
 
-/** 시기 탭 → 서버 `status` 파라미터. 고른 게 없으면 보내지 않는다. */
+/** 시기 탭 → 프리뷰 API 의 `status` 파라미터. 고른 게 없으면 보내지 않는다. */
 export function timingToStatus(timing: TimingKey | null): BloomSlotStatus | undefined {
   return timing ? TIMING_BY_KEY.get(timing)?.status : undefined
 }
 
 /**
- * 시기 탭 → 클라이언트에서 남길 개화 상태.
+ * 시기 탭 → 지도에서 남길 개화 상태.
  *
- * 서버가 이미 status 로 걸러 주는데도 클라 필터가 필요하다. 서버 판정은 **핀 단위**라
- * "그 상태인 꽃이 하나라도 있는 핀"을 주는데, 꽃 종류를 함께 고르면 그중 고른 꽃이
- * 그 상태여야 한다. 그 판정은 꽃을 좁힌 뒤에만 가능하므로 mapFilter 가 맡는다.
+ * 지도는 status 를 서버로 보내지 않고 mapFilter 가 거른다. 서버 status 필터도 그 상태인 꽃이 있는 핀만 주고
+ * 핀의 꽃까지 그 상태로 거를 뿐이라 결과가 같고, 꽃 종류를 함께 고르면 "고른 꽃이 그 상태"인지는
+ * 꽃을 좁힌 뒤에만 볼 수 있다.
  */
 export function timingToStatuses(timing: TimingKey | null): BloomSlotStatus[] {
   const status = timingToStatus(timing)

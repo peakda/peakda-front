@@ -62,9 +62,9 @@ describe('lib/utils/mapFilter', () => {
 
   // 핀 하나에 꽃이 여러 개일 수 있으므로 "하나라도 해당" 이면 남긴다.
   it('statuses 는 핀의 꽃 중 하나라도 해당하면 통과', () => {
-    expect(filterMapSpots(ALL_SPOTS, filter({ statuses: ['PEAK'] }))).toEqual([
-      attractionPeak,
-      localMulti,
+    expect(filterMapSpots(ALL_SPOTS, filter({ statuses: ['PEAK'] })).map((s) => s.title)).toEqual([
+      '명소-절정',
+      '동네-복수',
     ])
   })
 
@@ -73,6 +73,21 @@ describe('lib/utils/mapFilter', () => {
       localStarted,
       attractionEnded,
     ])
+  })
+
+  // 서버 status 필터도 핀의 꽃(blooms)까지 그 상태로 거른다. 지도는 status 를 서버로 보내지 않으므로 여기서 같게 만든다.
+  it('핀에 꽃이 여러 개면 고른 상태인 꽃만 남기고 핀 색도 다시 계산한다', () => {
+    const [narrowed] = filterMapSpots([localMulti], filter({ statuses: ['PREPARING'] }))
+
+    expect(narrowed.categories).toEqual(['CHERRY'])
+    expect(narrowed.statuses).toEqual(['PREPARING'])
+    expect(narrowed.flowers).toEqual([{ src: CATEGORY_ICON.CHERRY, alt: 'CHERRY' }])
+    expect(narrowed.maxStage).toBe('Early')
+  })
+
+  it('꽃이 전부 고른 상태면 같은 객체를 그대로 돌려준다', () => {
+    const [same] = filterMapSpots([localMulti], filter({ statuses: ['PREPARING', 'PEAK'] }))
+    expect(same).toBe(localMulti)
   })
 
   // 서버 category 파라미터는 값 하나만 받는다. 복수 선택은 여기서 거른다.

@@ -93,8 +93,8 @@ export function Drawer() {
   const [activeTab, setActiveTab] = useState('region')
 
   const isFilterMode = type === 'filter' || type === 'flower-filter'
-  // 꽃 종류는 클라 필터라 개수를 미리 셀 수 있다. 지역·시기는 서버를 다녀와야 알 수 있다.
-  const showsCount = type === 'filter' && activeTab === 'flowers'
+  // 꽃 종류·시기는 클라 필터라 개수를 미리 셀 수 있다. 지역은 서버를 다녀와야 알 수 있다.
+  const showsCount = type === 'filter' && (activeTab === 'timing' || activeTab === 'flowers')
 
   // position: 목록에서 몇 번째(0부터) 카드였는지
   const handleOpenSpot = (spotId: number | undefined, position: number) => {
