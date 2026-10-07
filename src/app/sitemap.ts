@@ -8,8 +8,16 @@ import { isSitemapSpotPin } from '@/lib/utils/spotSeo'
 // 개화 추정은 하루 단위로 산출되므로 sitemap 도 하루에 한 번 다시 만든다. (/api/sitemap 도 하루 1회 호출 전제)
 export const revalidate = 86400
 
-// 공개·정상 응답하는 canonical URL 만 넣는다. /explore/spots 는 ?section 마다 목록이 달라 canonical 이 없어 제외.
-const STATIC_PATHS = ['', '/map', '/explore', '/explore/festivals', '/feed']
+// 공개·정상 응답하는 canonical URL 만 넣는다. 탐색 목록은 섹션별 canonical URL 을 포함한다.
+const STATIC_PATHS = [
+  '',
+  '/map',
+  '/explore',
+  '/explore/festivals',
+  '/explore/spots',
+  '/explore/spots?section=NEXT_WEEK',
+  '/feed',
+]
 
 // 조회마다 따로 실패를 삼킨다 — 백엔드 장애로 sitemap 전체가 500 이 되면 고정 페이지까지 제출되지 않는다.
 

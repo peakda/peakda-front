@@ -10,7 +10,7 @@ export interface SpotBloomSummaryProps {
   spotId: number
   name: string
   address: string
-  recordCount: number
+  recordCount?: number
   /** 명소 id — 동네(LOCAL) 스팟이면 null 이라 캘린더를 조회하지 않는다 */
   attractionId?: number | null
   /** 스팟의 대표 꽃 카테고리 — 없으면 캘린더를 조회하지 않는다 */
@@ -40,12 +40,16 @@ export function SpotBloomSummary({
         href={`/spot/${spotId}`}
         className="border-border-primary flex items-center justify-between gap-2 border-y px-4 py-3.5 text-left"
       >
-        <span className="flex flex-col gap-1">
-          <span className="text-text-primary text-sm font-semibold">{name}</span>
-          <span className="text-text-tertiary text-xs">
-            방문 기록 {recordCount} · {address}
-          </span>
-        </span>
+        <div className="flex flex-col gap-1">
+          <h1 className="text-text-primary text-sm font-semibold">{name}</h1>
+          {(recordCount != null || address) && (
+            <span className="text-text-tertiary text-xs">
+              {[recordCount != null && `방문 기록 ${recordCount}`, address]
+                .filter(Boolean)
+                .join(' · ')}
+            </span>
+          )}
+        </div>
         <ChevronRight className="text-icon-quaternary h-5 w-5 shrink-0" />
       </Link>
 
