@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { GoogleAnalytics } from '@next/third-parties/google'
+import Script from 'next/script'
 import './globals.css'
 import { Providers } from '@/app/_components/Providers'
 import {
@@ -83,7 +83,24 @@ export default function RootLayout({
             <main className="flex flex-1 flex-col">{children}</main>
           </Providers>
         </div>
-        {isProductionDeploy && <GoogleAnalytics gaId={GA_MEASUREMENT_ID} />}
+        {/* GA 본체(gtag.js, br 179KB)는 페이지 로드가 끝난 뒤 받는다. @next/third-parties 의 GoogleAnalytics 는
+            본체를 afterInteractive 로 넣어 <head> 에 높은 우선순위 preload 가 붙고, 첫 화면 번들·지도 SDK 와 대역폭을 다퉜다.
+            gtag 스텁은 예전처럼 하이드레이션 직후 심으므로 그 사이 이벤트는 dataLayer 에 쌓였다가 본체가 뜨면 나간다.
+            대가: 본체가 뜨기 전에 나간 아주 짧은 방문은 GA 에 잡히지 않는다. */}
+        {isProductionDeploy && (
+          <>
+            <Script id="ga-init" strategy="afterInteractive">
+              {`window['dataLayer'] = window['dataLayer'] || [];
+function gtag(){window['dataLayer'].push(arguments);}
+gtag('js', new Date());
+gtag('config', '${GA_MEASUREMENT_ID}');`}
+            </Script>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+              strategy="lazyOnload"
+            />
+          </>
+        )}
       </body>
     </html>
   )

@@ -150,7 +150,7 @@ interface AnalyticsEvents {
   }
 }
 
-// GA 초기화 스크립트(layout 의 GoogleAnalytics)는 화면 컴포넌트의 effect 보다 늦게 돈다.
+// GA 초기화 스크립트(layout 의 ga-init)는 화면 컴포넌트의 effect 보다 늦게 돈다.
 // 첫 화면에서 보낸 이벤트가 사라지지 않게 gtag 가 생길 때까지 잠깐 기다리고,
 // 운영 배포가 아니라 끝내 생기지 않으면 버린다.
 const RETRY_MS = 500
@@ -270,7 +270,12 @@ export async function initMixpanel() {
   isStarted = true
 
   try {
-    const { default: mp } = await import('mixpanel-browser')
+    // 기본 번들('mixpanel-browser')은 세션 리플레이 녹화기(rrweb)까지 실어 약 430KB 다. 녹화를 쓰지 않으므로
+    // README 가 안내하는 코어 로더만 받는다(약 130KB). 녹화를 켜려면 loader-module-with-async-modules 로 바꾼다.
+    // 이 경로의 타입 선언은 export * 라 default 가 실제(인스턴스)와 다르게 잡혀 패키지 본체의 타입으로 맞춘다.
+    const { default: mp } = (await import(
+      'mixpanel-browser/src/loaders/loader-module-core'
+    )) as unknown as { default: OverridedMixpanel }
     // 페이지뷰는 trackPageView 가 직접 보낸다 — 자동 페이지뷰는 prev_path 가 갱신되기 전에 나갈 수 있다.
     mp.init(MIXPANEL_TOKEN, { track_pageview: false, autocapture: AUTOCAPTURE_CONFIG })
     baseProperties.platform = Capacitor.getPlatform()
