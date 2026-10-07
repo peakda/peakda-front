@@ -43,6 +43,8 @@ export function FeedDetailClient({ initialRecord }: { initialRecord: SpotRecordR
   const requireLogin = useRequireLogin()
 
   const isOwner = !!record && !!currentUser && record.user.id === currentUser.id
+  // 헤더 아래에 사진(캐러셀)이 깔린 상태. 로딩·빈 화면에서는 기본 색 아이콘을 쓴다.
+  const isOverPhoto = !isLoading && !!record
 
   const handleDelete = () => {
     deleteRecord.mutate(
@@ -72,12 +74,17 @@ export function FeedDetailClient({ initialRecord }: { initialRecord: SpotRecordR
 
   return (
     <div className="bg-bg-primary relative flex min-h-screen flex-col pb-12">
+      {/* 흰 아이콘이 밝은 사진 위에서도 보일 만큼만 상단을 어둡게 한다 */}
+      {isOverPhoto && (
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-40 h-20 bg-gradient-to-b from-black/60 to-transparent" />
+      )}
       <Header
         className="mt-3"
-        left={<LeftArrow />}
+        left={<LeftArrow isLight={isOverPhoto} />}
         right={
           <MoreMenu
             isOwner={isOwner}
+            isLight={isOverPhoto}
             onEdit={() => router.push(`/record/${recordId}/edit`)}
             onDelete={() => openDeleteConfirmDrawer(handleDelete)}
             onReport={() => requireLogin(() => setReportModalOpen(true))}

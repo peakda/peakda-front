@@ -167,9 +167,14 @@ export function LocationStepForm({
 
         {/* 위치 */}
         <div className="flex flex-col gap-2">
-          <p className="px-4 text-sm font-medium">
-            위치 <span className="text-brand-primary">*</span>
-          </p>
+          <div className="px-4">
+            <p className="text-sm font-medium">
+              위치 <span className="text-brand-primary">*</span>
+            </p>
+            <p className="text-text-secondary text-xs">
+              유명 명소: 관광 정보가 있는 곳 | 동네 스팟: 기록으로 만들어진 곳
+            </p>
+          </div>
           {hasLocation ? (
             <div className="flex flex-col gap-2 px-4">
               <button
@@ -180,7 +185,7 @@ export function LocationStepForm({
                 {location}
               </button>
               {/* 폭을 화면 비율로 고정하면 좁은 폰에서 문구·버튼이 세로로 꺾여 내용 폭에 맞춘다 */}
-              <div className="flex w-fit items-center gap-2 rounded-2xl bg-green-50 p-1.5">
+              <div className="flex w-fit items-center gap-2 rounded-2xl bg-green-50 py-1.5 pr-1.5 pl-3.5">
                 <div className="flex items-center gap-1.5">
                   <span
                     className={cn(
@@ -188,7 +193,12 @@ export function LocationStepForm({
                       category === '유명명소' ? 'bg-green-400' : 'bg-yellow-500'
                     )}
                   />
-                  <span className="text-text-secondary text-sm whitespace-nowrap">
+                  <span
+                    className={cn(
+                      'text-sm whitespace-nowrap',
+                      category === '유명명소' ? 'text-green-400' : 'text-yellow-500'
+                    )}
+                  >
                     {category === '유명명소' ? '유명명소로' : '동네스팟으로'} 인식
                   </span>
                 </div>
@@ -205,7 +215,7 @@ export function LocationStepForm({
                 )}
               </div>
               {showCategoryPicker && (
-                <div className="flex flex-col gap-2">
+                <div className="border-border-primary flex flex-col gap-2 rounded-2xl border p-3">
                   <p className="text-sm font-medium">분류</p>
                   <div className="flex gap-2">
                     {(['유명명소', '동네스팟'] as Category[]).map((c) => (
