@@ -32,7 +32,7 @@ import {
   type Viewport,
 } from '@/lib/kakao/mapViewport'
 import { KOREA_BBOX, REGION_MAP_CENTERS } from '@/constants/region'
-import { useSearchParams } from 'next/navigation'
+import { kakaoLoader } from '@/lib/kakao/kakaoLoader'
 
 const Drawer = dynamic(
   () => import('@/components/ui/layout/Drawer').then((m) => ({ default: m.Drawer })),
@@ -61,6 +61,13 @@ const PIN_TYPE_LABELS = PIN_TYPES.map((type) => PIN_TYPE_LABEL[type])
 const trackMapOpenPermission = (permission: 'granted' | 'denied') =>
   trackLocationPermission(permission, 'map_open')
 
+// 이 모듈은 /map 번들에서만 실행된다. SDK 로드를 컴포넌트 effect 까지 미루지 않고 번들이 평가되는
+// 즉시 시작해, 하이드레이션·첫 렌더 동안 카카오 엔진(kakao.js → services.js)을 함께 받는다.
+// useLazyMapLoad 가 다시 부르면 진행 중인 같은 Promise 를 받고, 여기서 실패하면 거기서 다시 시도한다.
+if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_KAKAO_MAP_KEY) {
+  kakaoLoader.load(process.env.NEXT_PUBLIC_KAKAO_MAP_KEY).catch(() => {})
+}
+
 // 축제 상세 등에서 /map?lat=..&lng=.. 로 넘어오면 그 좌표를 초기 중심으로 쓴다.
 function toCoord(value: string | null) {
   if (value == null || value.trim() === '') return null
@@ -68,10 +75,32 @@ function toCoord(value: string | null) {
   return Number.isFinite(num) ? num : null
 }
 
+interface InitialTarget {
+  center: { lat: number; lng: number } | null
+  // 좌표가 없는 축제·큐레이션은 주소·장소명(?q)으로 넘어온다. 괄호 속 부연(예: '(효석문화제)')은
+  // 키워드 검색을 실패하게 만들어 떼고 찾는다.
+  query: string | null
+  spotId: number | null
+}
+
+// 쿼리(?lat/?lng/?q/?spotId)는 지도를 처음 만들 때만 쓴다(지도가 생긴 뒤엔 바뀌어도 무시된다).
+// useSearchParams 로 읽으면 정적 페이지인 /map 전체가 클라이언트 렌더링으로 빠져(CSR bailout)
+// 서버 HTML 에 헤더·검색바·내비가 없고 스켈레톤만 남는다. 그래서 effect 안에서 주소를 직접 읽는다.
+function readInitialTarget(): InitialTarget {
+  const params = new URLSearchParams(window.location.search)
+  const lat = toCoord(params.get('lat'))
+  const lng = toCoord(params.get('lng'))
+  return {
+    center: lat != null && lng != null ? { lat, lng } : null,
+    query: params.get('q')?.replace(/\(.*?\)/g, '').trim() || null,
+    spotId: toCoord(params.get('spotId')),
+  }
+}
+
 export const MapContainer = () => {
   const containerRef = useRef<HTMLDivElement>(null)
   const isRegionMovePendingRef = useRef(false)
-  const searchParams = useSearchParams()
+  const initialTargetRef = useRef<InitialTarget | null>(null)
   const [isRegionMovePending, setIsRegionMovePending] = useState(false)
   const mapRef = useRef<kakao.maps.Map | null>(null)
   const [mapInstance, setMapInstance] = useState<kakao.maps.Map | null>(null)
@@ -90,22 +119,6 @@ export const MapContainer = () => {
   const setVisibleSpots = useFilterStore((s) => s.setVisibleSpots)
 
   const statuses = useMemo(() => timingToStatuses(applied.timing), [applied.timing])
-
-  const latParam = searchParams.get('lat')
-  const lngParam = searchParams.get('lng')
-  const initialCenter = useMemo(() => {
-    const lat = toCoord(latParam)
-    const lng = toCoord(lngParam)
-    return lat != null && lng != null ? { lat, lng } : null
-  }, [latParam, lngParam])
-  // 좌표가 없는 축제·큐레이션은 주소·장소명(?q)으로 넘어온다. 괄호 속 부연(예: '(효석문화제)')은
-  // 키워드 검색을 실패하게 만들어 떼고 찾는다.
-  const targetQuery =
-    searchParams
-      .get('q')
-      ?.replace(/\(.*?\)/g, '')
-      .trim() || null
-  const targetSpotId = toCoord(searchParams.get('spotId'))
 
   // ?spotId 로 들어오면 그 명소 핀을 찾아 드로어를 연다. 좌표가 정해진 뒤에만 채운다.
   const pendingTargetRef = useRef<{ spotId: number; lat: number; lng: number } | null>(null)
@@ -305,6 +318,8 @@ export const MapContainer = () => {
   }, [])
 
   useEffect(() => {
+    initialTargetRef.current ??= readInitialTarget()
+    const { center: initialCenter, query: targetQuery } = initialTargetRef.current
     if (
       initialLocationRef.current ||
       readMapView() ||
@@ -329,13 +344,19 @@ export const MapContainer = () => {
         trackMapOpenPermission(result.permission)
       }
     })
-  }, [initialCenter, targetQuery])
+  }, [])
 
   useEffect(() => {
     if (!isSdkReady || !containerRef.current) return
 
     let map = mapRef.current
     if (!map) {
+      initialTargetRef.current ??= readInitialTarget()
+      const {
+        center: initialCenter,
+        query: targetQuery,
+        spotId: targetSpotId,
+      } = initialTargetRef.current
       // 이 히스토리 엔트리에 값이 있다는 건 여기서 지도를 보다가 상세로 갔다 돌아왔다는 뜻이라
       // 쿼리 좌표보다 우선한다. ?lat/?lng 는 그 화면에 '처음' 들어올 때만 의미가 있다.
       const savedView = readMapView()
@@ -403,7 +424,7 @@ export const MapContainer = () => {
       kakao.maps.event.removeListener(map, 'tilesloaded', handleTilesLoaded)
       if (frameId != null) window.cancelAnimationFrame(frameId)
     }
-  }, [isSdkReady, initialCenter, targetQuery, targetSpotId])
+  }, [isSdkReady])
 
   return (
     <div className="relative h-dvh w-full contain-strict">
@@ -438,7 +459,9 @@ export const MapContainer = () => {
       />
       <MapLocationBtn onLocate={handleLocate} />
       <Nav activeTab="map" />
-      {isSdkReady && <Drawer />}
+      {/* 드로어 코드(~30KB)를 SDK 준비 직후 받으면 첫 타일과 대역폭·메인 스레드를 다툰다.
+          첫 타일이 그려진 뒤 받는다. 그 전에 핀·필터를 눌러도 상태는 스토어에 있어 마운트되면 열린다. */}
+      {areTilesLoaded && <Drawer />}
     </div>
   )
 }

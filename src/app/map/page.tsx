@@ -12,10 +12,9 @@ export const metadata: Metadata = createPageMetadata({
   path: '/map',
 })
 
-// MapContainer 가 useSearchParams(?lat/?lng)를 쓰므로 App Router 에서 Suspense 경계가 필요하다.
-// fallback 이 null 이면 서버가 보내는 HTML 에 지도 영역이 비어 있어 LCP 후보가 하이드레이션
-// 이후에야 생긴다. 스켈레톤을 두면 첫 HTML 에 로딩 UI가 담기고, 높이를 MapContainer(100dvh)와
-// 맞춰 지도로 교체될 때 레이아웃이 밀리지 않는다.
+// MapContainer 는 useSearchParams 를 쓰지 않아(쿼리는 effect 에서 직접 읽는다) 서버 HTML 에
+// 헤더·검색바·내비·스켈레톤까지 그대로 담긴다. useSearchParams 를 다시 쓰면 이 경계까지
+// 클라이언트 렌더링으로 빠져 아래 fallback(스켈레톤)만 남으니 주의할 것.
 export default function MapPage() {
   const appKey = process.env.NEXT_PUBLIC_KAKAO_MAP_KEY
   const apiOrigin = process.env.NEXT_PUBLIC_API_URL

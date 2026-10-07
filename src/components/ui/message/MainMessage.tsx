@@ -1,4 +1,6 @@
 import Image from 'next/image'
+import { adventPro } from '@/lib/fonts'
+import { cn } from '@/lib/utils/cn'
 
 export function MainMessage() {
   return (
@@ -16,7 +18,12 @@ export function MainMessage() {
       />
       {/* 검색엔진이 브랜드명만이 아니라 서비스 문구까지 H1로 읽도록 두 줄을 한 H1에 담는다 */}
       <h1 className="text-center">
-        <span className="font-advent block text-[40px] font-semibold! tracking-tight text-green-700">
+        <span
+          className={cn(
+            adventPro.className,
+            'block text-[40px] font-semibold! tracking-tight text-green-700'
+          )}
+        >
           Peakda
         </span>
         <span className="text-text-secondary block font-sans text-base font-semibold tracking-tight">

@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from 'next'
-import { Advent_Pro } from 'next/font/google'
 import { GoogleAnalytics } from '@next/third-parties/google'
 import './globals.css'
 import { Providers } from '@/app/_components/Providers'
@@ -16,12 +15,6 @@ import {
 // Pretendard 는 next/font/local 을 쓰지 않는다 — 통짜 woff2 가 2MB 라 한 글자만 써도 전부 받는다.
 // globals.css 가 unicode-range 로 쪼갠 dynamic subset 을 import 하고,
 // --font-pretendard 도 거기서 정의한다.
-
-const adventPro = Advent_Pro({
-  subsets: ['latin'],
-  variable: '--font-advent-pro',
-  display: 'swap',
-})
 
 // GA4 측정 ID. 페이지 HTML 에 공개되는 값이라 비밀이 아니다.
 // 로컬·프리뷰 접속이 통계에 섞이지 않도록 Vercel 운영(Production) 배포에서만 태그를 넣는다.
@@ -74,7 +67,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="ko" className={adventPro.variable}>
+    <html lang="ko">
       <head>
         {/* DNS 미리 해석 */}
         <link rel="dns-prefetch" href="//dapi.kakao.com" />
