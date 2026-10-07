@@ -48,6 +48,11 @@ const NETWORK_TOAST_ID = 'map-network-error'
 
 const INITIAL_LEVEL = 8
 
+// 위치 권한을 이미 허용한 사용자는 현재 위치가 올 때까지 최대 이만큼(ms) 기다렸다 지도를 만든다.
+// SDK 를 HTML 에서 미리 받아 위치보다 먼저 준비되면, 기본 위치(서울)로 만들어 서울 타일을 받다가 위치가 오면
+// 그리로 튄다. 권한을 아직 안 정했거나 거부했으면 권한 조회만 하고 바로 끝나 사실상 기다리지 않는다.
+const INITIAL_LOCATION_WAIT_MS = 1000
+
 // 상단 칩. 서버 파라미터가 없어 응답의 pin.type 으로 클라이언트에서 거른다.
 const PIN_TYPES: PinTypeFilter[] = ['ALL', 'ATTRACTION', 'LOCAL']
 const PIN_TYPE_LABEL: Record<PinTypeFilter, string> = {
@@ -110,6 +115,8 @@ export const MapContainer = () => {
     promise: Promise<InitialMapLocation>
     result: InitialMapLocation | null
   } | null>(null)
+  // 첫 위치 조회가 끝났거나(또는 기다릴 필요가 없거나) 기다림 상한이 지났는지. 지도는 이 뒤에 만든다.
+  const [isInitialLocationSettled, setIsInitialLocationSettled] = useState(false)
   const { isReady: isSdkReady, error, retry } = useLazyMapLoad()
   const openFilterDrawer = useDrawerStore((s) => s.openFilterDrawer)
   const pinType = useFilterStore((s) => s.pinType)
@@ -318,15 +325,12 @@ export const MapContainer = () => {
   }, [])
 
   useEffect(() => {
+    // 이미 시작한 조회가 있으면 그 조회(또는 기다림 상한)가 지도 생성을 풀어 준다.
+    if (initialLocationRef.current) return
     initialTargetRef.current ??= readInitialTarget()
     const { center: initialCenter, query: targetQuery } = initialTargetRef.current
-    if (
-      initialLocationRef.current ||
-      readMapView() ||
-      initialCenter ||
-      targetQuery ||
-      !loadAppSettings().locationEnabled
-    ) {
+    if (readMapView() || initialCenter || targetQuery || !loadAppSettings().locationEnabled) {
+      setIsInitialLocationSettled(true)
       return
     }
 
@@ -337,8 +341,14 @@ export const MapContainer = () => {
       result: null as InitialMapLocation | null,
     }
     initialLocationRef.current = request
+    const waitTimer = window.setTimeout(
+      () => setIsInitialLocationSettled(true),
+      INITIAL_LOCATION_WAIT_MS
+    )
     void request.promise.then((result) => {
       request.result = result
+      window.clearTimeout(waitTimer)
+      setIsInitialLocationSettled(true)
       // 이미 정해 둔 권한(설정에서 바꾼 경우 포함)도 여기서 확인된다. 아직 안 정했으면 이후 팝업 결과로 잡힌다.
       if (result.permission === 'granted' || result.permission === 'denied') {
         trackMapOpenPermission(result.permission)
@@ -347,7 +357,8 @@ export const MapContainer = () => {
   }, [])
 
   useEffect(() => {
-    if (!isSdkReady || !containerRef.current) return
+    // 첫 위치 조회를 기다린다(INITIAL_LOCATION_WAIT_MS 참고). 상한이 지나 위치 없이 만들면 아래에서 나중에 옮긴다.
+    if (!isSdkReady || !isInitialLocationSettled || !containerRef.current) return
 
     let map = mapRef.current
     if (!map) {
@@ -424,7 +435,7 @@ export const MapContainer = () => {
       kakao.maps.event.removeListener(map, 'tilesloaded', handleTilesLoaded)
       if (frameId != null) window.cancelAnimationFrame(frameId)
     }
-  }, [isSdkReady])
+  }, [isSdkReady, isInitialLocationSettled])
 
   return (
     <div className="relative h-dvh w-full contain-strict">
