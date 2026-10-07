@@ -3,7 +3,7 @@ import { createPageMetadata } from '@/lib/utils/pageMetadata'
 import { Suspense } from 'react'
 import { MapContainer } from '@/components/Map/MapContainer'
 import { MapSkeleton } from '@/components/Map/MapSkeleton'
-import { getKakaoMapSdkUrl } from '@/lib/kakao/kakaoLoader'
+import { getKakaoMapSdkBootstrap, getKakaoMapSdkUrl } from '@/lib/kakao/kakaoLoader'
 
 export const metadata: Metadata = createPageMetadata({
   title: '전국 명소 지도·개화 지도',
@@ -27,6 +27,9 @@ export default function MapPage() {
       {/* API는 credentials: 'include'로 호출하므로 기본 credential 모드로 연결한다. */}
       {apiOrigin && <link rel="preconnect" href={apiOrigin} />}
       {appKey && <link rel="preload" as="script" href={getKakaoMapSdkUrl(appKey)} />}
+      {/* 번들을 기다리지 않고 HTML 을 읽는 즉시 SDK·엔진 로드를 시작한다(getKakaoMapSdkBootstrap 참고).
+          다른 화면에서 클라이언트 이동으로 들어오면 React 가 이 스크립트를 실행하지 않아 로더가 직접 시작한다. */}
+      {appKey && <script dangerouslySetInnerHTML={{ __html: getKakaoMapSdkBootstrap(appKey) }} />}
       <Suspense
         fallback={
           <div className="h-dvh">
