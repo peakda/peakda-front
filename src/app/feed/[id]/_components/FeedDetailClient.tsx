@@ -94,18 +94,14 @@ export function FeedDetailClient({ initialRecord }: { initialRecord: SpotRecordR
       ) : (
         <FeedDetailView
           {...detailToFeedCardProps(record)}
-          spotSummary={
-            spot
-              ? {
-                  spotId: record.spot.id,
-                  name: record.spot.name,
-                  recordCount: spot.recordCount,
-                  address: spot.address ?? '',
-                  attractionId: spot.attractionId,
-                  category: spot.bloom?.category,
-                }
-              : undefined
-          }
+          spotSummary={{
+            spotId: record.spot.id,
+            name: record.spot.name,
+            recordCount: spot?.recordCount,
+            address: spot?.address ?? record.spot.address ?? '',
+            attractionId: spot?.attractionId ?? record.spot.attractionId,
+            category: spot?.bloom?.category,
+          }}
         />
       )}
 
