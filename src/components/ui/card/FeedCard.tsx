@@ -10,8 +10,10 @@ import { IconBtn } from '@/components/ui/button/IconBtn'
 import { MoreMenu } from '@/components/ui/button/MoreMenu'
 import { CardBadge } from '@/components/ui/card/CardBadge'
 import { Badge } from '@/components/ui/display/Badge'
+import { AvatarImage } from '@/components/ui/display/AvatarImage'
 import { ReactionBar } from '@/components/ui/card/ReactionBar'
 import { useCarousel } from '@/hooks/useEmblaCarousel'
+import { usePhotoCarouselImages } from '@/hooks/usePhotoCarouselImages'
 import { useTrackPhotoSwipe } from '@/hooks/useTrackPhotoSwipe'
 import { useRequireLogin } from '@/hooks/useRequireLogin'
 import { Indecator } from '@/app/onboarding/_components/Indecator'
@@ -90,6 +92,7 @@ export function FeedCard({
   priority = false,
 }: FeedCardProps) {
   const { emblaRef, selectedIndex, scrollSnaps, scrollTo } = useCarousel({ loop: true })
+  const { shouldRenderImage, onImageSettled } = usePhotoCarouselImages(images.length, selectedIndex)
   useTrackPhotoSwipe(selectedIndex, recordId, images.length, 'feed_list')
 
   const [isReportModalOpen, setReportModalOpen] = useState(false)
@@ -134,7 +137,7 @@ export function FeedCard({
         <Link href={`/users/${authorId}`} rel="nofollow">
           <IconBtn size="md" className="relative overflow-hidden">
             {safeAuthorImageUrl ? (
-              <Image
+              <AvatarImage
                 src={safeAuthorImageUrl}
                 alt="프로필"
                 fill
@@ -187,16 +190,22 @@ export function FeedCard({
         <div ref={images.length > 1 ? emblaRef : undefined} className="mp-no-track overflow-hidden">
           <div className="flex touch-pan-y">
             {images.map((src, i) => (
-              <div key={i} className="min-w-0 flex-[0_0_100%]">
-                <Image
-                  src={src}
-                  alt={`피드 이미지 ${i + 1}`}
-                  width={430}
-                  height={240}
-                  sizes="(max-width: 430px) 100vw, 430px"
-                  priority={priority && i === 0}
-                  className="h-[240px] w-full object-cover"
-                />
+              <div key={i} className="min-w-0 flex-[0_0_100%] bg-gray-200">
+                {shouldRenderImage(i) ? (
+                  <Image
+                    src={src}
+                    alt={`피드 이미지 ${i + 1}`}
+                    width={430}
+                    height={240}
+                    sizes="(max-width: 430px) 100vw, 430px"
+                    priority={priority && i === 0}
+                    className="h-[240px] w-full object-cover"
+                    onLoad={onImageSettled}
+                    onError={onImageSettled}
+                  />
+                ) : (
+                  <div className="h-[240px]" />
+                )}
               </div>
             ))}
           </div>

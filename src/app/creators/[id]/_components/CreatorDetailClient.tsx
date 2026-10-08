@@ -1,5 +1,3 @@
-'use client'
-
 import Image from 'next/image'
 import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
@@ -32,6 +30,7 @@ interface CreatorDetailClientProps {
 }
 
 // 본문은 서버(page.tsx)가 조회한 응답으로 그린다. 없는 id 는 서버에서 404 로 끝난다.
+// 훅·이벤트가 없어 서버 컴포넌트로 둔다(JS·하이드레이션 절약). 이름만 다른 상세 화면(*Client)과 맞춰 뒀다.
 export function CreatorDetailClient({ curation }: CreatorDetailClientProps) {
   const chapters = [...curation.chapters].sort((a, b) => a.sortOrder - b.sortOrder)
   const recommendations = [...curation.recommendations].sort((a, b) => a.sortOrder - b.sortOrder)

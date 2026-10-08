@@ -4,10 +4,10 @@ import { PAGE_SIZE } from '@/api/facades/pagination'
 import { GetExploreSpotsSection } from '@/api/facades/generated/peakdaApi.schemas'
 import { toExploreSection } from '@/lib/utils/explore'
 import { createPageMetadata } from '@/lib/utils/pageMetadata'
-import { ExploreSpotsClient } from './_components/ExploreSpotsClient'
+import { ExploreSpotsClient } from '@/app/explore/spots/_components/ExploreSpotsClient'
 
 interface ExploreSpotsPageProps {
-  searchParams: Promise<{ section?: string | string[] }>
+  params: Promise<{ section: string }>
 }
 
 const SECTION_METADATA = {
@@ -25,8 +25,18 @@ const SECTION_METADATA = {
   },
 } satisfies Record<GetExploreSpotsSection, { title: string; description: string; path: string }>
 
-export async function generateMetadata({ searchParams }: ExploreSpotsPageProps): Promise<Metadata> {
-  const section = toExploreSection((await searchParams).section)
+// 공개 주소는 /explore/spots?section=X 지만, 페이지가 쿼리를 읽으면 매 요청 서버 렌더링(no-store)이라 CDN 캐시를 못 탄다.
+// 그래서 middleware.ts 가 그 주소를 이 경로(/explore/spots/X)로 rewrite 하고, 이 페이지는 섹션별로 미리 만들어
+// 5분마다 다시 만든다(ISR). canonical·sitemap 은 그대로 쿼리 주소라 이 경로로 직접 들어와도 중복으로 잡히지 않는다.
+export const revalidate = 300
+export const dynamicParams = false
+
+export async function generateStaticParams() {
+  return Object.values(GetExploreSpotsSection).map((section) => ({ section }))
+}
+
+export async function generateMetadata({ params }: ExploreSpotsPageProps): Promise<Metadata> {
+  const section = toExploreSection((await params).section)
   return createPageMetadata(SECTION_METADATA[section])
 }
 
@@ -47,7 +57,7 @@ async function getInitialPage(section: GetExploreSpotsSection) {
   }
 }
 
-export default async function ExploreSpotsPage({ searchParams }: ExploreSpotsPageProps) {
-  const section = toExploreSection((await searchParams).section)
+export default async function ExploreSpotsPage({ params }: ExploreSpotsPageProps) {
+  const section = toExploreSection((await params).section)
   return <ExploreSpotsClient section={section} initialPage={await getInitialPage(section)} />
 }

@@ -1,8 +1,10 @@
 'use client'
 import { IconBtn } from '@/components/ui/button/IconBtn'
 import { Input } from '@/components/ui/form/Input'
+import { useIsPageLoaded } from '@/hooks/useIsPageLoaded'
 import { X } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Dispatch, SetStateAction, useEffect, useRef } from 'react'
 
@@ -13,9 +15,8 @@ interface SearchBarProps {
   isCancle?: boolean
   placeholder?: string
   onFocus?: () => void
-  // 입력 대신 클릭만 받는 용도 (예: 탐색 페이지에서 검색 페이지로 이동)
-  readOnly?: boolean
-  onClick?: () => void
+  // 입력 대신 이 주소로 가는 링크로 쓴다 (예: 탐색 페이지에서 검색 페이지로 이동)
+  href?: string
   // Enter 로 검색을 확정할 때 현재 입력값을 넘긴다 (최근 검색어 저장 등)
   onSubmit?: (value: string) => void
   // 페이지 전환 직후 바로 입력할 수 있도록 검색창에 포커스한다.
@@ -29,13 +30,14 @@ export function SearchInput({
   isCancle,
   placeholder = '검색어를 입력하세요.',
   onFocus,
-  readOnly,
-  onClick,
+  href,
   onSubmit,
   autoFocus = false,
 }: SearchBarProps) {
   const router = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
+  // 링크로 쓸 때 검색 화면 prefetch 는 지도 SearchBar·내비 탭처럼 페이지 load 뒤에 시작한다 (Nav 참고).
+  const prefetch = useIsPageLoaded() ? 'auto' : false
 
   useEffect(() => {
     if (!autoFocus) return
@@ -46,18 +48,18 @@ export function SearchInput({
     return () => cancelAnimationFrame(frame)
   }, [autoFocus])
 
-  if (readOnly) {
+  if (href) {
     return (
       <div className="flex items-center gap-4 px-4 pt-2 pb-2">
-        <button
-          type="button"
-          onClick={onClick}
+        <Link
+          href={href}
+          prefetch={prefetch}
           aria-label="검색 페이지 열기"
           className="bg-bg-secondary text-text-tertiary flex h-12 w-full items-center gap-3 rounded-3xl px-3 text-left text-base"
         >
           <Image src="/icons/search.svg" alt="" width={24} height={24} />
           <span className="truncate">{placeholder}</span>
-        </button>
+        </Link>
       </div>
     )
   }
@@ -96,9 +98,6 @@ export function SearchInput({
           }}
           onFocus={onFocus}
           placeholder={placeholder}
-          readOnly={readOnly}
-          onClick={onClick}
-          className={readOnly ? 'cursor-pointer' : undefined}
         />
       </div>
 

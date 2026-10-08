@@ -28,9 +28,10 @@ export function SpotBloomSummary({
   attractionId,
   category,
 }: SpotBloomSummaryProps) {
-  const { data: calendar } = useBloomCalendar(
-    attractionId && category ? { attractionId, category } : null
-  )
+  // 캘린더는 서버에서 미리 받지 않는다 — peakHeadline 이 new Date() 로 오늘을 정해서, 서버(UTC)에서 그리면
+  // KST 0~9시에 날짜가 하루 어긋나 하이드레이션이 깨진다.
+  const calendarParams = attractionId && category ? { attractionId, category } : null
+  const { data: calendar, isPending } = useBloomCalendar(calendarParams)
 
   const period = formatPeakPeriod(calendar?.peakStartDate, calendar?.peakEndDate)
 
@@ -53,7 +54,7 @@ export function SpotBloomSummary({
         <ChevronRight className="text-icon-quaternary h-5 w-5 shrink-0" />
       </Link>
 
-      {calendar && (
+      {calendar ? (
         <section className="mx-4 flex flex-col gap-2">
           <h2 className="text-text-primary text-base font-semibold">올해 만개 시기</h2>
           <div className="flex items-center justify-between gap-2 rounded-xl bg-green-50 px-4 py-3">
@@ -66,6 +67,17 @@ export function SpotBloomSummary({
             </span>
           ) : null}
         </section>
+      ) : (
+        // 캘린더는 하이드레이션 뒤에 받아 와서, 받는 동안 같은 높이(제목·배너 44px·지속일 줄)로 자리를 잡아 둔다.
+        // 늦게 끼어들며 아래 꽃 태그·본문을 밀던 것이 피드 상세 CLS 의 원인이었다.
+        calendarParams &&
+        isPending && (
+          <section aria-busy="true" className="mx-4 flex flex-col gap-2">
+            <h2 className="text-text-primary text-base font-semibold">올해 만개 시기</h2>
+            <div className="h-11 animate-pulse rounded-xl bg-green-50" />
+            <div className="h-4 w-20 animate-pulse rounded bg-gray-100" />
+          </section>
+        )
       )}
     </>
   )
