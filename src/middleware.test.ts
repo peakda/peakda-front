@@ -52,6 +52,22 @@ describe('middleware', () => {
     expect(rewrite(middleware(request('/explore')))).toBeNull()
   })
 
+  it('landing 서브도메인의 루트는 로그인 여부와 무관하게 랜딩 페이지로 rewrite 한다', () => {
+    const landing = (loggedIn: boolean) => {
+      const req = new NextRequest(new URL('/', 'https://landing.peakda.com'), {
+        headers: { host: 'landing.peakda.com' },
+      })
+      if (loggedIn) req.cookies.set(AUTH_MARKER, '1')
+      return middleware(req)
+    }
+
+    for (const loggedIn of [false, true]) {
+      const res = landing(loggedIn)
+      expect(res.headers.get('x-middleware-rewrite')).toBe('https://landing.peakda.com/landing')
+      expect(location(res)).toBeNull()
+    }
+  })
+
   it('로그인 상태는 보호 경로와 로그인 콜백을 그대로 통과한다', () => {
     expect(location(middleware(request('/my/saved', true)))).toBeNull()
     expect(location(middleware(request('/auth/callback', true)))).toBeNull()

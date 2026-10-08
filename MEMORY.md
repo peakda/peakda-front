@@ -77,6 +77,11 @@
   - **Mixpanel 초기화와 다른 화면 prefetch 도 페이지 `load` 뒤로 미룬다** (2026-10-07): Slow 4G(1.6Mbps) 실측에서 `/map` LCP 는 요청 순서가 아니라 LCP 전까지 받는 총량(약 1.8MB, 그중 HD 지도 타일 1.1MB)으로 정해졌다 — 카카오 엔진 요청을 0.9초 앞당겨도 LCP 는 그대로였다. 하이드레이션 직후 받던 Mixpanel 청크(37KB)와 내비·검색바 `<Link>`의 화면 진입 prefetch(RSC + 각 화면 JS, 약 110KB)를 빼자 LCP 가 약 0.8초 줄었다. 그래서 `useIsPageLoaded`로 load 뒤에 `initMixpanel`을 부르고, `Nav`·`SearchBar`의 `<Link prefetch>`는 load 전엔 `false`, 뒤엔 `'auto'`다.
     - 대가: load 전에 떠난 방문은 Mixpanel 에도 남지 않고(GA 본체와 같음), load 전에 누른 탭은 prefetch 없이 이동한다.
     - 일반 해상도 타일(`kakao.maps.disableHD()`, 타일 총량 1.1MB → 0.45MB)은 LCP 를 3초 넘게 더 줄이지만 고해상도 폰에서 지명·도로가 흐려져 쓰지 않았다. 실사용 LCP(GA4 `web_vitals`)를 보고 다시 판단한다.
+- **랜딩 페이지(`/landing`)는 같은 레포·같은 Vercel 프로젝트에 두고 `landing.peakda.com`으로 연결한다** (2026-10-08): 디자인 토큰·폰트를 공유하려고 별도 레포로 빼지 않았다. `middleware.ts`가 `landing.` 호스트의 `/`만 `/landing`으로 rewrite 하고, canonical 은 `LANDING_URL`(`constants/site.ts`)로 고정한다.
+  - 호스트는 **`Host` 헤더**로 판별한다 — `next dev`에서는 `request.nextUrl.hostname`이 Host 와 무관하게 `localhost`로 나와 rewrite 가 안 된다. 로컬 확인은 `http://landing.localhost:3000`.
+  - 앱 화면은 루트 레이아웃이 430px 틀(`max-w-107.5 overflow-hidden`)로 감싸는데, 랜딩은 반응형이라 `data-landing` 이 있는 페이지에서만 `has-[[data-landing]]:` 로 틀과 overflow 를 푼다(overflow-hidden 이 남으면 sticky 헤더가 안 붙는다).
+  - 슬라이드 카드는 Figma 에서 540×960 통이미지였지만 **텍스트는 HTML 로, 휴대폰만 이미지(`public/images/landing/phone-*.webp`)로** 나눴다(검색 노출·선명도). 카드 안 배치는 컨테이너 단위(`cqw`)라 화면 너비가 달라도 시안 비율 그대로다.
+  - iOS 출시 알림(이메일 수집)은 방식 미정이라 버튼 모양만 있고 동작이 없다.
 - **PR은 `main` 대상이고, `main`은 보호돼 있다** (2026-10-01): PR 필수 + `ci` 체크 통과 필수(관리자 우회 가능). 로컬 `develop`은 크게 뒤처져 있어 기준으로 쓰지 않는다. Android 워크플로는 필수 체크가 아니다.
 
 ## 자주 하는 작업

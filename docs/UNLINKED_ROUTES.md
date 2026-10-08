@@ -23,6 +23,8 @@
 
 `/auth/callback`은 OAuth 리다이렉트 외부 진입점이라 내부 링크가 없는 게 정상이다.
 
+`/landing`(랜딩 페이지, 2026-10-08)도 앱 안 링크 없이 **`landing.peakda.com` 서브도메인으로 들어오는 외부 진입점**이다. `src/middleware.ts`가 그 호스트의 `/`를 `/landing`으로 rewrite 한다. 서브도메인(Vercel 도메인 + DNS)이 연결되기 전까지는 `www.peakda.com/landing`으로만 열린다.
+
 ---
 
 ## 2. 연동 안 된 API (파사드는 있고 호출부가 없음)
