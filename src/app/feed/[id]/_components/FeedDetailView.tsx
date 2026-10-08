@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/display/Badge'
 import { TimeAgoText } from '@/components/ui/display/TimeAgoText'
 import { Indecator } from '@/app/onboarding/_components/Indecator'
 import { useCarousel } from '@/hooks/useEmblaCarousel'
+import { usePhotoCarouselImages } from '@/hooks/usePhotoCarouselImages'
 import { useTrackPhotoSwipe } from '@/hooks/useTrackPhotoSwipe'
 import { SpotBloomSummary } from './SpotBloomSummary'
 import type { SpotBloomSummaryProps } from './SpotBloomSummary'
@@ -51,6 +52,7 @@ export function FeedDetailView({
   spotSummary,
 }: FeedDetailViewProps) {
   const { emblaRef, selectedIndex, scrollSnaps, scrollTo } = useCarousel({ loop: true })
+  const { shouldRenderImage, onImageSettled } = usePhotoCarouselImages(images.length, selectedIndex)
   useTrackPhotoSwipe(selectedIndex, recordId, images.length, 'feed_detail')
   const safeAuthorImageUrl = toHttpsImageUrl(authorImageUrl)
 
@@ -61,19 +63,25 @@ export function FeedDetailView({
         <div ref={emblaRef} className="mp-no-track overflow-hidden">
           <div className="flex touch-pan-y">
             {images.map((src, i) => (
-              <div key={i} className="min-w-0 flex-[0_0_100%]">
-                <Image
-                  src={src}
-                  alt={
-                    src === '/images/explore.png'
-                      ? '방문 사진 없음'
-                      : `${location} 방문 사진 ${i + 1}`
-                  }
-                  width={430}
-                  height={322}
-                  className="aspect-[4/3] w-full object-cover"
-                  priority={i === 0}
-                />
+              <div key={i} className="min-w-0 flex-[0_0_100%] bg-gray-200">
+                {shouldRenderImage(i) ? (
+                  <Image
+                    src={src}
+                    alt={
+                      src === '/images/explore.png'
+                        ? '방문 사진 없음'
+                        : `${location} 방문 사진 ${i + 1}`
+                    }
+                    width={430}
+                    height={322}
+                    className="aspect-[4/3] w-full object-cover"
+                    priority={i === 0}
+                    onLoad={onImageSettled}
+                    onError={onImageSettled}
+                  />
+                ) : (
+                  <div className="aspect-[4/3]" />
+                )}
               </div>
             ))}
           </div>

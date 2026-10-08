@@ -1,5 +1,8 @@
+'use client'
+
 import Image from 'next/image'
 import { CardBadge, type CardBadgeVariant } from '@/components/ui/card/CardBadge'
+import { useShouldRenderSlideImage } from '@/hooks/useShouldRenderSlideImage'
 import { cn } from '@/lib/utils/cn'
 import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
 
@@ -43,6 +46,8 @@ export type ExplorCardProps = PeakCardProps | FestivalCardProps | CourseCardProp
 
 export function ExplorCard(props: ExplorCardProps) {
   const isCourse = props.type === 'course'
+  // 캐러셀에서 아직 화면에 들어오지 않은 카드는 이미지를 그리지 않는다(Carousel 의 eagerImageCount).
+  const shouldRenderImage = useShouldRenderSlideImage()
 
   return (
     <div
@@ -57,16 +62,18 @@ export function ExplorCard(props: ExplorCardProps) {
         }
       }}
     >
-      {/* 이미지 영역 */}
-      <div className="relative overflow-hidden rounded-2xl">
-        <Image
-          src={toHttpsImageUrl(props.image) ?? props.image}
-          alt={isCourse ? props.title : props.name}
-          width={250}
-          height={180}
-          priority={props.priority}
-          className="h-[180px] w-full object-cover"
-        />
+      {/* 이미지 영역 — 이미지를 아직 안 그린 카드도 같은 높이로 자리를 지킨다 */}
+      <div className="relative h-[180px] overflow-hidden rounded-2xl bg-gray-200">
+        {shouldRenderImage && (
+          <Image
+            src={toHttpsImageUrl(props.image) ?? props.image}
+            alt={isCourse ? props.title : props.name}
+            width={250}
+            height={180}
+            priority={props.priority}
+            className="h-[180px] w-full object-cover"
+          />
+        )}
 
         {/* Peak 뱃지 */}
         {props.type === 'peak' && (

@@ -13,6 +13,10 @@
   - **외부 이미지(한국관광공사 등)는 `SafeImage`(`src/components/ui/display/SafeImage.tsx`)로 그린다** (2026-10-01, PR #107). 관광공사 `firstimage`/`photoUrls` 는 `http://` 로 내려오는 경우가 있는데, 웹은 브라우저가 https 로 올려 줘서 보이지만 Capacitor 앱은 `androidScheme: 'https'` + `allowMixedContent: false` 라 WebView 가 `http://` 이미지를 **차단**한다("웹은 되는데 앱은 안 됨"의 원인). `SafeImage` 는 https 변환 + 로드 실패 시 이미지를 숨겨 부모 배경이 보이게 한다. 새로 외부 URL 이미지를 그릴 때 `next/image` 에 `src` 를 직접 넘기지 말 것. 적용된 곳: `PinList`·`SpotCard`·`PinCard`·`SpotDetailClient` — 나머지 `<Image>` 는 아직 직접 쓴다.
   - 앱 WebView 콘솔은 평소 못 본다. `CAPACITOR_DEBUG=true` 로 빌드·sync 하면 `webContentsDebuggingEnabled` 가 켜져 `chrome://inspect` 로 볼 수 있다(`capacitor.config.ts`). 네이티브 설정이라 바꾸면 재빌드가 필요하고, 릴리스 빌드에는 쓰지 않는다.
   - `unoptimized: true` 에서는 `remotePatterns` 가 검사되지 않는다. 목록은 최적화를 다시 켤 때를 대비해 남겨 둔 것이며, 지금 도메인을 빼거나 넣어도 동작은 같다.
+- **캐러셀은 화면에 들어온 장만 `<img>`를 그린다 — 모든 장을 그리는 것으로 되돌리지 말 것** (2026-10-08): Chrome 은 `overflow:hidden` 캐러셀 안의 `loading="lazy"` 이미지도 가로로 약 2장 거리까지 바로 받는다(통제 실험·운영 실측). 운영에서 피드 상세는 첫 사진(약 500KB)이 옆 2장과 대역폭을 나눠 Slow 4G LCP 가 10.9초였고 옆 장 요청을 막으면 6.1초였다. 탐색은 안 보이는 절정 4번째 카드의 관광공사 BMP(약 1MB) 때문에 `load`가 13.9초로 늦어져, `useIsPageLoaded` 뒤로 미룬 Mixpanel·GA·탭 prefetch까지 밀렸다.
+  - 탐색(`Carousel`의 `eagerImageCount`): 첫 화면에 보이는 2장만 그리고, 나머지는 Embla `slidesInView`로 화면에 들어올 때 그린다. 카드(`ExplorCard`)는 `useShouldRenderSlideImage()`로 읽는다.
+  - 피드 목록·상세(`usePhotoCarouselImages`): 현재 장만 그리고, 사진 하나를 다 받은 뒤 지나간 장의 양옆(loop 라 맨 끝 장 포함)을 그린다. 첫 사진을 받기 전에 넘기면 옆 장이 잠깐 회색 칸으로 보인다.
+  - 대가: 서버 HTML 에 2번째 이후 사진의 `<img>`(alt 에 장소명)가 빠진다.
 - **토큰 refresh 동시성**: 401 발생 시 `runRefresh()`가 진행 중인 refresh Promise를 공유해 동시 다발 요청이 refresh를 중복 호출하지 않게 한다 (`src/api/mutator/index.ts`).
 - **swagger.json은 커밋하지 않음**: `pnpm generate:api`가 `.env.development`의 `NEXT_PUBLIC_API_URL` 백엔드에서 `/v3/api-docs`를 받아와 로컬에 생성한다 (`scripts/fetch-swagger.mjs`). 즉 API 재생성에는 해당 백엔드가 떠 있어야 한다.
   - **⚠️ `.env.development`는 `http://localhost:8080`을 가리키는데, 현재 최신 스펙은 `https://api-dev.peakda.com`에 있다** (2026-08-18 기준). 그냥 `pnpm generate:api`를 돌리면 **로컬에 떠 있는 백엔드 버전으로 스키마가 되돌아간다.** 최신 dev 스펙으로 재생성하려면 그 실행에만 환경변수를 주입한다:
