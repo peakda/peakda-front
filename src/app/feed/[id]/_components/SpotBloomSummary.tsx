@@ -55,7 +55,7 @@ export function SpotBloomSummary({
       </Link>
 
       {calendar ? (
-        <section className="mx-4 flex flex-col gap-2">
+        <section key="calendar" className="mx-4 flex flex-col gap-2">
           <h2 className="text-text-primary text-base font-semibold">올해 만개 시기</h2>
           <div className="flex items-center justify-between gap-2 rounded-xl bg-green-50 px-4 py-3">
             <span className="text-sm font-semibold text-green-600">{peakHeadline(calendar)}</span>
@@ -70,9 +70,11 @@ export function SpotBloomSummary({
       ) : (
         // 캘린더는 하이드레이션 뒤에 받아 와서, 받는 동안 같은 높이(제목·배너 44px·지속일 줄)로 자리를 잡아 둔다.
         // 늦게 끼어들며 아래 꽃 태그·본문을 밀던 것이 피드 상세 CLS 의 원인이었다.
+        // key 를 실제 섹션과 다르게 둬 새 노드로 바꿔 그린다. 깜빡이던 자리 표시 div 를 배너로 재사용하면 Chrome 이
+        // 배너가 (0,0)에서 옮겨 온 것으로 계산해, 캘린더가 0.6초 넘게 걸릴 때 CLS 0.054 가 잡혔다(제자리여도).
         calendarParams &&
         isPending && (
-          <section aria-busy="true" className="mx-4 flex flex-col gap-2">
+          <section key="calendar-placeholder" aria-busy="true" className="mx-4 flex flex-col gap-2">
             <h2 className="text-text-primary text-base font-semibold">올해 만개 시기</h2>
             <div className="h-11 animate-pulse rounded-xl bg-green-50" />
             <div className="h-4 w-20 animate-pulse rounded bg-gray-100" />
