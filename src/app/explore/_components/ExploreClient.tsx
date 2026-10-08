@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
 import { Header } from '@/components/ui/layout/Header'
 import { SearchInput } from '@/app/search/_components/SearchInput'
 import { ExplorCard } from '@/components/ui/card/ExplorCard'
@@ -83,7 +82,6 @@ interface ExploreClientProps {
 }
 
 export function ExploreClient({ initialExplore }: ExploreClientProps) {
-  const router = useRouter()
   const openFlowerFilterDrawer = useDrawerStore((s) => s.openFlowerFilterDrawer)
   const { data: suggestion } = useHomeSuggestion()
   // 필터 드로어에서 고른 꽃 종류. 서버 category 는 값 하나만 받으므로
@@ -135,11 +133,7 @@ export function ExploreClient({ initialExplore }: ExploreClientProps) {
         />
       </div>
 
-      <SearchInput
-        readOnly
-        onClick={() => router.push('/search')}
-        placeholder={searchPlaceholder}
-      />
+      <SearchInput href="/search" placeholder={searchPlaceholder} />
 
       {isLoading && <QueryFeedback state="loading" />}
       {isError && !explore && <QueryFeedback state="error" onRetry={() => void refetch()} />}

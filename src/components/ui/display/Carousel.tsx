@@ -27,6 +27,8 @@ export const Carousel = ({
   children,
   ...props
 }: CarouselProps) => {
+  // 필터 변경 등으로 슬라이드 수가 바뀌면 embla 가 스스로 다시 측정한다(watchSlides 기본값, 8.6 에서 확인).
+  // reInit 을 직접 부르면 마운트 직후에 측정을 한 번 더 하게 된다.
   const {
     emblaRef,
     emblaApi,
@@ -38,12 +40,6 @@ export const Carousel = ({
     scrollNext,
     scrollTo,
   } = useCarousel({ loop, align, dragFree })
-
-  // 필터 변경 등으로 슬라이드 수가 바뀌면 embla 가 다시 측정해야 한다.
-  const slideCount = Children.count(children)
-  useEffect(() => {
-    emblaApi?.reInit()
-  }, [emblaApi, slideCount])
 
   // 이미지를 그린 슬라이드 수(앞에서부터). 화면에 들어온 슬라이드까지 늘리고, 한 번 그린 이미지는 지우지 않는다.
   const [imageCount, setImageCount] = useState(eagerImageCount ?? Infinity)
