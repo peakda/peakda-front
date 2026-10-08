@@ -6,6 +6,7 @@ import { IconBtn } from '@/components/ui/button/IconBtn'
 import { CardBadge } from '@/components/ui/card/CardBadge'
 import { ReactionBar } from '@/components/ui/card/ReactionBar'
 import { Badge } from '@/components/ui/display/Badge'
+import { AvatarImage } from '@/components/ui/display/AvatarImage'
 import { TimeAgoText } from '@/components/ui/display/TimeAgoText'
 import { Indecator } from '@/app/onboarding/_components/Indecator'
 import { useCarousel } from '@/hooks/useEmblaCarousel'
@@ -109,7 +110,7 @@ export function FeedDetailView({
         <Link href={`/users/${authorId}`}>
           <IconBtn size="md" className="relative overflow-hidden">
             {safeAuthorImageUrl ? (
-              <Image
+              <AvatarImage
                 src={safeAuthorImageUrl}
                 alt="프로필"
                 fill

@@ -10,6 +10,7 @@ import { IconBtn } from '@/components/ui/button/IconBtn'
 import { MoreMenu } from '@/components/ui/button/MoreMenu'
 import { CardBadge } from '@/components/ui/card/CardBadge'
 import { Badge } from '@/components/ui/display/Badge'
+import { AvatarImage } from '@/components/ui/display/AvatarImage'
 import { ReactionBar } from '@/components/ui/card/ReactionBar'
 import { useCarousel } from '@/hooks/useEmblaCarousel'
 import { usePhotoCarouselImages } from '@/hooks/usePhotoCarouselImages'
@@ -136,7 +137,7 @@ export function FeedCard({
         <Link href={`/users/${authorId}`} rel="nofollow">
           <IconBtn size="md" className="relative overflow-hidden">
             {safeAuthorImageUrl ? (
-              <Image
+              <AvatarImage
                 src={safeAuthorImageUrl}
                 alt="프로필"
                 fill

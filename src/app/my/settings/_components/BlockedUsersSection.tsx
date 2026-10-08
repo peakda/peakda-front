@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button/Button'
 import { InfiniteScrollFooter } from '@/components/ui/display/InfiniteScrollFooter'
+import { AvatarImage } from '@/components/ui/display/AvatarImage'
 import { useBlockedListInfinite, useUnblockUser } from '@/api/facades/user-block'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { flattenPages } from '@/lib/utils/infinitePages'
@@ -31,7 +32,7 @@ export function BlockedUsersSection() {
           <div key={row.userId} className="flex items-center gap-3 px-4 py-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-200">
               {toHttpsImageUrl(row.profileImageUrl) ? (
-                <Image
+                <AvatarImage
                   src={toHttpsImageUrl(row.profileImageUrl)!}
                   alt="프로필"
                   width={40}

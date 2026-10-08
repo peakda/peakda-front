@@ -11,6 +11,7 @@ import { MyRecordSection } from '@/app/my/_components/MyRecordSection'
 import { SavedSpotSection } from '@/app/my/_components/SavedSpotSection'
 import { LazyDrawer } from '@/components/ui/layout/LazyDrawer'
 import { IconBtn } from '@/components/ui/button/IconBtn'
+import { AvatarImage } from '@/components/ui/display/AvatarImage'
 import { useRouter } from 'next/navigation'
 import { toMyRecordThumb } from '@/lib/utils/spotRecordToFeed'
 import { toProfileStats, toFavoriteFlowerLabels } from '@/lib/utils/userProfile'
@@ -96,7 +97,7 @@ export default function MyPage() {
       <div className="flex items-center gap-3 px-4 py-3">
         <IconBtn size="md" className="bg-bg-tertiary relative overflow-hidden">
           {safeProfileImageUrl ? (
-            <Image
+            <AvatarImage
               src={safeProfileImageUrl}
               alt="프로필"
               fill
