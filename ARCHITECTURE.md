@@ -16,7 +16,7 @@ flowchart LR
   Mutator -->|"fetch + credentials: include"| Backend
 ```
 
-- 이미지 업로드도 백엔드 API(`uploadProfileImageApi`, `uploadSpotRecordPhotosApi`)로 처리한다. `src/app/api` Route Handler는 없다 (2026-08-08 미사용 uploadthing 라우트 제거).
+- 이미지 업로드도 백엔드 API(`uploadProfileImageApi`, `uploadSpotRecordPhotosApi`)로 처리한다. `src/app/api` 에 백엔드 프록시 Route Handler는 없다 (2026-08-08 미사용 uploadthing 라우트 제거). 유일한 Route Handler는 Sentry 알림 메일 → Discord 중계(`src/app/api/sentry-email-to-discord/route.ts`)로 백엔드와 무관하다.
 
 - 새 API 도메인: swagger 갱신 → `pnpm generate:api` → `pnpm generate:facades` → 파사드 TODO 채우기 (`src/CLAUDE.md` 참고).
 - 응답 언래핑: 파사드에서 `res.data`(orval 래퍼) → `res.data.data`(백엔드 실제 payload) 순으로 벗겨 앱에 노출한다.

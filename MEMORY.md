@@ -5,7 +5,7 @@
 ## 결정과 이유
 
 - **API 직접 호출 (Route Handler 프록시 아님)**: 프런트(Vercel)와 백엔드(AWS)가 다른 도메인이라 크로스사이트 쿠키(`SameSite=None; Secure`)로 인증을 주고받는다. `src/api/mutator/index.ts`는 그래서 `NEXT_PUBLIC_API_URL`로 브라우저/서버에서 백엔드를 직접 호출한다.
-  - `CLAUDE.md`의 API 호출 규칙은 이 방식(직접 호출)을 기준으로 맞춰져 있다 (2026-07-19 업데이트). `/app/api/` Route Handler는 현재 하나도 없다 — 유일하게 있던 uploadthing 라우트는 호출부가 없어 2026-08-08 제거했다. 이미지 업로드도 백엔드 API로 처리한다.
+  - `CLAUDE.md`의 API 호출 규칙은 이 방식(직접 호출)을 기준으로 맞춰져 있다 (2026-07-19 업데이트). `/app/api/`에 백엔드 프록시 Route Handler는 없다 — 유일하게 있던 uploadthing 라우트는 호출부가 없어 2026-08-08 제거했다. 2026-10-09 Sentry 알림 메일 → Discord 중계 라우트(`sentry-email-to-discord`)가 생겼지만 백엔드와 무관한 외부 웹훅 중계다(`docs/SENTRY_DISCORD_ALERTS.md`). 이미지 업로드도 백엔드 API로 처리한다.
 - **next/image 최적화는 꺼져 있다 (`images.unoptimized: true`, 2026-09-22 `e8b403e`)** — 서버가 용도별 크기를 직접 준다.
   - 경위: 백엔드 사진·프로필 URL 이 presigned(응답마다 `X-Amz-Signature` 가 바뀜)라 Vercel 이미지 캐시가 한 번도 맞지 않았고, Pro 월 5,000건을 넘겨 **`OPTIMIZED_IMAGE_REQUEST_PAYMENT_REQUIRED`(HTTP 402)로 이미지가 깨졌다**(2026-09-20). 처음엔 AVIF 만 빼고 버텼다 — 끄면 원본이 그대로 내려가기 때문이다.
   - 그 뒤 백엔드가 [docs/BACKEND_API_REQUESTS.md](docs/BACKEND_API_REQUESTS.md) 15번을 반영해 **기록 사진(`PhotoEntry`)에 `variants`(`thumbnail`/`medium`/`main`)와 CDN 고정 주소(`cdn.peakda.com`)** 를 내려주게 되어 최적화를 껐다. 화면은 `src/lib/utils/recordPhotoUrl.ts`로 크기에 맞는 variant 를 고른다 — **기록 사진을 새로 그릴 때 `photo.url`(원본 1600px)을 직접 쓰지 말 것.**

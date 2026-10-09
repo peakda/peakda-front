@@ -58,7 +58,7 @@ pnpm validate:context  # context 문서 경로 검증 (CI에서도 실행)
 
 - 백엔드(AWS) API는 `src/api/mutator`의 `customInstance`를 통해 직접 호출한다.
   Why: 프런트(Vercel)와 도메인이 달라 크로스사이트 쿠키로 인증을 주고받기 때문에 Route Handler 프록시를 거치지 않는다 ([ARCHITECTURE.md](ARCHITECTURE.md), [MEMORY.md](MEMORY.md) 참고)
-- `/app/api/` Route Handler는 현재 없다. 새로 만들 일이 생겨도 백엔드 프록시 용도로는 쓰지 않는다
+- `/app/api/` Route Handler는 백엔드 프록시 용도로 쓰지 않는다. 현재는 Sentry 알림 메일 → Discord 중계(`src/app/api/sentry-email-to-discord/route.ts`, [docs/SENTRY_DISCORD_ALERTS.md](docs/SENTRY_DISCORD_ALERTS.md)) 하나뿐이다
 - TanStack Query로 캐싱. 전역 기본값은 `staleTime` 5분 + `retry`는 5xx·네트워크 오류만 1회(4xx는 재시도 안 함, `src/lib/utils/apiError.ts`의 `shouldRetryQuery`) (`src/app/_components/Providers.tsx`)
 - **즉시 반영돼야 하는 데이터는 전역 5분을 따르지 말고 쿼리별로 분리한다** — 알림 목록/읽지 않은 알림 뱃지, 팔로우·팔로워 수, 차단 목록처럼 다른 사용자의 행동으로 바뀌는 값은 해당 파사드에서 `staleTime: 0`을 명시할 것. 전역값을 그대로 두면 최대 5분간 과거 데이터가 보인다.
   - 단, 내 행동으로 바뀌는 값(기록 작성·삭제, 좋아요 등)은 mutation 후 `invalidateQueries`가 staleTime과 무관하게 갱신하므로 따로 손댈 필요 없다.
@@ -80,7 +80,7 @@ pnpm generate:facades   # 없는 도메인만 파사드 스텁 생성
 - 인라인 스타일
 - default export (컴포넌트)
 - `customInstance`(`src/api/mutator`)를 거치지 않는 임의의 fetch/axios 직접 호출
-  - 예외(의도된 우회, 새로 늘리지 말 것): refresh 호출 자체(`src/api/mutator/index.ts`의 `runRefresh`), 네이티브 토큰 교환(`src/lib/auth/nativeAuth.ts` — mutator가 이 모듈에 의존해 순환), 로그인 콜백(`src/app/auth/callback/_components/AuthCallbackHandler.tsx` — 신규 유저의 401을 인터셉터가 로그인 시트로 가로채면 안 됨)
+  - 예외(의도된 우회, 새로 늘리지 말 것): refresh 호출 자체(`src/api/mutator/index.ts`의 `runRefresh`), 네이티브 토큰 교환(`src/lib/auth/nativeAuth.ts` — mutator가 이 모듈에 의존해 순환), 로그인 콜백(`src/app/auth/callback/_components/AuthCallbackHandler.tsx` — 신규 유저의 401을 인터셉터가 로그인 시트로 가로채면 안 됨), Discord 웹훅 전송(`src/app/api/sentry-email-to-discord/route.ts` — 백엔드가 아닌 외부 서비스 호출)
 
 ## PR 작성 규칙
 
@@ -105,6 +105,7 @@ pnpm generate:facades   # 없는 도메인만 파사드 스텁 생성
 | [docs/ANDROID_APP_DECISION.md](docs/ANDROID_APP_DECISION.md) | Google Play 배포 방식(TWA vs Capacitor) 비교 기록 — **Capacitor 로 결정·구현됨** (`android/`, `capacitor.config.ts`) |
 | [docs/CAPACITOR_FRONT_PLAN.md](docs/CAPACITOR_FRONT_PLAN.md) | Capacitor 안드로이드 앱 프론트 개발 계획/TODO |
 | [docs/SEO_GEO_AUDIT.md](docs/SEO_GEO_AUDIT.md) | SEO·GEO 점검 보고서 + **9절: 검색엔진 등록·비로그인 모드 진행 현황과 남은 일** (외부 답변 대기 포함) |
+| [docs/SENTRY_DISCORD_ALERTS.md](docs/SENTRY_DISCORD_ALERTS.md) | Sentry 알림 메일 → Gmail → Apps Script → Discord 중계 구성·설정·한계 |
 
 ## 버그 수정 시 설명
 

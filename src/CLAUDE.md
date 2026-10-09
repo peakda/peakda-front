@@ -11,7 +11,7 @@
 | `api/mutator/` | orval customInstance — 순수 `fetch` 래퍼(axios 미사용). 401 시 refresh 후 1회 재시도까지 담당하며 생성 코드가 공통으로 사용 |
 | `api/facades/generated/` | `pnpm generate:api`로 orval이 생성 (tags-split 모드, 도메인별 분리). **직접 수정 금지** — swagger 재생성 시 덮어씀 |
 | `api/facades/*.ts` | 도메인별 수동 파사드. generated 훅을 감싸서 앱에 노출. 언래핑 규칙: `res.data`(orval 래퍼) → `res.data.data`(백엔드 실제 payload) |
-| `app/` | Next.js App Router. 라우트: explore, feed, map, spot, search, my, profile, users, creators, festivals, followers, following, notification, onboarding, login/auth, Terms(약관), record. `app/_components/`는 앱 전역 공용 컴포넌트(Providers, SplashScreen, 네이티브 앱용 NativeAuthManager·NativeBackButton·NativeSplash·PushNotificationManager 등). 서버 페이지 일부(`app/feed`, `app/explore`, `app/spot/[id]` 등)는 ISR 캐시 미스용 `loading.tsx` 스켈레톤을 둔다. Route Handler 디렉터리는 없다 — 백엔드를 직접 호출한다 (`ARCHITECTURE.md` 참고) |
+| `app/` | Next.js App Router. 라우트: explore, feed, map, spot, search, my, profile, users, creators, festivals, followers, following, notification, onboarding, login/auth, Terms(약관), record. `app/_components/`는 앱 전역 공용 컴포넌트(Providers, SplashScreen, 네이티브 앱용 NativeAuthManager·NativeBackButton·NativeSplash·PushNotificationManager 등). 서버 페이지 일부(`app/feed`, `app/explore`, `app/spot/[id]` 등)는 ISR 캐시 미스용 `loading.tsx` 스켈레톤을 둔다. 백엔드는 Route Handler 프록시 없이 직접 호출한다 (`ARCHITECTURE.md` 참고). `app/api/`에는 Sentry 알림 메일 → Discord 중계 라우트(`sentry-email-to-discord`)만 있다 |
 | `app/Terms/_prompts/` | 법적 고지 페이지를 만들 때 쓴 AI 프롬프트 원본. 런타임에서 참조하지 않으니 문구 수정은 `app/Terms/_data/`를 직접 고친다. `public/`에 두면 운영 URL로 공개되므로 여기 둔다 |
 | `components/Map/` | 카카오맵 관련 컴포넌트 — `dynamic import + ssr: false` 필수 |
 | `components/ui/` | 프레젠테이셔널 컴포넌트 (button, card, category, display, form, icon, layout, list, message, Tab) |
@@ -22,6 +22,7 @@
 | `hooks/` | 커스텀 훅 (디바운스, 카카오 장소 검색, 지도 핀, 닉네임 체크 등) |
 | `lib/auth/` | 인증 마커·막힌 경로(`session.ts`), 소셜 로그인(`socialLogin.ts`), 네이티브 앱 토큰 교환·갱신(`nativeAuth.ts`) |
 | `lib/kakao/` | 카카오맵 SDK 초기화/유틸 |
+| `lib/sentryAlert/` | Sentry 알림 메일 해석·Discord 메시지 포맷 (`app/api/sentry-email-to-discord`에서만 사용, `docs/SENTRY_DISCORD_ALERTS.md`) |
 | `lib/push/` | 네이티브 앱 푸시 권한·FCM 토큰 등록/해제 (`pushNotifications.ts`, 웹에서는 동작 안 함) |
 | `lib/utils/` | 범용 유틸 (`cn()` 등). API 에러 판별은 `apiError.ts`(`ApiError`·`getApiErrorStatus`·`getApiErrorMessage`), localStorage 접근은 반드시 `storage.ts`(`readStorage`/`writeStorage` — 예외를 삼킴)를 거친다 |
 | `stores/` | Zustand 스토어 (클라이언트 전역 상태) |
