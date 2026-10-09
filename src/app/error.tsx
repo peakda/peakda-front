@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { RotateCcw, TriangleAlert } from 'lucide-react'
+import * as Sentry from '@sentry/nextjs'
 import { Button } from '@/components/ui/button/Button'
 import { IconBtn } from '@/components/ui/button/IconBtn'
 
@@ -14,6 +15,9 @@ interface ErrorProps {
 export default function Error({ error, reset }: ErrorProps) {
   useEffect(() => {
     console.error(error)
+    // digest 는 서버에서 난 에러에만 붙는다. 그건 instrumentation 의 onRequestError 가 이미 보고했고,
+    // 여기 도착한 건 메시지가 가려진 사본이라 다시 보내면 내용 없는 중복 이슈만 생긴다.
+    if (!error.digest) Sentry.captureException(error)
   }, [error])
 
   return (

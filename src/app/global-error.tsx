@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import * as Sentry from '@sentry/nextjs'
 import './globals.css'
 
 interface GlobalErrorProps {
@@ -17,6 +18,8 @@ interface GlobalErrorProps {
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
   useEffect(() => {
     console.error(error)
+    // 서버 에러(digest 있음)는 onRequestError 가 이미 보고했다 — error.tsx 와 같은 이유
+    if (!error.digest) Sentry.captureException(error)
   }, [error])
 
   return (

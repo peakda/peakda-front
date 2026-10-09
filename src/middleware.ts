@@ -44,5 +44,5 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   // _next 내부 자원, 정적 파일(확장자 있는 경로), public 하위 아이콘/이미지는 미들웨어를 태우지 않는다.
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|icons|images|.*\\.[\\w]+$).*)'],
+  matcher: ['/((?!monitoring|_next/static|_next/image|favicon.ico|icons|images|.*\\.[\\w]+$).*)'],
 }
