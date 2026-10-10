@@ -1,15 +1,19 @@
 'use client'
 
 import { useCarousel } from '@/hooks/useEmblaCarousel'
+import { SlideImageContext } from '@/hooks/useShouldRenderSlideImage'
 import { cn } from '@/lib/utils/cn'
-import { Children, ComponentPropsWithoutRef, useEffect } from 'react'
+import { Children, ComponentPropsWithoutRef, useEffect, useState } from 'react'
 
 interface CarouselProps extends ComponentPropsWithoutRef<'div'> {
   loop?: boolean
   align?: 'start' | 'center' | 'end'
   dragFree?: boolean
-  showDots?: boolean  
+  showDots?: boolean
   showArrows?: boolean
+  // 주면 앞에서 이 수만큼의 슬라이드만 처음부터(서버 HTML 포함) 이미지를 그리고, 나머지는 화면에 들어온 뒤에 그린다.
+  // Chrome 은 overflow:hidden 캐러셀 안의 loading="lazy" 이미지도 가로로 2장 거리까지 바로 받아서, 그리지 않는 수밖에 없다.
+  eagerImageCount?: number
 }
 
 export const Carousel = ({
@@ -18,10 +22,13 @@ export const Carousel = ({
   dragFree,
   showDots = false,
   showArrows = false,
+  eagerImageCount,
   className,
   children,
   ...props
 }: CarouselProps) => {
+  // 필터 변경 등으로 슬라이드 수가 바뀌면 embla 가 스스로 다시 측정한다(watchSlides 기본값, 8.6 에서 확인).
+  // reInit 을 직접 부르면 마운트 직후에 측정을 한 번 더 하게 된다.
   const {
     emblaRef,
     emblaApi,
@@ -34,17 +41,29 @@ export const Carousel = ({
     scrollTo,
   } = useCarousel({ loop, align, dragFree })
 
-  // 필터 변경 등으로 슬라이드 수가 바뀌면 embla 가 다시 측정해야 한다.
-  const slideCount = Children.count(children)
+  // 이미지를 그린 슬라이드 수(앞에서부터). 화면에 들어온 슬라이드까지 늘리고, 한 번 그린 이미지는 지우지 않는다.
+  const [imageCount, setImageCount] = useState(eagerImageCount ?? Infinity)
   useEffect(() => {
-    emblaApi?.reInit()
-  }, [emblaApi, slideCount])
+    if (!emblaApi || eagerImageCount == null) return
+    const revealInView = () => {
+      const lastInView = Math.max(-1, ...emblaApi.slidesInView())
+      setImageCount((count) => Math.max(count, lastInView + 1))
+    }
+    emblaApi.on('slidesInView', revealInView)
+    return () => {
+      emblaApi.off('slidesInView', revealInView)
+    }
+  }, [emblaApi, eagerImageCount])
 
   return (
     <div className={cn('relative', className)} {...props}>
       {/* 뷰포트 */}
       <div ref={emblaRef} className="overflow-hidden">
-        <div className="flex touch-pan-y">{children}</div>
+        <div className="flex touch-pan-y">
+          {Children.map(children, (child, index) => (
+            <SlideImageContext.Provider value={index < imageCount}>{child}</SlideImageContext.Provider>
+          ))}
+        </div>
       </div>
 
       {/* 화살표 */}

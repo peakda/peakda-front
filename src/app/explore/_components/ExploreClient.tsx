@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
 import { Header } from '@/components/ui/layout/Header'
 import { SearchInput } from '@/app/search/_components/SearchInput'
 import { ExplorCard } from '@/components/ui/card/ExplorCard'
@@ -28,6 +27,10 @@ import {
 
 // 탐색 응답에는 카드 이미지가 없는 항목이 있어 공통 플레이스홀더를 쓴다.
 const PLACEHOLDER_IMAGE = '/images/exploreEmpty.jpg'
+
+// 카드 폭이 72% 라 캐러셀마다 첫 화면에 2장(1장 + 2번째 일부)이 보인다. 이 2장만 이미지를 먼저 받고,
+// 나머지는 넘겨서 화면에 들어올 때 받는다 — 절정 4번째 카드의 관광공사 BMP(약 1MB)를 안 보이는데 받던 문제.
+const EAGER_CARD_IMAGES = 2
 
 // 절정 카드 설명: '벚꽃 · 4.1~4.14'. 절정 기간이 없으면 꽃 종류만 보여준다.
 const toPeakDescription = (item: ExploreSpotItem) => {
@@ -79,7 +82,6 @@ interface ExploreClientProps {
 }
 
 export function ExploreClient({ initialExplore }: ExploreClientProps) {
-  const router = useRouter()
   const openFlowerFilterDrawer = useDrawerStore((s) => s.openFlowerFilterDrawer)
   const { data: suggestion } = useHomeSuggestion()
   // 필터 드로어에서 고른 꽃 종류. 서버 category 는 값 하나만 받으므로
@@ -131,11 +133,7 @@ export function ExploreClient({ initialExplore }: ExploreClientProps) {
         />
       </div>
 
-      <SearchInput
-        readOnly
-        onClick={() => router.push('/search')}
-        placeholder={searchPlaceholder}
-      />
+      <SearchInput href="/search" placeholder={searchPlaceholder} />
 
       {isLoading && <QueryFeedback state="loading" />}
       {isError && !explore && <QueryFeedback state="error" onRetry={() => void refetch()} />}
@@ -152,7 +150,7 @@ export function ExploreClient({ initialExplore }: ExploreClientProps) {
             {peakNow.length === 0 ? (
               <EmptySection text="지금 절정인 명소가 없어요" />
             ) : (
-              <Carousel className="px-4 pb-4">
+              <Carousel className="px-4 pb-4" eagerImageCount={EAGER_CARD_IMAGES}>
                 {peakNow.map((item, idx) => (
                   <CarouselItem
                     key={`${item.attractionId}-${item.category}`}
@@ -211,7 +209,7 @@ export function ExploreClient({ initialExplore }: ExploreClientProps) {
             {festivals.length === 0 ? (
               <EmptySection text="진행 중인 축제가 없어요" />
             ) : (
-              <Carousel className="px-4 pb-4">
+              <Carousel className="px-4 pb-4" eagerImageCount={EAGER_CARD_IMAGES}>
                 {festivals.map((item, idx) => {
                   const status = toFestivalStatus(item)
                   return (
@@ -246,7 +244,7 @@ export function ExploreClient({ initialExplore }: ExploreClientProps) {
               <EmptySection text="아직 발행된 큐레이션이 없어요" />
             ) : (
               // 시안대로 다음 카드가 살짝 보이게 두어 더 있다는 걸 알린다(슬라이드 폭 72%).
-              <Carousel className="px-4 pb-4">
+              <Carousel className="px-4 pb-4" eagerImageCount={EAGER_CARD_IMAGES}>
                 {curations.map((item, idx) => (
                   <CarouselItem key={item.id} className="flex-[0_0_72%] pr-3">
                     <Link

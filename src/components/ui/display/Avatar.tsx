@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils/cn'
 import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
 import Image from 'next/image'
+import { AvatarImage } from '@/components/ui/display/AvatarImage'
 
 type AvatarSize = 'sm' | 'md' | 'lg'
 
@@ -41,7 +42,7 @@ export function Avatar({ imageUrl, size = 'sm', className }: AvatarProps) {
       )}
     >
       {safeImageUrl ? (
-        <Image src={safeImageUrl} alt="" fill sizes={IMAGE_SIZES[size]} className="object-cover" />
+        <AvatarImage src={safeImageUrl} alt="" fill sizes={IMAGE_SIZES[size]} className="object-cover" />
       ) : (
         <Image
           src="/icons/person.svg"

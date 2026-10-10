@@ -2,10 +2,11 @@ import type { Metadata } from 'next'
 import { cache } from 'react'
 import { notFound } from 'next/navigation'
 import { feedDetailApi } from '@/api/facades/feed-detail'
+import { spotDetailApi } from '@/api/facades/spot'
 import { BASE_OPEN_GRAPH, DEFAULT_OG_IMAGE, SITE_BRAND_NAME } from '@/constants/site'
 import { isApiErrorStatus } from '@/lib/utils/apiError'
 import { recordPhotoUrl } from '@/lib/utils/recordPhotoUrl'
-import { FeedDetailClient } from './_components/FeedDetailClient'
+import { FeedDetailClient, type FeedSpotInfo } from './_components/FeedDetailClient'
 
 interface FeedDetailPageProps {
   params: Promise<{ id: string }>
@@ -25,6 +26,19 @@ const getRecord = cache(async (rawId: string) => {
     throw error
   }
 })
+
+// 스팟 요약의 방문 기록 수와 '올해 만개 시기' 캘린더에 필요한 대표 꽃은 기록 응답에 없어 스팟 상세에서 골라 넘긴다.
+// 클라이언트가 스팟 상세를 받은 뒤에야 캘린더를 조회하던 직렬 요청을 없애려는 것. 스팟 화면과 같은 조회라 5분 캐시를 함께 쓴다.
+// 실패하면 null — 클라이언트가 예전처럼 스팟 상세를 직접 받는다.
+async function getSpotInfo(spotId: number): Promise<FeedSpotInfo | null> {
+  try {
+    const spot = await spotDetailApi(spotId, { next: { revalidate: 300 } })
+    return spot ? { recordCount: spot.recordCount, category: spot.bloom?.category ?? null } : null
+  } catch (error) {
+    console.error('[feed/[id]] 스팟 조회 실패 — 클라이언트 조회로 대체', error)
+    return null
+  }
+}
 
 // 빌드 때는 만들지 않고 첫 요청 때 생성해 재사용한다(ISR). 주기는 기록 조회 fetch 와 같은 1분.
 export const revalidate = 60
@@ -73,5 +87,5 @@ export default async function FeedDetailPage({ params }: FeedDetailPageProps) {
   const record = await getRecord((await params).id)
   if (!record) notFound()
 
-  return <FeedDetailClient initialRecord={record} />
+  return <FeedDetailClient initialRecord={record} spotInfo={await getSpotInfo(record.spot.id)} />
 }

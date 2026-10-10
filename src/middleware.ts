@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { AUTH_MARKER, LOGIN_SHEET_QUERY, RETURN_TO, isProtectedPath } from '@/lib/auth/session'
+import { toExploreSection } from '@/lib/utils/explore'
 
 // 인증 쿠키는 백엔드(AWS) 도메인에 SameSite=None 으로 심겨 프런트(Vercel)로 오지 않는다.
 // 그래서 미들웨어는 프런트 도메인에 따로 심는 마커 쿠키만 보고 라우팅한다.
@@ -10,6 +11,14 @@ const ENTRY_PATHS = ['/', '/onboarding', '/login']
 
 export function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl
+
+  // 탐색 전체 목록(/explore/spots?section=X)은 섹션별 정적 페이지로 rewrite 한다 — 쿼리를 페이지에서 읽으면
+  // 매 요청 서버 렌더링이 된다(app/explore/spots/[section]/page.tsx 참고). 로그인 여부와 무관해 맨 먼저 처리한다.
+  if (pathname === '/explore/spots') {
+    const section = toExploreSection(request.nextUrl.searchParams.get('section') ?? undefined)
+    return NextResponse.rewrite(new URL(`/explore/spots/${section}`, request.url))
+  }
+
   const hasMarker = request.cookies.get(AUTH_MARKER)?.value === '1'
 
   if (hasMarker) {
@@ -35,5 +44,5 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   // _next 내부 자원, 정적 파일(확장자 있는 경로), public 하위 아이콘/이미지는 미들웨어를 태우지 않는다.
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|icons|images|.*\\.[\\w]+$).*)'],
+  matcher: ['/((?!monitoring|_next/static|_next/image|favicon.ico|icons|images|.*\\.[\\w]+$).*)'],
 }

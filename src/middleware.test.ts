@@ -37,6 +37,21 @@ describe('middleware', () => {
     }
   })
 
+  it('탐색 전체 목록은 로그인 여부와 무관하게 섹션 경로로 rewrite 하고, 모르는 섹션은 PEAK_NOW 로 보낸다', () => {
+    const rewrite = (res: Response) => res.headers.get('x-middleware-rewrite')
+
+    expect(rewrite(middleware(request('/explore/spots')))).toBe(
+      'https://www.peakda.com/explore/spots/PEAK_NOW'
+    )
+    expect(rewrite(middleware(request('/explore/spots?section=NEXT_WEEK', true)))).toBe(
+      'https://www.peakda.com/explore/spots/NEXT_WEEK'
+    )
+    expect(rewrite(middleware(request('/explore/spots?section=unknown')))).toBe(
+      'https://www.peakda.com/explore/spots/PEAK_NOW'
+    )
+    expect(rewrite(middleware(request('/explore')))).toBeNull()
+  })
+
   it('로그인 상태는 보호 경로와 로그인 콜백을 그대로 통과한다', () => {
     expect(location(middleware(request('/my/saved', true)))).toBeNull()
     expect(location(middleware(request('/auth/callback', true)))).toBeNull()

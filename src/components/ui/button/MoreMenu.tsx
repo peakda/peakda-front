@@ -17,7 +17,9 @@ export function MoreMenu({ isOwner, onEdit, onDelete, onReport, isLight = false 
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
+  // 바깥 클릭 감지는 열려 있을 때만 건다 — 피드 카드마다 메뉴가 있어 항상 걸면 카드 수만큼 리스너가 쌓인다.
   useEffect(() => {
+    if (!open) return
     function handleClickOutside(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpen(false)
@@ -25,7 +27,7 @@ export function MoreMenu({ isOwner, onEdit, onDelete, onReport, isLight = false 
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+  }, [open])
 
   return (
     <div ref={ref} className="relative">
