@@ -170,7 +170,7 @@ export function DetailsStepForm({
         </div>
 
         {/* 관련 콘텐츠 링크 (SCR-018a) — 플랫폼은 붙여넣은 주소로 자동 분류한다 */}
-        <div className="flex flex-col gap-3 px-5">
+        <div className="flex flex-col gap-3 px-4">
           <div className="flex flex-col gap-1">
             <p className="text-text-primary text-base leading-normal font-semibold tracking-[-0.005em]">
               관련 콘텐츠 링크{' '}
