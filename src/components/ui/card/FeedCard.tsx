@@ -21,6 +21,8 @@ import { useReport } from '@/api/facades/report'
 import { buildReportRequest } from '@/lib/utils/feed'
 import { toHttpsImageUrl } from '@/lib/utils/imageUrl'
 import { ReportModal } from '@/components/ui/card/ReportModal'
+import { ContentLinkCard } from '@/components/ui/card/ContentLinkCard'
+import type { ContentLink } from '@/api/facades/generated/peakdaApi.schemas'
 import { TimeAgoText } from '@/components/ui/display/TimeAgoText'
 import { cn } from '@/lib/utils/cn'
 import type {
@@ -55,6 +57,8 @@ export interface FeedCardProps {
   images: string[]
   flowers: FlowerTag[]
   content: string
+  // 관련 콘텐츠 링크. null 이면 아무것도 그리지 않는다.
+  contentLink?: ContentLink | null
   reactions: ReactionSummary
   isOwner?: boolean
   onEdit?: () => void
@@ -81,6 +85,7 @@ export function FeedCard({
   images,
   flowers,
   content,
+  contentLink,
   reactions,
   isOwner = false,
   onEdit,
@@ -286,6 +291,9 @@ export function FeedCard({
       ) : (
         <p className="text-text-primary text-sm leading-relaxed">{content}</p>
       )}
+
+      {/* 관련 콘텐츠 링크 — 읽기 전용(X 없음) */}
+      {contentLink && <ContentLinkCard url={contentLink.url} platform={contentLink.platform} />}
 
       {/* 리액션 — 추가 버튼 + 남겨진 리액션만 카운트 칩으로 노출 */}
       <ReactionBar recordId={recordId} reactions={reactions} />

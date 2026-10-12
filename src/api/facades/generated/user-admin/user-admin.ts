@@ -157,7 +157,7 @@ export const getGetAdminUsersUrl = (params: GetAdminUsersParams,) => {
 }
 
 /**
- * 닉네임 부분일치와 상태·역할 선택 조건을 조합해 최신 가입순으로 조회한다.
+ * 닉네임 부분일치와 상태·역할·가입 경로 선택 조건을 조합해 최신 가입순으로 조회한다.
  * @summary 관리자 사용자 목록 조회
  */
 export const getAdminUsers = async (params: GetAdminUsersParams, options?: RequestInit): Promise<getAdminUsersResponse> => {

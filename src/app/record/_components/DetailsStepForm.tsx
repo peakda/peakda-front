@@ -1,10 +1,13 @@
-import { ChevronLeft, Plus } from 'lucide-react'
+import { ChevronLeft, Link as LinkIcon, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { Header } from '@/components/ui/layout/Header'
 import { StepperTab } from '@/components/ui/display/StepperTab'
 import { Button } from '@/components/ui/button/Button'
 import { Badge } from '@/components/ui/display/Badge'
 import { Textarea } from '@/components/ui/form/Textarea'
+import { Input } from '@/components/ui/form/Input'
+import { ContentLinkCard } from '@/components/ui/card/ContentLinkCard'
+import { classifyContentLink, normalizeContentLinkUrl } from '@/lib/utils/contentLink'
 import { PlantSelectDrawer } from '@/app/record/_components/PlantSelectDrawer'
 import type { PlantResponse } from '@/api/facades/generated/peakdaApi.schemas'
 
@@ -29,6 +32,9 @@ interface DetailsStepFormProps {
   onSelectStatus: (status: BloomStage) => void
   memo: string
   onMemoChange: (value: string) => void
+  // 관련 콘텐츠 링크 입력값(정규화 전). 빈 문자열이면 링크 없음.
+  contentLink: string
+  onContentLinkChange: (value: string) => void
   isSubmitting: boolean
   onPublish: () => void
   plantDrawerOpen: boolean
@@ -45,6 +51,8 @@ export function DetailsStepForm({
   onSelectStatus,
   memo,
   onMemoChange,
+  contentLink,
+  onContentLinkChange,
   isSubmitting,
   onPublish,
   plantDrawerOpen,
@@ -57,7 +65,10 @@ export function DetailsStepForm({
     (p) => selectedPlantIds.includes(p.id) && !basePlants.some((b) => b.id === p.id)
   )
   const visiblePlants = [...basePlants, ...extraSelected]
-  const isStep2Valid = selectedPlantIds.length > 0 && selectedStatus !== ''
+  // 링크는 선택이지만, 서버가 400 으로 거절할 주소는 사진 업로드 전에 막는다.
+  const normalizedLink = normalizeContentLinkUrl(contentLink)
+  const isLinkInvalid = contentLink.trim() !== '' && !normalizedLink
+  const isStep2Valid = selectedPlantIds.length > 0 && selectedStatus !== '' && !isLinkInvalid
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
@@ -156,6 +167,45 @@ export function DetailsStepForm({
             rows={5}
             variant="none"
           />
+        </div>
+
+        {/* 관련 콘텐츠 링크 (SCR-018a) — 플랫폼은 붙여넣은 주소로 자동 분류한다 */}
+        <div className="flex flex-col gap-3 px-5">
+          <div className="flex flex-col gap-1">
+            <p className="text-text-primary text-base leading-normal font-semibold tracking-[-0.005em]">
+              관련 콘텐츠 링크{' '}
+              <span className="text-text-tertiary text-sm font-medium tracking-normal">(선택)</span>
+            </p>
+            <p className="text-text-secondary text-sm leading-normal tracking-[0.005em]">
+              블로그, 인스타그램, 유튜브 등 관련 콘텐츠를 연결해보세요.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Input
+              type="url"
+              inputMode="url"
+              autoCapitalize="off"
+              autoComplete="off"
+              variant="secondary"
+              error={isLinkInvalid}
+              value={contentLink}
+              onChange={(e) => onContentLinkChange(e.target.value)}
+              placeholder="콘텐츠 링크를 붙여넣어 주세요."
+              aria-label="관련 콘텐츠 링크"
+              leftIcon={<LinkIcon size={20} className="text-icon-secondary" />}
+              className="text-text-secondary text-base"
+            />
+            {isLinkInvalid && (
+              <p className="text-sm text-rose-500">올바른 링크 주소를 입력해 주세요.</p>
+            )}
+            {normalizedLink && (
+              <ContentLinkCard
+                url={normalizedLink}
+                platform={classifyContentLink(normalizedLink)}
+                onRemove={() => onContentLinkChange('')}
+              />
+            )}
+          </div>
         </div>
       </div>
 

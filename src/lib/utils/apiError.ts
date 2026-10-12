@@ -30,6 +30,14 @@ export function getApiErrorMessage(error: unknown): string | undefined {
   return typeof data.message === 'string' ? data.message : undefined
 }
 
+// 백엔드 에러 본문 { code, message } 의 code(ErrorCode enum 이름). 없으면 undefined.
+export function getApiErrorCode(error: unknown): string | undefined {
+  if (!(error instanceof ApiError)) return undefined
+  const { data } = error.response
+  if (typeof data !== 'object' || data === null || !('code' in data)) return undefined
+  return typeof data.code === 'string' ? data.code : undefined
+}
+
 // 4xx 는 다시 불러도 결과가 같다(401 은 mutator 가 refresh 까지 이미 시도했다).
 // 응답이 없는 네트워크 오류와 5xx 만 한 번 더 시도한다.
 export function shouldRetryQuery(failureCount: number, error: unknown): boolean {

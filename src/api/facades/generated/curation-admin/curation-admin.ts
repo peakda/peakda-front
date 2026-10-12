@@ -32,6 +32,7 @@ import type {
   ApiResponseUploadedImageResponse,
   CurationImageUploadForm,
   GetAdminCurationsParams,
+  PostAdminCurationsImagesParams,
   UpsertCurationRequest
 } from '../peakdaApi.schemas';
 
@@ -264,23 +265,39 @@ export type postAdminCurationsImagesResponseSuccess = (postAdminCurationsImagesR
 
 export type postAdminCurationsImagesResponse = (postAdminCurationsImagesResponseSuccess)
 
-export const getPostAdminCurationsImagesUrl = () => {
+export const getPostAdminCurationsImagesUrl = (params?: PostAdminCurationsImagesParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+        Object.entries(value).forEach(([nestedKey, nestedValue]) => {
+          if (nestedValue !== undefined && nestedValue !== null) {
+            normalizedParams.append(nestedKey, nestedValue.toString())
+          }
+        })
+      } else {
+        normalizedParams.append(key, value === null ? 'null' : value.toString())
+      }
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/admin/curations/images`
+  return stringifiedParams.length > 0 ? `/api/admin/curations/images?${stringifiedParams}` : `/api/admin/curations/images`
 }
 
 /**
- * 큐레이션과 축제 에디토리얼에서 공용으로 사용할 가로형 이미지를 업로드한다. 응답 objectKey만 저장 API에 전달하고, 만료되는 previewUrl은 DB에 저장하지 않는다. 단일 파일은 최대 10MB이며 jpeg/png/webp를 지원한다.
+ * 큐레이션과 축제 에디토리얼에서 공용으로 사용할 이미지를 업로드한다. 응답 objectKey만 저장 API에 전달하고, 만료되는 previewUrl은 DB에 저장하지 않는다. 단일 파일은 최대 30MB이며 jpeg/png/webp를 지원한다. 업로드한 이미지는 WebP(품질 80)로 다시 저장한다. usage=HERO 는 최대 1600×900, usage=PHOTO 는 최대 가로 860px 로 줄이고, 원본이 더 작으면 원본 크기를 유지한다.
  * @summary 큐레이션 이미지 업로드
  */
-export const postAdminCurationsImages = async (curationImageUploadForm: CurationImageUploadForm, options?: RequestInit): Promise<postAdminCurationsImagesResponse> => {
+export const postAdminCurationsImages = async (curationImageUploadForm: CurationImageUploadForm,
+    params?: PostAdminCurationsImagesParams, options?: RequestInit): Promise<postAdminCurationsImagesResponse> => {
     const formData = new FormData();
 formData.append(`file`, curationImageUploadForm.file);
 
-  return customInstance<postAdminCurationsImagesResponse>(getPostAdminCurationsImagesUrl(),
+  return customInstance<postAdminCurationsImagesResponse>(getPostAdminCurationsImagesUrl(params),
   {
     ...options,
     method: 'POST'
@@ -293,8 +310,8 @@ formData.append(`file`, curationImageUploadForm.file);
 
 
 export const getPostAdminCurationsImagesMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAdminCurationsImages>>, TError,{data: CurationImageUploadForm}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof postAdminCurationsImages>>, TError,{data: CurationImageUploadForm}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAdminCurationsImages>>, TError,{data: CurationImageUploadForm;params?: PostAdminCurationsImagesParams}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postAdminCurationsImages>>, TError,{data: CurationImageUploadForm;params?: PostAdminCurationsImagesParams}, TContext> => {
 
 const mutationKey = ['postAdminCurationsImages'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -306,10 +323,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAdminCurationsImages>>, {data: CurationImageUploadForm}> = (props) => {
-          const {data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAdminCurationsImages>>, {data: CurationImageUploadForm;params?: PostAdminCurationsImagesParams}> = (props) => {
+          const {data,params} = props ?? {};
 
-          return  postAdminCurationsImages(data,requestOptions)
+          return  postAdminCurationsImages(data,params,requestOptions)
         }
 
 
@@ -327,11 +344,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  * @summary 큐레이션 이미지 업로드
  */
 export const usePostAdminCurationsImages = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAdminCurationsImages>>, TError,{data: CurationImageUploadForm}, TContext>, request?: SecondParameter<typeof customInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAdminCurationsImages>>, TError,{data: CurationImageUploadForm;params?: PostAdminCurationsImagesParams}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postAdminCurationsImages>>,
         TError,
-        {data: CurationImageUploadForm},
+        {data: CurationImageUploadForm;params?: PostAdminCurationsImagesParams},
         TContext
       > => {
       return useMutation(getPostAdminCurationsImagesMutationOptions(options), queryClient);

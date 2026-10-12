@@ -25,6 +25,11 @@ import { compressImages } from '@/lib/utils/image'
 import { readPhotoExif } from '@/lib/utils/photoExif'
 import { loadAppSettings } from '@/lib/utils/appSettings'
 import { track, type RecordAction, type RecordLocationMethod } from '@/lib/analytics'
+import { getApiErrorCode } from '@/lib/utils/apiError'
+import {
+  INVALID_CONTENT_LINK_CODE,
+  normalizeContentLinkUrl,
+} from '@/lib/utils/contentLink'
 
 // 매칭/생성에 필요한 스팟 정보 (카카오 검색 + 스팟 매칭 결과)
 // kakaoPlaceId: 스팟 상세(?spotId=)에서 넘어오면 응답에 없으므로 null 이다.
@@ -61,6 +66,7 @@ function RecordPageContent() {
   const [selectedPlantIds, setSelectedPlantIds] = useState<number[]>([])
   const [selectedStatus, setSelectedStatus] = useState<BloomStage | ''>('')
   const [memo, setMemo] = useState('')
+  const [contentLink, setContentLink] = useState('')
   const [plantDrawerOpen, setPlantDrawerOpen] = useState(false)
   const [isComplete, setIsComplete] = useState(false)
 
@@ -316,6 +322,8 @@ function RecordPageContent() {
         visitedDate: date ? date.replaceAll('.', '-') : null,
         bloomStage: selectedStatus,
         memo: memo.trim() || null,
+        // 생성은 빠지면 링크가 없는 것으로 저장되므로(임시저장 덮어쓰기 포함) 항상 현재 값을 보낸다.
+        contentLinkUrl: normalizeContentLinkUrl(contentLink),
         plantIds: selectedPlantIds,
         photoKeys,
         status: 'PUBLISHED',
@@ -325,7 +333,11 @@ function RecordPageContent() {
       setIsComplete(true)
     } catch (err) {
       console.error(err)
-      toast.error('기록 저장에 실패했어요')
+      toast.error(
+        getApiErrorCode(err) === INVALID_CONTENT_LINK_CODE
+          ? '관련 콘텐츠 링크를 확인해주세요'
+          : '기록 저장에 실패했어요'
+      )
     }
   }
 
@@ -345,6 +357,7 @@ function RecordPageContent() {
     setSelectedPlantIds([])
     setSelectedStatus('')
     setMemo('')
+    setContentLink('')
     setPlantDrawerOpen(false)
     setIsComplete(false)
     // 새 기록을 시작한 것으로 보고 이탈 기준을 처음부터 다시 잡는다.
@@ -384,6 +397,8 @@ function RecordPageContent() {
           markAction('memo')
           setMemo(value)
         }}
+        contentLink={contentLink}
+        onContentLinkChange={setContentLink}
         isSubmitting={isSubmitting}
         onPublish={handlePublish}
         plantDrawerOpen={plantDrawerOpen}
