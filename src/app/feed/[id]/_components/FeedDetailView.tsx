@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { IconBtn } from '@/components/ui/button/IconBtn'
 import { CardBadge } from '@/components/ui/card/CardBadge'
 import { ReactionBar } from '@/components/ui/card/ReactionBar'
+import { ContentLinkCard } from '@/components/ui/card/ContentLinkCard'
 import { Badge } from '@/components/ui/display/Badge'
 import { AvatarImage } from '@/components/ui/display/AvatarImage'
 import { TimeAgoText } from '@/components/ui/display/TimeAgoText'
@@ -31,6 +32,7 @@ type FeedDetailViewProps = Pick<
   | 'images'
   | 'flowers'
   | 'content'
+  | 'contentLink'
   | 'reactions'
 > & { spotSummary?: SpotBloomSummaryProps }
 
@@ -49,6 +51,7 @@ export function FeedDetailView({
   images,
   flowers,
   content,
+  contentLink,
   reactions,
   spotSummary,
 }: FeedDetailViewProps) {
@@ -160,6 +163,11 @@ export function FeedDetailView({
 
       {/* 본문 */}
       <p className="text-text-primary px-4 text-sm leading-relaxed">{content}</p>
+
+      {/* 관련 콘텐츠 링크 — 읽기 전용(X 없음) */}
+      {contentLink && (
+        <ContentLinkCard url={contentLink.url} platform={contentLink.platform} className="mx-4" />
+      )}
 
       {/* 리액션 — 추가 버튼 + 남겨진 리액션만 카운트 칩으로 노출 */}
       <ReactionBar recordId={recordId} reactions={reactions} className="px-4" />

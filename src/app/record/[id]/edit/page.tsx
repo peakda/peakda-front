@@ -20,6 +20,8 @@ import { usePreviewUrls } from '@/hooks/usePreviewUrls'
 import { readPhotoExif } from '@/lib/utils/photoExif'
 import { loadAppSettings } from '@/lib/utils/appSettings'
 import { track } from '@/lib/analytics'
+import { getApiErrorCode } from '@/lib/utils/apiError'
+import { INVALID_CONTENT_LINK_CODE, normalizeContentLinkUrl } from '@/lib/utils/contentLink'
 import type {
   SpotRecordResponse,
   UpdateSpotRecordRequest,
@@ -82,6 +84,7 @@ function RecordEditForm({ record }: { record: SpotRecordResponse }) {
   )
   const [selectedStatus, setSelectedStatus] = useState<BloomStage | ''>(record.bloomStage ?? '')
   const [memo, setMemo] = useState(record.memo ?? '')
+  const [contentLink, setContentLink] = useState(record.contentLink?.url ?? '')
   const [selectedPlantIds, setSelectedPlantIds] = useState<number[]>(record.plants.map((p) => p.id))
   const [plantDrawerOpen, setPlantDrawerOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -160,6 +163,8 @@ function RecordEditForm({ record }: { record: SpotRecordResponse }) {
         visitedDate: date ? date.replaceAll('.', '-') : null,
         bloomStage: selectedStatus,
         memo,
+        // 수정은 빠지면 유지, '' 이면 삭제, URL 이면 교체다. 화면 값 그대로 반영되도록 항상 보낸다.
+        contentLinkUrl: normalizeContentLinkUrl(contentLink) ?? '',
         plantIds: selectedPlantIds,
         photoKeys,
       }
@@ -168,7 +173,11 @@ function RecordEditForm({ record }: { record: SpotRecordResponse }) {
       router.push(`/record/${record.id}`)
     } catch (err) {
       console.error(err)
-      toast.error('기록 수정에 실패했어요')
+      toast.error(
+        getApiErrorCode(err) === INVALID_CONTENT_LINK_CODE
+          ? '관련 콘텐츠 링크를 확인해주세요'
+          : '기록 수정에 실패했어요'
+      )
     }
   }
 
@@ -183,6 +192,8 @@ function RecordEditForm({ record }: { record: SpotRecordResponse }) {
         onSelectStatus={setSelectedStatus}
         memo={memo}
         onMemoChange={setMemo}
+        contentLink={contentLink}
+        onContentLinkChange={setContentLink}
         isSubmitting={isSubmitting}
         onPublish={handleSave}
         plantDrawerOpen={plantDrawerOpen}

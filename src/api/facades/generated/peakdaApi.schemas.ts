@@ -751,6 +751,13 @@ export interface CreateSpotRecordRequest {
      */
   memo?: string | null;
   /**
+     * 관련 콘텐츠 링크 1개 (선택). 플랫폼은 서버가 hostname 으로 분류한다 — instagram.com → INSTAGRAM, blog.naver.com → NAVER_BLOG, youtube.com·youtu.be → YOUTUBE, 그 외 UNSUPPORTED. 스킴이 없으면 https 로 보정한다. null 이나 빈 문자열이면 링크 없음.
+     * @minLength 0
+     * @maxLength 2048
+     * @nullable
+     */
+  contentLinkUrl?: string | null;
+  /**
      * 선택한 식물 id 리스트. PUBLISHED 시 1개 이상, ACTIVE 상태만 허용.
      * @minItems 0
      * @maxItems 10
@@ -813,6 +820,29 @@ export const SpotRecordResponseBloomStage = {
   PEAK: 'PEAK',
   LATE: 'LATE',
 } as const;
+
+/**
+ * hostname 으로 분류한 플랫폼. UNSUPPORTED 면 URL 만 노출한다
+ */
+export type ContentLinkPlatform = typeof ContentLinkPlatform[keyof typeof ContentLinkPlatform];
+
+
+export const ContentLinkPlatform = {
+  INSTAGRAM: 'INSTAGRAM',
+  NAVER_BLOG: 'NAVER_BLOG',
+  YOUTUBE: 'YOUTUBE',
+  UNSUPPORTED: 'UNSUPPORTED',
+} as const;
+
+/**
+ * 관련 콘텐츠 링크 — 미리보기(제목·썸네일)는 클라이언트가 url 로 조회한다
+ */
+export interface ContentLink {
+  /** 링크 URL (스킴 보정된 값) */
+  url: string;
+  /** hostname 으로 분류한 플랫폼. UNSUPPORTED 면 URL 만 노출한다 */
+  platform: ContentLinkPlatform;
+}
 
 /**
  * 식물 요약
@@ -915,6 +945,7 @@ export interface SpotRecordResponse {
      * @nullable
      */
   memo?: string | null;
+  contentLink?: ContentLink | null;
   /** 기록된 식물 목록 */
   plants: PlantSummary[];
   /** 첨부 사진 목록 (sortOrder 오름차순) */
@@ -1244,7 +1275,7 @@ export interface SpotFavoriteResponse {
   categories: CategoryChip[];
   /** 게시된 방문 기록 수 */
   recordCount: number;
-  /** 카드 사진 URL. 최근 게시 기록 사진 최대 4장. 기록 사진이 없는 명소형은 명소 이미지 1장(관광공사 썸네일 우선, 없으면 원본) */
+  /** 카드 사진 URL. 최근 게시 기록 사진 최대 4장. 기록 사진이 없는 명소형은 명소 이미지 1장(관광공사 썸네일 우선, 없거나 파일이 없으면 원본) */
   photoUrls: string[];
 }
 
@@ -1594,7 +1625,7 @@ export interface ApiResponseSpotRecordPhotoBackfillResponse {
  * 큐레이션 이미지 업로드 multipart form
  */
 export interface CurationImageUploadForm {
-  /** 업로드할 이미지 파일(jpeg/png/webp, 최대 10MB) */
+  /** 업로드할 이미지 파일(jpeg/png/webp, 최대 30MB) */
   file: Blob;
 }
 
@@ -1656,6 +1687,13 @@ export interface UpdateSpotRecordRequest {
      * @nullable
      */
   memo?: string | null;
+  /**
+     * 관련 콘텐츠 링크 교체 (null 이면 변경하지 않음, 빈 문자열을 보내면 링크 삭제). 플랫폼은 서버가 다시 분류한다.
+     * @minLength 0
+     * @maxLength 2048
+     * @nullable
+     */
+  contentLinkUrl?: string | null;
   /**
      * 식물 id 리스트 교체 (null 이면 변경하지 않음)
      * @minItems 0
@@ -1743,6 +1781,18 @@ export const UserAdminResponseRole = {
 } as const;
 
 /**
+ * 가입 경로. WEB=웹, APP=앱, UNKNOWN=구분 저장 이전 가입
+ */
+export type UserAdminResponseSignupChannel = typeof UserAdminResponseSignupChannel[keyof typeof UserAdminResponseSignupChannel];
+
+
+export const UserAdminResponseSignupChannel = {
+  WEB: 'WEB',
+  APP: 'APP',
+  UNKNOWN: 'UNKNOWN',
+} as const;
+
+/**
  * 관리자 사용자 조회 응답
  */
 export interface UserAdminResponse {
@@ -1761,6 +1811,8 @@ export interface UserAdminResponse {
   status: UserAdminResponseStatus;
   /** 사용자 역할 */
   role: UserAdminResponseRole;
+  /** 가입 경로. WEB=웹, APP=앱, UNKNOWN=구분 저장 이전 가입 */
+  signupChannel: UserAdminResponseSignupChannel;
   /** 가입 시각 */
   createdAt: string;
 }
@@ -2256,6 +2308,7 @@ export interface SpotRecordSummaryResponse {
   bloomStage?: SpotRecordSummaryResponseBloomStage;
   /** @nullable */
   memo?: string | null;
+  contentLink?: ContentLink | null;
   plants: PlantSummary[];
   coverPhoto?: PhotoEntry | null;
   /** 첨부 사진 전체 목록 (sortOrder 오름차순, 사진이 없으면 빈 배열) */
@@ -2912,6 +2965,41 @@ export interface ApiResponseSpotFavoriteListResponse {
 }
 
 /**
+ * 상세 페이지 id 와 내용의 마지막 수정 시각
+ */
+export interface SitemapEntry {
+  /** 상세 id */
+  id: number;
+  /** 상세 화면 내용의 마지막 수정 시각 (UTC) */
+  updatedAt: string;
+}
+
+/**
+ * sitemap 용 공개 상세 페이지 목록. 각 목록은 id 오름차순
+ */
+export interface SitemapResponse {
+  /** 공개 명소 스팟 (동네 스팟 제외) */
+  spots: SitemapEntry[];
+  /** 전체 축제 */
+  festivals: SitemapEntry[];
+  /** 발행된 큐레이션 */
+  curations: SitemapEntry[];
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseSitemapResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: SitemapResponse | null;
+}
+
+/**
  * 핀 유형
  */
 export type BloomMapPinType = typeof BloomMapPinType[keyof typeof BloomMapPinType];
@@ -3350,7 +3438,7 @@ export interface SpotSearchItem {
   /** 경도 */
   longitude: number;
   /**
-     * 카드 이미지 URL. 명소 이미지(관광공사 썸네일 우선, 없으면 원본)가 없으면 최근 게시 기록 사진, 없으면 null
+     * 카드 이미지 URL. 명소 이미지(관광공사 썸네일 우선, 없거나 파일이 없으면 원본)가 없으면 최근 게시 기록 사진, 없으면 null
      * @nullable
      */
   thumbnailUrl?: string | null;
@@ -3855,7 +3943,7 @@ export interface ExploreSpotItem {
      */
   address?: string | null;
   /**
-     * 카드 이미지 URL. 관광공사 썸네일 우선, 없으면 원본. 둘 다 없으면 null
+     * 카드 이미지 URL. 관광공사 썸네일 우선, 없거나 파일이 없으면 원본. 둘 다 없으면 null
      * @nullable
      */
   thumbnailUrl?: string | null;
@@ -5639,6 +5727,21 @@ export const GetAdminNoticesStatus = {
   CANCELED: 'CANCELED',
 } as const;
 
+export type PostAdminCurationsImagesParams = {
+/**
+ * 이미지 용도. HERO: 히어로(최대 1600×900), PHOTO: 챕터·추천 사진(최대 가로 860px)
+ */
+usage?: PostAdminCurationsImagesUsage;
+};
+
+export type PostAdminCurationsImagesUsage = typeof PostAdminCurationsImagesUsage[keyof typeof PostAdminCurationsImagesUsage];
+
+
+export const PostAdminCurationsImagesUsage = {
+  HERO: 'HERO',
+  PHOTO: 'PHOTO',
+} as const;
+
 export type GetUsersByUserIdFollowingsParams = {
 pageRequest: PageRequest;
 };
@@ -6121,6 +6224,10 @@ status?: GetAdminUsersStatus;
  * 사용자 역할. 조회 필터 전용
  */
 role?: GetAdminUsersRole;
+/**
+ * 가입 경로. WEB=웹, APP=앱, UNKNOWN=구분 저장 이전 가입
+ */
+signupChannel?: GetAdminUsersSignupChannel;
 pageRequest: PageRequest;
 };
 
@@ -6139,6 +6246,15 @@ export type GetAdminUsersRole = typeof GetAdminUsersRole[keyof typeof GetAdminUs
 export const GetAdminUsersRole = {
   USER: 'USER',
   ADMIN: 'ADMIN',
+} as const;
+
+export type GetAdminUsersSignupChannel = typeof GetAdminUsersSignupChannel[keyof typeof GetAdminUsersSignupChannel];
+
+
+export const GetAdminUsersSignupChannel = {
+  WEB: 'WEB',
+  APP: 'APP',
+  UNKNOWN: 'UNKNOWN',
 } as const;
 
 export type GetAdminReportsParams = {
