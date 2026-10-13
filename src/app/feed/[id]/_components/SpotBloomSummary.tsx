@@ -39,19 +39,19 @@ export function SpotBloomSummary({
     <>
       <Link
         href={`/spot/${spotId}`}
-        className="border-border-primary flex items-center justify-between gap-2 border-y px-4 py-3.5 text-left"
+        className="bg-bg-secondary mx-4 flex items-center justify-between gap-2 rounded-xl py-2.5 pr-2 pl-3 text-left"
       >
-        <div className="flex flex-col gap-1">
-          <h1 className="text-text-primary text-sm font-semibold">{name}</h1>
+        <div className="flex flex-col gap-0.5">
+          <h1 className="text-text-primary text-base font-semibold">{name}</h1>
           {(recordCount != null || address) && (
-            <span className="text-text-tertiary text-xs">
+            <span className="text-text-secondary text-[13px]">
               {[recordCount != null && `방문 기록 ${recordCount}`, address]
                 .filter(Boolean)
                 .join(' · ')}
             </span>
           )}
         </div>
-        <ChevronRight className="text-icon-quaternary h-5 w-5 shrink-0" />
+        <ChevronRight className="text-icon-secondary h-6 w-6 shrink-0" />
       </Link>
 
       {calendar ? (
