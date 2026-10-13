@@ -130,7 +130,13 @@ export const MapContainer = () => {
   const draftStatuses = useMemo(() => timingToStatuses(draftTiming), [draftTiming])
 
   // ?spotId 로 들어오면 그 명소 핀을 찾아 드로어를 연다. 좌표가 정해진 뒤에만 채운다.
-  const pendingTargetRef = useRef<{ spotId: number; lat: number; lng: number } | null>(null)
+  // ref 가 아니라 state 인 이유: 지도 데이터가 이미 캐시에 있으면(앱은 지도에서 시작해 늘 그렇다)
+  // 데이터가 더는 바뀌지 않아, 대상을 채운 뒤 아래 effect 가 다시 돌 계기가 없다.
+  const [pendingTarget, setPendingTarget] = useState<{
+    spotId: number
+    lat: number
+    lng: number
+  } | null>(null)
 
   // 전국을 한 번에 받는다. 지도를 옮겨도 조회 조건이 그대로라 spots 참조가 바뀌지 않고,
   // 클러스터·핀 오버레이도 다시 만들지 않는다. 화면 범위로 조회하면 이동할 때마다 데이터가
@@ -233,13 +239,12 @@ export const MapContainer = () => {
   // 판정하면 핀이 있는데도 못 찾고 끝난다.
   // 필터로 가려진 핀이어도 사용자가 고른 명소라 allSpots 에서 찾는다. 없으면 이동만 한다.
   useEffect(() => {
-    const target = pendingTargetRef.current
-    if (!target || !bloomData || isPlaceholderData) return
+    if (!pendingTarget || !bloomData || isPlaceholderData) return
 
-    pendingTargetRef.current = null
-    const spot = allSpots.find((s) => s.spotId === target.spotId)
+    setPendingTarget(null)
+    const spot = allSpots.find((s) => s.spotId === pendingTarget.spotId)
     if (spot) handlePinClick(spot)
-  }, [bloomData, isPlaceholderData, allSpots, handlePinClick])
+  }, [pendingTarget, bloomData, isPlaceholderData, allSpots, handlePinClick])
 
   // 지도 이동/줌이 멈출 때(idle) 화면 영역과 보던 위치를 갱신한다. 조회는 하지 않는다.
   useEffect(() => {
@@ -384,7 +389,7 @@ export const MapContainer = () => {
 
       // 핀 자동 선택도 처음 들어올 때만 한다. 뒤로가기로 돌아왔는데 드로어가 또 열리면 안 된다.
       if (!savedView && initialCenter && targetSpotId != null) {
-        pendingTargetRef.current = { spotId: targetSpotId, ...initialCenter }
+        setPendingTarget({ spotId: targetSpotId, ...initialCenter })
       }
       setMapInstance(map)
 
@@ -400,7 +405,7 @@ export const MapContainer = () => {
           }
           const lat = Number(place.y)
           const lng = Number(place.x)
-          if (targetSpotId != null) pendingTargetRef.current = { spotId: targetSpotId, lat, lng }
+          if (targetSpotId != null) setPendingTarget({ spotId: targetSpotId, lat, lng })
           createdMap.setCenter(new kakao.maps.LatLng(lat, lng))
         })
       } else if (!savedView && !initialCenter && canUseLocation) {
