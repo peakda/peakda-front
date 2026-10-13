@@ -3,6 +3,7 @@ import useEmblaCarousel from 'embla-carousel-react'
 import { useCallback, useEffect, useState } from 'react'
 
 interface UseCarouselOptions {
+  active?: boolean
   loop?: boolean
   align?: 'start' | 'center' | 'end'
   skipSnaps?: boolean
@@ -11,6 +12,7 @@ interface UseCarouselOptions {
 
 export const useCarousel = (options: UseCarouselOptions = {}, initialCount = 0) => {
   const [emblaRef, emblaApi] = useEmblaCarousel({
+    active: options.active ?? true,
     loop: options.loop ?? false,
     align: options.align ?? 'start',
     skipSnaps: options.skipSnaps ?? false,

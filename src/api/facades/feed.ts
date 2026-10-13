@@ -57,13 +57,16 @@ export const useFeedListInfinite = (
   initialPage?: PageResponseSpotRecordSummaryResponse
 ) => {
   // initialData 객체는 렌더마다 새로 만들어지므로 첫 페이지 참조로 초기값인지 판정한다.
-  const ssr = useSsrInitialQuery<InfiniteData<PageResponseSpotRecordSummaryResponse | null, number>>(
-    (data) => data?.pages[0] === initialPage
-  )
+  const ssr = useSsrInitialQuery<
+    InfiniteData<PageResponseSpotRecordSummaryResponse | null, number>
+  >((data) => data?.pages[0] === initialPage)
   return useInfiniteQuery({
     queryKey: ['/api/feed', 'infinite', filter],
-    queryFn: ({ pageParam }) =>
-      feedListApi({ filter, pageRequest: { page: pageParam, size: PAGE_SIZE } }),
+    queryFn: ({ pageParam, signal }) =>
+      feedListApi({ filter, pageRequest: { page: pageParam, size: PAGE_SIZE } }, { signal }),
+    // 포커스 복귀마다 긴 목록 전체를 순차 재조회하지 않는다.
+    // 재진입·명시적 refetch·기록 변경 무효화·네트워크 재연결은 기존대로 갱신한다.
+    refetchOnWindowFocus: false,
     initialPageParam: 0,
     getNextPageParam: nextPageParam,
     initialData: initialPage ? { pages: [initialPage], pageParams: [0] } : undefined,
@@ -76,7 +79,7 @@ export const useFeedDetail = (id: number | undefined, initialRecord?: SpotRecord
   const ssr = useSsrInitialQuery<SpotRecordResponse | null>((data) => data === initialRecord)
   return useQuery({
     queryKey: getGetFeedByIdQueryKey(id ?? 0),
-    queryFn: () => feedDetailApi(id!),
+    queryFn: ({ signal }) => feedDetailApi(id!, { signal }),
     enabled: !!id && ssr.enabled,
     initialData: initialRecord,
     staleTime: ssr.staleTime,

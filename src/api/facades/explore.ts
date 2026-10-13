@@ -27,7 +27,7 @@ export const useExploreCuration = (params?: GetExploreParams, initialExplore?: E
   const ssr = useSsrInitialQuery<ExploreResponse | null>((data) => data === initialExplore)
   return useQuery({
     queryKey: getGetExploreQueryKey(params),
-    queryFn: () => exploreCurationApi(params),
+    queryFn: ({ signal }) => exploreCurationApi(params, { signal }),
     initialData: initialExplore,
     ...ssr,
   })
@@ -47,8 +47,12 @@ export const useExploreSpotsInfinite = (
   )
   return useInfiniteQuery({
     queryKey: ['/api/explore/spots', 'infinite', section, category ?? null],
-    queryFn: ({ pageParam }) =>
-      exploreSpotsApi({ section, category, pageRequest: { page: pageParam, size: PAGE_SIZE } }),
+    queryFn: ({ pageParam, signal }) =>
+      exploreSpotsApi(
+        { section, category, pageRequest: { page: pageParam, size: PAGE_SIZE } },
+        { signal }
+      ),
+    refetchOnWindowFocus: false,
     initialPageParam: 0,
     getNextPageParam: nextPageParam,
     initialData: initialPage ? { pages: [initialPage], pageParams: [0] } : undefined,
@@ -64,6 +68,6 @@ export const useExploreFestivals = (
 ) =>
   useQuery({
     queryKey: getGetExploreFestivalsQueryKey(params),
-    queryFn: () => exploreFestivalsApi(params),
+    queryFn: ({ signal }) => exploreFestivalsApi(params, { signal }),
     initialData: initialFestivals,
   })

@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/display/Badge'
 import { AvatarImage } from '@/components/ui/display/AvatarImage'
 import { ReactionBar } from '@/components/ui/card/ReactionBar'
 import { useCarousel } from '@/hooks/useEmblaCarousel'
+import { useNearViewport } from '@/hooks/useNearViewport'
 import { usePhotoCarouselImages } from '@/hooks/usePhotoCarouselImages'
 import { useTrackPhotoSwipe } from '@/hooks/useTrackPhotoSwipe'
 import { useRequireLogin } from '@/hooks/useRequireLogin'
@@ -96,7 +97,11 @@ export function FeedCard({
   spotSummary,
   priority = false,
 }: FeedCardProps) {
-  const { emblaRef, selectedIndex, scrollSnaps, scrollTo } = useCarousel({ loop: true })
+  const { ref: visibilityRef, isNear } = useNearViewport(false)
+  const { emblaRef, selectedIndex, scrollSnaps, scrollTo } = useCarousel({
+    loop: true,
+    active: isNear,
+  })
   const { shouldRenderImage, onImageSettled } = usePhotoCarouselImages(images.length, selectedIndex)
   useTrackPhotoSwipe(selectedIndex, recordId, images.length, 'feed_list')
 
@@ -135,7 +140,7 @@ export function FeedCard({
   )
 
   return (
-    <div className="bg-bg-primary flex flex-col gap-3 px-4 py-4">
+    <div ref={visibilityRef} className="bg-bg-primary flex flex-col gap-3 px-4 py-4">
       {/* 헤더 */}
       <div className="flex items-center gap-2">
         {/* 유저 화면은 로그인 전용이라 크롤러가 따라가면 로그인 리다이렉트만 받는다 */}
@@ -154,11 +159,7 @@ export function FeedCard({
             )}
           </IconBtn>
         </Link>
-        <Link
-          href={`/users/${authorId}`}
-          rel="nofollow"
-          className="flex flex-1 flex-col text-left"
-        >
+        <Link href={`/users/${authorId}`} rel="nofollow" className="flex flex-1 flex-col text-left">
           {authorInfo}
         </Link>
 
@@ -192,7 +193,10 @@ export function FeedCard({
         className={cn('relative overflow-hidden rounded-2xl', onOpen && 'cursor-pointer')}
       >
         {/* 사진이 1장이면 캐러셀이 필요 없다. ref 를 안 달면 Embla 인스턴스(측정·옵저버)를 만들지 않는다 */}
-        <div ref={images.length > 1 ? emblaRef : undefined} className="mp-no-track overflow-hidden">
+        <div
+          ref={images.length > 1 && (isNear || scrollSnaps.length > 0) ? emblaRef : undefined}
+          className="mp-no-track overflow-hidden"
+        >
           <div className="flex touch-pan-y">
             {images.map((src, i) => (
               <div key={i} className="min-w-0 flex-[0_0_100%] bg-gray-200">

@@ -3,6 +3,7 @@ import { Capacitor, CapacitorHttp } from '@capacitor/core'
 import { useQuery } from '@tanstack/react-query'
 import { useDebounce } from '@/hooks/useDebounce'
 import { SITE_URL } from '@/constants/site'
+import { createRequestQueue } from '@/lib/utils/requestQueue'
 import {
   parseInstagramEmbed,
   parseOgMeta,
@@ -21,9 +22,13 @@ interface YoutubeOembedResponse {
 // - YouTube: oEmbed 가 CORS 를 열어 웹·앱 모두 조회한다.
 // - 네이버 블로그·인스타그램: CORS 헤더가 없어 브라우저에서는 못 받는다. 앱에서만 네이티브 HTTP 로
 //   원문 HTML 을 받아 파싱하고, 웹은 플랫폼명 + URL 만 보여 준다.
-async function fetchYoutubeTitle(url: string): Promise<ContentLinkMeta | null> {
+async function fetchYoutubeTitle(
+  url: string,
+  signal?: AbortSignal
+): Promise<ContentLinkMeta | null> {
   const res = await fetch(
-    `https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(url)}`
+    `https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(url)}`,
+    { signal }
   )
   if (!res.ok) return null
   const body: YoutubeOembedResponse = await res.json()
@@ -37,6 +42,7 @@ const PREVIEW_HEADERS = {
   'Accept-Language': 'ko-KR,ko;q=0.9',
 }
 const PREVIEW_TIMEOUT_MS = 5000
+const enqueuePreview = createRequestQueue(3)
 
 // capacitor.config 의 CapacitorHttp 전역 패치(fetch 가로채기)는 꺼 둔 채 플러그인을 직접 부른다.
 // 켜면 백엔드 호출까지 네이티브로 바뀌어 쿠키 인증 흐름이 달라진다.
@@ -54,9 +60,10 @@ async function fetchHtmlNative(url: string): Promise<string | null> {
 
 async function fetchContentLinkMeta(
   url: string,
-  platform: ContentLinkPlatform
+  platform: ContentLinkPlatform,
+  signal?: AbortSignal
 ): Promise<ContentLinkMeta | null> {
-  if (platform === 'YOUTUBE') return fetchYoutubeTitle(url)
+  if (platform === 'YOUTUBE') return fetchYoutubeTitle(url, signal)
   if (platform === 'NAVER_BLOG') {
     const html = await fetchHtmlNative(toNaverBlogMobileUrl(url))
     return html ? parseOgMeta(html) : null
@@ -80,9 +87,9 @@ const useIsNativeApp = () =>
   )
 
 // 조회에 실패해도(비공개·로그인월·타임아웃) 카드는 플랫폼명 + URL 로 그려지므로 재시도하지 않는다.
-// 같은 URL 은 앱을 켜 둔 동안 메모리 캐시에서 꺼내 다시 받지 않는다.
+// 같은 URL 은 캐시에 남아 있는 동안 재사용하고, 구독이 없어진 뒤 30분 후 정리한다.
 // 입력창에서 한 글자씩 칠 때마다 부르지 않도록 URL 이 멈췄을 때만 조회한다. 첫 렌더는 바로 조회한다.
-export function useContentLinkMeta(url: string, platform: ContentLinkPlatform) {
+export function useContentLinkMeta(url: string, platform: ContentLinkPlatform, enabled = true) {
   const isNativeApp = useIsNativeApp()
   const debouncedUrl = useDebounce(url)
   const canFetch =
@@ -92,14 +99,15 @@ export function useContentLinkMeta(url: string, platform: ContentLinkPlatform) {
   const isSettled = debouncedUrl === url
   const query = useQuery({
     queryKey: ['content-link-meta', url, platform],
-    queryFn: () => fetchContentLinkMeta(url, platform),
-    enabled: canFetch && isSettled,
+    queryFn: ({ signal }) =>
+      enqueuePreview(() => fetchContentLinkMeta(url, platform, signal), signal),
+    enabled: enabled && canFetch && isSettled,
     staleTime: Infinity,
-    gcTime: Infinity,
+    gcTime: 30 * 60 * 1000,
     retry: false,
   })
   return {
     meta: canFetch && isSettled ? (query.data ?? null) : null,
-    isLoading: canFetch && (!isSettled || query.isLoading),
+    isLoading: enabled && canFetch && (!isSettled || query.isLoading),
   }
 }

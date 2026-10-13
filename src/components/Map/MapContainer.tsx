@@ -2,7 +2,7 @@
 
 import { useLazyMapLoad } from '@/hooks/useLazyMapLoad'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import dynamic from 'next/dynamic'
+import { LazyDrawer } from '@/components/ui/layout/LazyDrawer'
 import { MapSkeleton } from '@/components/Map/MapSkeleton'
 import { MapHeader } from '@/components/Map/MapHeader'
 import { MapLocationBtn } from '@/components/Map/MapLocationBtn'
@@ -33,11 +33,6 @@ import {
 } from '@/lib/kakao/mapViewport'
 import { KOREA_BBOX, REGION_MAP_CENTERS } from '@/constants/region'
 import { kakaoLoader } from '@/lib/kakao/kakaoLoader'
-
-const Drawer = dynamic(
-  () => import('@/components/ui/layout/Drawer').then((m) => ({ default: m.Drawer })),
-  { ssr: false }
-)
 
 const DEFAULT_CENTER = {
   lat: 37.5662,
@@ -97,7 +92,11 @@ function readInitialTarget(): InitialTarget {
   const lng = toCoord(params.get('lng'))
   return {
     center: lat != null && lng != null ? { lat, lng } : null,
-    query: params.get('q')?.replace(/\(.*?\)/g, '').trim() || null,
+    query:
+      params
+        .get('q')
+        ?.replace(/\(.*?\)/g, '')
+        .trim() || null,
     spotId: toCoord(params.get('spotId')),
   }
 }
@@ -442,7 +441,11 @@ export const MapContainer = () => {
 
   return (
     <div className="relative h-dvh w-full contain-strict">
-      <div ref={containerRef} id="kakao-map" className="mp-no-track absolute inset-0 z-0 bg-green-50" />
+      <div
+        ref={containerRef}
+        id="kakao-map"
+        className="mp-no-track absolute inset-0 z-0 bg-green-50"
+      />
 
       {!areTilesLoaded && (
         <div className="pointer-events-none absolute inset-0 z-[1]">
@@ -475,7 +478,7 @@ export const MapContainer = () => {
       <Nav activeTab="map" />
       {/* 드로어 코드(~30KB)를 SDK 준비 직후 받으면 첫 타일과 대역폭·메인 스레드를 다툰다.
           첫 타일이 그려진 뒤 받는다. 그 전에 핀·필터를 눌러도 상태는 스토어에 있어 마운트되면 열린다. */}
-      {areTilesLoaded && <Drawer />}
+      {areTilesLoaded && <LazyDrawer />}
     </div>
   )
 }

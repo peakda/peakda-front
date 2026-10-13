@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Header } from '@/components/ui/layout/Header'
@@ -49,6 +49,7 @@ export function FeedClient({ initialPage }: FeedClientProps) {
     isError,
     refetch,
     hasNextPage,
+    isFetching,
     isFetchingNextPage,
     isFetchNextPageError,
     fetchNextPage,
@@ -56,10 +57,10 @@ export function FeedClient({ initialPage }: FeedClientProps) {
     filter,
     filter === GetFeedFilter.ALL ? (initialPage ?? undefined) : undefined
   )
-  const records = flattenPages(data)
+  const records = useMemo(() => flattenPages(data), [data])
   const sentinelRef = useInfiniteScroll(
     () => fetchNextPage(),
-    shouldLoadMore(hasNextPage, isFetchingNextPage, isFetchNextPageError)
+    shouldLoadMore(hasNextPage, isFetching, isFetchNextPageError)
   )
 
   // 탭마다 무한 쿼리 키가 달라 목록이 처음부터 다시 쌓인다.

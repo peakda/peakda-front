@@ -3,6 +3,7 @@
 import { X } from 'lucide-react'
 import { IconBtn } from '@/components/ui/button/IconBtn'
 import { useContentLinkMeta } from '@/hooks/useContentLinkMeta'
+import { useNearViewport } from '@/hooks/useNearViewport'
 import { CONTENT_LINK_PLATFORM_LABEL, toDisplayUrl } from '@/lib/utils/contentLink'
 import type { ContentLinkPlatform } from '@/api/facades/generated/peakdaApi.schemas'
 import { cn } from '@/lib/utils/cn'
@@ -19,7 +20,8 @@ interface ContentLinkCardProps {
 // 본문을 누르면 원문을 새 창으로 연다 — 앱(Capacitor)에서는 시스템이 받아 외부 브라우저나
 // 설치된 해당 앱(인스타그램·유튜브)으로 열린다. 축제 홈페이지·외부 알림 링크와 같은 방식이다.
 export function ContentLinkCard({ url, platform, onRemove, className }: ContentLinkCardProps) {
-  const { meta, isLoading } = useContentLinkMeta(url, platform)
+  const { ref, isNear } = useNearViewport()
+  const { meta, isLoading } = useContentLinkMeta(url, platform, !!onRemove || isNear)
   // 미지원 플랫폼은 플랫폼명 자리에 도메인을 보여 준다.
   const label =
     platform === 'UNSUPPORTED'
@@ -28,6 +30,7 @@ export function ContentLinkCard({ url, platform, onRemove, className }: ContentL
 
   return (
     <div
+      ref={ref}
       className={cn(
         'bg-bg-primary border-border-primary flex flex-col gap-2 rounded-2xl border p-3',
         className

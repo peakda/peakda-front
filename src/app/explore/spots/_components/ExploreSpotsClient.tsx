@@ -1,5 +1,6 @@
 'use client'
 
+import { memo, useMemo } from 'react'
 import { Header } from '@/components/ui/layout/Header'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { SpotCard } from '@/components/ui/card/SpotCard'
@@ -11,6 +12,7 @@ import { useExploreSpotsInfinite } from '@/api/facades/explore'
 import type {
   GetExploreSpotsSection,
   PageResponseExploreSpotItem,
+  ExploreSpotItem,
 } from '@/api/facades/generated/peakdaApi.schemas'
 import { hasSpotId, toExploreSpotProps } from '@/lib/utils/explore'
 import { flattenPages } from '@/lib/utils/infinitePages'
@@ -27,6 +29,33 @@ const SECTION_TITLE: Record<GetExploreSpotsSection, string> = {
   PEAK_NOW: '지금이 절정이에요',
   NEXT_WEEK: '다음 주에 가면 좋을 곳',
 }
+
+const ExploreListItem = memo(function ExploreListItem({
+  item,
+  section,
+  position,
+}: {
+  item: ExploreSpotItem
+  section: GetExploreSpotsSection
+  position: number
+}) {
+  return (
+    <li style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 104px' }}>
+      <SpotCard
+        spot={toExploreSpotProps(item)}
+        onOpen={() =>
+          item.spotId != null &&
+          track('explore_card_click', {
+            section: ANALYTICS_SECTION[section],
+            item_id: item.spotId,
+            position,
+            view: 'list',
+          })
+        }
+      />
+    </li>
+  )
+})
 
 interface ExploreSpotsClientProps {
   // 서버가 ?section 을 해석한 값
@@ -46,6 +75,7 @@ export function ExploreSpotsClient({ section, initialPage }: ExploreSpotsClientP
     refetch,
     fetchNextPage,
     hasNextPage,
+    isFetching,
     isFetchingNextPage,
     isFetchNextPageError,
   } = useExploreSpotsInfinite(
@@ -54,10 +84,10 @@ export function ExploreSpotsClient({ section, initialPage }: ExploreSpotsClientP
     // 서버 응답은 필터 없는 조회라, 꽃 필터를 고른 채 들어왔으면 쓰지 않는다.
     category ? undefined : (initialPage ?? undefined)
   )
-  const spots = flattenPages(data).filter(hasSpotId)
+  const spots = useMemo(() => flattenPages(data).filter(hasSpotId), [data])
   const sentinelRef = useInfiniteScroll(
     fetchNextPage,
-    shouldLoadMore(hasNextPage, isFetchingNextPage, isFetchNextPageError)
+    shouldLoadMore(hasNextPage, isFetching, isFetchNextPageError)
   )
 
   return (
@@ -84,18 +114,11 @@ export function ExploreSpotsClient({ section, initialPage }: ExploreSpotsClientP
         <>
           <ul className="divide-y divide-gray-100">
             {spots.map((item, idx) => (
-              <SpotCard
+              <ExploreListItem
                 key={`${item.attractionId}-${item.category}`}
-                spot={toExploreSpotProps(item)}
-                onOpen={() =>
-                  item.spotId != null &&
-                  track('explore_card_click', {
-                    section: ANALYTICS_SECTION[section],
-                    item_id: item.spotId,
-                    position: idx,
-                    view: 'list',
-                  })
-                }
+                item={item}
+                section={section}
+                position={idx}
               />
             ))}
           </ul>

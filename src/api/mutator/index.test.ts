@@ -141,6 +141,22 @@ describe('customInstance', () => {
     expect(calledUrls().filter((url) => url === '/api/auth/refresh')).toHaveLength(1)
   })
 
+  it('refresh 뒤 원래 요청의 취소는 로그인 상태를 지우지 않는다', async () => {
+    setMarker()
+    const controller = new AbortController()
+    fetchMock
+      .mockResolvedValueOnce(json({}, 401))
+      .mockResolvedValueOnce(new Response(null, { status: 200 }))
+      .mockImplementationOnce(async () => {
+        controller.abort()
+        throw controller.signal.reason
+      })
+    const error = await catchError(customInstance('/api/feed', { signal: controller.signal }))
+    expect(error).toBe(controller.signal.reason)
+    expect(document.cookie).toContain(`${AUTH_MARKER}=1`)
+    expect(useLoginSheetStore.getState().isOpen).toBe(false)
+  })
+
   it('refresh 가 실패하면 마커를 지우고 돌아올 위치를 남긴 뒤 로그인 시트를 연다', async () => {
     setMarker()
     window.history.replaceState(null, '', '/my/saved?tab=spot')
