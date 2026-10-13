@@ -1,6 +1,6 @@
 'use client'
 
-import { Bell, Heart, MapPin } from 'lucide-react'
+import { Bell, ChevronRight, Heart } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -30,7 +30,7 @@ import type {
   FavoriteState,
   SpotDetailResponse,
 } from '@/api/facades/generated/peakdaApi.schemas'
-import { buildRecordUrl } from '@/lib/utils/spotCta'
+import { buildMapUrl, buildRecordUrl } from '@/lib/utils/spotCta'
 import { type BloomStageStatus, toStatusBadge } from '@/lib/utils/bloomStatus'
 import { formatPeakPeriod, peakHeadline } from '@/lib/utils/bloomCalendar'
 import { CATEGORY_ICON } from '@/constants/map'
@@ -236,10 +236,17 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
             </div>
           </div>
 
-          <span className="text-text-secondary flex items-center gap-1 text-sm">
-            <MapPin className="h-4 w-4 shrink-0" />
-            {spot.address ?? ''}
-          </span>
+          {/* 주소 카드 — 누르면 지도에서 이 스팟 핀을 찾아 드로어를 연다 */}
+          <Link
+            href={buildMapUrl({ ...spot, query: spot.address, spotId: spot.id })}
+            className="bg-bg-secondary mt-1 flex items-center gap-1.5 rounded-xl py-2.75 pr-2 pl-3"
+          >
+            <Image src="/icons/Pin.svg" alt="" width={20} height={20} className="shrink-0" />
+            <span className="text-text-secondary flex-1 text-base font-medium">
+              {spot.address ?? spot.name}
+            </span>
+            <ChevronRight className="text-icon-secondary h-6 w-6 shrink-0" />
+          </Link>
 
           <span className="text-text-tertiary text-xs">
             방문 기록 {spot.recordCount}
