@@ -7,6 +7,8 @@ interface UseCarouselOptions {
   align?: 'start' | 'center' | 'end'
   skipSnaps?: boolean
   dragFree?: boolean
+  // 'auto' 면 화면에 보이는 장 수만큼 한 번에 넘긴다(랜딩 캐러셀: 태블릿 2장·데스크톱 3장씩).
+  slidesToScroll?: number | 'auto'
 }
 
 export const useCarousel = (options: UseCarouselOptions = {}, initialCount = 0) => {
@@ -15,6 +17,7 @@ export const useCarousel = (options: UseCarouselOptions = {}, initialCount = 0) 
     align: options.align ?? 'start',
     skipSnaps: options.skipSnaps ?? false,
     dragFree: options.dragFree ?? false,
+    slidesToScroll: options.slidesToScroll ?? 1,
   })
 
   const [selectedIndex, setSelectedIndex] = useState(0)

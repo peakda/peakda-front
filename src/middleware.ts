@@ -12,6 +12,13 @@ const ENTRY_PATHS = ['/', '/onboarding', '/login']
 export function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl
 
+  // landing.peakda.com 은 같은 Vercel 프로젝트에 붙인 서브도메인이다. 루트만 랜딩 페이지로 rewrite 하고,
+  // 로그인 마커로 /map 에 보내는 아래 진입 화면 처리보다 먼저 둔다.
+  // 호스트는 Host 헤더로 본다 — next dev 에서는 nextUrl.hostname 이 Host 와 무관하게 localhost 로 나온다.
+  if (request.headers.get('host')?.startsWith('landing.') && pathname === '/') {
+    return NextResponse.rewrite(new URL('/landing', request.url))
+  }
+
   // 탐색 전체 목록(/explore/spots?section=X)은 섹션별 정적 페이지로 rewrite 한다 — 쿼리를 페이지에서 읽으면
   // 매 요청 서버 렌더링이 된다(app/explore/spots/[section]/page.tsx 참고). 로그인 여부와 무관해 맨 먼저 처리한다.
   if (pathname === '/explore/spots') {
