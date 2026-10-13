@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { createClusterHTML, createPinHTML } from '@/components/Map/overlayHtml'
+import { advanceFrame } from '@/lib/utils/frameTask'
 import {
   canSplitByZoom,
   clusterSpots,
@@ -14,7 +15,7 @@ const ZOOM_DEBOUNCE_MS = 120
 // 드래그·관성 이동 중 한 프레임에 새 핀을 만드는 데 쓸 시간(ms). 카카오 CustomOverlay 는 지도에
 // 붙을 때마다 콘텐츠 크기를 읽어(강제 레이아웃) 여러 개를 한 번에 만들면 프레임이 끊긴다.
 // 개수가 아니라 시간으로 자르므로 빠른 기기는 많이, 느린 기기는 적게 만들고 나머지는 다음 프레임에 이어 간다.
-// 멈추면(idle) 남은 것을 한 번에 마저 만든다. 실기기 측정으로 조정할 값은 이것 하나다.
+// 초기 표시·필터·줌·idle 도 같은 예산을 쓴다. 진행 위치를 보존해 준비 작업을 반복하지 않는다.
 const FRAME_BUDGET_MS = 4
 
 // 화면 밖 이만큼(px)까지 미리 그려 둔다. 좌표는 꼬리 끝이라 핀 몸통이 좌우 ~63px·위 ~65px
@@ -71,6 +72,7 @@ export function useMapCluster(
   // spots 가 바뀌면 객체도 새로 생기므로 따로 비우지 않아도 된다.
   const viewCacheRef = useRef(new WeakMap<ClusterGroup | MapSpot, OverlayView>())
   const spotsRef = useRef(spots)
+  const scheduleRef = useRef<(() => void) | null>(null)
   const onPinClickRef = useRef(onPinClick)
   const onClusterClickRef = useRef(onClusterClick)
 
@@ -79,14 +81,14 @@ export function useMapCluster(
     onClusterClickRef.current = onClusterClick
   })
 
-  // budgetMs 안에서만 새 오버레이를 만든다. 화면 밖으로 나간 것은 예산과 상관없이 모두 걷어낸다.
-  // 다 못 만들고 남았으면 true 를 돌려준다(다음 프레임에 이어서 그린다).
-  const render = useCallback((map: kakao.maps.Map, budgetMs = Infinity): boolean => {
+  // 준비·순회·제거·생성을 모두 프레임에 나눈다. 인덱스 생성과 SDK 호출 하나는 원자적이다.
+  const render = useCallback(function* (map: kakao.maps.Map): Generator<void, void> {
     const level = map.getLevel()
     const entries = entriesRef.current
 
     if (!clusterCacheRef.current.has(level)) {
       clusterCacheRef.current.set(level, clusterSpots(spotsRef.current, level))
+      yield
     }
     const clusters = clusterCacheRef.current.get(level)!
     // 조회 bbox 는 격자 스냅으로 화면보다 넓다. 클러스터는 전체로 계산해 팬해도 묶음이
@@ -192,6 +194,7 @@ export function useMapCluster(
     }
 
     for (const cluster of clusters) {
+      yield
       if (cluster.spots.length >= 2 && level >= 4) {
         if (!inView(cluster.lat, cluster.lng)) continue
         const { key, html, label } = viewOf(cluster, () => {
@@ -205,6 +208,7 @@ export function useMapCluster(
       }
 
       for (const spot of cluster.spots) {
+        yield
         if (!inView(spot.lat, spot.lng)) continue
         const { key, html, label } = viewOf(spot, () => {
           const html = createPinHTML(spot.flowers, spot.maxStage)
@@ -217,54 +221,72 @@ export function useMapCluster(
 
     // 이번에 안 쓰인 것만 걷어낸다. 그대로인 핀은 DOM 을 건드리지 않는다.
     for (const [key, entry] of entries) {
+      yield
       if (nextKeys.has(key)) continue
       entry.overlay.setMap(null)
       entries.delete(key)
     }
 
-    const start = performance.now()
-    for (const create of [...screenAdds, ...marginAdds]) {
-      if (performance.now() - start >= budgetMs) return true
-      create()
+    for (const queue of [screenAdds, marginAdds]) {
+      for (const create of queue) {
+        create()
+        yield
+      }
     }
-    return false
   }, [])
 
   // spots 가 바뀌면 클러스터 계산 캐시를 버리고 다시 그린다.
   useEffect(() => {
     spotsRef.current = spots
     clusterCacheRef.current.clear()
-    if (map) render(map)
+    scheduleRef.current?.()
   }, [map, spots, render])
 
   useEffect(() => {
     if (!map) return
 
     let timer: ReturnType<typeof setTimeout>
+    let job: Generator<void, void> | null = null
     const onZoom = () => {
       clearTimeout(timer)
-      timer = setTimeout(() => render(map), ZOOM_DEBOUNCE_MS)
+      // 이전 줌의 큐가 뒤늦게 핀을 붙이지 않게 즉시 폐기한다.
+      job?.return()
+      job = null
+      stopLoop()
+      timer = setTimeout(schedule, ZOOM_DEBOUNCE_MS)
     }
 
-    // 화면 안 핀만 그리므로 팬할 때도 다시 그려야 한다. 드래그를 시작하면 매 프레임 예산만큼만
-    // 새 핀을 만들고, 손을 뗀 뒤 관성 이동 중에도 이어 간다. 멈추면(idle) 남은 것을 모두 만든다.
-    // idle 은 지도가 실제로 움직였을 때만 오므로, 움직임 없이 끝난 드래그는 중심이 그대로이고
-    // 남은 핀이 없을 때 루프가 스스로 멈춘다.
+    // 팬 중에도 현재 큐를 마친 뒤 최신 화면을 처리해 연속 이동에 작업이 굶지 않게 한다.
     let frameId: number | null = null
     let isDragging = false
     let lastCenter: { lat: number; lng: number } | null = null
+    let needsRefresh = false
     const tick = () => {
-      const hasPending = render(map, FRAME_BUDGET_MS)
+      frameId = null
       const latLng = map.getCenter()
       const center = { lat: latLng.getLat(), lng: latLng.getLng() }
       const isMoving =
         lastCenter == null || lastCenter.lat !== center.lat || lastCenter.lng !== center.lng
       lastCenter = center
-      frameId = isDragging || isMoving || hasPending ? requestAnimationFrame(tick) : null
+      needsRefresh ||= isMoving
+      if (!job && needsRefresh) {
+        job = render(map)
+        needsRefresh = false
+      }
+      if (job && advanceFrame(job, FRAME_BUDGET_MS)) job = null
+      if (isDragging || needsRefresh || job) frameId = requestAnimationFrame(tick)
     }
     const stopLoop = () => {
       if (frameId != null) cancelAnimationFrame(frameId)
       frameId = null
+    }
+    const schedule = () => {
+      job?.return()
+      job = render(map)
+      const center = map.getCenter()
+      lastCenter = { lat: center.getLat(), lng: center.getLng() }
+      needsRefresh = false
+      if (frameId == null) frameId = requestAnimationFrame(tick)
     }
     const onDragStart = () => {
       isDragging = true
@@ -275,9 +297,12 @@ export function useMapCluster(
       isDragging = false
     }
     const onIdle = () => {
-      stopLoop()
-      render(map)
+      clearTimeout(timer)
+      schedule()
     }
+
+    scheduleRef.current = schedule
+    schedule()
 
     kakao.maps.event.addListener(map, 'zoom_changed', onZoom)
     kakao.maps.event.addListener(map, 'dragstart', onDragStart)
@@ -288,6 +313,8 @@ export function useMapCluster(
     return () => {
       clearTimeout(timer)
       stopLoop()
+      job?.return()
+      scheduleRef.current = null
       kakao.maps.event.removeListener(map, 'zoom_changed', onZoom)
       kakao.maps.event.removeListener(map, 'dragstart', onDragStart)
       kakao.maps.event.removeListener(map, 'dragend', onDragEnd)

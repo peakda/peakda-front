@@ -59,7 +59,10 @@ export const customInstance = async <T>(url: string, options?: RequestInit): Pro
       if (native) await refreshNativeAuthSession()
       else await runRefresh()
       res = await request()
-    } catch {
+    } catch (error) {
+      // 탭 전환으로 재시도 fetch 가 취소된 것은 인증 만료가 아니다.
+      // 공유 refresh 는 계속 완료시키되 이 요청 때문에 로그인 상태를 지우지 않는다.
+      if (options?.signal?.aborted) throw error
       if (native) await clearNativeAuthSession()
       // 로그인했던 사용자의 세션이 끊긴 경우에만 알린다. 네이티브 비로그인은 여기서 마커가 없다.
       if (typeof window !== 'undefined' && hasAuthMarker()) {
