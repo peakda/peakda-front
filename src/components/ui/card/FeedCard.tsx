@@ -159,7 +159,11 @@ export function FeedCard({
             )}
           </IconBtn>
         </Link>
-        <Link href={`/users/${authorId}`} rel="nofollow" className="flex flex-1 flex-col text-left">
+        <Link
+          href={`/users/${authorId}`}
+          rel="nofollow"
+          className="flex flex-1 flex-col text-left"
+        >
           {authorInfo}
         </Link>
 

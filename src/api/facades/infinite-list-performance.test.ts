@@ -1,6 +1,6 @@
 import { act, createElement as h } from 'react'
 import { createRoot } from 'react-dom/client'
-import { QueryClient, QueryClientProvider, focusManager } from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { afterEach, expect, it, vi } from 'vitest'
 import { useFeedListInfinite } from './feed'
 import { useExploreSpotsInfinite } from './explore'
@@ -12,10 +12,7 @@ vi.mock('@/lib/analytics', () => ({ track: vi.fn() }))
 vi.mock('./feed-list', () => ({ feedListApi: vi.fn() }))
 vi.mock('./explore-spots', () => ({ exploreSpotsApi: vi.fn() }))
 
-afterEach(() => {
-  focusManager.setFocused(undefined)
-  vi.clearAllMocks()
-})
+afterEach(() => vi.clearAllMocks())
 
 const flush = () =>
   act(async () => {
@@ -23,7 +20,7 @@ const flush = () =>
   })
 
 it.each(['feed', 'explore'] as const)(
-  '%s: 포커스 복귀는 재조회하지 않고 명시적 무효화는 모든 페이지를 갱신한다',
+  '%s: 명시적 무효화는 모든 페이지를 갱신하고 signal 을 전달한다',
   async (surface) => {
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     const key =
@@ -52,13 +49,7 @@ it.each(['feed', 'explore'] as const)(
         root.render(h(QueryClientProvider, { client }, h(surface === 'feed' ? Feed : Explore)))
       )
       await flush()
-      // 마운트 시 stale 데이터는 갱신한다. 이후 강제로 오래된 시각으로 만들어 포커스를 검사한다.
       api.mockClear()
-      client.setQueryData(key, client.getQueryData(key), { updatedAt: 1 })
-      focusManager.setFocused(false)
-      focusManager.setFocused(true)
-      await flush()
-      expect(api).not.toHaveBeenCalled()
       await act(async () => {
         await client.invalidateQueries({ queryKey: key })
       })

@@ -30,8 +30,12 @@ function inViewChecker(map: kakao.maps.Map, margin: number) {
   // 화면 좌표로 남서 = (0, 높이), 북동 = (폭, 0) 이라 컨테이너 크기를 따로 재지 않아도 된다.
   const height = proj.containerPointFromCoords(bounds.getSouthWest()).y
   const width = proj.containerPointFromCoords(bounds.getNorthEast()).x
-  const sw = proj.coordsFromContainerPoint(new kakao.maps.Point(-margin, height + margin))
-  const ne = proj.coordsFromContainerPoint(new kakao.maps.Point(width + margin, -margin))
+  const sw = proj.coordsFromContainerPoint(
+    new kakao.maps.Point(-margin, height + margin)
+  )
+  const ne = proj.coordsFromContainerPoint(
+    new kakao.maps.Point(width + margin, -margin)
+  )
   const minLat = sw.getLat()
   const maxLat = ne.getLat()
   const minLng = sw.getLng()

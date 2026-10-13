@@ -52,7 +52,6 @@ export const useExploreSpotsInfinite = (
         { section, category, pageRequest: { page: pageParam, size: PAGE_SIZE } },
         { signal }
       ),
-    refetchOnWindowFocus: false,
     initialPageParam: 0,
     getNextPageParam: nextPageParam,
     initialData: initialPage ? { pages: [initialPage], pageParams: [0] } : undefined,
