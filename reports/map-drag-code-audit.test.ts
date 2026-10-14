@@ -406,6 +406,33 @@ describe('optimized map hook: real clustering and HTML', () => {
     expect(vi.getTimerCount()).toBe(0)
   })
 
+  it('zoom start hides current pins so old-level groups never reappear after the zoom', async () => {
+    await mount()
+    const [cluster] = [...visible]
+    events.get('zoom_start')!()
+    expect(cluster.options.content.style.visibility).toBe('hidden')
+    // level 3 에서는 묶음이 개별 핀 둘로 갈라진다. 이전 묶음은 숨겨진 채 걷혀야 한다.
+    level = 3
+    events.get('zoom_changed')!()
+    events.get('idle')!()
+    drain()
+    expect(visible.has(cluster)).toBe(false)
+    expect(cluster.options.content.style.visibility).toBe('hidden')
+    expect(visible.size).toBe(2)
+    expect([...visible].every((o) => o.options.content.style.visibility !== 'hidden')).toBe(true)
+  })
+
+  it('pins that stay the same at the new level reappear after the zoom', async () => {
+    await mount()
+    const [cluster] = [...visible]
+    events.get('zoom_start')!()
+    events.get('zoom_changed')!()
+    events.get('idle')!()
+    drain()
+    expect([...visible]).toEqual([cluster])
+    expect(cluster.options.content.style.visibility).toBe('')
+  })
+
   it('a second zoom start cancels the previous debounce until its own zoom settles', async () => {
     await mount()
     events.get('zoom_changed')!()

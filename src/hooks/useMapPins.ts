@@ -56,6 +56,8 @@ interface OverlayEntry {
   overlay: kakao.maps.CustomOverlay
   // 클릭 시점의 최신 데이터. 오버레이를 재사용해도 리스너가 옛 spot 을 붙들지 않도록 여기서 읽는다.
   spots: MapSpot[]
+  // 오버레이 콘텐츠. 줌 동안 숨겼다가 새 레벨에서도 쓰이면 다시 보인다.
+  content: HTMLElement
 }
 
 export function useMapCluster(
@@ -118,7 +120,7 @@ export function useMapCluster(
       container.setAttribute('role', 'button')
       container.setAttribute('aria-label', label)
       container.tabIndex = 0
-      const entry: OverlayEntry = { overlay: null!, spots: members }
+      const entry: OverlayEntry = { overlay: null!, spots: members, content: container }
 
       const activate =
         members.length >= 2
@@ -187,6 +189,8 @@ export function useMapCluster(
       const existing = entries.get(key)
       if (existing) {
         existing.spots = members
+        // 줌 시작 때 숨긴 핀 중 새 레벨에서도 그대로인 것만 다시 보인다.
+        existing.content.style.visibility = ''
         return
       }
       ;(onScreen(lat, lng) ? screenAdds : marginAdds).push(() =>
@@ -302,6 +306,10 @@ export function useMapCluster(
       isZooming = true
       cancelJob()
       coverage = null
+      // 카카오는 줌 애니메이션 동안 오버레이를 감췄다가 끝나면 다시 보인다. 그때 아직 안 걷힌
+      // 이전 레벨 묶음이 저사양 기기에서 1초 가까이 보였다(CPU 6배 실측). 그래서 미리 숨겨 두고
+      // 새 레벨에서 다시 쓰이는 것만 render 가 되살린다. display 대신 visibility 라 SDK 위치 계산은 그대로다.
+      entriesRef.current.forEach((e) => (e.content.style.visibility = 'hidden'))
     }
     const onZoom = () => {
       onZoomStart()
