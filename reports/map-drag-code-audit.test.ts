@@ -58,7 +58,7 @@ let detachments: number
 let onPinClick = vi.fn<(spot: MapSpot) => void>()
 let onClusterClick = vi.fn<(spots: MapSpot[]) => void>()
 class Overlay {
-  constructor(public options: { content: HTMLElement }) {}
+  constructor(public options: { content: HTMLElement; position: LatLng }) {}
   setMap(target: unknown) {
     if (target) {
       attachments++
@@ -199,9 +199,14 @@ function move(lng: number) {
   center.lng = lng
   events.get('bounds_changed')!()
 }
-function refill() {
-  vi.advanceTimersByTime(160)
-  drain()
+// 실제 SDK는 드래그를 놓을 때 idle 을 dragend 보다 먼저 보낸다(2026-10 브라우저 실측).
+// 훅이 dragstart/dragend 를 듣지 않아도 같은 순서로 보낸다(듣는 구현의 회귀를 잡기 위해).
+function grab() {
+  events.get('dragstart')?.()
+}
+function release() {
+  events.get('idle')!()
+  events.get('dragend')?.()
 }
 
 describe('optimized map hook: real clustering and HTML', () => {
@@ -225,10 +230,9 @@ describe('optimized map hook: real clustering and HTML', () => {
     await mount()
     const original = [...visible]
     resetMetrics()
-    events.get('dragstart')!()
+    grab()
     for (let i = 0; i < 60; i++) {
       move(center.lng + 0.000001)
-      vi.advanceTimersByTime(16)
       frame()
     }
     expect(metrics()).toMatchObject({
@@ -242,8 +246,7 @@ describe('optimized map hook: real clustering and HTML', () => {
     })
     expect([...visible]).toEqual(original)
     expect(frames.size).toBe(0)
-    events.get('dragend')!()
-    events.get('idle')!()
+    release()
     drain()
     expect(visits).toBe(1)
     expect(metrics().clusterQueries).toBe(0) // wider coordinate cache reused
@@ -253,22 +256,21 @@ describe('optimized map hook: real clustering and HTML', () => {
   it('a stationary drag does not keep an rAF loop or refresh overlays', async () => {
     await mount()
     resetMetrics()
-    events.get('dragstart')!()
-    refill()
+    grab()
+    move(center.lng)
+    drain()
     expect(visits).toBe(0)
     expect(frames.size).toBe(0)
     expect(vi.getTimerCount()).toBe(0)
   })
 
-  it('long drags refill after the interval, coalescing many move events', async () => {
+  it('leaving the prepared area refills at once, coalescing move events while it runs', async () => {
     await mount()
     resetMetrics()
-    events.get('dragstart')!()
     for (let i = 0; i < 30; i++) move(127.1)
-    vi.advanceTimersByTime(159)
-    expect(frames.size).toBe(0)
-    expect(attachments + detachments).toBe(0)
-    vi.advanceTimersByTime(1)
+    // 타이머를 기다리지 않고 첫 이벤트에서 바로 보충을 예약한다.
+    expect(frames.size).toBe(1)
+    expect(vi.getTimerCount()).toBe(0)
     drain()
     expect(metrics()).toMatchObject({
       indexBuilds: 0,
@@ -280,20 +282,44 @@ describe('optimized map hook: real clustering and HTML', () => {
     })
     expect(visible.size).toBe(1)
     // A completed refill at the final bounds must not be repeated by idle.
-    events.get('dragend')!()
-    events.get('idle')!()
+    release()
     drain()
     expect(visits).toBe(1)
     expect(vi.getTimerCount()).toBe(0)
+  })
+
+  it('attaches pins before their body reaches the screen during a steady drag', async () => {
+    await mount()
+    // 10px 씩 오른쪽으로 끌어 다음 군집(1,000px 옆)을 화면으로 들여온다. 핀 몸통은 좌표에서
+    // 좌우 약 32px 이므로, 좌표가 화면 오른쪽 + 32px 안에 들어오면 이미 붙어 있어야 한다.
+    const target = { lat: 37.5, lng: 127.1 }
+    const isAttached = () =>
+      [...visible].some(
+        (o) =>
+          Math.abs(o.options.position.getLat() - target.lat) < 0.001 &&
+          Math.abs(o.options.position.getLng() - target.lng) < 0.001
+      )
+    let checked = 0
+    grab()
+    while (center.lng < 127.1) {
+      move(center.lng + 10 / PX_PER_DEGREE)
+      frame()
+      const screenX = WIDTH / 2 + (target.lng - center.lng) * PX_PER_DEGREE
+      if (screenX < WIDTH + 32) {
+        checked++
+        expect(isAttached()).toBe(true)
+      }
+    }
+    expect(checked).toBeGreaterThan(0)
   })
 
   it('programmatic movement and inertia refill and settle without drag events', async () => {
     await mount()
     resetMetrics()
     move(127.1)
-    refill()
+    drain()
     move(127.2)
-    refill()
+    drain()
     events.get('idle')!()
     drain()
     expect(attachments).toBe(2)
@@ -301,16 +327,18 @@ describe('optimized map hook: real clustering and HTML', () => {
     expect(visible.size).toBe(1)
   })
 
-  it('data arriving during a drag waits, then replaces the old appearance', async () => {
+  it('a filter change right after a drag release redraws at once, not after a delay', async () => {
     const data = await mount()
-    events.get('dragstart')!()
+    grab()
+    move(center.lng + 0.000001)
+    release()
+    drain()
     resetMetrics()
     const updated = data.map((s) => ({ ...s, maxStage: 'End' as const }))
     await act(async () => root.render(h(Component, { data: updated })))
-    expect(frames.size).toBe(0)
-    expect(attachments + detachments).toBe(0)
-    events.get('dragend')!()
-    events.get('idle')!()
+    // 드래그 뒤에 '이동 중' 상태가 남아 타이머를 기다리면 안 된다.
+    expect(frames.size).toBe(1)
+    expect(vi.getTimerCount()).toBe(0)
     drain()
     expect(metrics().indexBuilds).toBe(1)
     expect(attachments).toBe(1)
@@ -345,11 +373,9 @@ describe('optimized map hook: real clustering and HTML', () => {
     clockStep = 1
     await act(async () => root.render(h(Component, { data })))
     frame()
-    events.get('dragstart')!()
-    expect(frames.size).toBe(0)
     move(127.1)
-    events.get('dragend')!()
-    events.get('idle')!()
+    // 진행 중인 초기 작업은 끊지 않고 끝낸 뒤, 바뀐 화면을 이어서 보충한다(idle 없이도).
+    expect(frames.size).toBe(1)
     drain()
     expect(visible.size).toBe(1)
     expect([...visible][0].options.content.getAttribute('aria-label')).toBe('명소 2곳 묶음')
@@ -358,8 +384,9 @@ describe('optimized map hook: real clustering and HTML', () => {
 
   it('unmount clears scheduled checks, frame work, overlays and listeners', async () => {
     await mount()
-    events.get('dragstart')!()
     move(127.1)
+    expect(frames.size).toBe(1)
+    events.get('zoom_changed')!()
     expect(vi.getTimerCount()).toBe(1)
     await act(async () => root.unmount())
     expect(vi.getTimerCount()).toBe(0)
@@ -373,8 +400,8 @@ describe('optimized map hook: real clustering and HTML', () => {
     await act(async () => root.render(h(Component, { data: [] })))
     drain()
     expect(visible.size).toBe(0)
-    events.get('dragstart')!()
-    refill()
+    move(127.1)
+    drain()
     expect(frames.size).toBe(0)
     expect(vi.getTimerCount()).toBe(0)
   })
@@ -397,9 +424,8 @@ describe('optimized map hook: real clustering and HTML', () => {
     await mount()
     resetMetrics()
     clockStep = 0.5
-    events.get('dragstart')!()
+    grab()
     move(127.1)
-    vi.advanceTimersByTime(160)
     for (let i = 0; i < 30; i++) {
       move(127.1 + i * 0.000001)
       frame()
@@ -407,8 +433,7 @@ describe('optimized map hook: real clustering and HTML', () => {
     expect(visits).toBe(1)
     expect(attachments).toBe(1)
     expect(detachments).toBe(1)
-    events.get('dragend')!()
-    events.get('idle')!()
+    release()
     drain()
     expect(visible.size).toBe(1)
   })

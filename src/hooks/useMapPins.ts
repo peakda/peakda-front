@@ -18,15 +18,15 @@ const ZOOM_DEBOUNCE_MS = 120
 // 한 프레임에 핀을 갱신하는 데 쓸 협력적 시간 예산(ms). 카카오 CustomOverlay 는 지도에
 // 붙을 때마다 콘텐츠 크기를 읽어(강제 레이아웃) 여러 개를 한 번에 만들면 프레임이 끊긴다.
 // 개수가 아니라 시간으로 자르므로 빠른 기기는 많이, 느린 기기는 적게 만들고 나머지는 다음 프레임에 이어 간다.
-// 초기 표시·필터·줌·idle은 4ms, 이동 중 제한적 보충은 2ms. 한 SDK 호출의 상한은 아니다.
+// 초기 표시·필터·줌·idle·이동 중 보충 모두 같은 예산을 쓴다. 한 SDK 호출의 상한은 아니다.
 // 진행 위치를 보존해 준비 작업을 반복하지 않는다.
 const FRAME_BUDGET_MS = 4
-const MOVING_FRAME_BUDGET_MS = 2
-const MOVING_REFRESH_MS = 160
 // 좌표 결과만 더 넓게 보관한다. 이 여백 전체에 DOM을 붙이지 않는다.
 const QUERY_MARGIN_PX = 200
-// 핀 몸통까지 화면에 걸치는 범위를 준비했는지 확인한다.
-const PIN_EXTENT_PX = 64
+// 이동 중 보충 기준. 준비한 영역(화면 + VIEW_MARGIN_PX)이 화면 + 이만큼을 못 덮으면 보충한다.
+// 즉 VIEW_MARGIN_PX − 이 값(px)만큼 움직일 때마다 한 번 다시 그린다. 핀 몸통(~65px)보다
+// 넉넉해야 보충이 몇 프레임 걸려도 핀이 화면에 걸치기 전에 붙는다.
+const REFILL_MARGIN_PX = 80
 
 // 화면 밖 이만큼(px)까지 미리 그려 둔다. 좌표는 꼬리 끝이라 핀 몸통이 좌우 ~63px·위 ~65px
 // 걸치므로 그보다 커야 가장자리 핀이 잘리지 않고, 프레임 예산에 밀려 늦게 붙는 핀의 여유도 된다.
@@ -249,11 +249,8 @@ export function useMapCluster(
     if (!map) return
 
     let zoomTimer: ReturnType<typeof setTimeout> | undefined
-    let motionTimer: ReturnType<typeof setTimeout> | undefined
     let job: Generator<void, void> | null = null
     let frameId: number | null = null
-    let isDragging = false
-    let isMoving = false
     let isZooming = false
     let coverage: { bounds: MapBounds; level: number } | null = null
 
@@ -271,24 +268,13 @@ export function useMapCluster(
       coverage?.level === map.getLevel() &&
       containsMapBounds(coverage.bounds, viewBounds(map, margin))
 
-    // 같은 범위에서는 rAF를 계속 돌리지 않는다. 이동 이벤트가 왔을 때만 최대 주기로
-    // 범위를 확인한다. 긴 이동 중에도 진행 중인 보충 작업은 끝내어 굶지 않게 한다.
-    const checkMotion = () => {
-      motionTimer = undefined
-      if (!isMoving || isZooming || job) return
-      if (!covered(PIN_EXTENT_PX)) startJob()
-    }
-    const scheduleMotionCheck = () => {
-      if (motionTimer == null && !job && !isZooming) {
-        motionTimer = setTimeout(checkMotion, MOVING_REFRESH_MS)
-      }
-    }
     const tick = () => {
       frameId = null
       if (!job) return
-      if (advanceFrame(job, isMoving ? MOVING_FRAME_BUDGET_MS : FRAME_BUDGET_MS)) {
+      if (advanceFrame(job, FRAME_BUDGET_MS)) {
         job = null
-        if (isMoving) scheduleMotionCheck()
+        // 작업하는 동안 화면이 더 움직였으면 바로 이어서 보충한다.
+        onMove()
       } else {
         frameId = requestAnimationFrame(tick)
       }
@@ -299,34 +285,23 @@ export function useMapCluster(
       })
       frameId = requestAnimationFrame(tick)
     }
+    // 같은 범위에서는 rAF를 돌리지 않는다. 범위 확인은 이동 이벤트마다 하고(O(1)),
+    // 진행 중인 보충은 끊지 않고 끝낸 뒤 tick 에서 다시 확인해 긴 이동에도 굶지 않게 한다.
+    // 드래그·관성·코드로 일으킨 이동 모두 bounds_changed 로 들어온다.
+    const onMove = () => {
+      if (isZooming || job) return
+      if (!covered(REFILL_MARGIN_PX)) startJob()
+    }
     const invalidate = () => {
       cancelJob()
       coverage = null
-      if (isZooming) return
-      if (isMoving) scheduleMotionCheck()
-      else startJob()
-    }
-    const beginMovement = () => {
-      if (!isMoving) cancelJob()
-      isMoving = true
-      scheduleMotionCheck()
-    }
-    const onDragStart = () => {
-      isDragging = true
-      beginMovement()
-    }
-    const onDragEnd = () => {
-      isDragging = false
-      // 관성 이동도 bounds_changed로 받으며, 최종 정착은 idle에서 처리한다.
-      scheduleMotionCheck()
+      if (!isZooming) startJob()
     }
     const onZoomStart = () => {
       clearTimeout(zoomTimer)
       isZooming = true
       cancelJob()
       coverage = null
-      clearTimeout(motionTimer)
-      motionTimer = undefined
     }
     const onZoom = () => {
       onZoomStart()
@@ -335,13 +310,13 @@ export function useMapCluster(
         invalidate()
       }, ZOOM_DEBOUNCE_MS)
     }
+    // 카카오는 드래그를 놓을 때 idle 을 dragend 보다 먼저 보낸다(2026-10 실측, 마우스·터치 동일).
+    // 그래서 드래그 중인지로 거르면 드래그 뒤 정착 갱신이 항상 빠진다.
     const onIdle = () => {
-      if (isDragging) return
       clearTimeout(zoomTimer)
-      clearTimeout(motionTimer)
-      motionTimer = undefined
-      isMoving = isZooming = false
+      isZooming = false
       cancelJob()
+      // 직전 보충이 이미 같은 영역을 덮었으면 다시 순회하지 않는다.
       if (!covered(VIEW_MARGIN_PX)) startJob()
     }
 
@@ -350,21 +325,16 @@ export function useMapCluster(
 
     kakao.maps.event.addListener(map, 'zoom_start', onZoomStart)
     kakao.maps.event.addListener(map, 'zoom_changed', onZoom)
-    kakao.maps.event.addListener(map, 'bounds_changed', beginMovement)
-    kakao.maps.event.addListener(map, 'dragstart', onDragStart)
-    kakao.maps.event.addListener(map, 'dragend', onDragEnd)
+    kakao.maps.event.addListener(map, 'bounds_changed', onMove)
     kakao.maps.event.addListener(map, 'idle', onIdle)
     const entries = entriesRef.current
     return () => {
       clearTimeout(zoomTimer)
-      clearTimeout(motionTimer)
       cancelJob()
       scheduleRef.current = null
       kakao.maps.event.removeListener(map, 'zoom_start', onZoomStart)
       kakao.maps.event.removeListener(map, 'zoom_changed', onZoom)
-      kakao.maps.event.removeListener(map, 'bounds_changed', beginMovement)
-      kakao.maps.event.removeListener(map, 'dragstart', onDragStart)
-      kakao.maps.event.removeListener(map, 'dragend', onDragEnd)
+      kakao.maps.event.removeListener(map, 'bounds_changed', onMove)
       kakao.maps.event.removeListener(map, 'idle', onIdle)
       entries.forEach((e) => e.overlay.setMap(null))
       entries.clear()
