@@ -146,6 +146,85 @@ export function clusterSpots(spots: MapSpot[], level: number): ClusterGroup[] {
   })
 }
 
+/** [west, south, east, north], 지도 SDK의 투영으로 구한 국내 지도 범위. */
+export type MapBounds = [number, number, number, number]
+
+export function containsMapBounds(outer: MapBounds, inner: MapBounds): boolean {
+  return (
+    outer[0] <= inner[0] && outer[1] <= inner[1] && outer[2] >= inner[2] && outer[3] >= inner[3]
+  )
+}
+
+export function isInsideMapBounds(bounds: MapBounds, lat: number, lng: number): boolean {
+  return lng >= bounds[0] && lat >= bounds[1] && lng <= bounds[2] && lat <= bounds[3]
+}
+
+// 화면 밖 재사용 결과가 줌/지역 이동마다 무한히 쌓이지 않게 제한한다.
+const MAX_CACHED_GROUPS = 256
+const MAX_CACHED_MEMBERS = 10_000
+
+/**
+ * 한 데이터 세대의 화면 조회기. 전국 인덱스는 그대로 사용하므로 팬해도 군집은 바뀌지 않는다.
+ * 넓게 받은 마지막 좌표 결과와 실제 표시할 그룹/구성원 캐시는 분리한다.
+ * yield 사이에서 구성원을 펼쳐 훅의 프레임 예산으로 나눠 처리할 수 있다.
+ */
+export function createMapClusterQuery(spots: MapSpot[]) {
+  const groups = new Map<string, ClusterGroup>()
+  let cachedMembers = 0
+  let lastQuery: {
+    bounds: MapBounds
+    zoom: number
+    features: ReturnType<Supercluster<SpotProps>['getClusters']>
+  } | null = null
+
+  return function* query(
+    bounds: MapBounds,
+    level: number,
+    cacheBounds: MapBounds = bounds
+  ): Generator<ClusterGroup, void> {
+    const index = clusterIndex(spots)
+    // level 1~3의 기존 UI는 군집 안의 개별 핀을 전부 표시한다. 군집 중심을 조회하면
+    // 경계 안에 있는 구성원을 놓칠 수 있어, 이때는 원본 포인트 트리를 범위 조회한다.
+    const zoom = level < 4 ? MAX_CLUSTER_ZOOM + 1 : toZoom(level)
+    if (!lastQuery || lastQuery.zoom !== zoom || !containsMapBounds(lastQuery.bounds, bounds)) {
+      const region = containsMapBounds(cacheBounds, bounds) ? cacheBounds : bounds
+      lastQuery = { bounds: [...region], zoom, features: index.getClusters(region, zoom) }
+    }
+
+    for (const feature of lastQuery.features) {
+      const [lng, lat] = feature.geometry.coordinates
+      if (!isInsideMapBounds(bounds, lat, lng)) continue
+      const props = feature.properties
+      const key = 'cluster_id' in props ? `c:${props.cluster_id}` : `p:${props.index}`
+      let group = groups.get(key)
+      if (group) {
+        // 마지막 사용 순서로 보관해 왕복 이동 때 같은 객체와 HTML을 재사용한다.
+        groups.delete(key)
+        groups.set(key, group)
+      } else {
+        const members =
+          'cluster_id' in props
+            ? index
+                .getLeaves(props.cluster_id, Infinity)
+                .map((leaf) => spots[leaf.properties.index])
+            : [spots[props.index]]
+        group = { lat, lng, spots: members }
+        // 매우 큰 단일 군집은 현재 렌더에서만 보유한다. 원본 데이터/활성 오버레이는 유지된다.
+        if (members.length <= MAX_CACHED_MEMBERS) {
+          groups.set(key, group)
+          cachedMembers += members.length
+          while (groups.size > MAX_CACHED_GROUPS || cachedMembers > MAX_CACHED_MEMBERS) {
+            const oldest = groups.keys().next().value!
+            cachedMembers -= groups.get(oldest)!.spots.length
+            groups.delete(oldest)
+          }
+        }
+      }
+      yield group
+    }
+  }
+}
+
 // 카카오 지도의 최대 확대(= 최소 레벨).
 const MAX_ZOOM_LEVEL = 1
 

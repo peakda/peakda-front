@@ -8,9 +8,12 @@ vi.mock('@/components/Map/overlayHtml', () => ({
   createPinHTML: () => '<span>pin</span>',
   createClusterHTML: () => '<span>cluster</span>',
 }))
-vi.mock('@/lib/utils/mapCluster', () => ({
-  clusterSpots: (spots: MapSpot[]) =>
-    spots.map((spot) => ({ lat: spot.lat, lng: spot.lng, spots: [spot] })),
+vi.mock('@/lib/utils/mapCluster', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/utils/mapCluster')>()),
+  createMapClusterQuery: (spots: MapSpot[]) =>
+    function* () {
+      for (const spot of spots) yield { lat: spot.lat, lng: spot.lng, spots: [spot] }
+    },
   pinLabel: (spot: MapSpot) => spot.title,
   canSplitByZoom: () => false,
 }))
@@ -71,6 +74,7 @@ function drain() {
 }
 
 beforeEach(() => {
+  vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
   nextFrame = 0
   clock = 0
   frames = new Map()
@@ -146,7 +150,7 @@ describe('map frame scheduling', () => {
     expect(visible.size).toBe(20)
     const original = [...visible]
     events.get('idle')!()
-    expect(frames.size).toBe(1)
+    expect(frames.size).toBe(0)
     drain()
     expect([...visible]).toEqual(original)
   })
