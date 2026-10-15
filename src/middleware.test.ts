@@ -37,6 +37,15 @@ describe('middleware', () => {
     }
   })
 
+  it('지도로 보낼 때 링크의 utm_* 는 이어 붙이고 다른 쿼리는 버린다', () => {
+    expect(location(middleware(request('/?utm_source=kakao&utm_medium=social&x=1', true)))).toBe(
+      'https://www.peakda.com/map?utm_source=kakao&utm_medium=social'
+    )
+    expect(location(middleware(request('/my/saved?tab=spot&utm_source=kakao')))).toBe(
+      'https://www.peakda.com/map?login=1&utm_source=kakao'
+    )
+  })
+
   it('탐색 전체 목록은 로그인 여부와 무관하게 섹션 경로로 rewrite 하고, 모르는 섹션은 PEAK_NOW 로 보낸다', () => {
     const rewrite = (res: Response) => res.headers.get('x-middleware-rewrite')
 
