@@ -78,7 +78,9 @@ export default function RootLayout({
         <link rel="preconnect" href="//t1.kakaocdn.net" />
       </head>
       <body vaul-drawer-wrapper="" className="bg-gray-100" suppressHydrationWarning>
-        <div className="relative mx-auto flex min-h-dvh w-full max-w-107.5 flex-col overflow-hidden bg-[#FFFFFF]">
+        {/* 앱 화면은 430px 모바일 틀로 감싼다. 반응형인 랜딩 페이지(data-landing)만 틀을 풀고,
+            overflow-hidden 이 있으면 sticky 헤더가 붙지 않아 overflow 도 함께 푼다. */}
+        <div className="relative mx-auto flex min-h-dvh w-full max-w-107.5 flex-col overflow-hidden bg-[#FFFFFF] has-[[data-landing]]:max-w-none has-[[data-landing]]:overflow-visible">
           <Providers>
             <main className="flex flex-1 flex-col">{children}</main>
           </Providers>

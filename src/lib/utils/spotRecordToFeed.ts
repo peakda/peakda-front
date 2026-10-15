@@ -62,6 +62,7 @@ export function toFeedCardProps(
     images: toSummaryImages(record),
     flowers: record.plants.map(toFlowerTag),
     content: record.memo ?? '',
+    contentLink: record.contentLink ?? null,
     reactions: record.reactions,
     ...options,
   }
@@ -95,6 +96,7 @@ export function detailToFeedCardProps(
         : ['/images/explore.png'],
     flowers: record.plants.map(toFlowerTag),
     content: record.memo ?? '',
+    contentLink: record.contentLink ?? null,
     reactions: record.reactions,
     ...options,
   }

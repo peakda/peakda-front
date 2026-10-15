@@ -29,13 +29,15 @@ export function createPinHTML(flowers: FlowerItem[], maxStage: Stage): string {
       ? `<span style="flex-shrink:0;background:${color};color:white;font-size:11px;font-weight:600;border-radius:9999px;padding:2px 5px;">+${flowers.length}</span>`
       : ''
 
+  // 꼬리는 viewBox 확대 없이 같은 좌표로 그린다(예전 viewBox 0 0 14 9 가 10×8 상자에 만들던 모양).
+  // SVG 안 변환을 없애는 이유는 createClusterHTML 의 링 주석 참고.
   return `
     <div style="display:inline-flex;flex-direction:column;align-items:center;">
       <div style="background:white;border:2px solid ${color};border-radius:9999px;padding:6px;display:flex;align-items:center;gap:4px;box-shadow:0 1px 3px rgba(0,0,0,0.15);white-space:nowrap;">
         ${imgs}${badge}
       </div>
-      <svg width="10" height="8" viewBox="0 0 14 9" style="margin-top:-1px;display:block;flex-shrink:0;">
-        <polygon points="0,0 14,0 7,9" fill="${color}"/>
+      <svg width="10" height="8" style="margin-top:-1px;display:block;flex-shrink:0;">
+        <polygon points="0,0.7857 10,0.7857 5,7.2143" fill="${color}"/>
       </svg>
     </div>
   `
@@ -60,12 +62,16 @@ export function createClusterHTML(spots: MapSpot[]): string {
   const circumference = 2 * Math.PI * radius
 
   // 상태별 비율(개수/전체)만큼 링을 각도로 나눈다. dasharray 로 호 길이를, dashoffset 으로
-  // 시작점을 잡고, 그룹을 -90° 돌려 12시 방향부터 시계방향으로 그린다.
+  // 시작점을 잡는다. 원은 12시 방향에서 시작해 시계방향으로 도는 path 로 그린다.
+  // 예전엔 <g> 를 -90° 돌렸는데, 카카오가 드래그 때 오버레이 판을 left/top 으로 옮겨 매 프레임 판 아래를
+  // 다시 처리하므로 SVG 안의 변환이 그 비용(Layerize·PrePaint)을 키웠다. 픽셀 비교로 모양이 같음을 확인했다.
+  // pathLength 를 붙이면 경계 각도가 미세하게 어긋나 눈에 보이므로 붙이지 않는다.
+  const circle = `M${center},${center - radius}A${radius},${radius} 0 1 1 ${center},${center + radius}A${radius},${radius} 0 1 1 ${center},${center - radius}`
   let drawn = 0
   const ring = slices
     .map(({ stage, count }) => {
       const arcLength = (count / spots.length) * circumference
-      const arc = `<circle cx="${center}" cy="${center}" r="${radius}" fill="none" stroke="${STAGE_COLOR[stage]}" stroke-width="${CLUSTER_RING_WIDTH}" stroke-dasharray="${arcLength.toFixed(2)} ${(circumference - arcLength).toFixed(2)}" stroke-dashoffset="${(-drawn).toFixed(2)}"/>`
+      const arc = `<path d="${circle}" fill="none" stroke="${STAGE_COLOR[stage]}" stroke-width="${CLUSTER_RING_WIDTH}" stroke-dasharray="${arcLength.toFixed(2)} ${(circumference - arcLength).toFixed(2)}" stroke-dashoffset="${(-drawn).toFixed(2)}"/>`
       drawn += arcLength
       return arc
     })
@@ -89,7 +95,7 @@ export function createClusterHTML(spots: MapSpot[]): string {
       <svg width="${CLUSTER_SIZE}" height="${CLUSTER_SIZE + CLUSTER_TAIL_HEIGHT}" viewBox="0 0 ${CLUSTER_SIZE} ${CLUSTER_SIZE + CLUSTER_TAIL_HEIGHT}" style="display:block;">
         <polygon points="${center - 7},${CLUSTER_SIZE - 12} ${center + 7},${CLUSTER_SIZE - 12} ${center},${CLUSTER_SIZE + CLUSTER_TAIL_HEIGHT}" fill="${color}"/>
         <circle cx="${center}" cy="${center}" r="${radius}" fill="white"/>
-        <g transform="rotate(-90 ${center} ${center})">${ring}</g>
+        ${ring}
       </svg>
       ${icon}${badge}
     </div>

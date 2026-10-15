@@ -37,6 +37,15 @@ describe('middleware', () => {
     }
   })
 
+  it('지도로 보낼 때 링크의 utm_* 는 이어 붙이고 다른 쿼리는 버린다', () => {
+    expect(location(middleware(request('/?utm_source=kakao&utm_medium=social&x=1', true)))).toBe(
+      'https://www.peakda.com/map?utm_source=kakao&utm_medium=social'
+    )
+    expect(location(middleware(request('/my/saved?tab=spot&utm_source=kakao')))).toBe(
+      'https://www.peakda.com/map?login=1&utm_source=kakao'
+    )
+  })
+
   it('탐색 전체 목록은 로그인 여부와 무관하게 섹션 경로로 rewrite 하고, 모르는 섹션은 PEAK_NOW 로 보낸다', () => {
     const rewrite = (res: Response) => res.headers.get('x-middleware-rewrite')
 
@@ -50,6 +59,22 @@ describe('middleware', () => {
       'https://www.peakda.com/explore/spots/PEAK_NOW'
     )
     expect(rewrite(middleware(request('/explore')))).toBeNull()
+  })
+
+  it('landing 서브도메인의 루트는 로그인 여부와 무관하게 랜딩 페이지로 rewrite 한다', () => {
+    const landing = (loggedIn: boolean) => {
+      const req = new NextRequest(new URL('/', 'https://landing.peakda.com'), {
+        headers: { host: 'landing.peakda.com' },
+      })
+      if (loggedIn) req.cookies.set(AUTH_MARKER, '1')
+      return middleware(req)
+    }
+
+    for (const loggedIn of [false, true]) {
+      const res = landing(loggedIn)
+      expect(res.headers.get('x-middleware-rewrite')).toBe('https://landing.peakda.com/landing')
+      expect(location(res)).toBeNull()
+    }
   })
 
   it('로그인 상태는 보호 경로와 로그인 콜백을 그대로 통과한다', () => {

@@ -62,8 +62,8 @@ export const useFeedListInfinite = (
   )
   return useInfiniteQuery({
     queryKey: ['/api/feed', 'infinite', filter],
-    queryFn: ({ pageParam }) =>
-      feedListApi({ filter, pageRequest: { page: pageParam, size: PAGE_SIZE } }),
+    queryFn: ({ pageParam, signal }) =>
+      feedListApi({ filter, pageRequest: { page: pageParam, size: PAGE_SIZE } }, { signal }),
     initialPageParam: 0,
     getNextPageParam: nextPageParam,
     initialData: initialPage ? { pages: [initialPage], pageParams: [0] } : undefined,
@@ -76,7 +76,7 @@ export const useFeedDetail = (id: number | undefined, initialRecord?: SpotRecord
   const ssr = useSsrInitialQuery<SpotRecordResponse | null>((data) => data === initialRecord)
   return useQuery({
     queryKey: getGetFeedByIdQueryKey(id ?? 0),
-    queryFn: () => feedDetailApi(id!),
+    queryFn: ({ signal }) => feedDetailApi(id!, { signal }),
     enabled: !!id && ssr.enabled,
     initialData: initialRecord,
     staleTime: ssr.staleTime,

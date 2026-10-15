@@ -2,6 +2,9 @@ import type { Metadata } from 'next'
 
 // 검색엔진에 알리는 대표 주소(canonical). 프리뷰 배포에서도 이 주소를 가리켜야 색인이 갈리지 않는다.
 export const SITE_URL = 'https://www.peakda.com'
+// 랜딩 페이지 대표 주소. 같은 Vercel 프로젝트에 붙인 서브도메인으로, middleware 가 루트를 /landing 으로 rewrite 한다.
+export const LANDING_URL = 'https://landing.peakda.com'
+export const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.peakda.app'
 export const SITE_NAME = 'Peakda'
 export const SITE_NAME_KO = '피크다'
 export const SITE_BRAND_NAME = `${SITE_NAME_KO} ${SITE_NAME}`
