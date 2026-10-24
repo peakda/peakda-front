@@ -55,15 +55,6 @@ export function IosLaunchAlertModal({ onClose }: IosLaunchAlertModalProps) {
         className="relative w-full max-w-90 rounded-2xl bg-white px-5 pt-12 pb-5"
         onClick={(e) => e.stopPropagation()}
       >
-        <button
-          type="button"
-          aria-label="닫기"
-          onClick={onClose}
-          className="absolute top-4 right-4 cursor-pointer text-gray-400"
-        >
-          <X className="size-6" />
-        </button>
-
         {isSuccess ? (
           <div className="text-center">
             <h2
@@ -95,6 +86,15 @@ export function IosLaunchAlertModal({ onClose }: IosLaunchAlertModalProps) {
           </div>
         ) : (
           <form noValidate onSubmit={handleSubmit}>
+            {/* 완료 화면은 시안에 X 가 없어 하단 "닫기"로만 닫는다 */}
+            <button
+              type="button"
+              aria-label="닫기"
+              onClick={onClose}
+              className="absolute top-4 right-4 cursor-pointer text-gray-400"
+            >
+              <X className="size-6" />
+            </button>
             <h2
               id="ios-launch-alert-title"
               className="text-center text-xl leading-[1.4] font-bold tracking-[-0.01em] text-gray-950"
@@ -123,6 +123,7 @@ export function IosLaunchAlertModal({ onClose }: IosLaunchAlertModalProps) {
                 onBlur={() => setTouched(true)}
                 className={cn(
                   'rounded-xl',
+                  email ? 'bg-white' : 'border-transparent',
                   showEmailError && 'border-brand-warning focus:border-brand-warning'
                 )}
                 rightIcon={
@@ -139,7 +140,10 @@ export function IosLaunchAlertModal({ onClose }: IosLaunchAlertModalProps) {
                 }
               />
               {showEmailError && (
-                <p id="ios-launch-alert-email-error" className="text-brand-warning mt-1.5 text-sm">
+                <p
+                  id="ios-launch-alert-email-error"
+                  className="text-brand-warning mt-1.5 text-[13px]"
+                >
                   이메일 형식을 확인해 주세요
                 </p>
               )}
@@ -148,20 +152,27 @@ export function IosLaunchAlertModal({ onClose }: IosLaunchAlertModalProps) {
             <div className="mt-4 rounded-xl bg-gray-50 p-4 text-xs leading-[1.6] text-gray-600">
               <p className="font-semibold text-gray-900">수집·이용 안내</p>
               <ul className="mt-1">
-                <li>· 수집 항목: 이메일 주소</li>
-                <li>· 이용 목적: 출시 안내 메일 발송</li>
-                <li>· 보유 기간: 발송 후 지체 없이 파기</li>
+                <li>- 수집 항목: 이메일 주소</li>
+                <li>- 이용 목적: 출시 안내 메일 발송</li>
+                <li>- 보유 기간: 발송 후 지체 없이 파기</li>
               </ul>
             </div>
 
-            <label className="mt-4 flex cursor-pointer items-center gap-2 text-sm text-gray-900">
+            {/* label 로 감싸면 form 안 Radix 의 숨은 input 까지 눌려 두 번 토글된다. TermsForm 처럼 htmlFor 로 잇는다 */}
+            <div className="mt-4 flex items-center gap-2">
               <Checkbox
+                id="ios-launch-alert-consent"
                 checked={consent}
                 onCheckedChange={(checked) => setConsent(checked === true)}
-                className="border border-gray-300 bg-white data-[state=checked]:border-transparent"
+                className="border border-solid border-gray-300 bg-white data-[state=checked]:border-transparent"
               />
-              출시 안내 메일 수신에 동의합니다.
-            </label>
+              <label
+                htmlFor="ios-launch-alert-consent"
+                className="cursor-pointer text-sm text-gray-900"
+              >
+                출시 안내 메일 수신에 동의합니다.
+              </label>
+            </div>
 
             <Button
               type="submit"
