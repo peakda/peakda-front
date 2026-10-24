@@ -88,7 +88,15 @@ class KakaoSDKLoader {
         return
       }
 
-      script.addEventListener('load', loadEngine)
+      script.addEventListener('load', () => {
+        // load 는 응답이 잘리거나 바뀌어 스크립트가 깨져도 온다(error 는 네트워크 실패에만 온다).
+        // 그러면 window.kakao 가 없다 — 타임아웃까지 기다리지 않고 바로 실패시켜 재시도 화면을 띄운다.
+        if (typeof window.kakao?.maps?.load !== 'function') {
+          fail('SDK 초기화 실패')
+          return
+        }
+        loadEngine()
+      })
       script.addEventListener('error', () => fail('SDK 로드 실패'))
       if (script === existing) return
 

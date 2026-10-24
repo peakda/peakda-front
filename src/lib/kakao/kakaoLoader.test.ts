@@ -95,4 +95,24 @@ describe('lib/kakao/kakaoLoader', () => {
     retried.dispatchEvent(new Event('error'))
     await expect(retrying).rejects.toThrow('SDK 로드 실패')
   })
+
+  it('sdk.js 가 load 됐는데 kakao 가 없으면 바로 실패하고, 다시 부르면 새로 붙인다', async () => {
+    const { kakaoLoader } = await loadModule()
+    const loading = kakaoLoader.load('key')
+    const first = document.getElementById('kakao-map-sdk')!
+
+    // 응답이 잘리거나 바뀌어 sdk.js 가 깨진 채 실행된 경우
+    first.dispatchEvent(new Event('load'))
+    await expect(loading).rejects.toThrow('SDK 초기화 실패')
+    expect(first.isConnected).toBe(false)
+
+    const retrying = kakaoLoader.load('key')
+    const retried = document.getElementById('kakao-map-sdk')!
+    expect(retried).not.toBe(first)
+
+    const { finishEngine } = fakeSdkExecuted()
+    retried.dispatchEvent(new Event('load'))
+    finishEngine()
+    await expect(retrying).resolves.toBeUndefined()
+  })
 })

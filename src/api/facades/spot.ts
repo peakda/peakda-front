@@ -12,14 +12,20 @@ import type {
   BloomSlotCategory,
   BloomSlotStatus,
 } from '@/api/facades/generated/peakdaApi.schemas'
+import { shouldRetryQuery } from '@/lib/utils/apiError'
 
 // 기록 작성에서 카카오 장소를 고르면 그 좌표로 Spot 을 찾거나 만든다.
 // 지도 핀 클릭에는 더 이상 쓰지 않는다 — 서버가 노출 명소의 Spot 행을 미리 만들어 준다.
 export const useMatchSpot = () => useMatchGen()
 
 // 서버 컴포넌트(스팟 상세 metadata·첫 HTML)용. 서버 요청에는 사용자 쿠키가 없어 찜 상태는 항상 false 다.
+// 서버 렌더에는 TanStack 재시도가 없어, 백엔드가 잠깐 503 을 내면 그대로 에러 페이지가 된다.
+// 클라이언트 쿼리와 같은 기준(5xx·네트워크 오류만)으로 한 번만 다시 묻는다.
 export async function spotDetailApi(id: number, options?: RequestInit) {
-  const res = await getSpotsById(id, options)
+  const res = await getSpotsById(id, options).catch((error: unknown) => {
+    if (!shouldRetryQuery(0, error)) throw error
+    return getSpotsById(id, options)
+  })
   return res.data.data ?? null
 }
 
