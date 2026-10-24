@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 import { BellIcon, DownloadIcon, GlobeIcon } from '@/app/landing/_components/LandingIcons'
+import { IosLaunchAlertTrigger } from '@/app/landing/_components/IosLaunchAlertTrigger'
 import { LandingCarousel } from '@/app/landing/_components/LandingCarousel'
 import { ShowcaseCard, type ShowcaseSlide } from '@/app/landing/_components/ShowcaseCard'
 import {
@@ -196,8 +197,9 @@ export default function LandingPage() {
                 <ArrowRight aria-hidden className="size-5 shrink-0 text-gray-500" />
               </a>
 
-              {/* iOS 출시 알림 신청 방식(이메일 수집)이 정해지면 링크/버튼으로 바꾼다 */}
-              <div className={secondaryOptionClass}>
+              <IosLaunchAlertTrigger
+                className={cn(secondaryOptionClass, 'w-full cursor-pointer text-left')}
+              >
                 <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-green-50 text-green-700">
                   <BellIcon className="size-6" />
                 </span>
@@ -210,7 +212,7 @@ export default function LandingPage() {
                   </span>
                 </span>
                 <ArrowRight aria-hidden className="size-5 shrink-0 text-gray-500" />
-              </div>
+              </IosLaunchAlertTrigger>
             </div>
           </div>
 
@@ -288,9 +290,9 @@ export default function LandingPage() {
             >
               Android 앱 다운로드
             </a>
-            <p className="text-sm leading-[1.4] text-gray-500 md:text-xl md:leading-[1.35]">
+            <IosLaunchAlertTrigger className="cursor-pointer text-sm leading-[1.4] text-gray-500 md:text-xl md:leading-[1.35]">
               iOS 앱 출시 알림 받기 →
-            </p>
+            </IosLaunchAlertTrigger>
           </div>
         </div>
       </section>
