@@ -22,6 +22,9 @@ function toChapterBadge(badge: { displayName: string; status: BloomStageStatus }
 
 const HERO_PLACEHOLDER = '/images/explore.png'
 
+// 한국관광콘텐츠랩 사진·정보로 만든 큐레이션. 출처 표기를 위해 푸터 문구를 바꾼다(2026년 11월 가을 산책 특집).
+const KTO_CONTENT_LAB_CURATION_IDS = [7]
+
 // 챕터 번호·소제목 포인트 컬러. 시안 기준 01 핑크 · 02 초록 · 03 옐로 순으로 돌려 쓴다.
 const CHAPTER_ACCENTS = ['text-brand-primary', 'text-brand-secondary', 'text-yellow-500']
 
@@ -179,7 +182,9 @@ export function CreatorDetailClient({ curation }: CreatorDetailClientProps) {
 
       {/* 에디토리얼 푸터 */}
       <p className="text-text-tertiary pb-6 text-center text-[11px]">
-        PEAKDA · 이번 주말, 가장 반짝하는 순간을 찾아드려요
+        {KTO_CONTENT_LAB_CURATION_IDS.includes(curation.id)
+          ? '관광정보·사진 ⓒ한국관광콘텐츠랩'
+          : 'PEAKDA · 이번 주말, 가장 반짝하는 순간을 찾아드려요'}
       </p>
 
     </div>
