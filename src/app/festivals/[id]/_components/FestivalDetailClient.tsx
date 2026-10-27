@@ -17,6 +17,9 @@ import { track } from '@/lib/analytics'
 // 축제에는 대표 이미지가 없을 수 있다(에디토리얼이 없으면 heroImageUrl 도 없다).
 const HERO_PLACEHOLDER = '/images/explore.png'
 
+// 한국관광콘텐츠랩 사진·정보로 만든 에디토리얼. 본문 끝에 출처를 표기한다(부여국화축제).
+const KTO_CONTENT_LAB_FESTIVAL_IDS = [748]
+
 // '2026-07-19' → '7월 19일'. 파싱 실패 시 원본 반환.
 const formatDate = (iso: string) => {
   const [, m, d] = iso.split('-')
@@ -220,6 +223,13 @@ export function FestivalDetailClient({ festival }: FestivalDetailClientProps) {
             {festival.homepageUrl}
           </a>
         </div>
+      )}
+
+      {/* 출처 표기 — 큐레이션 상세 푸터와 같은 모양 */}
+      {KTO_CONTENT_LAB_FESTIVAL_IDS.includes(festivalId) && (
+        <p className="text-text-tertiary py-5 text-center text-[11px]">
+          관광정보·사진 ⓒ한국관광콘텐츠랩
+        </p>
       )}
 
       {/* 하단 CTA */}
