@@ -215,6 +215,8 @@ function RecordPageContent() {
       setPendingPhotoCount(0)
     }
     if (isUnmounted()) return
+    if (compressed.length < files.length) toast.error('올릴 수 없는 형식의 사진은 뺐어요')
+    if (compressed.length === 0) return
     const newItems = compressed.map((file) => ({ file, previewUrl: createPreviewUrl(file) }))
     setPhotoItems((prev) => [...prev, ...newItems].slice(0, 5))
     markAction('photo_add')
