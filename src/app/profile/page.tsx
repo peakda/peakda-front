@@ -18,7 +18,7 @@ import { useSignUpComplete } from '@/hooks/useSignUpComplete'
 import { LeftArrow } from '@/components/ui/button/LeftArrow'
 import { toast } from 'sonner'
 import type { SignupCompleteRequestFavoriteCategoriesItem } from '@/api/facades/generated/peakdaApi.schemas'
-import { compressImage } from '@/lib/utils/image'
+import { compressImage, UnsupportedImageError } from '@/lib/utils/image'
 // 기타 식물 선택은 임시로 숨김 — 다시 열 때 아래 OtherPlantPicker 주석과 함께 푼다
 // import { OtherPlantPicker } from './_components/OtherPlantPicker'
 import { savePendingCustomFavoritePlantIds } from '@/lib/utils/customFavoritePlants'
@@ -77,7 +77,14 @@ export default function ProfilePage() {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const original = e.target.files?.[0]
     if (!original) return
-    const file = await compressImage(original)
+    let file: File
+    try {
+      file = await compressImage(original)
+    } catch (error) {
+      if (!(error instanceof UnsupportedImageError)) throw error
+      toast.error('올릴 수 없는 형식의 사진이에요. 다른 사진을 골라주세요.')
+      return
+    }
     const blobUrl = URL.createObjectURL(file)
     setPreview(blobUrl)
     uploadImage(
