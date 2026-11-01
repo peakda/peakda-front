@@ -10,7 +10,7 @@ import {
   clearNativeAuthSession,
   exchangeNativeAuthorizationCode,
   getNativeAuthSession,
-  isNativeAndroid,
+  isNativeApp,
 } from '@/lib/auth/nativeAuth'
 import { setAuthMarker, takeReturnTo } from '@/lib/auth/session'
 import { useLoginSheetStore } from '@/stores/useLoginSheetStore'
@@ -46,7 +46,7 @@ export function NativeAuthManager() {
   const router = useRouter()
 
   useEffect(() => {
-    if (!isNativeAndroid()) return
+    if (!isNativeApp()) return
 
     const handleAppUrl = (url: string) => {
       const code = codeFromAppUrl(url)

@@ -20,6 +20,13 @@ export interface NativeAuthSession {
   signupTokenExpiresIn?: number
 }
 
+// 네이티브 앱(Android·iOS). 토큰 저장·Bearer 인증·딥링크 로그인처럼 두 앱이 같은 흐름을 쓰는 곳에서 쓴다.
+// Capacitor 플랫폼은 android·ios·web 뿐이라 Android·웹에서는 isNativeAndroid 와 항상 같은 값이다.
+export function isNativeApp(): boolean {
+  return Capacitor.isNativePlatform()
+}
+
+// 하드웨어 뒤로가기·알림 채널처럼 Android 에만 있는 동작에서만 쓴다.
 export function isNativeAndroid(): boolean {
   return Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android'
 }
@@ -29,7 +36,7 @@ function getBaseUrl(): string {
 }
 
 async function readSession(): Promise<NativeAuthSession | null> {
-  if (!isNativeAndroid()) return null
+  if (!isNativeApp()) return null
 
   const { value } = await NativeSecureStore.get({ key: STORAGE_KEY })
   if (!value) return null
@@ -51,7 +58,7 @@ export async function getNativeAuthSession(): Promise<NativeAuthSession | null> 
 }
 
 export async function clearNativeAuthSession(): Promise<void> {
-  if (!isNativeAndroid()) return
+  if (!isNativeApp()) return
   await NativeSecureStore.remove({ key: STORAGE_KEY })
 }
 

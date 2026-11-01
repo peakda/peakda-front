@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Android 스플래시(android/app/src/main/res/drawable*/splash.png)와 같은 규칙:
+  흰 배경, 화면 가운데 로고(세로 위치는 아래 제약 주석 참고), 로고의 긴 쪽이 화면 짧은 변의 30%, 문구 없음.
+  배경은 다크 모드에서도 흰색으로 고정한다(capacitor.config 의 backgroundColor #ffffff 와 같음).
+  @capacitor/splash-screen 도 이 스토리보드를 그대로 띄우므로 런치 화면과 스플래시가 같게 보인다.
+-->
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17132" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
+    <device id="retina4_7" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17105"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="EHf-IW-A2E">
+            <objects>
+                <viewController id="01J-lp-oVM" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Pkd-Vw-001">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Splash" translatesAutoresizingMaskIntoConstraints="NO" id="snD-IY-ifK">
+                                <rect key="frame" x="131.5" y="277" width="112.5" height="112.5"/>
+                                <constraints>
+                                    <!-- 정사각 틀에 aspectFit 으로 넣어 로고의 긴 쪽(세로)이 틀 크기가 된다 -->
+                                    <constraint firstAttribute="width" secondItem="snD-IY-ifK" secondAttribute="height" multiplier="1:1" id="Pkd-Ar-001"/>
+                                </constraints>
+                            </imageView>
+                            <!-- 로고 세로 위치를 잡는 보이지 않는 간격 뷰 (안전 영역 위쪽부터 화면 높이의 43.5%) -->
+                            <view hidden="YES" userInteractionEnabled="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Pkd-Sp-001">
+                                <rect key="frame" x="0.0" y="20" width="0.0" height="290"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="0.0" id="Pkd-Sw-001"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="Pkd-Sa-001"/>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <!-- 로고 세로 위치 = 안전 영역 위쪽 + 화면 높이 × 0.435. 화면 중앙(centerY)에 두지 않는 이유:
+                                 StatusBar(overlaysWebView: false)가 WebView 를 상태바 높이만큼 내리고 SplashScreen 플러그인이
+                                 이 화면을 그 WebView 안에 붙여, 플러그인 스플래시는 화면이 상태바 높이만큼 아래로 밀려 그려진다.
+                                 그래서 화면 중앙 기준이면 시스템 런치 화면 → 플러그인 스플래시로 넘어갈 때 로고가 그만큼 아래로 튄다.
+                                 두 경우에 화면상 위치가 같은 것은 안전 영역 위쪽(상태바 아래)과 뷰 높이(창 높이)뿐이라 이 둘로만 잡는다.
+                                 0.435 는 Face ID 아이폰에서 화면 중앙과 ±8pt 안에 오는 값이다(0.5 - 안전 영역 위쪽/화면 높이). -->
+                            <constraint firstItem="snD-IY-ifK" firstAttribute="centerX" secondItem="Pkd-Vw-001" secondAttribute="centerX" id="Pkd-Cx-001"/>
+                            <constraint firstItem="snD-IY-ifK" firstAttribute="centerY" secondItem="Pkd-Sp-001" secondAttribute="bottom" id="Pkd-Cy-001"/>
+                            <constraint firstItem="Pkd-Sp-001" firstAttribute="top" secondItem="Pkd-Sa-001" secondAttribute="top" id="Pkd-St-001"/>
+                            <constraint firstItem="Pkd-Sp-001" firstAttribute="leading" secondItem="Pkd-Vw-001" secondAttribute="leading" id="Pkd-Sl-001"/>
+                            <constraint firstItem="Pkd-Sp-001" firstAttribute="height" secondItem="Pkd-Vw-001" secondAttribute="height" multiplier="0.435" id="Pkd-Sh-001"/>
+                            <!-- 짧은 변의 30%: 너비 30% 를 원하되(999) 높이 30% 를 넘지 않게 해(필수) 가로 화면에서도 짧은 변 기준이 된다.
+                                 999 는 이미지 원래 크기를 지키려는 압축 저항(750)보다 높아야 한다. 같으면 로고가 원래 크기 쪽으로 커진다. -->
+                            <constraint firstItem="snD-IY-ifK" firstAttribute="width" secondItem="Pkd-Vw-001" secondAttribute="width" multiplier="0.3" priority="999" id="Pkd-Wd-001"/>
+                            <constraint firstItem="snD-IY-ifK" firstAttribute="width" relation="lessThanOrEqual" secondItem="Pkd-Vw-001" secondAttribute="height" multiplier="0.3" id="Pkd-Ht-001"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="53" y="375"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="Splash" width="379" height="400"/>
+    </resources>
+</document>
