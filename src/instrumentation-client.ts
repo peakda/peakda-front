@@ -15,8 +15,10 @@ Sentry.init({
   // Vercel 밖(로컬 pnpm build)에서는 SDK 기본값이 'production' 이라 운영 이슈와 섞인다
   environment: process.env.NEXT_PUBLIC_VERCEL_ENV ?? 'local',
 
-  // 안드로이드 앱 WebView 도 같은 번들을 띄우므로 태그로 구분한다
-  initialScope: { tags: { platform: Capacitor.isNativePlatform() ? 'android-app' : 'web' } },
+  // 앱 WebView(android-app·ios-app)도 같은 번들을 띄우므로 태그로 구분한다
+  initialScope: {
+    tags: { platform: Capacitor.isNativePlatform() ? `${Capacitor.getPlatform()}-app` : 'web' },
+  },
 
   // 4xx 는 401 refresh·404 같은 정상 흐름이라 노이즈. 서버 실패(5xx)만 남긴다
   beforeSend(event, hint) {

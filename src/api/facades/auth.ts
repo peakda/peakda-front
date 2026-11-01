@@ -12,7 +12,7 @@ import {
   usePostAuthSignupProfileImage as useUploadSignupProfileImageGen,
 } from '@/api/facades/generated/auth/auth'
 import type { SignupCompleteRequest } from '@/api/facades/generated/peakdaApi.schemas'
-import { applyAppTokenResponse, isNativeAndroid } from '@/lib/auth/nativeAuth'
+import { applyAppTokenResponse, isNativeApp } from '@/lib/auth/nativeAuth'
 import { useIsLoggedIn } from '@/hooks/useIsLoggedIn'
 import { markSignedUp, takeLoginProvider, track } from '@/lib/analytics'
 
@@ -79,7 +79,7 @@ export const useCompleteSignup = () => {
         // 뒤이은 회원 정보 조회에서 사용자를 식별할 때 가입일·가입 플랫폼을 함께 남긴다.
         markSignedUp()
         // 앱 가입은 signup token을 Bearer로 보내며, 완료 응답의 새 토큰 쌍으로 즉시 교체한다.
-        if (isNativeAndroid() && res.data.data) await applyAppTokenResponse(res.data.data)
+        if (isNativeApp() && res.data.data) await applyAppTokenResponse(res.data.data)
         await queryClient.invalidateQueries({ queryKey: getGetAuthMeQueryKey() })
       },
     },

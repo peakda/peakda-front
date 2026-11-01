@@ -6,7 +6,7 @@ import { useLoginSheetStore } from '@/stores/useLoginSheetStore'
 import * as nativeAuth from '@/lib/auth/nativeAuth'
 
 vi.mock('@/lib/auth/nativeAuth', () => ({
-  isNativeAndroid: vi.fn(() => false),
+  isNativeApp: vi.fn(() => false),
   getNativeAuthorizationHeader: vi.fn(async () => null),
   refreshNativeAuthSession: vi.fn(async () => ({})),
   clearNativeAuthSession: vi.fn(async () => undefined),
@@ -40,7 +40,7 @@ describe('customInstance', () => {
   beforeEach(() => {
     fetchMock.mockReset()
     vi.stubGlobal('fetch', fetchMock)
-    vi.mocked(nativeAuth.isNativeAndroid).mockReturnValue(false)
+    vi.mocked(nativeAuth.isNativeApp).mockReturnValue(false)
     useLoginSheetStore.setState({ isOpen: false })
     clearCookies()
   })
@@ -180,9 +180,9 @@ describe('customInstance', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 
-  describe('네이티브(Android)', () => {
+  describe('네이티브 앱(Android·iOS)', () => {
     beforeEach(() => {
-      vi.mocked(nativeAuth.isNativeAndroid).mockReturnValue(true)
+      vi.mocked(nativeAuth.isNativeApp).mockReturnValue(true)
       vi.mocked(nativeAuth.getNativeAuthorizationHeader).mockResolvedValue('Bearer app-token')
       vi.mocked(nativeAuth.refreshNativeAuthSession).mockReset()
       vi.mocked(nativeAuth.clearNativeAuthSession).mockReset()

@@ -3,7 +3,7 @@ import { useLoginSheetStore } from '@/stores/useLoginSheetStore'
 import {
   clearNativeAuthSession,
   getNativeAuthorizationHeader,
-  isNativeAndroid,
+  isNativeApp,
   refreshNativeAuthSession,
 } from '@/lib/auth/nativeAuth'
 import { ApiError } from '@/lib/utils/apiError'
@@ -33,7 +33,7 @@ async function runRefresh(): Promise<void> {
 }
 
 export const customInstance = async <T>(url: string, options?: RequestInit): Promise<T> => {
-  const native = isNativeAndroid()
+  const native = isNativeApp()
   const request = async () => {
     const authorization = native ? await getNativeAuthorizationHeader(url) : null
     const headers = new Headers(options?.headers)

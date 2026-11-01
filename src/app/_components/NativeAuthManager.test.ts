@@ -30,7 +30,7 @@ vi.mock('@/lib/analytics', () => ({ track: vi.fn(), takeLoginProvider: vi.fn() }
 vi.mock('sonner', () => ({ toast: { error: vi.fn() } }))
 // 서버의 로그인 code 는 일회성이다 — 같은 code 의 두 번째 교환은 실패한다.
 vi.mock('@/lib/auth/nativeAuth', () => ({
-  isNativeAndroid: () => true,
+  isNativeApp: () => true,
   getNativeAuthSession: () => Promise.resolve(null),
   clearNativeAuthSession: () => Promise.resolve(),
   exchangeNativeAuthorizationCode: vi.fn((code: string) => {
