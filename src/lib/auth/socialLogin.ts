@@ -1,16 +1,16 @@
 import { Browser } from '@capacitor/browser'
-import { isNativeAndroid } from '@/lib/auth/nativeAuth'
+import { isNativeApp } from '@/lib/auth/nativeAuth'
 import { trackLoginStart } from '@/lib/analytics'
 
-// 웹은 백엔드가 HttpOnly 쿠키를 심는 기존 OAuth 흐름을 유지한다. Android는 Custom Tab을
-// 열고, 백엔드가 peakda://auth/callback?code=... 로 복귀시키는 앱 전용 흐름을 사용한다.
+// 웹은 백엔드가 HttpOnly 쿠키를 심는 기존 OAuth 흐름을 유지한다. 앱은 인앱 브라우저(Android Custom Tab,
+// iOS SFSafariViewController)를 열고, 백엔드가 peakda://auth/callback?code=... 로 복귀시키는 앱 전용 흐름을 사용한다.
 export type SocialLoginProvider = 'google' | 'kakao' | 'naver'
 
 async function redirectToSocialLogin(provider: SocialLoginProvider): Promise<void> {
   // 외부 로그인 화면에서 돌아오지 않는 비율을 보려고 떠나기 전에 보낸다.
   trackLoginStart(provider)
   const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? ''
-  if (isNativeAndroid()) {
+  if (isNativeApp()) {
     await Browser.open({ url: `${baseUrl}/oauth2/authorization/${provider}?client=app` })
     return
   }

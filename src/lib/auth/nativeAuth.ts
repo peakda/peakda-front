@@ -20,6 +20,13 @@ export interface NativeAuthSession {
   signupTokenExpiresIn?: number
 }
 
+// 네이티브 앱(Android·iOS). 토큰 저장·Bearer 인증·딥링크 로그인처럼 두 앱이 같은 흐름을 쓰는 곳에서 쓴다.
+// Capacitor 플랫폼은 android·ios·web 뿐이라 Android·웹에서는 isNativeAndroid 와 항상 같은 값이다.
+export function isNativeApp(): boolean {
+  return Capacitor.isNativePlatform()
+}
+
+// 하드웨어 뒤로가기·알림 채널처럼 Android 에만 있는 동작에서만 쓴다.
 export function isNativeAndroid(): boolean {
   return Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android'
 }
@@ -29,7 +36,7 @@ function getBaseUrl(): string {
 }
 
 async function readSession(): Promise<NativeAuthSession | null> {
-  if (!isNativeAndroid()) return null
+  if (!isNativeApp()) return null
 
   const { value } = await NativeSecureStore.get({ key: STORAGE_KEY })
   if (!value) return null
@@ -51,7 +58,7 @@ export async function getNativeAuthSession(): Promise<NativeAuthSession | null> 
 }
 
 export async function clearNativeAuthSession(): Promise<void> {
-  if (!isNativeAndroid()) return
+  if (!isNativeApp()) return
   await NativeSecureStore.remove({ key: STORAGE_KEY })
 }
 
@@ -105,6 +112,19 @@ async function requestAppToken(path: string, payload: Record<string, string>): P
 
 export async function exchangeNativeAuthorizationCode(code: string): Promise<NativeAuthSession> {
   const token = await requestAppToken('/api/auth/app/token', { code })
+  return applyAppTokenResponse(token)
+}
+
+export interface AppleCredential {
+  identityToken: string
+  authorizationCode: string
+  /** 앱이 만든 nonce 원문. 애플 요청에는 이 값의 SHA-256 이 들어갔다. */
+  nonce: string
+}
+
+// iOS Sign in with Apple. 응답은 소셜 로그인 코드 교환과 같은 형식이라 같은 방식으로 저장한다.
+export async function exchangeAppleIdentityToken(credential: AppleCredential): Promise<NativeAuthSession> {
+  const token = await requestAppToken('/api/auth/app/apple', { ...credential })
   return applyAppTokenResponse(token)
 }
 

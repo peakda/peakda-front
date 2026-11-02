@@ -14,7 +14,7 @@ import {
   track,
   trackPageView,
 } from '@/lib/analytics'
-import { isNativeAndroid } from '@/lib/auth/nativeAuth'
+import { isNativeApp } from '@/lib/auth/nativeAuth'
 import { AUTH_MARKER_CHANGED_EVENT } from '@/lib/auth/session'
 
 // Mixpanel 초기화, 페이지뷰, 로그인 사용자 식별, 앱 재방문을 맡는다.
@@ -46,7 +46,7 @@ export function AnalyticsManager() {
 
   // 백그라운드에서 다시 열면 화면 이동이 없어 페이지뷰가 안 생긴다. 보기만 하고 닫은 재방문도 잡기 위해 따로 보낸다.
   useEffect(() => {
-    if (!isNativeAndroid()) return
+    if (!isNativeApp()) return
 
     App.getInfo()
       .then((info) => setAppVersion(info.version))
