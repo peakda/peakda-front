@@ -153,7 +153,12 @@ export async function getNativeAuthorizationHeader(url: string): Promise<string 
   if (!session) return null
 
   // 가입 중에는 signup API에만 가입 세션 토큰을 보낸다.
-  const token = url.startsWith('/api/auth/signup/') ? session.signupToken : session.accessToken
+  // 닉네임 중복확인은 프로필 수정에서도 쓰므로, 서버처럼 가입 토큰이 없으면 액세스 토큰으로 인증한다.
+  const token = url.startsWith('/api/auth/signup/nickname/check')
+    ? (session.signupToken ?? session.accessToken)
+    : url.startsWith('/api/auth/signup/')
+      ? session.signupToken
+      : session.accessToken
   if (!token) return null
   return `${session.tokenType ?? 'Bearer'} ${token}`
 }
