@@ -7,6 +7,7 @@ import {
   LOGIN_SHEET_QUERY,
   hasAuthMarker,
   isProtectedPath,
+  isReloadingMarkerChange,
   setReturnTo,
 } from '@/lib/auth/session'
 import { useLoginSheetStore } from '@/stores/useLoginSheetStore'
@@ -42,12 +43,14 @@ export function LoginGuard() {
   // 로그인 전에 받아 둔 보호 경로 prefetch 는 미들웨어의 /map?login=1 리다이렉트까지 캐시하고 있다.
   // 로그인이 클라이언트 이동(네이티브 로그인·가입 완료 등)으로 끝나면 그 캐시가 남아, 로그인 직후
   // + 버튼을 눌러도 로그인 시트로 돌아간다. 마커 값이 실제로 바뀔 때 라우터 캐시를 비운다.
+  // 곧바로 전체 로드로 떠나는 경우는 새 페이지가 캐시 없이 시작하므로 비우지 않는다 (setAuthMarker 참고).
   useEffect(() => {
     let prev = hasAuthMarker()
-    const handleChange = () => {
+    const handleChange = (event: Event) => {
       const next = hasAuthMarker()
       if (next === prev) return
       prev = next
+      if (isReloadingMarkerChange(event)) return
       router.refresh()
     }
 
