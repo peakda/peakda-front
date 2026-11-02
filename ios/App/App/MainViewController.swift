@@ -1,4 +1,5 @@
 import UIKit
+import WebKit
 import Capacitor
 
 // 앱 타깃 안의 로컬 플러그인은 자동으로 발견되지 않아 여기서 직접 등록한다.
@@ -11,11 +12,28 @@ class MainViewController: CAPBridgeViewController {
         bridge?.registerPluginInstance(NativeSecureStorePlugin())
         bridge?.registerPluginInstance(NativeAppleSignInPlugin())
         installNavigationErrorFilter()
-        // 웹은 viewport-fit=cover 를 쓰지 않아(src/app/layout.tsx — Android 를 위한 선택) env(safe-area-inset-bottom) 이 0 이다.
-        // iOS 는 WebView 가 홈 인디케이터 밑까지 깔려 하단 고정 버튼·내비게이션이 그 위에 겹치므로,
-        // 아래쪽 안전 영역을 WebKit 의 가려진 영역으로 넘겨 고정 요소가 그 위에 놓이게 한다.
-        // Android 는 네이티브가 WebView 를 내비게이션 바 위에 배치해 해당 없음.
-        webView?.scrollView.contentInsetAdjustmentBehavior = .always
+        enableViewportFitCover()
+    }
+
+    // 웹은 viewport-fit=cover 를 쓰지 않는다(src/app/layout.tsx — Android 를 위한 선택). 그러면 iOS 에서
+    // env(safe-area-inset-bottom) 이 0 이라, 홈 인디케이터 밑까지 깔린 WebView 에서 하단 내비게이션 배경이
+    // 화면 끝까지 내려가지 못하고 하단 고정 버튼이 홈 인디케이터에 겹친다.
+    // iOS 앱에서만 cover 를 덧붙여 웹이 env(safe-area-inset-bottom) 으로 여백을 직접 잡게 한다(Nav.tsx 등).
+    // 첫 화면이 그려지기 전에 바꾸도록 파싱 중에 viewport 태그를 찾아 고친다. React 가 hydration 때
+    // viewport 태그를 하나 더 넣고 WebKit 은 마지막 태그를 따르므로, 새로 들어오는 태그까지 모두 고친다.
+    private func enableViewportFitCover() {
+        let source = """
+        (function () {
+          var patch = function () {
+            document.querySelectorAll('meta[name="viewport"]').forEach(function (meta) {
+              if (meta.content.indexOf('viewport-fit') === -1) meta.content += ', viewport-fit=cover';
+            });
+          };
+          new MutationObserver(patch).observe(document, { childList: true, subtree: true });
+        })();
+        """
+        let script = WKUserScript(source: source, injectionTime: .atDocumentStart, forMainFrameOnly: true)
+        webView?.configuration.userContentController.addUserScript(script)
     }
 
     // 첫 페이지를 불러오기 전(viewDidLoad 의 loadWebView 이전)에 Capacitor 의 이동 처리기를 감싼다.

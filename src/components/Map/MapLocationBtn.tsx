@@ -16,7 +16,8 @@ export function MapLocationBtn({ onLocate }: MapLocationBtnProps) {
     <LocationBtn
       onLocate={onLocate}
       style={{
-        bottom: snapHeight > 0 ? `${snapHeight + 16}px` : '96px',
+        bottom:
+          snapHeight > 0 ? `${snapHeight + 16}px` : 'calc(96px + env(safe-area-inset-bottom))',
         transition: 'bottom 0.5s cubic-bezier(0.32,0.72,0,1)',
       }}
     />

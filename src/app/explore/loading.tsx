@@ -28,7 +28,7 @@ export default function Loading() {
     <div
       aria-busy="true"
       aria-label="탐색 불러오는 중"
-      className="relative flex min-h-screen w-full flex-col bg-white pb-24"
+      className="relative flex min-h-screen w-full flex-col bg-white pb-[calc(6rem+env(safe-area-inset-bottom))]"
     >
       <div className="flex h-14 items-center justify-between px-4">
         <div className="h-6 w-12 animate-pulse rounded bg-gray-200" />

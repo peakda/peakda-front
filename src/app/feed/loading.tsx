@@ -7,7 +7,7 @@ export default function Loading() {
     <div
       aria-busy="true"
       aria-label="피드 불러오는 중"
-      className="bg-bg-primary relative flex min-h-screen flex-col pb-24"
+      className="bg-bg-primary relative flex min-h-screen flex-col pb-[calc(6rem+env(safe-area-inset-bottom))]"
     >
       <div className="flex h-14 items-center px-4">
         <div className="h-6 w-12 animate-pulse rounded bg-gray-200" />

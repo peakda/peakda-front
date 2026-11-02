@@ -229,7 +229,7 @@ export function Drawer() {
       <VaulDrawer.Root key="sheet" open={isOpen} onOpenChange={(open) => !open && closeDrawer()}>
         <VaulDrawer.Portal>
           <VaulDrawer.Overlay className="fixed inset-0 z-100 bg-black/40" />
-          <VaulDrawer.Content className="fixed right-0 bottom-0 left-0 z-100 mx-auto flex max-w-[430px] flex-col rounded-t-[20px] bg-white outline-none">
+          <VaulDrawer.Content className="fixed right-0 bottom-0 left-0 z-100 mx-auto flex max-w-[430px] flex-col rounded-t-[20px] bg-white pb-[env(safe-area-inset-bottom)] outline-none">
             <VaulDrawer.Title className="sr-only">{title}</VaulDrawer.Title>
             <VaulDrawer.Description className="sr-only">{description}</VaulDrawer.Description>
             <div className="mp-no-track mx-auto mt-4 mb-2 h-1.5 w-12 shrink-0 rounded-full bg-zinc-300" />
@@ -295,7 +295,7 @@ export function Drawer() {
       <VaulDrawer.Portal>
         <VaulDrawer.Overlay className="pointer-events-none fixed inset-0 z-100 bg-black/10 opacity-100!" />
 
-        <VaulDrawer.Content className="pointer-events-auto fixed right-0 bottom-0 left-0 z-100 mx-auto flex h-full max-w-[430px] flex-col overflow-hidden rounded-t-[20px] bg-white outline-none">
+        <VaulDrawer.Content className="pointer-events-auto fixed right-0 bottom-0 left-0 z-100 mx-auto flex h-full max-w-[430px] flex-col overflow-hidden rounded-t-[20px] bg-white pb-[env(safe-area-inset-bottom)] outline-none">
           <VaulDrawer.Title className="sr-only">
             {type === 'filter' ? '검색 필터' : '명소 정보'}
           </VaulDrawer.Title>
