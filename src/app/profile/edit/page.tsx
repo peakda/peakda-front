@@ -264,7 +264,7 @@ export default function ProfileEditPage() {
       </div>
 
       {/* 저장 */}
-      <div className="fixed right-0 bottom-2 left-0 z-10 mx-auto max-w-107.5 px-4">
+      <div className="fixed right-0 bottom-[calc(0.5rem+env(safe-area-inset-bottom))] left-0 z-10 mx-auto max-w-107.5 px-4">
         <Button
           variant="filled"
           size="lg"

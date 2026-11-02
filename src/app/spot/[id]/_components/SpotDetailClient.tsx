@@ -183,7 +183,7 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
   }
 
   return (
-    <div className="bg-bg-primary relative flex min-h-screen flex-col pb-28">
+    <div className="bg-bg-primary relative flex min-h-screen flex-col pb-[calc(7rem+env(safe-area-inset-bottom))]">
       {/* 대표 이미지 — 뒤로가기를 이미지 위에 겹친다 */}
       <div className="relative h-64 bg-gray-200">
         {spot.representativeImageUrl && (
@@ -313,7 +313,7 @@ export function SpotDetailClient({ initialSpot }: SpotDetailClientProps) {
       </div>
 
       {/* 하단 CTA */}
-      <div className="fixed right-0 bottom-0 left-0 z-10 mx-auto flex max-w-107.5 items-center gap-3 border-t border-gray-100 bg-white px-4 py-3">
+      <div className="fixed right-0 bottom-0 left-0 z-10 mx-auto flex max-w-107.5 items-center gap-3 border-t border-gray-100 bg-white px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
         <button
           type="button"
           aria-label="찜하기"

@@ -57,9 +57,8 @@ export default function ProfilePage() {
     onSuccess: () => {
       savePendingCustomFavoritePlantIds(customPlantIds)
       // 가입이 끝나야 정식 인증 상태 — 이 시점에 마커를 심어야 미들웨어가 /map 을 통과시킨다.
-      setAuthMarker()
-      // router.replace 는 마커 변경으로 걸린 router.refresh 를 취소해 로그인 전 prefetch 캐시가 남는다.
-      // 전체 로드로 라우터 캐시를 비워, 가입 직후 보호 경로가 로그인 시트로 돌아가지 않게 한다.
+      setAuthMarker({ reloading: true })
+      // 전체 로드로 라우터 캐시를 비워, 로그인 전 prefetch 가 남아 가입 직후 보호 경로가 로그인 시트로 돌아가지 않게 한다.
       window.location.replace('/map')
     },
   })
@@ -253,7 +252,7 @@ export default function ProfilePage() {
           <p className="text-sm text-rose-500">기본 꽃·자연도 1개 이상 선택해 주세요.</p>
         )}
       </div>
-      <div className="fixed right-0 bottom-2 left-0 z-10 mx-auto max-w-107.5 px-4">
+      <div className="fixed right-0 bottom-[calc(0.5rem+env(safe-area-inset-bottom))] left-0 z-10 mx-auto max-w-107.5 px-4">
         <Button
           variant="filled"
           size="lg"

@@ -19,6 +19,7 @@
 		68AB0184B43B611F47841AAC /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74750242097FF1A7019736F3 /* MainViewController.swift */; };
 		9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9582B6822FE993A50072D4E8 /* SceneDelegate.swift */; };
 		A93547E6DF96FA1C92D95067 /* NativeAppleSignInPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23061945D96227E04E351B65 /* NativeAppleSignInPlugin.swift */; };
+		B91CED1E79B9C01617E85703 /* NavigationErrorFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA9EBE61F7A62117B60252F6 /* NavigationErrorFilter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +37,7 @@
 		74750242097FF1A7019736F3 /* MainViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		9582B6822FE993A50072D4E8 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
+		CA9EBE61F7A62117B60252F6 /* NavigationErrorFilter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NavigationErrorFilter.swift; sourceTree = "<group>"; };
 		D91EC6C5F475532EFABCE37A /* App.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -84,6 +86,7 @@
 				26E1AB586E8437F5BB954015 /* NativeSecureStorePlugin.swift */,
 				23061945D96227E04E351B65 /* NativeAppleSignInPlugin.swift */,
 				D91EC6C5F475532EFABCE37A /* App.entitlements */,
+				CA9EBE61F7A62117B60252F6 /* NavigationErrorFilter.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -174,6 +177,7 @@
 				68AB0184B43B611F47841AAC /* MainViewController.swift in Sources */,
 				41D73DF50D8B45CA92636C9D /* NativeSecureStorePlugin.swift in Sources */,
 				A93547E6DF96FA1C92D95067 /* NativeAppleSignInPlugin.swift in Sources */,
+				B91CED1E79B9C01617E85703 /* NavigationErrorFilter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

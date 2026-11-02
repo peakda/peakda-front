@@ -35,10 +35,30 @@ export function isProtectedPath(pathname: string): boolean {
 const MARKER_MAX_AGE = 2592000 // 30일
 const RETURN_TO_MAX_AGE = 600 // 10분
 
-export function setAuthMarker(): void {
+interface AuthMarkerChangeDetail {
+  reloading: boolean
+}
+
+// reloading: 마커를 심은 직후 window.location 으로 전체 로드해 떠나는 경우 true 로 넘긴다.
+// 새 페이지가 마커를 처음부터 읽으므로 LoginGuard 의 router.refresh 가 필요 없고, 오히려 해롭다 —
+// iOS WebKit 은 이동을 시작하며 진행 중인 refresh 요청을 끊고, Next 는 실패한 refresh 를 현재 주소의
+// 전체 로드로 바꿔 방금 시작한 이동을 덮어쓴다(가입 완료 후 /map 대신 /profile 에 남는다).
+// 다른 구독자(분석·푸시·캐시 초기화)는 그대로 알림을 받는다.
+export function setAuthMarker(options?: { reloading?: boolean }): void {
   if (typeof document === 'undefined') return
   document.cookie = `${AUTH_MARKER}=1; path=/; max-age=${MARKER_MAX_AGE}; samesite=lax`
-  window.dispatchEvent(new Event(AUTH_MARKER_CHANGED_EVENT))
+  window.dispatchEvent(
+    new CustomEvent<AuthMarkerChangeDetail>(AUTH_MARKER_CHANGED_EVENT, {
+      detail: { reloading: options?.reloading ?? false },
+    })
+  )
+}
+
+export function isReloadingMarkerChange(event: Event): boolean {
+  return (
+    event instanceof CustomEvent &&
+    (event as CustomEvent<AuthMarkerChangeDetail>).detail?.reloading === true
+  )
 }
 
 export function hasAuthMarker(): boolean {

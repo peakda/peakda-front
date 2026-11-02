@@ -89,7 +89,7 @@ export function FeedClient({ initialPage }: FeedClientProps) {
   )
 
   return (
-    <div className="bg-bg-primary relative flex min-h-screen flex-col pb-24">
+    <div className="bg-bg-primary relative flex min-h-screen flex-col pb-[calc(6rem+env(safe-area-inset-bottom))]">
       <div className="h-14">
         <Header
           left={<h1 className="text-text-primary text-xl font-semibold">피드</h1>}
