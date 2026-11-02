@@ -48,7 +48,7 @@ export async function handleAppleLogin(goToTerms: () => void): Promise<void> {
     const session = await exchangeAppleIdentityToken({ ...credential, nonce })
     useLoginSheetStore.getState().closeLoginSheet()
     if (session.accessToken) {
-      setAuthMarker()
+      setAuthMarker({ reloading: true })
       track('login', { provider: takeLoginProvider() })
       // NativeAuthManager 와 같은 이유로 전체 로드해 로그인 전 라우터 캐시를 비운다.
       window.location.replace(takeReturnTo() ?? '/map')

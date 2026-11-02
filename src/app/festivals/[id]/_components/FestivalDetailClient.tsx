@@ -79,7 +79,7 @@ export function FestivalDetailClient({ festival }: FestivalDetailClientProps) {
   const carLines = toLines(editorial?.directionsCar)
 
   return (
-    <div className="bg-bg-primary relative flex min-h-screen flex-col pb-28">
+    <div className="bg-bg-primary relative flex min-h-screen flex-col pb-[calc(7rem+env(safe-area-inset-bottom))]">
       {/* 히어로 이미지 */}
       <div className="relative h-64 w-full">
         <Header left={<LeftArrow />} />
@@ -223,7 +223,7 @@ export function FestivalDetailClient({ festival }: FestivalDetailClientProps) {
       )}
 
       {/* 하단 CTA */}
-      <div className="fixed right-0 bottom-0 left-0 z-10 mx-auto flex max-w-107.5 items-center gap-3 border-t border-gray-100 bg-white px-4 py-3">
+      <div className="fixed right-0 bottom-0 left-0 z-10 mx-auto flex max-w-107.5 items-center gap-3 border-t border-gray-100 bg-white px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
         <Button
           variant="filled"
           color="primary"

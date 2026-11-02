@@ -110,7 +110,7 @@ export function ExploreClient({ initialExplore }: ExploreClientProps) {
       : '스팟, 지역, 식물을 검색해보세요.'
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col bg-white pb-24">
+    <div className="relative flex min-h-screen w-full flex-col bg-white pb-[calc(6rem+env(safe-area-inset-bottom))]">
       <div className="h-14">
         <Header
           left={<h1 className="text-xl font-semibold text-[#000000]">탐색</h1>}

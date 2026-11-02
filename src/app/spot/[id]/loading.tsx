@@ -4,7 +4,7 @@ export default function Loading() {
     <div
       aria-busy="true"
       aria-label="명소 불러오는 중"
-      className="bg-bg-primary relative flex min-h-screen flex-col pb-28"
+      className="bg-bg-primary relative flex min-h-screen flex-col pb-[calc(7rem+env(safe-area-inset-bottom))]"
     >
       <div className="h-64 w-full animate-pulse bg-gray-200" />
 
@@ -37,7 +37,7 @@ export default function Loading() {
         </div>
       </div>
 
-      <div className="fixed right-0 bottom-0 left-0 z-10 mx-auto flex max-w-107.5 items-center gap-3 border-t border-gray-100 bg-white px-4 py-3">
+      <div className="fixed right-0 bottom-0 left-0 z-10 mx-auto flex max-w-107.5 items-center gap-3 border-t border-gray-100 bg-white px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
         <div className="h-12 w-12 shrink-0 animate-pulse rounded-xl bg-gray-100" />
         <div className="h-12 flex-1 animate-pulse rounded-xl bg-gray-200" />
       </div>

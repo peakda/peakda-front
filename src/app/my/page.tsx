@@ -59,7 +59,7 @@ export default function MyPage() {
   const safeProfileImageUrl = toHttpsImageUrl(myPage?.profileImageUrl)
 
   return (
-    <div className="bg-bg-primary relative flex min-h-screen w-full flex-col pb-24">
+    <div className="bg-bg-primary relative flex min-h-screen w-full flex-col pb-[calc(6rem+env(safe-area-inset-bottom))]">
       <div className="h-14">
         <Header
           left={<div className="text-text-primary text-xl font-semibold">My</div>}

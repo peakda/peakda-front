@@ -70,7 +70,7 @@ describe('handleAppleLogin', () => {
     expect(nonce).toMatch(/^[0-9a-f]{64}$/)
     expect(mocks.exchange).toHaveBeenCalledWith({ ...CREDENTIAL, nonce })
     expect(mocks.trackLoginStart).toHaveBeenCalledWith('apple')
-    expect(mocks.setAuthMarker).toHaveBeenCalled()
+    expect(mocks.setAuthMarker).toHaveBeenCalledWith({ reloading: true })
     expect(mocks.track).toHaveBeenCalledWith('login', { provider: 'apple' })
     expect(mocks.closeLoginSheet).toHaveBeenCalled()
     expect(window.location.replace).toHaveBeenCalledWith('/map')
