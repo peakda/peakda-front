@@ -11,6 +11,11 @@ class MainViewController: CAPBridgeViewController {
         bridge?.registerPluginInstance(NativeSecureStorePlugin())
         bridge?.registerPluginInstance(NativeAppleSignInPlugin())
         installNavigationErrorFilter()
+        // 웹은 viewport-fit=cover 를 쓰지 않아(src/app/layout.tsx — Android 를 위한 선택) env(safe-area-inset-bottom) 이 0 이다.
+        // iOS 는 WebView 가 홈 인디케이터 밑까지 깔려 하단 고정 버튼·내비게이션이 그 위에 겹치므로,
+        // 아래쪽 안전 영역을 WebKit 의 가려진 영역으로 넘겨 고정 요소가 그 위에 놓이게 한다.
+        // Android 는 네이티브가 WebView 를 내비게이션 바 위에 배치해 해당 없음.
+        webView?.scrollView.contentInsetAdjustmentBehavior = .always
     }
 
     // 첫 페이지를 불러오기 전(viewDidLoad 의 loadWebView 이전)에 Capacitor 의 이동 처리기를 감싼다.
