@@ -20,7 +20,7 @@
 | `constants/` | 상수 (`index.ts`, `map.ts`, `flower.ts`, `reaction.ts`, `region.ts`, `site.ts`) |
 | `context/` | React Context. 현재 `TabContext.tsx` 1개 — 새 상태 공유가 필요하면 Context 전에 Zustand 검토 |
 | `hooks/` | 커스텀 훅 (디바운스, 카카오 장소 검색, 지도 핀, 닉네임 체크 등) |
-| `lib/auth/` | 인증 마커·막힌 경로(`session.ts`), 소셜 로그인(`socialLogin.ts`), 네이티브 앱 토큰 교환·갱신(`nativeAuth.ts`) |
+| `lib/auth/` | 인증 마커·막힌 경로(`session.ts`), 소셜 로그인(`socialLogin.ts`), 네이티브 앱 토큰 교환·갱신(`nativeAuth.ts`), iOS 전용 Apple 로그인(`appleLogin.ts` — 네이티브 창 + 서버 identity token 검증) |
 | `lib/kakao/` | 카카오맵 SDK 초기화/유틸 |
 | `lib/push/` | 네이티브 앱 푸시 권한·FCM 토큰 등록/해제 (`pushNotifications.ts`, 웹에서는 동작 안 함) |
 | `lib/utils/` | 범용 유틸 (`cn()` 등). API 에러 판별은 `apiError.ts`(`ApiError`·`getApiErrorStatus`·`getApiErrorMessage`), localStorage 접근은 반드시 `storage.ts`(`readStorage`/`writeStorage` — 예외를 삼킴)를 거친다 |

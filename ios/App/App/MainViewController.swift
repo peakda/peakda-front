@@ -6,6 +6,7 @@ import Capacitor
 class MainViewController: CAPBridgeViewController {
     override open func capacitorDidLoad() {
         bridge?.registerPluginInstance(NativeSecureStorePlugin())
+        bridge?.registerPluginInstance(NativeAppleSignInPlugin())
     }
 
     // capacitor.config 의 StatusBar.style 'DARK'(어두운 배경용 밝은 글씨)는 Android 와 함께 쓰는 값이다.

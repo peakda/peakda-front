@@ -33,7 +33,7 @@ export type RecordAction =
 // 파라미터로 나눠 보려면 GA 관리 → 맞춤 정의에 측정기준으로 등록해야 한다 (등록 전에 쌓인 데이터에는 적용 안 됨).
 // 어느 화면에서 일어났는지는 GA 가 page_location 으로 자동으로 붙이므로 따로 보내지 않는다.
 interface AnalyticsEvents {
-  // provider: 로그인 버튼을 누를 때 저장해 둔 값(google/kakao/naver). 다른 경로로 왔으면 없다.
+  // provider: 로그인 버튼을 누를 때 저장해 둔 값(google/kakao/naver, iOS 앱은 apple). 다른 경로로 왔으면 없다.
   login: { provider?: string }
   login_click: { provider: string }
   sign_up: { provider?: string }
