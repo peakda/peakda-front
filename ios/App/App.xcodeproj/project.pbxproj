@@ -16,6 +16,7 @@
 		504EC30F1FED79650016851F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30E1FED79650016851F /* Assets.xcassets */; };
 		504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC3101FED79650016851F /* LaunchScreen.storyboard */; };
 		50B271D11FEDC1A000F3C39B /* public in Resources */ = {isa = PBXBuildFile; fileRef = 50B271D01FEDC1A000F3C39B /* public */; };
+		61BED17C6AE0D28613E69CCF /* NativeGeolocationPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = D06A5FEA806627909BAFAFF2 /* NativeGeolocationPlugin.swift */; };
 		68AB0184B43B611F47841AAC /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74750242097FF1A7019736F3 /* MainViewController.swift */; };
 		9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9582B6822FE993A50072D4E8 /* SceneDelegate.swift */; };
 		A93547E6DF96FA1C92D95067 /* NativeAppleSignInPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23061945D96227E04E351B65 /* NativeAppleSignInPlugin.swift */; };
@@ -38,6 +39,7 @@
 		9582B6822FE993A50072D4E8 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
 		CA9EBE61F7A62117B60252F6 /* NavigationErrorFilter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NavigationErrorFilter.swift; sourceTree = "<group>"; };
+		D06A5FEA806627909BAFAFF2 /* NativeGeolocationPlugin.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeGeolocationPlugin.swift; sourceTree = "<group>"; };
 		D91EC6C5F475532EFABCE37A /* App.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -87,6 +89,7 @@
 				23061945D96227E04E351B65 /* NativeAppleSignInPlugin.swift */,
 				D91EC6C5F475532EFABCE37A /* App.entitlements */,
 				CA9EBE61F7A62117B60252F6 /* NavigationErrorFilter.swift */,
+				D06A5FEA806627909BAFAFF2 /* NativeGeolocationPlugin.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -178,6 +181,7 @@
 				41D73DF50D8B45CA92636C9D /* NativeSecureStorePlugin.swift in Sources */,
 				A93547E6DF96FA1C92D95067 /* NativeAppleSignInPlugin.swift in Sources */,
 				B91CED1E79B9C01617E85703 /* NavigationErrorFilter.swift in Sources */,
+				61BED17C6AE0D28613E69CCF /* NativeGeolocationPlugin.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
