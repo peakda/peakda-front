@@ -115,6 +115,19 @@ export async function exchangeNativeAuthorizationCode(code: string): Promise<Nat
   return applyAppTokenResponse(token)
 }
 
+export interface AppleCredential {
+  identityToken: string
+  authorizationCode: string
+  /** 앱이 만든 nonce 원문. 애플 요청에는 이 값의 SHA-256 이 들어갔다. */
+  nonce: string
+}
+
+// iOS Sign in with Apple. 응답은 소셜 로그인 코드 교환과 같은 형식이라 같은 방식으로 저장한다.
+export async function exchangeAppleIdentityToken(credential: AppleCredential): Promise<NativeAuthSession> {
+  const token = await requestAppToken('/api/auth/app/apple', { ...credential })
+  return applyAppTokenResponse(token)
+}
+
 let refreshPromise: Promise<NativeAuthSession> | null = null
 
 export async function refreshNativeAuthSession(): Promise<NativeAuthSession> {

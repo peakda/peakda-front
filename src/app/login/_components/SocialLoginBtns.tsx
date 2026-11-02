@@ -1,11 +1,31 @@
 'use client'
 import { Button } from '@/components/ui/button/Button'
+import { handleAppleLogin, isAppleLoginAvailable } from '@/lib/auth/appleLogin'
 import { handleGoogleLogin, handleKakaoLogin, handleNaverLogin } from '@/lib/auth/socialLogin'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
+import { useSyncExternalStore } from 'react'
+
+const noopSubscribe = () => () => {}
 
 export function SocialLoginBtns() {
+  const router = useRouter()
+  // 서버 렌더링(웹과 같은 HTML)에는 없고, 하이드레이션 뒤 iOS 앱에서만 보인다.
+  const showApple = useSyncExternalStore(noopSubscribe, isAppleLoginAvailable, () => false)
+
   return (
     <div className="flex w-full flex-1 flex-col items-center justify-center gap-2">
+      {showApple && (
+        <Button
+          onClick={() => handleAppleLogin(() => router.replace('/Terms'))}
+          size="lg"
+          className="rounded-3xl bg-black text-white hover:bg-black"
+          variant="filled"
+          leftIcon={<Image src="/images/Apple.png" alt="Apple 로고" width={24} height={24} />}
+        >
+          Apple로 계속하기
+        </Button>
+      )}
       <Button
         onClick={handleGoogleLogin}
         size="lg"
