@@ -34,7 +34,6 @@
   - **`ENDED`(늦었다)도 PR #104부터 응답에 나온다.** 그전엔 서버가 6곳에서 걸러내 화면에 도달하지 않았다 — "ENDED는 안 온다"를 전제로 짠 코드가 남아 있는지 의심할 것.
   - **스팟 기록의 '상태' 선택지에 '개화 전' 버튼을 추가하는 건 여전히 보류다.** 기록축 `bloomStage`는 PR #104가 건드리지 않아 4값 그대로라 프런트만으로는 전송할 수 없다 (`src/app/record/_components/DetailsStepForm.tsx`의 `STATUS_OPTIONS`, `src/app/record/[id]/edit/page.tsx`에 각각 정의됨). 2026-09-20에 [docs/BACKEND_API_REQUESTS.md](docs/BACKEND_API_REQUESTS.md) 14번으로 확장을 요청했고 회신 대기 중이다. 그때까지 **동네형 핀은 `BEFORE_SEASON`이 구조적으로 나오지 않는다** — 동네형은 기록축을 환산해 쓰므로 4단계뿐이고, 명소형만 5단계다.
 
-
 - **지도 꽃 필터는 일부러 서버로 안 보낸다** (2026-08-18): `GET /api/seasonal/blooms`에 `categories` 파라미터가 생겼지만 쓰지 않는다. 서버가 걸러 주면 ① 필터 드로어 하단 "N개의 명소 보기"를 **아직 적용 안 한 draft 기준으로 셀 수 없고** ② 응답에서 안 고른 꽃이 빠져 **핀 아이콘·색을 선택에 맞게 좁힐 수 없다.** 지도는 전국을 한 번에 받으므로 꽃 종류를 서버에서 거르지 않아도 추가 조회는 없다. 근거는 `MapContainer.tsx`의 `bloomParams` 주석에도 남겼다.
   - **시기(`status`)도 서버로 보내지 않는다** (2026-10-07): 서버 `status` 필터는 **슬롯 단위**다 — 그 상태인 꽃이 있는 핀만 주고 핀 안의 `blooms`까지 그 상태로 거른다. 같은 bbox로 `status` 유무를 비교해 확인했다(상태가 섞인 핀 28개, 예: `[BEFORE_SEASON, BEFORE_SEASON, PEAK]` → `[PEAK]`). 클라에서 "그 상태인 꽃만 남기기"로 만든 결과와 `PEAK`·`STARTED`·`PREPARING` 모두 핀 목록·꽃 순서까지 같았다. 그래서 `mapFilter.ts`의 `narrowFlowers`가 꽃 종류·상태로 함께 좁히고 서버로는 `region`만 보낸다 — 시기 탭끼리 같은 조회 캐시를 써 **탭을 바꿔도 요청이 나가지 않고**, 드로어 시기 탭에서도 "N개의 명소 보기"를 draft 기준으로 센다.
     - 핀·목록을 눌렀을 때의 프리뷰 API(`/api/spots/preview`)에는 지금도 `status`를 보낸다(카드 뱃지를 핀과 같은 기준으로 계산하려고). 서버의 상태 판정 규칙이 바뀌면 지도(클라)와 프리뷰(서버)가 어긋날 수 있으니 그때 이 비교를 다시 한다.
@@ -83,8 +82,11 @@
 - **랜딩 페이지(`/landing`)는 같은 레포·같은 Vercel 프로젝트에 두고 `landing.peakda.com`으로 연결한다** (2026-10-08): 디자인 토큰·폰트를 공유하려고 별도 레포로 빼지 않았다. `middleware.ts`가 `landing.` 호스트의 `/`만 `/landing`으로 rewrite 하고, canonical 은 `LANDING_URL`(`constants/site.ts`)로 고정한다.
   - 호스트는 **`Host` 헤더**로 판별한다 — `next dev`에서는 `request.nextUrl.hostname`이 Host 와 무관하게 `localhost`로 나와 rewrite 가 안 된다. 로컬 확인은 `http://landing.localhost:3000`.
   - 앱 화면은 루트 레이아웃이 430px 틀(`max-w-107.5 overflow-hidden`)로 감싸는데, 랜딩은 반응형이라 `data-landing` 이 있는 페이지에서만 `has-[[data-landing]]:` 로 틀과 overflow 를 푼다(overflow-hidden 이 남으면 sticky 헤더가 안 붙는다).
-  - 슬라이드 카드는 Figma 에서 540×960 통이미지였지만 **텍스트는 HTML 로, 휴대폰만 이미지(`public/images/landing/phone-*.webp`)로** 나눴다(검색 노출·선명도). 카드 안 배치는 컨테이너 단위(`cqw`)라 화면 너비가 달라도 시안 비율 그대로다.
-  - iOS 출시 알림(이메일 수집)은 방식 미정이라 버튼 모양만 있고 동작이 없다.
+  - (2026-11-03) Figma `랜딩 · 계절의 절정 / Visual story`(Web 1440·Tablet 834·Mobile 390)로 다시 만들었다. 이전 슬라이드 캐러셀(`phone-*.webp`)은 지웠다.
+    - 가을 추천 명소 3곳은 시안 문구 그대로 하드코딩하고, 상세 팝업 링크만 운영 ID(`/festivals/748`, `/spot/11198`, `/spot/251`)로 잇는다. 계절이 바뀌면 `SpotPicks.tsx`의 데이터와 사진을 같이 바꾼다.
+    - Scene 01 계절 탭·Scene 03 단계 카드는 시안에 가을·찜하기 화면만 있어 **보여 주기만 하는 정적 UI**다(클릭 전환 없음).
+    - iOS 출시 알림은 모달 대신 '알림 신청' 섹션의 인라인 폼(`LaunchAlertForm`)이고, 히어로의 iOS 버튼은 그 섹션으로 스크롤한다(시안 프로토타입 인터랙션).
+    - 스크롤 등장 효과는 `Reveal`(IntersectionObserver)이 `data-shown`을 붙이고 `globals.css`의 `.reveal-item` 이 받는다. '동작 줄이기' 설정이면 처음부터 다 보인다.
 - **PR은 `main` 대상이고, `main`은 보호돼 있다** (2026-10-01): PR 필수 + `ci` 체크 통과 필수(관리자 우회 가능). 로컬 `develop`은 크게 뒤처져 있어 기준으로 쓰지 않는다. Android 워크플로는 필수 체크가 아니다.
 
 ## 자주 하는 작업
