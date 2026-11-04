@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import Image from 'next/image'
 import { SITE_URL } from '@/constants/site'
 import { cn } from '@/lib/utils/cn'
@@ -58,7 +59,15 @@ const CARD_DELAYS = ['delay-0', 'delay-100', 'delay-200']
 // 카드를 누르면 시안(Added interactions)의 상세 팝업을 띄운다.
 // 모바일·태블릿은 가로 스크롤, 데스크톱은 3열.
 export const SpotPicks = () => {
+  const dialogRef = useRef<HTMLDialogElement>(null)
   const [selected, setSelected] = useState<SpotPick | null>(null)
+
+  // 내용을 먼저 그린 뒤 연다. 네이티브 dialog 라 Esc 닫기·포커스 가두기·닫은 뒤 카드로 포커스 복귀를 브라우저가 맡는다.
+  const open = (pick: SpotPick) => {
+    flushSync(() => setSelected(pick))
+    dialogRef.current?.showModal()
+  }
+  const close = () => dialogRef.current?.close()
 
   return (
     <>
@@ -70,17 +79,17 @@ export const SpotPicks = () => {
           >
             <button
               type="button"
-              onClick={() => setSelected(pick)}
+              onClick={() => open(pick)}
               className="group flex w-full cursor-pointer flex-col gap-2.5 text-left"
             >
               <span className="flex flex-col gap-3.5 xl:gap-[21px]">
-                <span className="relative block h-45 overflow-hidden rounded-3xl shadow-[0_14px_32px_rgba(23,62,53,0.16)] group-hover:-translate-y-1 motion-safe:transition-transform motion-safe:duration-300 xl:h-[272px]">
+                <span className="relative block h-45 overflow-hidden rounded-3xl shadow-[0_14px_32px_rgba(23,62,53,0.16)] xl:h-[272px]">
                   <Image
                     src={pick.image}
                     alt={`${pick.name} 풍경`}
                     fill
                     sizes="(min-width: 1280px) 384px, 246px"
-                    className="object-cover group-hover:scale-105 motion-safe:transition-transform motion-safe:duration-500"
+                    className="object-cover group-hover:scale-[1.055] motion-safe:transition-transform motion-safe:duration-650 motion-safe:ease-[cubic-bezier(0.2,0.75,0.2,1)]"
                   />
                   <span className="absolute inset-x-2 top-2 flex items-center justify-between xl:inset-x-3 xl:top-3">
                     <span className="flex h-5 items-center rounded bg-gray-950/80 px-1.5 text-xs leading-[1.4] font-bold tracking-[0.01em] text-gray-50 xl:h-7.5 xl:rounded-md xl:px-[9px] xl:text-lg">
@@ -89,6 +98,13 @@ export const SpotPicks = () => {
                     <span className="flex h-6 items-center rounded-full bg-pink-400 px-2.5 text-xs leading-[1.4] tracking-[0.01em] text-gray-50 xl:h-9 xl:px-4 xl:text-lg">
                       {pick.tag}
                     </span>
+                  </span>
+                  {/* 데스크톱은 hover·포커스 때 아래에서 올라오고, 터치 화면 폭(모바일·태블릿)은 늘 보인다 */}
+                  <span
+                    aria-hidden
+                    className="absolute right-3.5 bottom-3.5 grid size-8 place-items-center rounded-full bg-white text-xl text-green-600 motion-safe:transition-transform motion-safe:duration-300 xl:size-10 xl:translate-y-[55px] xl:text-2xl xl:group-hover:translate-y-0 xl:group-focus-visible:translate-y-0"
+                  >
+                    ↗
                   </span>
                 </span>
                 <span className="flex flex-col gap-0.5 px-1 xl:gap-[3px] xl:px-1.5">
@@ -108,19 +124,15 @@ export const SpotPicks = () => {
         ))}
       </ul>
 
-      {selected && (
-        <div
-          className="animate-in fade-in-0 fixed inset-0 z-100 flex items-center justify-center bg-black/40 px-5 duration-200"
-          onClick={() => setSelected(null)}
-          onKeyDown={(e) => e.key === 'Escape' && setSelected(null)}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="spot-pick-title"
-            className="animate-in fade-in-0 zoom-in-95 rounded-5xl w-full max-w-87.5 overflow-hidden bg-white duration-200 md:max-w-155"
-            onClick={(e) => e.stopPropagation()}
-          >
+      {/* 바깥(backdrop)을 누르면 dialog 자신이 클릭 대상이 되므로 그때만 닫는다 */}
+      <dialog
+        ref={dialogRef}
+        aria-labelledby="spot-pick-title"
+        onClick={(e) => e.target === e.currentTarget && close()}
+        className="open:animate-in open:fade-in-0 open:zoom-in-95 rounded-5xl m-auto max-h-[90dvh] w-[calc(100%-40px)] max-w-87.5 overflow-auto border-0 bg-white p-0 shadow-[0_20px_80px_#0004] backdrop:bg-[#17201199] backdrop:backdrop-blur-[6px] open:duration-200 md:max-w-155"
+      >
+        {selected && (
+          <>
             <div className="relative h-[230px] md:h-75">
               <Image
                 src={selected.image}
@@ -133,7 +145,7 @@ export const SpotPicks = () => {
                 type="button"
                 aria-label="닫기"
                 autoFocus
-                onClick={() => setSelected(null)}
+                onClick={close}
                 className="text-landing-ink absolute top-4 right-4 flex size-10 cursor-pointer items-center justify-center rounded-full bg-white text-[28px] leading-none"
               >
                 ×
@@ -154,14 +166,14 @@ export const SpotPicks = () => {
               </p>
               <a
                 href={selected.href}
-                className="flex h-12 w-full items-center justify-center rounded-full bg-green-600 text-sm leading-[1.4] font-medium text-white md:h-13 md:w-77.5 md:text-base"
+                className="flex h-12 w-full items-center justify-center rounded-full bg-green-600 text-sm leading-[1.4] font-medium text-white transition-colors duration-200 hover:bg-green-700 md:h-13 md:w-77.5 md:text-base"
               >
                 {selected.cta}
               </a>
             </div>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </dialog>
     </>
   )
 }
