@@ -80,7 +80,7 @@ export const SavedSteps = () => {
   return (
     <section
       ref={trackRef}
-      className="landing-steps bg-landing-sage px-5 py-12 md:px-8 md:py-20 xl:h-[220vh] xl:px-30 xl:py-0"
+      className="landing-steps bg-landing-sage px-5 py-12 md:px-8 md:py-20 xl:h-[300vh] xl:px-30 xl:py-0"
     >
       <div className="xl:sticky xl:top-[77px] xl:flex xl:h-[calc(100dvh-77px)] xl:items-center">
         <Reveal className="mx-auto flex w-full max-w-300 flex-col gap-8 xl:flex-row xl:items-center xl:gap-20">
@@ -141,7 +141,7 @@ export const SavedSteps = () => {
           </div>
 
           <figure className="reveal-item flex flex-col items-center gap-4 delay-150 xl:flex-1">
-            <div className="@container relative aspect-[9/16] w-70 overflow-hidden rounded-[18px] bg-[linear-gradient(180deg,rgba(255,240,242,0.4)_55.4%,rgba(213,236,192,0.4)_100%)] md:w-80">
+            <div className="@container relative aspect-[9/16] w-70 overflow-hidden rounded-[18px] bg-[linear-gradient(180deg,rgba(255,240,242,0.4)_55.4%,rgba(213,236,192,0.4)_100%)] md:w-80 xl:w-[min(20rem,calc((100dvh-170px)*0.5625))]">
               {STEPS.map((step, index) => (
                 <div
                   key={step.label}
