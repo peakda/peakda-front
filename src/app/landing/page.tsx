@@ -8,8 +8,12 @@ import {
   DownloadIcon,
   GlobeIcon,
 } from '@/app/landing/_components/LandingIcons'
+import { LandingNav } from '@/app/landing/_components/LandingNav'
 import { LaunchAlertForm } from '@/app/landing/_components/LaunchAlertForm'
 import { Reveal } from '@/app/landing/_components/Reveal'
+import { SavedSteps } from '@/app/landing/_components/SavedSteps'
+import { SeasonChips } from '@/app/landing/_components/SeasonChips'
+import { SeasonRecord } from '@/app/landing/_components/SeasonRecord'
 import { SpotPicks } from '@/app/landing/_components/SpotPicks'
 import {
   BASE_OPEN_GRAPH,
@@ -63,64 +67,6 @@ const LANDING_JSON_LD = {
   publisher: { '@id': `${SITE_URL}/#organization` },
 }
 
-// 데스크톱 헤더에만 있는 섹션 이동 링크
-const NAV_LINKS = [
-  { label: '소개', href: '#intro' },
-  { label: '기능', href: '#features' },
-  { label: '알림 신청', href: '#waitlist' },
-  { label: 'FAQ', href: '#faq' },
-]
-
-// 아이콘이 없는 메밀꽃·은행나무는 시안대로 글자만 둔다
-const SEASON_CHIPS = [
-  { label: '벚꽃', icon: '/flowers/cherry-blossom.webp', color: 'bg-[#FFA8B4]/20 text-[#FFA8B4]' },
-  { label: '철쭉', icon: '/flowers/royal-azalea.webp', color: 'bg-[#E82A78]/20 text-[#E82A78]' },
-  { label: '진달래', icon: '/flowers/azalea.webp', color: 'bg-[#FF6FA0]/20 text-[#FF6FA0]' },
-  { label: '유채꽃', icon: '/flowers/canola.webp', color: 'bg-[#FFE87A]/20 text-[#FFE87A]' },
-  { label: '매화', icon: '/flowers/plum.webp', color: 'bg-[#FF7F92]/20 text-[#FF7F92]' },
-  { label: '산수유', icon: '/flowers/forsythia.webp', color: 'bg-[#FFD63A]/20 text-[#FFD63A]' },
-  { label: '수국', icon: '/flowers/hydrangea.webp', color: 'bg-[#97CAFF]/20 text-[#97CAFF]' },
-  { label: '연꽃', icon: '/flowers/lotus.webp', color: 'bg-[#FFCFD6]/20 text-[#FFCFD6]' },
-  { label: '해바라기', icon: '/flowers/sunflower.webp', color: 'bg-[#FFB800]/20 text-[#FFB800]' },
-  { label: '메밀꽃', icon: null, color: 'bg-[#A0B884]/20 text-[#A0B884]' },
-  { label: '단풍', icon: '/flowers/maple.webp', color: 'bg-[#F0603A]/20 text-[#F0603A]' },
-  { label: '은행나무', icon: null, color: 'bg-[#E0A800]/20 text-[#E0A800]' },
-  { label: '억새', icon: '/flowers/SilverGrass.webp', color: 'bg-[#C2AA8A]/20 text-[#C2AA8A]' },
-  { label: '코스모스', icon: '/flowers/cosmos.webp', color: 'bg-[#F07088]/20 text-[#F07088]' },
-  { label: '동백꽃', icon: '/flowers/camellia.webp', color: 'bg-[#C8202A]/20 text-[#C8202A]' },
-]
-
-// 칩이 왼쪽부터 차례로 떠오르게 하는 지연(Tailwind 가 읽을 수 있게 클래스를 그대로 적는다)
-const CHIP_DELAYS = [
-  'delay-0',
-  'delay-40',
-  'delay-80',
-  'delay-120',
-  'delay-160',
-  'delay-200',
-  'delay-240',
-  'delay-280',
-  'delay-320',
-  'delay-360',
-  'delay-400',
-  'delay-440',
-  'delay-480',
-  'delay-520',
-  'delay-560',
-]
-
-// 시안은 가을 탭만 채워져 있어 탭은 보여 주기만 한다
-const SEASON_TABS = [
-  { label: '봄 · 벚꽃', active: false },
-  { label: '여름 · 녹음', active: false },
-  { label: '가을 · 단풍', active: true },
-]
-
-const STEPS = [
-  { label: '01 마음에 드는 곳 찜하기', hint: '명소 화면에서 하트를 눌러요.', selected: true },
-  { label: '02 만개 알림 켜기', hint: '찜한 명소의 만개 소식을 받아요.', selected: false },
-]
-
 const FAQS = [
   {
     question: '앱을 설치하지 않아도 사용할 수 있나요?',
@@ -153,11 +99,18 @@ const sceneBodyClass =
   'text-landing-muted text-[15px] leading-[1.45] tracking-[-0.02em] md:text-[17px]'
 const optionTitleClass = 'text-lg leading-[1.55] font-semibold tracking-[-0.005em]'
 const optionDescClass = 'text-sm leading-normal font-medium'
-const secondaryOptionClass =
-  'flex flex-1 items-center gap-3 rounded-4xl border border-gray-200 bg-white px-5 py-4'
+// 히어로 시작 옵션은 hover 때 살짝 떠오른다(HTML 시안)
+const optionLiftClass =
+  'transition-[translate,box-shadow,border-color] duration-250 hover:-translate-y-[3px]'
+const secondaryOptionClass = cn(
+  'flex flex-1 items-center gap-3 rounded-4xl border border-gray-200 bg-white px-5 py-4 hover:border-[#9ebc88] hover:shadow-[0_8px_24px_#263e1610]',
+  optionLiftClass
+)
 const optionIconClass =
   'flex size-12 shrink-0 items-center justify-center rounded-full bg-green-50 text-green-700'
-const textLinkClass = 'text-sm leading-[1.55] font-bold text-green-600'
+// 밑줄이 있는 글자 링크 — hover 때 글자·밑줄이 진해진다
+const textLinkClass =
+  'hover:text-landing-ink w-fit border-b border-[#b6c8aa] pb-1 text-sm leading-[1.55] font-bold text-green-600 transition-colors duration-200 hover:border-current'
 // 고정 헤더(모바일 65px·태블릿 이상 77px)에 가리지 않게 앵커 위치를 내린다
 const anchorClass = 'scroll-mt-16 md:scroll-mt-20'
 
@@ -181,20 +134,7 @@ export default function LandingPage() {
             className="h-7.5 w-auto md:h-9 xl:h-8.5"
           />
           <div className="flex items-center gap-8">
-            <nav aria-label="랜딩 섹션" className="hidden xl:block">
-              <ul className="flex gap-8">
-                {NAV_LINKS.map((link) => (
-                  <li key={link.href}>
-                    <a
-                      href={link.href}
-                      className="text-[15px] leading-[1.3] font-medium text-gray-700"
-                    >
-                      {link.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </nav>
+            <LandingNav />
             <a
               href={SITE_URL}
               className="flex h-9 items-center rounded-xl bg-green-300 px-4 text-sm leading-[1.4] font-medium text-gray-50 md:h-10 md:rounded-2xl md:text-[15px]"
@@ -203,6 +143,11 @@ export default function LandingPage() {
             </a>
           </div>
         </div>
+        {/* 스크롤 진행 막대 — 폭은 globals.css 의 스크롤 연동 애니메이션이 채운다 */}
+        <div
+          aria-hidden
+          className="landing-progress absolute inset-x-0 -bottom-px h-0.5 bg-green-600"
+        />
       </header>
 
       <section
@@ -214,7 +159,9 @@ export default function LandingPage() {
             계절 명소를 찾을 땐, 피크다
           </p>
           <h1 className="text-landing-ink text-4xl leading-[1.45] font-bold tracking-[-0.02em] md:text-5xl xl:text-[64px]">
-            벚꽃도 단풍도, 보기 좋은 때에.
+            벚꽃도 단풍도,
+            <br />
+            보기 좋은 때에.
           </h1>
           <p className="text-landing-muted text-sm leading-[1.45] tracking-[-0.02em] md:text-lg">
             최근 다녀온 사람들의 사진을 보고
@@ -257,7 +204,10 @@ export default function LandingPage() {
 
             <a
               href={SITE_URL}
-              className="flex items-center gap-3 rounded-4xl bg-green-600 px-5 py-4 shadow-[0_8px_24px_rgba(26,31,38,0.12)]"
+              className={cn(
+                'flex items-center gap-3 rounded-4xl bg-green-600 px-5 py-4 shadow-[0_8px_24px_rgba(26,31,38,0.12)]',
+                optionLiftClass
+              )}
             >
               <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-white text-green-600">
                 <GlobeIcon className="size-6" />
@@ -283,17 +233,19 @@ export default function LandingPage() {
 
       <section className="bg-white px-5 pt-12 pb-14 md:px-8 md:pt-18 md:pb-20 xl:px-30">
         <div className="mx-auto flex max-w-300 flex-col gap-7 md:gap-10">
-          <div className="flex flex-col gap-2.5">
-            <p className="text-[13px] leading-[1.3] tracking-[-0.02em] text-green-500">
-              피크다가 고른 가을 명소
-            </p>
-            <h2 className="text-[26px] leading-[1.3] font-bold tracking-[-0.02em] text-gray-950 md:text-[32px] xl:text-[38px]">
-              이번 주말엔, 가을 산책 어때요?
-            </h2>
-            <p className="text-[15px] leading-normal text-gray-600 md:text-[17px]">
-              꽃구경부터 강변 산책까지, 걷고 싶은 풍경을 골라보세요.
-            </p>
-          </div>
+          <Reveal>
+            <div className="reveal-item flex flex-col gap-2.5">
+              <p className="text-[13px] leading-[1.3] tracking-[-0.02em] text-green-500">
+                피크다가 고른 가을 명소
+              </p>
+              <h2 className="text-[26px] leading-[1.3] font-bold tracking-[-0.02em] text-gray-950 md:text-[32px] xl:text-[38px]">
+                이번 주말엔, 가을 산책 어때요?
+              </h2>
+              <p className="text-[15px] leading-normal text-gray-600 md:text-[17px]">
+                꽃구경부터 강변 산책까지, 걷고 싶은 풍경을 골라보세요.
+              </p>
+            </div>
+          </Reveal>
 
           <Reveal>
             <SpotPicks />
@@ -312,8 +264,8 @@ export default function LandingPage() {
                 </h3>
                 <p className="text-landing-muted text-sm leading-[1.55] md:text-base">
                   피크다가 모아둔 명소 이야기를 읽어보세요.
-                  <br className="hidden md:block" /> 마음에 드는 풍경이 있다면 다음 여행에
-                  담아두고요.
+                  <br />
+                  마음에 드는 풍경이 있다면 다음 여행에 담아두고요.
                 </p>
                 <a href={`${SITE_URL}/explore`} className={textLinkClass}>
                   피크다가 고른 명소 보기 ↗
@@ -338,52 +290,33 @@ export default function LandingPage() {
         <Reveal className="mx-auto flex max-w-300 flex-col items-center gap-7 md:gap-16 xl:flex-row">
           <div className="reveal-item flex w-full flex-col gap-5 xl:w-105 xl:shrink-0">
             <p className={eyebrowClass}>01 떠나기 전 확인하세요</p>
-            <h2 className={sceneTitleClass}>지금 얼마나 피었는지 궁금하니까.</h2>
+            <h2 className={sceneTitleClass}>
+              지금 얼마나 피었는지
+              <br />
+              궁금하니까.
+            </h2>
             <p className={sceneBodyClass}>
-              예쁜 사진을 보고 찾아갔는데 꽃이 다 져 있으면 아쉬우니까요. 방문 날짜와 사진, 절정도를
-              함께 보고 언제 갈지 정해 보세요.
+              예쁜 사진을 보고 찾아갔는데
+              <br />
+              꽃이 다 져 있으면 아쉬우니까요.
+              <br />
+              방문 날짜와 사진, 절정도를 함께 보고
+              <br />
+              언제 갈지 정해 보세요.
             </p>
           </div>
 
           <div className="reveal-item flex w-full flex-col gap-5 rounded-[28px] bg-white p-[18px] delay-150 md:p-7 xl:flex-1">
-            <div className="bg-landing-tab flex gap-1 rounded-[13px] p-1">
-              {SEASON_TABS.map((tab) => (
-                <span
-                  key={tab.label}
-                  className={cn(
-                    'flex-1 rounded-xl p-1.5 text-center text-[11px] leading-[1.6] tracking-[-0.02em] md:text-[13px]',
-                    tab.active ? 'bg-white font-bold text-green-600' : 'text-landing-tab-text'
-                  )}
-                >
-                  {tab.label}
-                </span>
-              ))}
-            </div>
-            <div className="relative h-55 overflow-hidden rounded-3xl md:h-75">
-              <Image
-                src="/images/landing/record-naejangsan.webp"
-                alt="붉고 노랗게 물든 내장산 단풍과 케이블카"
-                fill
-                sizes="(min-width: 1280px) 660px, (min-width: 768px) 698px, 306px"
-                className="object-cover"
-              />
-            </div>
-            <p className={eyebrowClass}>내장산 케이블카 · 가을 기록 예시</p>
-            <h3 className="text-landing-ink text-xl leading-[1.45] font-bold tracking-[-0.02em] md:text-[26px]">
-              다녀온 날은 이런 모습이었어요
-            </h3>
-            <p className="text-landing-muted text-[13px] leading-[1.7] md:text-[15px]">
-              붉고 노랗게 물든 내장산의 가을 풍경이에요. 방문 날짜와 사진을 함께 보고 언제 갈지 정해
-              보세요.
-            </p>
+            <SeasonRecord />
           </div>
         </Reveal>
       </section>
 
       <section className="bg-white px-6 py-14 md:px-10 md:py-24 xl:px-30">
         <Reveal className="mx-auto flex max-w-300 flex-col items-center gap-7 md:gap-16 xl:flex-row">
-          <div className="reveal-item bg-landing-mint rounded-6xl flex w-full justify-center px-6 py-8 md:py-6 xl:w-140 xl:shrink-0">
-            <div className="bg-landing-phone rounded-[30px] p-[5.5px] shadow-[0_15px_24.7px_rgba(64,38,10,0.2)]">
+          {/* hover 하면 휴대폰이 살짝 떠오르며 기운다 */}
+          <div className="reveal-item bg-landing-mint rounded-6xl group/map flex w-full justify-center px-6 py-8 md:py-6 xl:w-140 xl:shrink-0">
+            <div className="bg-landing-phone rounded-[30px] p-[5.5px] shadow-[0_15px_24.7px_rgba(64,38,10,0.2)] group-hover/map:-translate-y-1.5 group-hover/map:-rotate-1 motion-safe:transition-[translate,rotate] motion-safe:duration-600">
               <Image
                 src="/images/landing/screen-map.webp"
                 alt="피크다 지도 화면 — 전국 계절 명소의 개화 상태를 꽃 핀으로 보여 준다"
@@ -396,101 +329,24 @@ export default function LandingPage() {
 
           <div className="reveal-item flex w-full flex-col gap-5 delay-150 xl:flex-1">
             <p className={eyebrowClass}>02 가보고 싶은 곳을 찾아보세요</p>
-            <h2 className={sceneTitleClass}>벚꽃 보러 갈까? 단풍 보러 갈까?</h2>
+            <h2 className={sceneTitleClass}>
+              벚꽃 보러 갈까?
+              <br />
+              단풍 보러 갈까?
+            </h2>
             <p className={sceneBodyClass}>
-              보고 싶은 꽃이나 단풍, 갈 지역을 골라보세요. 지도에서도 주변 명소를 찾을 수 있어요.
+              보고 싶은 꽃이나 단풍, 갈 지역을 골라보세요.
+              <br />
+              지도에서도 주변 명소를 찾을 수 있어요.
+              <br />
               가보고 싶은 곳은 저장해 두세요.
             </p>
-            <ul className="flex flex-wrap gap-2">
-              {SEASON_CHIPS.map((chip, index) => (
-                <li
-                  key={chip.label}
-                  className={cn(
-                    'reveal-item flex items-center gap-[2.33px] rounded-full px-[7px] py-[4.67px]',
-                    chip.color,
-                    CHIP_DELAYS[index]
-                  )}
-                >
-                  {chip.icon && (
-                    <Image
-                      src={chip.icon}
-                      alt=""
-                      width={19}
-                      height={19}
-                      className="size-[18.67px]"
-                    />
-                  )}
-                  <span className="text-[12.83px] leading-normal font-semibold tracking-[-0.02em] md:font-bold">
-                    {chip.label}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <div className="flex flex-col gap-2">
-              <hr className="border-gray-200" />
-              <p className="text-landing-muted text-sm leading-[1.6] tracking-[-0.02em]">
-                어떤 풍경이 보고 싶으세요?
-              </p>
-              <a
-                href={`${SITE_URL}/map`}
-                className="text-sm leading-[1.6] font-bold tracking-[-0.02em] text-green-600"
-              >
-                피크다에서 명소 찾기 →
-              </a>
-            </div>
+            <SeasonChips />
           </div>
         </Reveal>
       </section>
 
-      <section className="bg-landing-sage px-5 py-12 md:px-8 md:py-20 xl:px-30">
-        <Reveal className="mx-auto flex max-w-300 flex-col gap-8 xl:flex-row xl:items-center xl:gap-20">
-          <div className="reveal-item flex flex-col gap-4 xl:flex-1">
-            <p className="text-xs leading-[1.55] font-bold text-green-600">
-              03 마음에 드는 곳을 놓치지 않게
-            </p>
-            <h2 className="text-landing-ink text-3xl leading-[1.55] font-bold md:text-[40px]">
-              가고 싶은 곳은 찜. 만개 소식은 알림으로.
-            </h2>
-            <p className="text-landing-muted text-[15px] leading-[1.55] md:text-[17px]">
-              가보고 싶은 곳을 찾았다면 하트를 눌러두세요. 찜한 곳은 모아보고, 만개 알림도 받을 수
-              있어요.
-            </p>
-            {/* 시안은 '찜하기' 단계 화면만 있어 선택 상태를 고정해 보여 준다 */}
-            <ol className="flex flex-col gap-4">
-              {STEPS.map((step) => (
-                <li
-                  key={step.label}
-                  className={cn(
-                    'flex flex-col gap-1 rounded-3xl border px-5 py-4',
-                    step.selected ? 'border-green-300 bg-white' : 'border-landing-line'
-                  )}
-                >
-                  <span className="text-landing-ink text-base leading-[1.55] font-bold">
-                    {step.label}
-                  </span>
-                  <span className="text-landing-muted text-[13px] leading-[1.55]">{step.hint}</span>
-                </li>
-              ))}
-            </ol>
-            <a href={`${SITE_URL}/map`} className={textLinkClass}>
-              찜하고 싶은 명소 찾아보기 ↗
-            </a>
-          </div>
-
-          <figure className="reveal-item flex flex-col items-center gap-4 delay-150 xl:flex-1">
-            <Image
-              src="/images/landing/screen-spot-like.webp"
-              alt="명소 상세 화면 — 하트를 눌러 찜하고 만개 시기를 확인한다"
-              width={320}
-              height={569}
-              className="w-70 rounded-[18px] md:w-80"
-            />
-            <figcaption className="text-landing-muted text-center text-xs leading-[1.55]">
-              명소 상세 화면에서 하트를 눌러 찜해두세요.
-            </figcaption>
-          </figure>
-        </Reveal>
-      </section>
+      <SavedSteps />
 
       <section
         id="waitlist"
@@ -510,7 +366,9 @@ export default function LandingPage() {
                 iPhone에서도 곧 만나요
               </h2>
               <p className="text-[15px] leading-normal text-green-100 md:text-[17px]">
-                iOS 앱이 나오면 이메일로 알려드릴게요. 그동안 웹에서 둘러보세요.
+                iOS 앱이 나오면 이메일로 알려드릴게요.
+                <br />
+                그동안 웹에서 둘러보세요.
               </p>
             </div>
             <div className="relative w-full xl:w-115 xl:shrink-0">
@@ -526,17 +384,24 @@ export default function LandingPage() {
             04 다녀온 소식도 들려주세요
           </p>
           <h2 className="reveal-item text-landing-ink text-3xl leading-[1.45] font-bold tracking-[-0.02em] delay-100 md:text-[44px]">
-            오늘 찍은 사진이 누군가에겐 필요한 소식.
+            오늘 찍은 사진이
+            <br />
+            누군가에겐 필요한 소식.
           </h2>
           <p className="reveal-item text-landing-muted text-sm leading-[1.45] tracking-[-0.02em] delay-200 md:text-[17px]">
-            다녀온 날짜와 사진, 절정도를 남겨주세요. 방문을 고민하는 사람에게 도움이 돼요.
+            다녀온 날짜와 사진, 절정도를 남겨주세요.
+            <br />
+            방문을 고민하는 사람에게 도움이 돼요.
           </p>
-          <a
-            href={SITE_URL}
-            className="reveal-item w-58 rounded-full bg-green-600 p-4 text-base leading-[1.45] font-bold tracking-[-0.02em] text-white delay-300 md:w-65"
-          >
-            지금 명소 둘러보기 →
-          </a>
+          {/* reveal-item 이 translate 로 떠오르므로 hover 리프트는 안쪽 a 에 건다 */}
+          <div className="reveal-item delay-300">
+            <a
+              href={SITE_URL}
+              className="block w-58 rounded-full bg-green-600 p-4 text-base leading-[1.45] font-bold tracking-[-0.02em] text-white transition-[translate,background-color] duration-250 hover:-translate-y-[3px] hover:bg-green-700 md:w-65"
+            >
+              지금 명소 둘러보기 →
+            </a>
+          </div>
         </Reveal>
       </section>
 
@@ -545,17 +410,19 @@ export default function LandingPage() {
         aria-labelledby="landing-faq-title"
         className={cn(anchorClass, 'bg-white px-5 py-12 md:px-10 md:py-22')}
       >
-        <div className="mx-auto max-w-220">
-          <p className="text-[13px] leading-[1.6] font-bold tracking-[-0.02em] text-green-600">
-            궁금한 점이 있나요?
-          </p>
-          <h2
-            id="landing-faq-title"
-            className="text-landing-ink text-[26px] leading-[1.6] font-bold tracking-[-0.02em] md:text-[38px]"
-          >
-            자주 묻는 질문
-          </h2>
-          <ul className="mt-7 border-t border-gray-200">
+        <Reveal className="mx-auto max-w-220">
+          <div className="reveal-item">
+            <p className="text-[13px] leading-[1.6] font-bold tracking-[-0.02em] text-green-600">
+              궁금한 점이 있나요?
+            </p>
+            <h2
+              id="landing-faq-title"
+              className="text-landing-ink text-[26px] leading-[1.6] font-bold tracking-[-0.02em] md:text-[38px]"
+            >
+              자주 묻는 질문
+            </h2>
+          </div>
+          <ul className="reveal-item mt-7 border-t border-gray-200 delay-100">
             {FAQS.map((faq) => (
               <li key={faq.question} className="border-b border-gray-200">
                 <details className="landing-faq group">
@@ -572,7 +439,7 @@ export default function LandingPage() {
               </li>
             ))}
           </ul>
-        </div>
+        </Reveal>
       </section>
 
       <footer className="bg-gray-50 px-5 py-9 md:px-8 md:py-12 xl:px-30">

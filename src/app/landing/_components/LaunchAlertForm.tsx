@@ -113,7 +113,7 @@ export const LaunchAlertForm = () => {
       <button
         type="submit"
         disabled={!isEmailValid || !consent || isPending}
-        className="flex h-12 w-full cursor-pointer items-center justify-center rounded-3xl bg-green-300 text-[15px] leading-[1.4] font-medium text-gray-50 disabled:cursor-not-allowed disabled:bg-gray-300"
+        className="flex h-12 w-full cursor-pointer items-center justify-center rounded-3xl bg-green-300 text-[15px] leading-[1.4] font-medium text-gray-50 transition-colors duration-200 enabled:hover:bg-[#a7d38b] disabled:cursor-not-allowed disabled:bg-gray-300"
       >
         출시 알림 받기
       </button>
