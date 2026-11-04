@@ -84,7 +84,9 @@
   - 앱 화면은 루트 레이아웃이 430px 틀(`max-w-107.5 overflow-hidden`)로 감싸는데, 랜딩은 반응형이라 `data-landing` 이 있는 페이지에서만 `has-[[data-landing]]:` 로 틀과 overflow 를 푼다(overflow-hidden 이 남으면 sticky 헤더가 안 붙는다).
   - (2026-11-03) Figma `랜딩 · 계절의 절정 / Visual story`(Web 1440·Tablet 834·Mobile 390)로 다시 만들었다. 이전 슬라이드 캐러셀(`phone-*.webp`)은 지웠다.
     - 가을 추천 명소 3곳은 시안 문구 그대로 하드코딩하고, 상세 팝업 링크만 운영 ID(`/festivals/748`, `/spot/11198`, `/spot/251`)로 잇는다. 계절이 바뀌면 `SpotPicks.tsx`의 데이터와 사진을 같이 바꾼다.
-    - Scene 01 계절 탭·Scene 03 단계 카드는 시안에 가을·찜하기 화면만 있어 **보여 주기만 하는 정적 UI**다(클릭 전환 없음).
+    - (2026-11-04) hover·클릭 동작은 Notion PEAK-157 에 임베드된 HTML 프로토타입을 따른다. 히어로 타임라인 단계 클릭(지도 `Pin` 재사용), Scene 01 계절 탭, Scene 02 계절 칩, Scene 03 찜·만개 알림 단계가 모두 전환된다.
+    - Scene 03 은 데스크톱(xl)에서만 섹션을 220vh 로 늘리고 내용을 sticky 로 고정해 스크롤 절반을 넘으면 02 로 넘긴다(`SavedSteps`). 모바일·태블릿은 내용이 한 화면보다 길어 고정하지 않고 클릭으로만 바꾼다.
+    - 헤더 스크롤 진행 막대·히어로 사진 패럴랙스는 CSS `animation-timeline` 이라 Firefox 에서는 보이지 않는다(의도된 생략).
     - iOS 출시 알림은 모달 대신 '알림 신청' 섹션의 인라인 폼(`LaunchAlertForm`)이고, 히어로의 iOS 버튼은 그 섹션으로 스크롤한다(시안 프로토타입 인터랙션).
     - 스크롤 등장 효과는 `Reveal`(IntersectionObserver)이 `data-shown`을 붙이고 `globals.css`의 `.reveal-item` 이 받는다. '동작 줄이기' 설정이면 처음부터 다 보인다.
 - **PR은 `main` 대상이고, `main`은 보호돼 있다** (2026-10-01): PR 필수 + `ci` 체크 통과 필수(관리자 우회 가능). 로컬 `develop`은 크게 뒤처져 있어 기준으로 쓰지 않는다. Android 워크플로는 필수 체크가 아니다.
