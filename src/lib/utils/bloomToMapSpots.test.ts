@@ -15,6 +15,7 @@ const bloom = (
 const response = (pins: BloomMapPin[]): BloomMapResponse => ({
   count: pins.length,
   pins,
+  promotionalPins: [],
 })
 
 describe('lib/utils/bloomToMapSpots', () => {
