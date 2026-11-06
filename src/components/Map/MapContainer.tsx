@@ -11,6 +11,7 @@ import { SearchBar } from '@/components/ui/form/SearchBar'
 import { Category } from '@/components/ui/category/Category'
 import { toast } from 'sonner'
 import { useMapCluster } from '@/hooks/useMapPins'
+import { usePromotionalPins } from '@/hooks/usePromotionalPins'
 import { useSpotPreviewDrawer } from '@/hooks/useSpotPreviewDrawer'
 import type { MapSpot } from '@/lib/utils/mapCluster'
 import { useDrawerStore } from '@/stores/useDrawerStore'
@@ -234,6 +235,7 @@ export const MapContainer = () => {
   const { handlePinClick, handleClusterClick } = useSpotPreviewDrawer(applied)
 
   useMapCluster(mapInstance, spots, handlePinClick, handleClusterClick)
+  usePromotionalPins(mapInstance, bloomData?.promotionalPins)
 
   // 현재 조건의 조회 결과가 도착했을 때 한 번만 찾는다. 이전 조건의 결과(placeholder)로
   // 판정하면 핀이 있는데도 못 찾고 끝난다.

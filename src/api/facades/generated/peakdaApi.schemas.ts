@@ -3095,6 +3095,24 @@ export interface BloomMapPin {
 }
 
 /**
+ * 외부 링크로 바로 연결하는 홍보 지도 핀. 스팟 프리뷰나 상세를 조회하지 않는다.
+ */
+export interface PromotionalMapPinResponse {
+  /** 홍보 핀 식별자 */
+  id: string;
+  /** 핀 이름 */
+  name: string;
+  /** 위도 */
+  latitude: number;
+  /** 경도 */
+  longitude: number;
+  /** 프론트 핀 컴포넌트 식별자. SHARK는 상어 핀이다. */
+  iconKey: string;
+  /** 핀을 누르면 바로 열 HTTP(S) URL */
+  linkUrl: string;
+}
+
+/**
  * 지도 영역 내 Spot 핀별 개화 상태 (핀 5단계)
  */
 export interface BloomMapResponse {
@@ -3103,10 +3121,12 @@ export interface BloomMapResponse {
      * @nullable
      */
   baseDate?: string | null;
-  /** 핀 수 */
+  /** 개화 핀 수 (홍보 핀 제외) */
   count: number;
   /** Spot 핀 목록 (명소형 + 동네형) */
   pins: BloomMapPin[];
+  /** 영역 내 홍보 핀. 꽃·상태·방문예정일 필터와 무관하며, 비활성 또는 영역 밖이면 빈 목록이다. */
+  promotionalPins: PromotionalMapPinResponse[];
 }
 
 /**

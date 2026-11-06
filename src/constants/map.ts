@@ -71,3 +71,8 @@ export const CATEGORY_ICON: Record<BloomSlotCategory, string> = {
   MAPLE: '/flowers/maple.webp',
   CAMELLIA: '/flowers/camellia.webp',
 }
+
+// 홍보 핀 iconKey → 아이콘. 서버가 새 값을 보내도 여기 없으면 그리지 않는다.
+export const PROMOTIONAL_PIN_ICON: Record<string, string | undefined> = {
+  SHARK: '/images/shark-pin.svg',
+}

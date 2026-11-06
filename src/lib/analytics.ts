@@ -63,6 +63,8 @@ interface AnalyticsEvents {
   }
   filter_open: { surface: FilterSurface }
   map_pin_click: { spot_id: number }
+  // 외부 링크로 바로 나가는 홍보 핀(지도 영역은 자동 수집에서 빠져 있어 따로 보낸다)
+  map_promo_pin_click: { pin_id: string }
   // 핀을 누르면 뜨는 목록에서 몇 번째 카드를 눌러 상세로 갔는지
   map_preview_click: { spot_id: number; position: number }
   // 위치를 쓸 수 있었는지. 앱 설정에서 꺼 두었으면 app_off
@@ -182,6 +184,7 @@ const MIXPANEL_EVENT_NAMES: Record<keyof AnalyticsEvents, string | null> = {
   map_filter_apply: 'Filter Applied',
   filter_open: 'Filter Opened',
   map_pin_click: 'Map Pin Clicked',
+  map_promo_pin_click: 'Promo Pin Clicked',
   map_preview_click: 'Map Preview Clicked',
   map_my_location_click: 'My Location Clicked',
   location_permission: 'Location Permission Responded',
