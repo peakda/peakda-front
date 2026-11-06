@@ -1,10 +1,20 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
-import { ArrowRight } from 'lucide-react'
-import { BellIcon, DownloadIcon, GlobeIcon } from '@/app/landing/_components/LandingIcons'
-import { IosLaunchAlertTrigger } from '@/app/landing/_components/IosLaunchAlertTrigger'
-import { LandingCarousel } from '@/app/landing/_components/LandingCarousel'
-import { ShowcaseCard, type ShowcaseSlide } from '@/app/landing/_components/ShowcaseCard'
+import { ArrowDown, ArrowRight } from 'lucide-react'
+import { HeroVisual } from '@/app/landing/_components/HeroVisual'
+import {
+  BellIcon,
+  CaretDownIcon,
+  DownloadIcon,
+  GlobeIcon,
+} from '@/app/landing/_components/LandingIcons'
+import { LandingNav } from '@/app/landing/_components/LandingNav'
+import { LaunchAlertForm } from '@/app/landing/_components/LaunchAlertForm'
+import { Reveal } from '@/app/landing/_components/Reveal'
+import { SavedSteps } from '@/app/landing/_components/SavedSteps'
+import { SeasonChips } from '@/app/landing/_components/SeasonChips'
+import { SeasonRecord } from '@/app/landing/_components/SeasonRecord'
+import { SpotPicks } from '@/app/landing/_components/SpotPicks'
 import {
   BASE_OPEN_GRAPH,
   DEFAULT_OG_IMAGE,
@@ -57,49 +67,20 @@ const LANDING_JSON_LD = {
   publisher: { '@id': `${SITE_URL}/#organization` },
 }
 
-const SLIDES: ShowcaseSlide[] = [
+const FAQS = [
   {
-    eyebrow: '지금, 가장 예쁜 순간을 알려드려요',
-    lead: '벚꽃부터 단풍까지,',
-    highlight: '계절 명소의 지금 상태를 한눈에',
-    image: '/images/landing/phone-1.webp',
-    alt: '피크다 지도 화면 — 전국 계절 명소의 개화 상태를 꽃 핀으로 보여 준다',
+    question: '앱을 설치하지 않아도 사용할 수 있나요?',
+    answer: '네. ‘웹으로 명소 보기’를 누르면 설치 없이 피크다에서 계절 명소를 둘러볼 수 있어요.',
   },
   {
-    eyebrow: '이번 주, 어디가 좋을까요?',
-    lead: '준비중·피기시작·만개,',
-    highlight: '세 단계로 바로 확인해요',
-    image: '/images/landing/phone-2.webp',
-    alt: '명소 상세 화면 — 올해 만개 시기와 운영 시간·입장료·주차 정보',
+    question: '사진이 지금의 모습을 보여주나요?',
+    answer:
+      '방문자가 다녀온 날의 사진이에요. 사진과 함께 방문 날짜를 확인해 주세요. 계절 풍경은 날씨와 시기에 따라 달라질 수 있어요.',
   },
   {
-    eyebrow: '찜만 해둬도, 놓치지 않아요',
-    lead: '만개 예상 시기,',
-    highlight: '미리 알려드릴게요',
-    image: '/images/landing/phone-3.webp',
-    alt: '명소 찜 화면 — 만개 예상일 7일 전에 알림을 받는 설정',
-  },
-  {
-    eyebrow: '다녀온 사람들의 솔직한 기록',
-    lead: '사진 한 장으로',
-    highlight: '다녀왔던 곳을 기록',
-    tail: '할 수 있어요',
-    image: '/images/landing/phone-4.webp',
-    alt: '스팟 기록 화면 — 위치·사진·촬영일자를 입력하는 단계',
-  },
-  {
-    eyebrow: '이모지 하나로, 함께 만드는 타이밍 지도',
-    lead: '실제 방문자들의',
-    highlight: '사진과 반응으로 소통해요',
-    image: '/images/landing/phone-5.webp',
-    alt: '방문 기록 상세 화면 — 벚꽃길 사진과 방문자들의 이모지 반응',
-  },
-  {
-    eyebrow: '수도권 밖, 숨은 계절 명소까지',
-    lead: '매주 새로운',
-    highlight: '명소와 스팟을 만나요',
-    image: '/images/landing/phone-6.webp',
-    alt: '이번 주 피크다 큐레이션 화면 — 절정을 향해 가는 코스모스 명소 소개',
+    question: '절정도는 무엇인가요?',
+    answer:
+      '방문자가 꽃이나 단풍의 상태를 남기는 기록이에요. 사진과 방문 날짜를 함께 보면 언제 갈지 판단하는 데 도움이 돼요.',
   },
 ]
 
@@ -110,216 +91,377 @@ const FOOTER_LINKS = [
   { label: '위치기반서비스 이용약관', href: `${SITE_URL}/Terms/location-policy` },
 ]
 
+// 섹션 머리말(01 떠나기 전 확인하세요 등)
+const eyebrowClass = 'text-[13px] leading-[1.45] font-bold tracking-[-0.02em] text-green-600'
+const sceneTitleClass =
+  'text-landing-ink text-3xl leading-[1.45] font-bold tracking-[-0.02em] md:text-[42px]'
+const sceneBodyClass =
+  'text-landing-muted text-[15px] leading-[1.45] tracking-[-0.02em] md:text-[17px]'
 const optionTitleClass = 'text-lg leading-[1.55] font-semibold tracking-[-0.005em]'
-const optionDescClass = 'mt-0.5 text-sm leading-normal'
-const secondaryOptionClass =
-  'flex h-[85px] items-center gap-3 rounded-[20px] border border-gray-200 bg-white px-5'
+const optionDescClass = 'text-sm leading-normal font-medium'
+// 히어로 시작 옵션은 hover 때 살짝 떠오른다(HTML 시안)
+const optionLiftClass =
+  'transition-[translate,box-shadow,border-color] duration-250 hover:-translate-y-[3px]'
+const secondaryOptionClass = cn(
+  'flex flex-1 items-center gap-3 rounded-4xl border border-gray-200 bg-white px-5 py-4 hover:border-[#9ebc88] hover:shadow-[0_8px_24px_#263e1610]',
+  optionLiftClass
+)
+const optionIconClass =
+  'flex size-12 shrink-0 items-center justify-center rounded-full bg-green-50 text-green-700'
+// 밑줄이 있는 글자 링크 — hover 때 글자·밑줄이 진해진다
+const textLinkClass =
+  'hover:text-landing-ink w-fit border-b border-[#b6c8aa] pb-1 text-sm leading-[1.55] font-bold text-green-600 transition-colors duration-200 hover:border-current'
+// 고정 헤더(모바일 65px·태블릿 이상 77px)에 가리지 않게 앵커 위치를 내린다
+const anchorClass = 'scroll-mt-16 md:scroll-mt-20'
 
 export default function LandingPage() {
   return (
     // data-landing: 루트 레이아웃의 430px 모바일 틀을 이 페이지에서만 푼다(layout.tsx).
-    <div data-landing="" className="flex flex-col">
+    <div data-landing="" className="flex flex-col break-keep">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: toJsonLdScript(LANDING_JSON_LD) }}
       />
 
-      <header className="sticky top-0 z-10 bg-white">
-        <div className="mx-auto flex h-14 max-w-360 items-center justify-between px-5 md:h-20 md:px-10 xl:px-20">
+      <header className="sticky top-0 z-20 border-b border-gray-200 bg-white">
+        <div className="mx-auto flex max-w-360 items-center justify-between px-5 py-3.5 md:px-8 md:py-[18px] xl:px-30">
           <Image
             src="/images/landing/logo.webp"
             alt={SITE_BRAND_NAME}
-            width={109}
-            height={30}
+            width={130}
+            height={36}
             priority
+            className="h-7.5 w-auto md:h-9 xl:h-8.5"
           />
-          <a
-            href={SITE_URL}
-            className="flex h-9 items-center rounded-full bg-green-600 px-[17px] text-sm font-bold text-white md:h-[39px] md:text-base"
-          >
-            웹으로 보기
-          </a>
+          <div className="flex items-center gap-8">
+            <LandingNav />
+            <a
+              href={SITE_URL}
+              className="flex h-9 items-center rounded-xl bg-green-300 px-4 text-sm leading-[1.4] font-medium text-gray-50 md:h-10 md:rounded-2xl md:text-[15px]"
+            >
+              웹으로 보기
+            </a>
+          </div>
         </div>
+        {/* 스크롤 진행 막대 — 폭은 globals.css 의 스크롤 연동 애니메이션이 채운다 */}
+        <div
+          aria-hidden
+          className="landing-progress absolute inset-x-0 -bottom-px h-0.5 bg-green-600"
+        />
       </header>
 
-      <section className="bg-green-50">
-        <div className="mx-auto flex max-w-360 px-5 pt-8 pb-10 md:px-10 md:py-16 xl:min-h-208 xl:items-center xl:justify-between xl:px-20 xl:py-0">
-          <div className="w-full xl:max-w-160">
-            <p className="text-[13px] leading-[1.4] font-medium tracking-[-0.01em] text-green-700 md:text-xl">
-              벚꽃부터 단풍까지, 계절 여행의 타이밍
-            </p>
-            <h1 className="mt-4 text-4xl leading-[1.3] font-bold tracking-[-0.02em] text-gray-950 md:mt-6 xl:text-[60px] xl:leading-[1.2]">
-              이번 주말,
-              <br />
-              지금 가도 예쁠까?
-            </h1>
-            <p className="mt-6 text-base leading-[1.4] tracking-[-0.01em] text-gray-600 md:text-xl">
-              피크다에서 계절 명소를 찾고,
-              <br />
-              방문 기록으로 타이밍을 확인해요.
-            </p>
+      <section
+        id="intro"
+        className={cn(anchorClass, 'bg-white px-6 pt-9 pb-14 md:px-10 md:pt-16 md:pb-20 xl:px-30')}
+      >
+        <div className="mx-auto flex max-w-300 flex-col items-center gap-6 text-center md:gap-8">
+          <p className="text-base leading-[1.45] font-bold tracking-[-0.02em] text-green-600">
+            계절 명소를 찾을 땐, 피크다
+          </p>
+          <h1 className="text-landing-ink text-4xl leading-[1.45] font-bold tracking-[-0.02em] md:text-5xl xl:text-[64px]">
+            벚꽃도 단풍도,
+            <br />
+            보기 좋은 때에.
+          </h1>
+          <p className="text-landing-muted text-sm leading-[1.45] tracking-[-0.02em] md:text-lg">
+            최근 다녀온 사람들의 사진을 보고
+            <br />
+            언제 갈지 정해 보세요.
+          </p>
 
-            {/* 모바일은 웹 바로가기가 맨 위, 태블릿·데스크톱은 앱 두 개 아래 넓게 */}
-            <div className="mt-6 flex flex-col gap-3 md:grid md:grid-cols-2 md:gap-4">
-              <a
-                href={SITE_URL}
-                className="order-first flex h-[83px] items-center gap-3 rounded-[20px] bg-green-600 px-5 shadow-[0_8px_24px_rgba(26,31,38,0.12)] md:order-last md:col-span-2"
-              >
-                <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-white text-green-600">
-                  <GlobeIcon className="size-6" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="flex items-center gap-2.5">
-                    <span className={cn(optionTitleClass, 'text-white')}>웹으로 명소 보기</span>
-                    <span className="flex h-[22px] items-center rounded-full bg-pink-400 px-2.5 text-[11px] font-bold text-white">
-                      바로 시작
-                    </span>
-                  </span>
-                  <span className={cn('block', optionDescClass, 'text-green-100')}>
-                    설치 없이 바로 확인해요 · 모든 기기
-                  </span>
-                </span>
-                <ArrowRight aria-hidden className="size-5 shrink-0 text-white" />
-              </a>
-
+          <div className="flex w-full flex-col gap-4 text-left md:max-w-172">
+            <div className="flex flex-col gap-4 md:flex-row">
               <a href={PLAY_STORE_URL} className={secondaryOptionClass}>
-                <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-green-50 text-green-700">
+                <span className={optionIconClass}>
                   <DownloadIcon className="size-6" />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className={cn('block', optionTitleClass, 'text-gray-900')}>
+                  <span className={cn('block text-gray-900', optionTitleClass)}>
                     Android 앱 설치
                   </span>
-                  <span className={cn('block', optionDescClass, 'text-gray-600')}>
+                  <span className={cn('block text-gray-600', optionDescClass)}>
                     Google Play에서 받아요
                   </span>
                 </span>
                 <ArrowRight aria-hidden className="size-5 shrink-0 text-gray-500" />
               </a>
-
-              <IosLaunchAlertTrigger
-                className={cn(secondaryOptionClass, 'w-full cursor-pointer text-left')}
-              >
-                <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-green-50 text-green-700">
+              {/* 시안 인터랙션: 누르면 아래 '알림 신청' 섹션으로 스크롤 */}
+              <a href="#waitlist" className={secondaryOptionClass}>
+                <span className={optionIconClass}>
                   <BellIcon className="size-6" />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className={cn('block', optionTitleClass, 'text-gray-900')}>
+                  <span className={cn('block text-gray-900', optionTitleClass)}>
                     iOS 앱 출시 알림
                   </span>
-                  <span className={cn('block', optionDescClass, 'text-gray-600')}>
+                  <span className={cn('block text-gray-600', optionDescClass)}>
                     준비 중 · 이메일로 알려드려요
                   </span>
                 </span>
-                <ArrowRight aria-hidden className="size-5 shrink-0 text-gray-500" />
-              </IosLaunchAlertTrigger>
+                <ArrowDown aria-hidden className="size-5 shrink-0 text-gray-500" />
+              </a>
             </div>
+
+            <a
+              href={SITE_URL}
+              className={cn(
+                'flex items-center gap-3 rounded-4xl bg-green-600 px-5 py-4 shadow-[0_8px_24px_rgba(26,31,38,0.12)]',
+                optionLiftClass
+              )}
+            >
+              <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-white text-green-600">
+                <GlobeIcon className="size-6" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="flex items-center gap-2">
+                  <span className={cn('text-white', optionTitleClass)}>웹으로 명소 보기</span>
+                  <span className="rounded-full bg-pink-400 px-2.5 py-1 text-[11px] leading-[1.3] font-bold tracking-[-0.02em] text-white">
+                    바로 시작
+                  </span>
+                </span>
+                <span className={cn('block text-green-100', optionDescClass)}>
+                  설치 없이 바로 둘러보세요
+                </span>
+              </span>
+              <ArrowRight aria-hidden className="size-5 shrink-0 text-white" />
+            </a>
           </div>
 
-          {/* 데스크톱 시안에만 있는 휴대폰 두 대. 520×600 묶음 안 위치를 비율로 둔다 */}
-          <div className="relative mr-5 hidden aspect-[520/600] w-[40.625%] shrink-0 xl:block">
-            <Image
-              src="/images/landing/phone-1.webp"
-              alt="피크다 지도 화면"
-              width={543}
-              height={1098}
-              className="absolute top-[-1.22%] left-[-1.12%] h-auto w-[50.7%] drop-shadow-[0_16px_40px_rgba(0,0,0,0.14)]"
-            />
-            <Image
-              src="/images/landing/phone-2.webp"
-              alt="피크다 명소 상세 화면"
-              width={543}
-              height={1098}
-              className="absolute top-[12.78%] left-[50.42%] h-auto w-[50.7%] drop-shadow-[0_16px_40px_rgba(0,0,0,0.14)]"
-            />
-          </div>
+          <HeroVisual />
+        </div>
+      </section>
+
+      <section className="bg-white px-5 pt-12 pb-14 md:px-8 md:pt-18 md:pb-20 xl:px-30">
+        <div className="mx-auto flex max-w-300 flex-col gap-7 md:gap-10">
+          <Reveal>
+            <div className="reveal-item flex flex-col gap-2.5">
+              <p className="text-[13px] leading-[1.3] tracking-[-0.02em] text-green-500">
+                피크다가 고른 가을 명소
+              </p>
+              <h2 className="text-[26px] leading-[1.3] font-bold tracking-[-0.02em] text-gray-950 md:text-[32px] xl:text-[38px]">
+                이번 주말엔, 가을 산책 어때요?
+              </h2>
+              <p className="text-[15px] leading-normal text-gray-600 md:text-[17px]">
+                꽃구경부터 강변 산책까지, 걷고 싶은 풍경을 골라보세요.
+              </p>
+            </div>
+          </Reveal>
+
+          <Reveal>
+            <SpotPicks />
+          </Reveal>
+
+          <Reveal>
+            <div className="reveal-item bg-landing-sage rounded-5xl flex flex-col items-center gap-7 p-6 md:flex-row md:gap-10 md:px-10 md:py-8">
+              <div className="flex w-full flex-col gap-3.5 md:flex-1">
+                <p className="text-xs leading-[1.55] font-bold text-green-600">
+                  어디로 갈지 고민될 땐
+                </p>
+                <h3 className="text-landing-ink text-[27px] leading-[1.55] font-bold md:text-[32px]">
+                  아는 곳 말고,
+                  <br />
+                  새로운 계절 명소도.
+                </h3>
+                <p className="text-landing-muted text-sm leading-[1.55] md:text-base">
+                  피크다가 모아둔 명소 이야기를 읽어보세요.
+                  <br />
+                  마음에 드는 풍경이 있다면 다음 여행에 담아두고요.
+                </p>
+                <a href={`${SITE_URL}/explore`} className={textLinkClass}>
+                  피크다가 고른 명소 보기 ↗
+                </a>
+              </div>
+              <Image
+                src="/images/landing/screen-curation.webp"
+                alt="피크다 이번 주 큐레이션 화면 — 절정을 향해 가는 코스모스 명소 소개"
+                width={220}
+                height={391}
+                className="shrink-0 rounded-[18px]"
+              />
+            </div>
+          </Reveal>
         </div>
       </section>
 
       <section
-        aria-labelledby="landing-features"
-        className="bg-white md:px-10 md:py-6 xl:px-20 xl:pt-24 xl:pb-12"
+        id="features"
+        className={cn(anchorClass, 'bg-landing-sage px-6 py-14 md:px-10 md:py-22 xl:px-30')}
       >
-        <h2 id="landing-features" className="sr-only">
-          피크다로 할 수 있는 일
-        </h2>
-        <div className="mx-auto max-w-320">
-          <LandingCarousel>
-            {SLIDES.map((slide) => (
-              <ShowcaseCard key={slide.image} slide={slide} />
-            ))}
-          </LandingCarousel>
-        </div>
+        <Reveal className="mx-auto flex max-w-300 flex-col items-center gap-7 md:gap-16 xl:flex-row">
+          <div className="reveal-item flex w-full flex-col gap-5 xl:w-105 xl:shrink-0">
+            <p className={eyebrowClass}>01 떠나기 전 확인하세요</p>
+            <h2 className={sceneTitleClass}>
+              지금 얼마나 피었는지
+              <br />
+              궁금하니까.
+            </h2>
+            <p className={sceneBodyClass}>
+              예쁜 사진을 보고 찾아갔는데
+              <br />
+              꽃이 다 져 있으면 아쉬우니까요.
+              <br />
+              방문 날짜와 사진, 절정도를 함께 보고
+              <br />
+              언제 갈지 정해 보세요.
+            </p>
+          </div>
+
+          <div className="reveal-item flex w-full flex-col gap-5 rounded-[28px] bg-white p-[18px] delay-150 md:p-7 xl:flex-1">
+            <SeasonRecord />
+          </div>
+        </Reveal>
       </section>
 
-      <section className="bg-white">
-        <div className="mx-auto grid max-w-360 px-5 pt-12 pb-13 md:px-10 md:py-16 xl:grid-cols-[640px_1fr] xl:gap-x-10 xl:px-20 xl:pt-20 xl:pb-24">
-          <p className="text-sm leading-[1.4] font-semibold tracking-[-0.01em] text-green-500 md:text-xl">
-            벚꽃 · 수국 · 단풍 · 억새
-          </p>
-          <h2 className="mt-5 text-[28px] leading-[1.3] font-bold tracking-[-0.02em] text-gray-950 md:mt-4 md:text-[40px] md:leading-[1.2] xl:col-start-1">
-            다녀온 순간이
-            <br />
-            다음 여행의 힌트가 돼요
-          </h2>
-          <p className="mt-5 text-base leading-[1.4] text-gray-600 md:mt-4 md:text-xl md:leading-[1.35] xl:col-start-2 xl:row-start-2">
-            방문 사진과 절정도를 남기면
-            <br />
-            다른 사람의 여행에 도움이 돼요.
-          </p>
-        </div>
+      <section className="bg-white px-6 py-14 md:px-10 md:py-24 xl:px-30">
+        <Reveal className="mx-auto flex max-w-300 flex-col items-center gap-7 md:gap-16 xl:flex-row">
+          {/* hover 하면 휴대폰이 살짝 떠오르며 기운다 */}
+          <div className="reveal-item bg-landing-mint rounded-6xl group/map flex w-full justify-center px-6 py-8 md:py-6 xl:w-140 xl:shrink-0">
+            <div className="bg-landing-phone rounded-[30px] p-[5.5px] shadow-[0_15px_24.7px_rgba(64,38,10,0.2)] group-hover/map:-translate-y-1.5 group-hover/map:-rotate-1 motion-safe:transition-[translate,rotate] motion-safe:duration-600">
+              <Image
+                src="/images/landing/screen-map.webp"
+                alt="피크다 지도 화면 — 전국 계절 명소의 개화 상태를 꽃 핀으로 보여 준다"
+                width={242}
+                height={525}
+                className="rounded-[24.7px]"
+              />
+            </div>
+          </div>
+
+          <div className="reveal-item flex w-full flex-col gap-5 delay-150 xl:flex-1">
+            <p className={eyebrowClass}>02 가보고 싶은 곳을 찾아보세요</p>
+            <h2 className={sceneTitleClass}>
+              벚꽃 보러 갈까?
+              <br />
+              단풍 보러 갈까?
+            </h2>
+            <p className={sceneBodyClass}>
+              보고 싶은 꽃이나 단풍, 갈 지역을 골라보세요.
+              <br />
+              지도에서도 주변 명소를 찾을 수 있어요.
+              <br />
+              가보고 싶은 곳은 저장해 두세요.
+            </p>
+            <SeasonChips />
+          </div>
+        </Reveal>
       </section>
 
-      <section className="bg-gray-50">
-        <div className="mx-auto max-w-360 px-5 py-12 md:px-10 md:pt-[62px] md:pb-16 xl:flex xl:items-center xl:justify-between xl:px-20 xl:py-24">
-          <h2 className="text-[28px] leading-[1.3] font-bold tracking-[-0.02em] text-gray-950 md:text-[40px] md:leading-[1.2]">
-            이번 주말의 계절 명소,
+      <SavedSteps />
+
+      <section
+        id="waitlist"
+        className={cn(anchorClass, 'bg-white px-5 py-14 md:px-8 md:py-18 xl:px-30 xl:py-24')}
+      >
+        <Reveal className="mx-auto max-w-300">
+          <div className="reveal-item rounded-5xl md:rounded-6xl relative flex flex-col gap-7 overflow-hidden bg-green-700 p-6 shadow-[0_20px_48px_rgba(40,80,17,0.25)] md:gap-12 md:p-12 xl:flex-row xl:items-center xl:gap-16 xl:p-16">
+            <div
+              aria-hidden
+              className="absolute -top-35 -right-22.5 size-80 rounded-full bg-[rgba(141,196,104,0.28)] blur-[55px] md:-top-45 md:-right-17.5 md:size-105 xl:-top-50 xl:-right-20 xl:size-115"
+            />
+            <div className="relative flex flex-col items-start gap-4 xl:flex-1">
+              <span className="rounded-full bg-green-300 px-2.5 py-1 text-[13px] leading-[1.3] font-bold tracking-[-0.02em] text-green-800 md:bg-green-100 md:text-green-700">
+                출시 알림
+              </span>
+              <h2 className="text-[26px] leading-[1.3] font-bold tracking-[-0.02em] text-white md:text-[32px] xl:text-[38px]">
+                iPhone에서도 곧 만나요
+              </h2>
+              <p className="text-[15px] leading-normal text-green-100 md:text-[17px]">
+                iOS 앱이 나오면 이메일로 알려드릴게요.
+                <br />
+                그동안 웹에서 둘러보세요.
+              </p>
+            </div>
+            <div className="relative w-full xl:w-115 xl:shrink-0">
+              <LaunchAlertForm />
+            </div>
+          </div>
+        </Reveal>
+      </section>
+
+      <section className="bg-landing-cream px-6 py-12 md:px-10 md:py-18 xl:px-30">
+        <Reveal className="mx-auto flex max-w-300 flex-col items-center gap-6 text-center">
+          <p className="reveal-item text-[13px] leading-[1.45] tracking-[-0.02em] text-green-600">
+            04 다녀온 소식도 들려주세요
+          </p>
+          <h2 className="reveal-item text-landing-ink text-3xl leading-[1.45] font-bold tracking-[-0.02em] delay-100 md:text-[44px]">
+            오늘 찍은 사진이
             <br />
-            지금 찾아보세요
+            누군가에겐 필요한 소식.
           </h2>
-          <div className="mt-5 flex flex-col items-start gap-5 md:mt-[22px] md:w-80 xl:mt-0 xl:w-105 xl:gap-4">
+          <p className="reveal-item text-landing-muted text-sm leading-[1.45] tracking-[-0.02em] delay-200 md:text-[17px]">
+            다녀온 날짜와 사진, 절정도를 남겨주세요.
+            <br />
+            방문을 고민하는 사람에게 도움이 돼요.
+          </p>
+          {/* reveal-item 이 translate 로 떠오르므로 hover 리프트는 안쪽 a 에 건다 */}
+          <div className="reveal-item delay-300">
             <a
               href={SITE_URL}
-              className="flex h-12 w-full items-center justify-center rounded-full bg-pink-300 text-base font-bold text-white md:h-13 xl:h-14"
+              className="block w-58 rounded-full bg-green-600 p-4 text-base leading-[1.45] font-bold tracking-[-0.02em] text-white transition-[translate,background-color] duration-250 hover:-translate-y-[3px] hover:bg-green-700 md:w-65"
             >
-              지금 명소 보기
+              지금 명소 둘러보기 →
             </a>
-            <a
-              href={PLAY_STORE_URL}
-              className="text-sm leading-[1.4] text-gray-500 md:text-xl md:leading-[1.35]"
-            >
-              Android 앱 다운로드
-            </a>
-            <IosLaunchAlertTrigger className="cursor-pointer text-sm leading-[1.4] text-gray-500 md:text-xl md:leading-[1.35]">
-              iOS 앱 출시 알림 받기 →
-            </IosLaunchAlertTrigger>
           </div>
-        </div>
+        </Reveal>
       </section>
 
-      <footer className="bg-gray-50">
-        <div className="mx-auto flex max-w-360 flex-col gap-5 px-5 py-9 md:px-10 md:py-10 xl:grid xl:grid-cols-[1fr_auto] xl:gap-x-10 xl:gap-y-4 xl:px-20 xl:py-12">
-          <Image src="/images/landing/logo.webp" alt={SITE_BRAND_NAME} width={101} height={28} />
-          <nav
-            aria-label="문의 및 약관"
-            className="xl:col-start-2 xl:row-span-2 xl:row-start-1 xl:self-center"
-          >
-            <ul className="flex flex-wrap gap-x-5 gap-y-1.5 xl:gap-x-4">
-              {FOOTER_LINKS.map((link) => (
-                <li key={link.label}>
-                  <a
-                    href={link.href}
-                    className="block text-sm leading-[1.4] font-medium text-gray-700"
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-          <p className="text-[13px] leading-[1.3] text-gray-500 xl:col-start-1 xl:row-start-2">
-            © 2026 MOTE STUDIO
+      <section
+        id="faq"
+        aria-labelledby="landing-faq-title"
+        className={cn(anchorClass, 'bg-white px-5 py-12 md:px-10 md:py-22')}
+      >
+        <Reveal className="mx-auto max-w-220">
+          <div className="reveal-item">
+            <p className="text-[13px] leading-[1.6] font-bold tracking-[-0.02em] text-green-600">
+              궁금한 점이 있나요?
+            </p>
+            <h2
+              id="landing-faq-title"
+              className="text-landing-ink text-[26px] leading-[1.6] font-bold tracking-[-0.02em] md:text-[38px]"
+            >
+              자주 묻는 질문
+            </h2>
+          </div>
+          <ul className="reveal-item mt-7 border-t border-gray-200 delay-100">
+            {FAQS.map((faq) => (
+              <li key={faq.question} className="border-b border-gray-200">
+                <details className="landing-faq group">
+                  <summary className="flex cursor-pointer list-none items-center gap-4 py-5 group-open:pb-[18px] md:py-6 md:group-open:pb-[18px] [&::-webkit-details-marker]:hidden">
+                    <span className="text-landing-ink flex-1 text-[15px] leading-[1.6] font-bold tracking-[-0.02em] md:text-lg">
+                      {faq.question}
+                    </span>
+                    <CaretDownIcon className="size-6 shrink-0 text-gray-700 group-open:rotate-180 motion-safe:transition-transform motion-safe:duration-300" />
+                  </summary>
+                  <p className="text-landing-muted pb-5 text-sm leading-[1.6] tracking-[-0.02em] md:pb-6 md:text-base">
+                    {faq.answer}
+                  </p>
+                </details>
+              </li>
+            ))}
+          </ul>
+        </Reveal>
+      </section>
+
+      <footer className="bg-gray-50 px-5 py-9 md:px-8 md:py-12 xl:px-30">
+        <div className="mx-auto flex max-w-300 flex-col gap-5">
+          <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+            <Image src="/images/landing/logo.webp" alt={SITE_BRAND_NAME} width={101} height={28} />
+            <nav aria-label="문의 및 약관">
+              <ul className="flex flex-wrap gap-x-5 gap-y-2 xl:gap-x-6">
+                {FOOTER_LINKS.map((link) => (
+                  <li key={link.label}>
+                    <a href={link.href} className="text-sm leading-[1.3] font-medium text-gray-700">
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </div>
+          <p className="text-[13px] leading-normal text-gray-500">
+            데이터 출처 · 한국관광공사 TourAPI, 기상청 데이터 기반
           </p>
+          <p className="text-[13px] leading-[1.3] text-gray-500">© 2026 MOTE STUDIO</p>
         </div>
       </footer>
     </div>

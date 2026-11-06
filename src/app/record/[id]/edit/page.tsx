@@ -120,6 +120,7 @@ function RecordEditForm({ record }: { record: SpotRecordResponse }) {
       setPendingPhotoCount(0)
     }
     if (isUnmounted()) return
+    if (compressed.length < files.length) toast.error('올릴 수 없는 형식의 사진은 뺐어요')
     const newItems = compressed.map(
       (file): EditPhoto => ({ kind: 'new', file, previewUrl: createPreviewUrl(file) })
     )

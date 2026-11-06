@@ -21,7 +21,7 @@ import { Camera } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { compressImage } from '@/lib/utils/image'
+import { compressImage, UnsupportedImageError } from '@/lib/utils/image'
 import { OtherPlantPicker } from '@/app/profile/_components/OtherPlantPicker'
 import {
   readCustomFavoritePlantIds,
@@ -107,7 +107,14 @@ export default function ProfileEditPage() {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const original = e.target.files?.[0]
     if (!original) return
-    const file = await compressImage(original)
+    let file: File
+    try {
+      file = await compressImage(original)
+    } catch (error) {
+      if (!(error instanceof UnsupportedImageError)) throw error
+      toast.error('올릴 수 없는 형식의 사진이에요. 다른 사진을 골라주세요.')
+      return
+    }
     const previousPreview = preview
     const blobUrl = URL.createObjectURL(file)
     setPreview(blobUrl)

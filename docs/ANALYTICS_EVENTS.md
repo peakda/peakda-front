@@ -57,6 +57,7 @@ PM 공유용 전체 설계(퍼널·대시보드·예정 이벤트 포함): https
 | `search_result_click` | Search Result Clicked | 검색 결과를 눌러 이동 | `result_type`(spot/user), `item_id`, `position`, `search_term` |
 | `search_tab_change` | Search Tab Changed | 스팟/유저 탭 전환 | `tab`, `has_keyword` |
 | `map_pin_click` | Map Pin Clicked | 지도 핀·클러스터 클릭 | `spot_id` |
+| `map_promo_pin_click` | Promo Pin Clicked | 지도 홍보 핀(북항 상어 등) 클릭. 외부 링크를 열기 직전에 보낸다 | `pin_id` |
 | `map_preview_click` | Map Preview Clicked | 핀·필터 결과 목록에서 카드를 눌러 상세로 | `spot_id`, `position` |
 | `filter_open` | Filter Opened | 필터 시트 열기 (지도·탐색) | `surface`(map/explore) |
 | `map_filter_apply` | Filter Applied | 필터 적용. 지도는 목록 결과가 나온 뒤 보낸다 | `surface`, `region`, `timing`, `categories`(목록, 미선택은 `['all']`), `flower_count`, `result_count`(지도만, 0 포함) |

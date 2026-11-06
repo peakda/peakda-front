@@ -9,7 +9,8 @@
 
 /* next/font/local 이 <html> 에 심어 주던 변수를 직접 정의한다. */
 :root {
-  --font-pretendard: 'Pretendard Variable', 'Pretendard Fallback', system-ui, -apple-system, sans-serif;
+  --font-pretendard:
+    'Pretendard Variable', 'Pretendard Fallback', system-ui, -apple-system, sans-serif;
 }
 
 /* next/font/local 이 만들어 주던 metric override fallback. 폰트가 swap 될 때 줄바꿈이
@@ -67,6 +68,8 @@
   --font-sans: var(--font-pretendard);
   --animate-bounce-smooth: bounce-smooth 0.8s ease-out 1 forwards;
   --animate-drop-in: drop-in 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 1 forwards;
+  /* 랜딩 히어로 타임라인 — 카드·트랙이 먼저 나온 뒤 핀이 '절정'에 떨어진다 */
+  --animate-pin-drop: drop-in 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 1.1s both;
   /* gray */
   --color-gray-0: #ffffff;
   --color-gray-50: #f8f9fb;
@@ -138,6 +141,17 @@
   --color-flower-pampas-grass: #c2aa8a;
   --color-flower-autumn-maple: #f0603a;
   --color-flower-camellia: #c8202a;
+
+  /* 랜딩(Visual story 시안) 전용 — Figma 변수가 아닌 hex 라 랜딩에서만 쓴다 */
+  --color-landing-ink: #202c1c;
+  --color-landing-muted: #667060;
+  --color-landing-sage: #f6f8f1;
+  --color-landing-mint: #f3f7ed;
+  --color-landing-cream: #fdf6ef;
+  --color-landing-tab: #f3f6ef;
+  --color-landing-tab-text: #77806d;
+  --color-landing-line: #dee5d9;
+  --color-landing-phone: #243b22;
 }
 
 /* ============================================================
@@ -387,6 +401,111 @@
   button:not(:disabled),
   [role='button']:not(:disabled) {
     cursor: pointer;
+  }
+}
+
+/* 랜딩 스크롤 등장 — Reveal(data-reveal)이 화면에 들어오면 data-shown 이 붙고 안쪽 .reveal-item 이 떠오른다.
+   '동작 줄이기' 설정이면 숨기지 않고 처음부터 보여 준다. */
+@media (prefers-reduced-motion: no-preference) {
+  html:has([data-landing]) {
+    scroll-behavior: smooth;
+  }
+  /* 단축 속성(transition)을 쓰면 순서 지연용 delay-* 유틸이 덮여서 개별 속성으로 둔다 */
+  .reveal-item {
+    transition-property: opacity, translate;
+    transition-duration: 0.7s;
+    transition-timing-function: ease-out;
+  }
+  [data-reveal]:not([data-shown]) .reveal-item {
+    opacity: 0;
+    translate: 0 24px;
+  }
+  /* FAQ 펼침 높이 — ::details-content 를 모르는 브라우저는 그냥 바로 펼친다 */
+  .landing-faq {
+    interpolate-size: allow-keywords;
+  }
+  .landing-faq::details-content {
+    block-size: 0;
+    overflow: hidden;
+    transition:
+      block-size 0.3s ease,
+      content-visibility 0.3s allow-discrete;
+  }
+  .landing-faq[open]::details-content {
+    block-size: auto;
+  }
+}
+
+/* 랜딩 Scene 03(SavedSteps) — 데스크톱에서 고정된 섹션을 스크롤하는 만큼 단계 카드 아래 막대가 찬다.
+   01 은 앞 절반, 02 는 뒤 절반. view-timeline 을 모르는 브라우저는 막대를 숨긴다. */
+@keyframes landing-step-fill {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+.landing-step-track,
+.landing-step-bar {
+  display: none;
+}
+@supports (animation-timeline: view()) {
+  @media (min-width: 1280px) {
+    .landing-steps {
+      view-timeline-name: --landing-steps;
+    }
+    .landing-step-track,
+    .landing-step-bar {
+      display: block;
+    }
+    .landing-step-bar {
+      transform-origin: left;
+      animation: landing-step-fill linear both;
+      animation-timeline: --landing-steps;
+    }
+    .landing-step-bar[data-step='0'] {
+      animation-range: contain 0% contain 50%;
+    }
+    .landing-step-bar[data-step='1'] {
+      animation-range: contain 50% contain 100%;
+    }
+  }
+}
+
+/* 랜딩 명소 팝업(dialog)이 열려 있는 동안 뒤 페이지 스크롤을 잠근다 */
+html:has([data-landing] dialog[open]) {
+  overflow: hidden;
+}
+
+/* 랜딩 헤더의 스크롤 진행 막대와 히어로 사진 패럴랙스 — 스크롤 연동 애니메이션(animation-timeline)으로
+   JS 없이 그린다. 지원하지 않는 브라우저(Firefox 등)는 막대를 숨기고 사진은 고정한다. */
+@keyframes landing-progress {
+  to {
+    scale: 1 1;
+  }
+}
+@keyframes landing-parallax {
+  to {
+    translate: 0 42px;
+  }
+}
+.landing-progress {
+  transform-origin: left;
+  scale: 0 1;
+}
+@supports (animation-timeline: scroll()) {
+  .landing-progress {
+    animation: landing-progress linear both;
+    animation-timeline: scroll(root);
+  }
+  /* HTML 시안: scrollY × 0.055, 최대 42px (764px 스크롤에서 끝). 540px 이하 화면은 끈다 */
+  @media (prefers-reduced-motion: no-preference) and (min-width: 541px) {
+    .landing-parallax {
+      animation: landing-parallax linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 764px;
+    }
   }
 }
 
