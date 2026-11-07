@@ -70,7 +70,7 @@ export const getGetCurationsUrl = (params: GetCurationsParams,) => {
 }
 
 /**
- * 비로그인으로 조회할 수 있다. 발행된 주차 단위 큐레이션을 최신 주차순으로 조회한다.
+ * 비로그인으로 조회할 수 있다. 발행된 주차 단위 큐레이션을 최근 고정순, 최신 주차순으로 조회한다.
  * @summary 발행 큐레이션 목록
  */
 export const getCurations = async (params: GetCurationsParams, options?: RequestInit): Promise<getCurationsResponse> => {

@@ -253,6 +253,169 @@ export const usePutAdminCurations = <TError = unknown,
       > => {
       return useMutation(getPutAdminCurationsMutationOptions(options), queryClient);
     }
+    export type putAdminCurationsByIdPinResponse200 = {
+  data: ApiResponseUnit
+  status: 200
+}
+
+export type putAdminCurationsByIdPinResponseSuccess = (putAdminCurationsByIdPinResponse200) & {
+  headers: Headers;
+};
+;
+
+export type putAdminCurationsByIdPinResponse = (putAdminCurationsByIdPinResponseSuccess)
+
+export const getPutAdminCurationsByIdPinUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/curations/${id}/pin`
+}
+
+/**
+ * 큐레이션을 탐색 탭 목록 상단에 고정한다. 여러 건을 고정할 수 있으며 최근 고정 순으로 노출한다.
+ * @summary 큐레이션 상단 고정
+ */
+export const putAdminCurationsByIdPin = async (id: number, options?: RequestInit): Promise<putAdminCurationsByIdPinResponse> => {
+
+  return customInstance<putAdminCurationsByIdPinResponse>(getPutAdminCurationsByIdPinUrl(id),
+  {
+    ...options,
+    method: 'PUT'
+
+
+  }
+);}
+
+
+
+
+export const getPutAdminCurationsByIdPinMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putAdminCurationsByIdPin>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof putAdminCurationsByIdPin>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['putAdminCurationsByIdPin'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putAdminCurationsByIdPin>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  putAdminCurationsByIdPin(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutAdminCurationsByIdPinMutationResult = NonNullable<Awaited<ReturnType<typeof putAdminCurationsByIdPin>>>
+
+    export type PutAdminCurationsByIdPinMutationError = unknown
+
+    /**
+ * @summary 큐레이션 상단 고정
+ */
+export const usePutAdminCurationsByIdPin = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putAdminCurationsByIdPin>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putAdminCurationsByIdPin>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getPutAdminCurationsByIdPinMutationOptions(options), queryClient);
+    }
+    export type deleteAdminCurationsByIdPinResponse200 = {
+  data: ApiResponseUnit
+  status: 200
+}
+
+export type deleteAdminCurationsByIdPinResponseSuccess = (deleteAdminCurationsByIdPinResponse200) & {
+  headers: Headers;
+};
+;
+
+export type deleteAdminCurationsByIdPinResponse = (deleteAdminCurationsByIdPinResponseSuccess)
+
+export const getDeleteAdminCurationsByIdPinUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/curations/${id}/pin`
+}
+
+/**
+ * @summary 큐레이션 상단 고정 해제
+ */
+export const deleteAdminCurationsByIdPin = async (id: number, options?: RequestInit): Promise<deleteAdminCurationsByIdPinResponse> => {
+
+  return customInstance<deleteAdminCurationsByIdPinResponse>(getDeleteAdminCurationsByIdPinUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteAdminCurationsByIdPinMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAdminCurationsByIdPin>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteAdminCurationsByIdPin>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteAdminCurationsByIdPin'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteAdminCurationsByIdPin>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteAdminCurationsByIdPin(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteAdminCurationsByIdPinMutationResult = NonNullable<Awaited<ReturnType<typeof deleteAdminCurationsByIdPin>>>
+
+    export type DeleteAdminCurationsByIdPinMutationError = unknown
+
+    /**
+ * @summary 큐레이션 상단 고정 해제
+ */
+export const useDeleteAdminCurationsByIdPin = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAdminCurationsByIdPin>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteAdminCurationsByIdPin>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteAdminCurationsByIdPinMutationOptions(options), queryClient);
+    }
     export type postAdminCurationsImagesResponse200 = {
   data: ApiResponseUploadedImageResponse
   status: 200
