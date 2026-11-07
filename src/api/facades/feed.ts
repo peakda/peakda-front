@@ -109,6 +109,20 @@ export const useMyReactionKeys = (id: number) =>
     gcTime: 0,
   })
 
+// 더보기 시트용 전체 반응. 서버가 이모지 키 순으로 나눠 주므로 순서를 바꾸지 않고 이어 붙인다.
+// 시트에서 반응을 바꾸면 시트가 닫히니, 다시 열 때 새로 받도록 캐시를 남기지 않는다.
+export const useAllReactions = (id: number) =>
+  useInfiniteQuery({
+    queryKey: [...getGetV2FeedByIdReactionsQueryKey(id), 'all'],
+    queryFn: async ({ pageParam, signal }) =>
+      (await getV2FeedByIdReactions(id, { afterKey: pageParam, size: 100 }, { signal })).data
+        .data ?? null,
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (last) => (last?.hasMore ? (last.nextAfterKey ?? undefined) : undefined),
+    staleTime: 0,
+    gcTime: 0,
+  })
+
 // mutate({ id, emojiKey }) 형태로 호출 → 성공 시 해당 기록 상세 캐시만 무효화
 
 export const useAddReaction = () => {

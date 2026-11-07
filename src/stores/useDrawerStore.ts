@@ -12,6 +12,7 @@ type DrawerType =
   | 'date-select'
   | 'delete-confirm'
   | 'reaction'
+  | 'reaction-all'
 
 export interface SaveSpotData {
   spotId: number
@@ -41,6 +42,12 @@ export interface ReactionData {
   onSelect: (emoji: ReactionEmoji, action: ReactionAction) => void
 }
 
+/** 더보기로 여는 전체 반응 시트 */
+export interface ReactionAllData {
+  recordId: number
+  onSelect: ReactionData['onSelect']
+}
+
 interface DrawerState {
   isOpen: boolean
   type: DrawerType
@@ -52,6 +59,7 @@ interface DrawerState {
   dateSelectData: DateSelectData | null
   deleteConfirmData: DeleteConfirmData | null
   reactionData: ReactionData | null
+  reactionAllData: ReactionAllData | null
   openFilterDrawer: () => void
   openFlowerFilterDrawer: () => void
   openPinDrawer: (data: MultiImageProps[]) => void
@@ -61,6 +69,7 @@ interface DrawerState {
   openDateSelectDrawer: (value: string, onSelect: (value: string) => void) => void
   openDeleteConfirmDrawer: (onConfirm: () => void) => void
   openReactionDrawer: (data: ReactionData) => void
+  openReactionAllDrawer: (data: ReactionAllData) => void
   closeDrawer: () => void
   // 핀 목록 데이터는 쿼리가 아니라 스냅샷이라, 찜·알림을 바꾸면 여기서 직접 맞춘다.
   updatePinFavorite: (spotId: number, isFavorite: boolean, notifyEnabled: boolean) => void
@@ -77,6 +86,7 @@ export const useDrawerStore = create<DrawerState>((set) => ({
   dateSelectData: null,
   deleteConfirmData: null,
   reactionData: null,
+  reactionAllData: null,
   openFilterDrawer: () => set({ isOpen: true, type: 'filter', snapHeight: 400 }),
   openFlowerFilterDrawer: () => set({ isOpen: true, type: 'flower-filter', snapHeight: 400 }),
   openPinDrawer: (data) => set({ isOpen: true, type: 'pin', pinListData: data, snapHeight: 400 }),
@@ -96,6 +106,8 @@ export const useDrawerStore = create<DrawerState>((set) => ({
     set({ isOpen: true, type: 'delete-confirm', deleteConfirmData: { onConfirm }, snapHeight: 0 }),
   openReactionDrawer: (data) =>
     set({ isOpen: true, type: 'reaction', reactionData: data, snapHeight: 0 }),
+  openReactionAllDrawer: (data) =>
+    set({ isOpen: true, type: 'reaction-all', reactionAllData: data, snapHeight: 0 }),
   closeDrawer: () =>
     set((s) =>
       s.type === 'save-spot' && s.returnPinList

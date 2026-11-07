@@ -50,6 +50,7 @@ export function ReactionBar({ recordId, reactions, className }: ReactionBarProps
   const [reactionOverride, setReactionOverride] = useState<ReactionOverviewResponse | null>(null)
   const overview = reactionOverride ?? serverOverview
   const openReactionDrawer = useDrawerStore((s) => s.openReactionDrawer)
+  const openReactionAllDrawer = useDrawerStore((s) => s.openReactionAllDrawer)
   const addReaction = useAddReaction()
   const removeReaction = useRemoveReaction()
   const requireLogin = useRequireLogin()
@@ -114,6 +115,26 @@ export function ReactionBar({ recordId, reactions, className }: ReactionBarProps
           }
         />
       ))}
+
+      {/* 응답은 상위 8종만 준다. 나머지는 더보기 시트에서 본다(보기는 로그인 없이, 누르면 로그인 확인). */}
+      {overview.hasMore && (
+        <button
+          type="button"
+          onClick={() =>
+            openReactionAllDrawer({
+              recordId,
+              onSelect: (emoji, action) =>
+                requireLogin(
+                  () => handleReaction(emoji, action),
+                  '반응을 남기고 싶다면 로그인이 필요해요.'
+                ),
+            })
+          }
+          className="border-border-primary bg-bg-secondary text-text-secondary cursor-pointer rounded-full border px-3 py-1.5 text-sm font-medium"
+        >
+          더보기
+        </button>
+      )}
     </div>
   )
 }
