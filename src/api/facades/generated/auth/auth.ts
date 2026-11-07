@@ -311,7 +311,7 @@ export const getPostAuthLogoutUrl = () => {
 }
 
 /**
- * 서버에 저장된 refresh token을 삭제하고 access-token, refresh-token 쿠키를 만료시킵니다.
+ * 지금 요청한 기기의 로그인 세션만 끊고 access-token, refresh-token 쿠키를 만료시킵니다. 다른 기기의 로그인은 유지됩니다.
  * @summary 로그아웃
  */
 export const postAuthLogout = async ( options?: RequestInit): Promise<postAuthLogoutResponse> => {

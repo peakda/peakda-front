@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type { MultiImageProps } from '@/types/types'
-import type { FeedReactionSummaryResponseMyReactionsItem } from '@/api/facades/generated/peakdaApi.schemas'
+import type { ReactionAction, ReactionEmoji } from '@/lib/utils/feed'
 
 type DrawerType =
   | 'filter'
@@ -33,9 +33,12 @@ export interface DeleteConfirmData {
 }
 
 export interface ReactionData {
-  /** 내가 이미 남긴 리액션 — 시트에서 선택 상태로 표시한다 */
-  selected: FeedReactionSummaryResponseMyReactionsItem[]
-  onSelect: (type: FeedReactionSummaryResponseMyReactionsItem) => void
+  recordId: number
+  /** all: 전체 이모지 피커, legacy: ❤️·😀 만 (스팟 기록처럼 v1 응답을 쓰는 화면) */
+  scope: 'all' | 'legacy'
+  /** 내가 이미 남긴 리액션의 이모지 키 — 시트에서 선택 상태로 표시한다 */
+  selected: string[]
+  onSelect: (emoji: ReactionEmoji, action: ReactionAction) => void
 }
 
 interface DrawerState {

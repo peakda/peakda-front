@@ -18,7 +18,8 @@ import type {
 import type {
   ApiResponseAppTokenResponse,
   AppTokenExchangeRequest,
-  AppTokenRefreshRequest
+  AppTokenRefreshRequest,
+  AppleLoginRequest
 } from '../peakdaApi.schemas';
 
 import { customInstance } from '../../../mutator/index';
@@ -193,4 +194,90 @@ export const usePostAuthAppTokenRefresh = <TError = unknown,
         TContext
       > => {
       return useMutation(getPostAuthAppTokenRefreshMutationOptions(options), queryClient);
+    }
+    export type postAuthAppAppleResponse200 = {
+  data: ApiResponseAppTokenResponse
+  status: 200
+}
+
+export type postAuthAppAppleResponseSuccess = (postAuthAppAppleResponse200) & {
+  headers: Headers;
+};
+;
+
+export type postAuthAppAppleResponse = (postAuthAppAppleResponseSuccess)
+
+export const getPostAuthAppAppleUrl = () => {
+
+
+
+
+  return `/api/auth/app/apple`
+}
+
+/**
+ * iOS 앱이 AuthenticationServices 로 받은 identity token 을 검증하고 로그인한다. 앱은 nonce 원문을 만들어 그 SHA-256(hex)을 애플 요청에 넣고, 여기에는 원문을 보낸다.
+
+응답은 `/api/auth/app/token` 과 같다. 가입이 끝난 사용자는 `status=AUTHENTICATED`, 처음 로그인한 사용자는 `status=SIGNUP_REQUIRED` 와 가입 세션 토큰을 받는다.
+
+서버에 애플 로그인이 꺼져 있으면 `OAUTH2_PROVIDER_NOT_SUPPORTED` 를 돌려준다.
+ * @summary Sign in with Apple (iOS)
+ */
+export const postAuthAppApple = async (appleLoginRequest: AppleLoginRequest, options?: RequestInit): Promise<postAuthAppAppleResponse> => {
+
+  return customInstance<postAuthAppAppleResponse>(getPostAuthAppAppleUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(appleLoginRequest)
+  }
+);}
+
+
+
+
+export const getPostAuthAppAppleMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAuthAppApple>>, TError,{data: AppleLoginRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postAuthAppApple>>, TError,{data: AppleLoginRequest}, TContext> => {
+
+const mutationKey = ['postAuthAppApple'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAuthAppApple>>, {data: AppleLoginRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postAuthAppApple(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostAuthAppAppleMutationResult = NonNullable<Awaited<ReturnType<typeof postAuthAppApple>>>
+    export type PostAuthAppAppleMutationBody = AppleLoginRequest
+    export type PostAuthAppAppleMutationError = unknown
+
+    /**
+ * @summary Sign in with Apple (iOS)
+ */
+export const usePostAuthAppApple = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAuthAppApple>>, TError,{data: AppleLoginRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postAuthAppApple>>,
+        TError,
+        {data: AppleLoginRequest},
+        TContext
+      > => {
+      return useMutation(getPostAuthAppAppleMutationOptions(options), queryClient);
     }

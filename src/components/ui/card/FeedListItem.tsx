@@ -3,10 +3,13 @@
 import { memo } from 'react'
 import { FeedCard } from '@/components/ui/card/FeedCard'
 import { toFeedCardProps } from '@/lib/utils/spotRecordToFeed'
-import type { SpotRecordSummaryResponse } from '@/api/facades/generated/peakdaApi.schemas'
+import type {
+  FeedRecordSummaryResponse,
+  SpotRecordSummaryResponse,
+} from '@/api/facades/generated/peakdaApi.schemas'
 
 export interface FeedListItemProps {
-  record: SpotRecordSummaryResponse
+  record: SpotRecordSummaryResponse | FeedRecordSummaryResponse
   isOwner: boolean
   // 콜백은 id 를 인자로 받는다. 목록 쪽에서 아이템마다 새 클로저를 만들면
   // props 가 매번 달라져 memo 가 무력화되기 때문.

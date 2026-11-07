@@ -25,11 +25,14 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  ApiResponseFestivalAdminDetailResponse,
   ApiResponseFestivalEditorialAdminResponse,
   ApiResponseFestivalEditorialIdResponse,
+  ApiResponseFestivalIdResponse,
   ApiResponsePageResponseFestivalAdminSummaryResponse,
   ApiResponseUnit,
   GetAdminFestivalsParams,
+  SaveFestivalRequest,
   UpsertFestivalEditorialRequest
 } from '../peakdaApi.schemas';
 
@@ -40,7 +43,448 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export type getAdminFestivalsByFestivalIdEditorialResponse200 = {
+export type getAdminFestivalsByFestivalIdResponse200 = {
+  data: ApiResponseFestivalAdminDetailResponse
+  status: 200
+}
+
+export type getAdminFestivalsByFestivalIdResponseSuccess = (getAdminFestivalsByFestivalIdResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getAdminFestivalsByFestivalIdResponse = (getAdminFestivalsByFestivalIdResponseSuccess)
+
+export const getGetAdminFestivalsByFestivalIdUrl = (festivalId: number,) => {
+
+
+
+
+  return `/api/admin/festivals/${festivalId}`
+}
+
+/**
+ * 공공데이터·직접 등록 축제의 기본 정보와 오늘 기준 단계를 조회한다.
+ * @summary 관리자 축제 기본 정보 조회
+ */
+export const getAdminFestivalsByFestivalId = async (festivalId: number, options?: RequestInit): Promise<getAdminFestivalsByFestivalIdResponse> => {
+
+  return customInstance<getAdminFestivalsByFestivalIdResponse>(getGetAdminFestivalsByFestivalIdUrl(festivalId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAdminFestivalsByFestivalIdQueryKey = (festivalId: number,) => {
+    return [
+    `/api/admin/festivals/${festivalId}`
+    ] as const;
+    }
+
+
+export const getGetAdminFestivalsByFestivalIdQueryOptions = <TData = Awaited<ReturnType<typeof getAdminFestivalsByFestivalId>>, TError = unknown>(festivalId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAdminFestivalsByFestivalId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAdminFestivalsByFestivalIdQueryKey(festivalId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAdminFestivalsByFestivalId>>> = ({ signal }) => getAdminFestivalsByFestivalId(festivalId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: festivalId !== null && festivalId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAdminFestivalsByFestivalId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetAdminFestivalsByFestivalIdQueryResult = NonNullable<Awaited<ReturnType<typeof getAdminFestivalsByFestivalId>>>
+export type GetAdminFestivalsByFestivalIdQueryError = unknown
+
+
+export function useGetAdminFestivalsByFestivalId<TData = Awaited<ReturnType<typeof getAdminFestivalsByFestivalId>>, TError = unknown>(
+ festivalId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAdminFestivalsByFestivalId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAdminFestivalsByFestivalId>>,
+          TError,
+          Awaited<ReturnType<typeof getAdminFestivalsByFestivalId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAdminFestivalsByFestivalId<TData = Awaited<ReturnType<typeof getAdminFestivalsByFestivalId>>, TError = unknown>(
+ festivalId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAdminFestivalsByFestivalId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAdminFestivalsByFestivalId>>,
+          TError,
+          Awaited<ReturnType<typeof getAdminFestivalsByFestivalId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAdminFestivalsByFestivalId<TData = Awaited<ReturnType<typeof getAdminFestivalsByFestivalId>>, TError = unknown>(
+ festivalId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAdminFestivalsByFestivalId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 관리자 축제 기본 정보 조회
+ */
+
+export function useGetAdminFestivalsByFestivalId<TData = Awaited<ReturnType<typeof getAdminFestivalsByFestivalId>>, TError = unknown>(
+ festivalId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAdminFestivalsByFestivalId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAdminFestivalsByFestivalIdQueryOptions(festivalId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export type putAdminFestivalsByFestivalIdResponse200 = {
+  data: ApiResponseUnit
+  status: 200
+}
+
+export type putAdminFestivalsByFestivalIdResponseSuccess = (putAdminFestivalsByFestivalIdResponse200) & {
+  headers: Headers;
+};
+;
+
+export type putAdminFestivalsByFestivalIdResponse = (putAdminFestivalsByFestivalIdResponseSuccess)
+
+export const getPutAdminFestivalsByFestivalIdUrl = (festivalId: number,) => {
+
+
+
+
+  return `/api/admin/festivals/${festivalId}`
+}
+
+/**
+ * 직접 등록한 축제의 기본 정보를 요청 값으로 전부 교체한다. 공공데이터 축제는 수정할 수 없다.
+ * @summary 직접 등록 축제·트리 명소 수정
+ */
+export const putAdminFestivalsByFestivalId = async (festivalId: number,
+    saveFestivalRequest: SaveFestivalRequest, options?: RequestInit): Promise<putAdminFestivalsByFestivalIdResponse> => {
+
+  return customInstance<putAdminFestivalsByFestivalIdResponse>(getPutAdminFestivalsByFestivalIdUrl(festivalId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(saveFestivalRequest)
+  }
+);}
+
+
+
+
+export const getPutAdminFestivalsByFestivalIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putAdminFestivalsByFestivalId>>, TError,{festivalId: number;data: SaveFestivalRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof putAdminFestivalsByFestivalId>>, TError,{festivalId: number;data: SaveFestivalRequest}, TContext> => {
+
+const mutationKey = ['putAdminFestivalsByFestivalId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putAdminFestivalsByFestivalId>>, {festivalId: number;data: SaveFestivalRequest}> = (props) => {
+          const {festivalId,data} = props ?? {};
+
+          return  putAdminFestivalsByFestivalId(festivalId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutAdminFestivalsByFestivalIdMutationResult = NonNullable<Awaited<ReturnType<typeof putAdminFestivalsByFestivalId>>>
+    export type PutAdminFestivalsByFestivalIdMutationBody = SaveFestivalRequest
+    export type PutAdminFestivalsByFestivalIdMutationError = unknown
+
+    /**
+ * @summary 직접 등록 축제·트리 명소 수정
+ */
+export const usePutAdminFestivalsByFestivalId = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putAdminFestivalsByFestivalId>>, TError,{festivalId: number;data: SaveFestivalRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putAdminFestivalsByFestivalId>>,
+        TError,
+        {festivalId: number;data: SaveFestivalRequest},
+        TContext
+      > => {
+      return useMutation(getPutAdminFestivalsByFestivalIdMutationOptions(options), queryClient);
+    }
+    export type deleteAdminFestivalsByFestivalIdResponse200 = {
+  data: ApiResponseUnit
+  status: 200
+}
+
+export type deleteAdminFestivalsByFestivalIdResponseSuccess = (deleteAdminFestivalsByFestivalIdResponse200) & {
+  headers: Headers;
+};
+;
+
+export type deleteAdminFestivalsByFestivalIdResponse = (deleteAdminFestivalsByFestivalIdResponseSuccess)
+
+export const getDeleteAdminFestivalsByFestivalIdUrl = (festivalId: number,) => {
+
+
+
+
+  return `/api/admin/festivals/${festivalId}`
+}
+
+/**
+ * 직접 등록한 축제를 에디토리얼·주요 볼거리와 함께 삭제한다. 공공데이터 축제는 삭제할 수 없다.
+ * @summary 직접 등록 축제·트리 명소 삭제
+ */
+export const deleteAdminFestivalsByFestivalId = async (festivalId: number, options?: RequestInit): Promise<deleteAdminFestivalsByFestivalIdResponse> => {
+
+  return customInstance<deleteAdminFestivalsByFestivalIdResponse>(getDeleteAdminFestivalsByFestivalIdUrl(festivalId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteAdminFestivalsByFestivalIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAdminFestivalsByFestivalId>>, TError,{festivalId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteAdminFestivalsByFestivalId>>, TError,{festivalId: number}, TContext> => {
+
+const mutationKey = ['deleteAdminFestivalsByFestivalId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteAdminFestivalsByFestivalId>>, {festivalId: number}> = (props) => {
+          const {festivalId} = props ?? {};
+
+          return  deleteAdminFestivalsByFestivalId(festivalId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteAdminFestivalsByFestivalIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteAdminFestivalsByFestivalId>>>
+
+    export type DeleteAdminFestivalsByFestivalIdMutationError = unknown
+
+    /**
+ * @summary 직접 등록 축제·트리 명소 삭제
+ */
+export const useDeleteAdminFestivalsByFestivalId = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAdminFestivalsByFestivalId>>, TError,{festivalId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteAdminFestivalsByFestivalId>>,
+        TError,
+        {festivalId: number},
+        TContext
+      > => {
+      return useMutation(getDeleteAdminFestivalsByFestivalIdMutationOptions(options), queryClient);
+    }
+    export type putAdminFestivalsByFestivalIdPinResponse200 = {
+  data: ApiResponseUnit
+  status: 200
+}
+
+export type putAdminFestivalsByFestivalIdPinResponseSuccess = (putAdminFestivalsByFestivalIdPinResponse200) & {
+  headers: Headers;
+};
+;
+
+export type putAdminFestivalsByFestivalIdPinResponse = (putAdminFestivalsByFestivalIdPinResponseSuccess)
+
+export const getPutAdminFestivalsByFestivalIdPinUrl = (festivalId: number,) => {
+
+
+
+
+  return `/api/admin/festivals/${festivalId}/pin`
+}
+
+/**
+ * 발행된 축제 에디토리얼을 탐색 목록 상단에 고정한다.
+ * @summary 축제 에디토리얼 고정
+ */
+export const putAdminFestivalsByFestivalIdPin = async (festivalId: number, options?: RequestInit): Promise<putAdminFestivalsByFestivalIdPinResponse> => {
+
+  return customInstance<putAdminFestivalsByFestivalIdPinResponse>(getPutAdminFestivalsByFestivalIdPinUrl(festivalId),
+  {
+    ...options,
+    method: 'PUT'
+
+
+  }
+);}
+
+
+
+
+export const getPutAdminFestivalsByFestivalIdPinMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putAdminFestivalsByFestivalIdPin>>, TError,{festivalId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof putAdminFestivalsByFestivalIdPin>>, TError,{festivalId: number}, TContext> => {
+
+const mutationKey = ['putAdminFestivalsByFestivalIdPin'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putAdminFestivalsByFestivalIdPin>>, {festivalId: number}> = (props) => {
+          const {festivalId} = props ?? {};
+
+          return  putAdminFestivalsByFestivalIdPin(festivalId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutAdminFestivalsByFestivalIdPinMutationResult = NonNullable<Awaited<ReturnType<typeof putAdminFestivalsByFestivalIdPin>>>
+
+    export type PutAdminFestivalsByFestivalIdPinMutationError = unknown
+
+    /**
+ * @summary 축제 에디토리얼 고정
+ */
+export const usePutAdminFestivalsByFestivalIdPin = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putAdminFestivalsByFestivalIdPin>>, TError,{festivalId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putAdminFestivalsByFestivalIdPin>>,
+        TError,
+        {festivalId: number},
+        TContext
+      > => {
+      return useMutation(getPutAdminFestivalsByFestivalIdPinMutationOptions(options), queryClient);
+    }
+    export type deleteAdminFestivalsByFestivalIdPinResponse200 = {
+  data: ApiResponseUnit
+  status: 200
+}
+
+export type deleteAdminFestivalsByFestivalIdPinResponseSuccess = (deleteAdminFestivalsByFestivalIdPinResponse200) & {
+  headers: Headers;
+};
+;
+
+export type deleteAdminFestivalsByFestivalIdPinResponse = (deleteAdminFestivalsByFestivalIdPinResponseSuccess)
+
+export const getDeleteAdminFestivalsByFestivalIdPinUrl = (festivalId: number,) => {
+
+
+
+
+  return `/api/admin/festivals/${festivalId}/pin`
+}
+
+/**
+ * @summary 축제 에디토리얼 고정 해제
+ */
+export const deleteAdminFestivalsByFestivalIdPin = async (festivalId: number, options?: RequestInit): Promise<deleteAdminFestivalsByFestivalIdPinResponse> => {
+
+  return customInstance<deleteAdminFestivalsByFestivalIdPinResponse>(getDeleteAdminFestivalsByFestivalIdPinUrl(festivalId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteAdminFestivalsByFestivalIdPinMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAdminFestivalsByFestivalIdPin>>, TError,{festivalId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteAdminFestivalsByFestivalIdPin>>, TError,{festivalId: number}, TContext> => {
+
+const mutationKey = ['deleteAdminFestivalsByFestivalIdPin'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteAdminFestivalsByFestivalIdPin>>, {festivalId: number}> = (props) => {
+          const {festivalId} = props ?? {};
+
+          return  deleteAdminFestivalsByFestivalIdPin(festivalId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteAdminFestivalsByFestivalIdPinMutationResult = NonNullable<Awaited<ReturnType<typeof deleteAdminFestivalsByFestivalIdPin>>>
+
+    export type DeleteAdminFestivalsByFestivalIdPinMutationError = unknown
+
+    /**
+ * @summary 축제 에디토리얼 고정 해제
+ */
+export const useDeleteAdminFestivalsByFestivalIdPin = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAdminFestivalsByFestivalIdPin>>, TError,{festivalId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteAdminFestivalsByFestivalIdPin>>,
+        TError,
+        {festivalId: number},
+        TContext
+      > => {
+      return useMutation(getDeleteAdminFestivalsByFestivalIdPinMutationOptions(options), queryClient);
+    }
+    export type getAdminFestivalsByFestivalIdEditorialResponse200 = {
   data: ApiResponseFestivalEditorialAdminResponse
   status: 200
 }
@@ -354,7 +798,7 @@ export const getGetAdminFestivalsUrl = (params: GetAdminFestivalsParams,) => {
 }
 
 /**
- * 축제명 부분 검색(q)은 대소문자를 구분하지 않는다. q가 없으면 전체 축제를 최신 id 순으로 조회한다.
+ * 축제명 부분 검색(q)은 대소문자를 구분하지 않는다. q가 없으면 전체 축제를 최신 id 순으로 조회한다. kind를 주면 해당 종류만 조회한다.
  * @summary 관리자 축제 목록 조회
  */
 export const getAdminFestivals = async (params: GetAdminFestivalsParams, options?: RequestInit): Promise<getAdminFestivalsResponse> => {
@@ -446,3 +890,85 @@ export function useGetAdminFestivals<TData = Awaited<ReturnType<typeof getAdminF
 
 
 
+export type postAdminFestivalsResponse200 = {
+  data: ApiResponseFestivalIdResponse
+  status: 200
+}
+
+export type postAdminFestivalsResponseSuccess = (postAdminFestivalsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type postAdminFestivalsResponse = (postAdminFestivalsResponseSuccess)
+
+export const getPostAdminFestivalsUrl = () => {
+
+
+
+
+  return `/api/admin/festivals`
+}
+
+/**
+ * 공공데이터에 없는 축제나 트리 명소를 등록한다. 직접 등록한 행은 공공데이터 동기화가 덮어쓰지 않는다.
+ * @summary 축제·트리 명소 직접 등록
+ */
+export const postAdminFestivals = async (saveFestivalRequest: SaveFestivalRequest, options?: RequestInit): Promise<postAdminFestivalsResponse> => {
+
+  return customInstance<postAdminFestivalsResponse>(getPostAdminFestivalsUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(saveFestivalRequest)
+  }
+);}
+
+
+
+
+export const getPostAdminFestivalsMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAdminFestivals>>, TError,{data: SaveFestivalRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postAdminFestivals>>, TError,{data: SaveFestivalRequest}, TContext> => {
+
+const mutationKey = ['postAdminFestivals'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAdminFestivals>>, {data: SaveFestivalRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postAdminFestivals(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostAdminFestivalsMutationResult = NonNullable<Awaited<ReturnType<typeof postAdminFestivals>>>
+    export type PostAdminFestivalsMutationBody = SaveFestivalRequest
+    export type PostAdminFestivalsMutationError = unknown
+
+    /**
+ * @summary 축제·트리 명소 직접 등록
+ */
+export const usePostAdminFestivals = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAdminFestivals>>, TError,{data: SaveFestivalRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postAdminFestivals>>,
+        TError,
+        {data: SaveFestivalRequest},
+        TContext
+      > => {
+      return useMutation(getPostAdminFestivalsMutationOptions(options), queryClient);
+    }

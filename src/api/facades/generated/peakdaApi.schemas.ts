@@ -5,6 +5,35 @@
  * 계절 여행 타이밍 안내 서비스 API 문서
  * OpenAPI spec version: v1
  */
+/**
+ * 추가·삭제한 단일 이모지의 현재 반응 상태
+ */
+export interface ReactionStateResponse {
+  /** 기록 ID */
+  recordId: number;
+  /** 이모지 식별 키 */
+  key: string;
+  /** 표시할 이모지 */
+  emoji: string;
+  /** 반응 사용자 수. 마지막 삭제 시 0 */
+  count: number;
+  /** 현재 사용자의 반응 여부 */
+  reactedByMe: boolean;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseReactionStateResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: ReactionStateResponse | null;
+}
+
 export type FavoriteCategoryUpdateRequestCategoriesItem = typeof FavoriteCategoryUpdateRequestCategoriesItem[keyof typeof FavoriteCategoryUpdateRequestCategoriesItem];
 
 
@@ -209,6 +238,202 @@ export interface ApiResponseNoticeResponse {
   /** 사람이 읽는 메시지 */
   message: string;
   data?: NoticeResponse | null;
+}
+
+/**
+ * 앱 플랫폼
+ */
+export type UpdateLaunchAlertMailTemplateRequestPlatform = typeof UpdateLaunchAlertMailTemplateRequestPlatform[keyof typeof UpdateLaunchAlertMailTemplateRequestPlatform];
+
+
+export const UpdateLaunchAlertMailTemplateRequestPlatform = {
+  IOS: 'IOS',
+} as const;
+
+/**
+ * 출시 안내 메일 문구 수정. HTML 은 쓸 수 없다(이스케이프된다)
+ */
+export interface UpdateLaunchAlertMailTemplateRequest {
+  /** 앱 플랫폼 */
+  platform: UpdateLaunchAlertMailTemplateRequestPlatform;
+  /**
+     * 메일 제목
+     * @minLength 0
+     * @maxLength 100
+     */
+  subject: string;
+  /**
+     * 본문 맨 위 큰 제목
+     * @minLength 0
+     * @maxLength 100
+     */
+  headline: string;
+  /**
+     * 본문. 빈 줄로 문단을 나누고 줄바꿈은 그대로 살린다
+     * @minLength 0
+     * @maxLength 2000
+     */
+  body: string;
+  /**
+     * 스토어로 가는 버튼 문구
+     * @minLength 0
+     * @maxLength 30
+     */
+  buttonLabel: string;
+  /**
+     * 하단 안내 문구 (수신 사유·파기 안내)
+     * @minLength 0
+     * @maxLength 500
+     */
+  footer: string;
+}
+
+/**
+ * 앱 플랫폼
+ */
+export type LaunchAlertMailTemplateResponsePlatform = typeof LaunchAlertMailTemplateResponsePlatform[keyof typeof LaunchAlertMailTemplateResponsePlatform];
+
+
+export const LaunchAlertMailTemplateResponsePlatform = {
+  IOS: 'IOS',
+} as const;
+
+/**
+ * 출시 안내 메일 문구
+ */
+export interface LaunchAlertMailTemplateResponse {
+  /** 앱 플랫폼 */
+  platform: LaunchAlertMailTemplateResponsePlatform;
+  /** 메일 제목 */
+  subject: string;
+  /** 본문 맨 위 큰 제목 */
+  headline: string;
+  /** 본문. 빈 줄로 문단을 나눈다 */
+  body: string;
+  /** 스토어로 가는 버튼 문구 */
+  buttonLabel: string;
+  /** 하단 안내 문구 */
+  footer: string;
+  /** 마지막 수정 시각 */
+  updatedAt: string;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseLaunchAlertMailTemplateResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: LaunchAlertMailTemplateResponse | null;
+}
+
+/**
+ * 축제 종류. FESTIVAL(축제·행사)·TREE(트리 명소)
+ */
+export type SaveFestivalRequestKind = typeof SaveFestivalRequestKind[keyof typeof SaveFestivalRequestKind];
+
+
+export const SaveFestivalRequestKind = {
+  FESTIVAL: 'FESTIVAL',
+  TREE: 'TREE',
+} as const;
+
+/**
+ * 관리자 직접 등록 축제·트리 명소 등록·수정 요청
+ */
+export interface SaveFestivalRequest {
+  /** 축제 종류. FESTIVAL(축제·행사)·TREE(트리 명소) */
+  kind: SaveFestivalRequestKind;
+  /**
+     * 축제·트리 명소 이름
+     * @minLength 0
+     * @maxLength 200
+     */
+  name: string;
+  /**
+     * 장소명
+     * @minLength 0
+     * @maxLength 200
+     */
+  venue: string;
+  /** 운영 시작일 */
+  startsOn: string;
+  /**
+     * 운영 종료일. 하루짜리면 null
+     * @nullable
+     */
+  endsOn?: string | null;
+  /**
+     * 도로명 주소. 없으면 null
+     * @minLength 0
+     * @maxLength 500
+     * @nullable
+     */
+  roadAddress?: string | null;
+  /**
+     * 위도. 경도와 함께 입력하며 없으면 null
+     * @minimum -90
+     * @maximum 90
+     * @nullable
+     */
+  latitude?: number | null;
+  /**
+     * 경도. 위도와 함께 입력하며 없으면 null
+     * @minimum -180
+     * @maximum 180
+     * @nullable
+     */
+  longitude?: number | null;
+  /**
+     * http·https 홈페이지 URL. 없으면 null
+     * @minLength 0
+     * @maxLength 2000
+     * @nullable
+     * @pattern ^https?://\S+$
+     */
+  homepageUrl?: string | null;
+  /**
+     * 문의 전화번호. 없으면 null
+     * @minLength 0
+     * @maxLength 100
+     * @nullable
+     */
+  phoneNumber?: string | null;
+  /**
+     * 주최. 없으면 null
+     * @minLength 0
+     * @maxLength 200
+     * @nullable
+     */
+  hostOrganization?: string | null;
+  /**
+     * 주관. 없으면 null
+     * @minLength 0
+     * @maxLength 200
+     * @nullable
+     */
+  organizingInstitution?: string | null;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseUnit {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  /**
+     * 응답 본문 (성공 시 채워지고, 에러 시 생략됨)
+     * @nullable
+     */
+  data?: null;
 }
 
 /**
@@ -583,23 +808,6 @@ export interface ApiResponseCurationIdResponse {
   /** 사람이 읽는 메시지 */
   message: string;
   data?: CurationIdResponse | null;
-}
-
-/**
- * 공통 응답 envelope
- */
-export interface ApiResponseUnit {
-  /** HTTP status code */
-  status: number;
-  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
-  code: string;
-  /** 사람이 읽는 메시지 */
-  message: string;
-  /**
-     * 응답 본문 (성공 시 채워지고, 에러 시 생략됨)
-     * @nullable
-     */
-  data?: null;
 }
 
 /**
@@ -1394,6 +1602,33 @@ export interface ApiResponsePlantResponse {
   data?: PlantResponse | null;
 }
 
+/**
+ * 알림 받을 앱 플랫폼
+ */
+export type SubscribeLaunchAlertRequestPlatform = typeof SubscribeLaunchAlertRequestPlatform[keyof typeof SubscribeLaunchAlertRequestPlatform];
+
+
+export const SubscribeLaunchAlertRequestPlatform = {
+  IOS: 'IOS',
+} as const;
+
+/**
+ * 앱 출시 알림 신청
+ */
+export interface SubscribeLaunchAlertRequest {
+  /** 알림 받을 앱 플랫폼 */
+  platform: SubscribeLaunchAlertRequestPlatform;
+  /**
+     * 알림 받을 이메일 (소문자로 저장)
+     * @minLength 0
+     * @maxLength 254
+     * @pattern ^[A-Za-z0-9_][A-Za-z0-9._%+-]*@[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)*\.[A-Za-z]{2,}$
+     */
+  email: string;
+  /** 개인정보 수집·이용 동의 여부. true 가 아니면 LAUNCH_ALERT_CONSENT_REQUIRED 로 거절한다 */
+  privacyConsent: boolean;
+}
+
 export type FeedReactionSummaryResponseMyReactionsItem = typeof FeedReactionSummaryResponseMyReactionsItem[keyof typeof FeedReactionSummaryResponseMyReactionsItem];
 
 
@@ -1451,6 +1686,14 @@ export interface RegisterDeviceRequest {
   token: string;
   /** 디바이스 플랫폼 */
   platform: RegisterDeviceRequestPlatform;
+  /**
+     * 로그인 시 보낸 것과 같은 기기 식별자. 이 기기가 로그아웃되거나 기기 관리에서 해제되면 토큰을 지운다.
+     * @minLength 0
+     * @maxLength 100
+     * @nullable
+     * @pattern ^[!-~]+$
+     */
+  deviceId?: string | null;
 }
 
 /**
@@ -1459,6 +1702,44 @@ export interface RegisterDeviceRequest {
 export interface SignupProfileImageUploadForm {
   /** 업로드할 이미지 파일 (jpeg/png/webp, 최대 5MB) */
   image: Blob;
+}
+
+/**
+ * 앱 플랫폼
+ * @nullable
+ */
+export type SessionDeviceRequestPlatform = typeof SessionDeviceRequestPlatform[keyof typeof SessionDeviceRequestPlatform] | null;
+
+
+export const SessionDeviceRequestPlatform = {
+  ANDROID: 'ANDROID',
+  IOS: 'IOS',
+} as const;
+
+/**
+ * 앱 로그인 기기 정보. 기기 관리 목록에 표시되고, 같은 deviceId 로 다시 로그인하면 기기 수가 늘지 않는다.
+ */
+export interface SessionDeviceRequest {
+  /**
+     * 앱 설치 시 만들어 보관하는 기기 식별자 (ASCII, 최대 100자). 앱을 지웠다 다시 깔기 전까지 바뀌지 않아야 한다.
+     * @minLength 0
+     * @maxLength 100
+     * @nullable
+     * @pattern ^[!-~]+$
+     */
+  deviceId?: string | null;
+  /**
+     * 기기 표시 이름 (Android: Build.MODEL)
+     * @minLength 0
+     * @maxLength 100
+     * @nullable
+     */
+  deviceName?: string | null;
+  /**
+     * 앱 플랫폼
+     * @nullable
+     */
+  platform?: SessionDeviceRequestPlatform;
 }
 
 export type SignupCompleteRequestFavoriteCategoriesItem = typeof SignupCompleteRequestFavoriteCategoriesItem[keyof typeof SignupCompleteRequestFavoriteCategoriesItem];
@@ -1503,6 +1784,7 @@ export interface SignupCompleteRequest {
      * @minItems 1
      */
   favoriteCategories: SignupCompleteRequestFavoriteCategoriesItem[];
+  device?: SessionDeviceRequest | null;
 }
 
 /**
@@ -1581,6 +1863,7 @@ export interface AppTokenExchangeRequest {
      * @minLength 1
      */
   code: string;
+  device?: SessionDeviceRequest | null;
 }
 
 /**
@@ -1592,6 +1875,32 @@ export interface AppTokenRefreshRequest {
      * @minLength 1
      */
   refreshToken: string;
+  device?: SessionDeviceRequest | null;
+}
+
+/**
+ * iOS Sign in with Apple 로그인 요청
+ */
+export interface AppleLoginRequest {
+  /**
+     * ASAuthorizationAppleIDCredential.identityToken (JWT)
+     * @minLength 0
+     * @maxLength 8192
+     */
+  identityToken: string;
+  /**
+     * ASAuthorizationAppleIDCredential.authorizationCode. 회원 탈퇴 때 애플 토큰을 폐기하는 데 쓴다
+     * @minLength 0
+     * @maxLength 1024
+     */
+  authorizationCode: string;
+  /**
+     * 앱이 만든 nonce 원문. 애플 요청에는 이 값의 SHA-256(hex)을 넣어야 한다
+     * @minLength 0
+     * @maxLength 256
+     */
+  nonce: string;
+  device?: SessionDeviceRequest | null;
 }
 
 /**
@@ -1619,6 +1928,139 @@ export interface ApiResponseSpotRecordPhotoBackfillResponse {
   /** 사람이 읽는 메시지 */
   message: string;
   data?: SpotRecordPhotoBackfillResponse | null;
+}
+
+/**
+ * 앱 플랫폼
+ */
+export type RequestLaunchAlertDispatchRequestPlatform = typeof RequestLaunchAlertDispatchRequestPlatform[keyof typeof RequestLaunchAlertDispatchRequestPlatform];
+
+
+export const RequestLaunchAlertDispatchRequestPlatform = {
+  IOS: 'IOS',
+} as const;
+
+/**
+ * 출시 안내 메일 발송 요청
+ */
+export interface RequestLaunchAlertDispatchRequest {
+  /** 앱 플랫폼 */
+  platform: RequestLaunchAlertDispatchRequestPlatform;
+  /**
+     * 메일에 넣을 App Store 주소
+     * @pattern ^\s*https://apps\.apple\.com/[A-Za-z0-9/._~%?=&-]+\s*$
+     */
+  storeUrl: string;
+}
+
+/**
+ * 앱 플랫폼
+ */
+export type LaunchAlertDispatchResponsePlatform = typeof LaunchAlertDispatchResponsePlatform[keyof typeof LaunchAlertDispatchResponsePlatform];
+
+
+export const LaunchAlertDispatchResponsePlatform = {
+  IOS: 'IOS',
+} as const;
+
+/**
+ * 발송 상태. DISPATCHING 은 보내는 중, COMPLETED 는 끝까지 시도함, FAILED 는 연속 실패로 중단, CANCELED 는 관리자가 멈춤
+ */
+export type LaunchAlertDispatchResponseStatus = typeof LaunchAlertDispatchResponseStatus[keyof typeof LaunchAlertDispatchResponseStatus];
+
+
+export const LaunchAlertDispatchResponseStatus = {
+  DISPATCHING: 'DISPATCHING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED',
+  CANCELED: 'CANCELED',
+} as const;
+
+/**
+ * 출시 안내 메일 발송 1회
+ */
+export interface LaunchAlertDispatchResponse {
+  /** 발송 id */
+  id: number;
+  /** 앱 플랫폼 */
+  platform: LaunchAlertDispatchResponsePlatform;
+  /** 메일에 넣은 스토어 주소 */
+  storeUrl: string;
+  /** 발송 상태. DISPATCHING 은 보내는 중, COMPLETED 는 끝까지 시도함, FAILED 는 연속 실패로 중단, CANCELED 는 관리자가 멈춤 */
+  status: LaunchAlertDispatchResponseStatus;
+  /** 보낸 메일 수 */
+  sentCount: number;
+  /** 보내지 못한 메일 수. 그 신청은 목록에 남는다 */
+  failedCount: number;
+  /** 발송 요청 시각 */
+  requestedAt: string;
+  /**
+     * 발송이 끝나거나 중단된 시각. 보내는 중이면 null
+     * @nullable
+     */
+  completedAt?: string | null;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseLaunchAlertDispatchResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: LaunchAlertDispatchResponse | null;
+}
+
+/**
+ * 앱 플랫폼
+ */
+export type SendLaunchAlertTestMailRequestPlatform = typeof SendLaunchAlertTestMailRequestPlatform[keyof typeof SendLaunchAlertTestMailRequestPlatform];
+
+
+export const SendLaunchAlertTestMailRequestPlatform = {
+  IOS: 'IOS',
+} as const;
+
+/**
+ * 출시 안내 테스트 메일 발송 요청
+ */
+export interface SendLaunchAlertTestMailRequest {
+  /** 앱 플랫폼 */
+  platform: SendLaunchAlertTestMailRequestPlatform;
+  /**
+     * 메일에 넣을 App Store 주소
+     * @pattern ^\s*https://apps\.apple\.com/[A-Za-z0-9/._~%?=&-]+\s*$
+     */
+  storeUrl: string;
+  /**
+     * 테스트 메일을 받을 주소 (관리자 본인)
+     * @minLength 1
+     */
+  email: string;
+}
+
+/**
+ * 축제 등록 결과
+ */
+export interface FestivalIdResponse {
+  /** 등록된 축제 id */
+  festivalId: number;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseFestivalIdResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: FestivalIdResponse | null;
 }
 
 /**
@@ -1755,6 +2197,7 @@ export const UserAdminResponseProvider = {
   KAKAO: 'KAKAO',
   NAVER: 'NAVER',
   GOOGLE: 'GOOGLE',
+  APPLE: 'APPLE',
 } as const;
 
 /**
@@ -2166,6 +2609,35 @@ export interface ApiResponseCongestionLinkAdminResponse {
   data?: CongestionLinkAdminResponse | null;
 }
 
+export interface EmojiDefinitionResponse {
+  /** API에서 사용할 이모지 키 */
+  key: string;
+  /** 완전한 Unicode 이모지 시퀀스 */
+  emoji: string;
+  /** Unicode 이모지 그룹 */
+  group: string;
+}
+
+export interface EmojiCatalogResponse {
+  /** Unicode Emoji 데이터 버전 */
+  version: string;
+  /** 허용되는 모든 기본 이모지. 피커에서 이 키를 사용한다 */
+  items: EmojiDefinitionResponse[];
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseEmojiCatalogResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: EmojiCatalogResponse | null;
+}
+
 /**
  * 공통 페이지 요청 (0-based)
  */
@@ -2181,6 +2653,247 @@ export interface PageRequest {
      * @maximum 50
      */
   size?: number;
+}
+
+/**
+ * 개화·단풍 상태
+ * @nullable
+ */
+export type FeedRecordSummaryResponseBloomStage = typeof FeedRecordSummaryResponseBloomStage[keyof typeof FeedRecordSummaryResponseBloomStage] | null;
+
+
+export const FeedRecordSummaryResponseBloomStage = {
+  EARLY: 'EARLY',
+  STARTING: 'STARTING',
+  PEAK: 'PEAK',
+  LATE: 'LATE',
+} as const;
+
+/**
+ * 기록 상태
+ */
+export type FeedRecordSummaryResponseStatus = typeof FeedRecordSummaryResponseStatus[keyof typeof FeedRecordSummaryResponseStatus];
+
+
+export const FeedRecordSummaryResponseStatus = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+  HIDDEN: 'HIDDEN',
+} as const;
+
+/**
+ * 이모지별 반응 집계
+ */
+export interface ReactionItemResponse {
+  /** 이모지 식별 키 */
+  key: string;
+  /** 표시할 이모지 */
+  emoji: string;
+  /** 반응 사용자 수 */
+  count: number;
+  /** 현재 사용자가 이 반응을 남겼는지 여부 */
+  reactedByMe: boolean;
+}
+
+/**
+ * 반응 수 내림차순·키 오름차순의 최대 8종 미리보기
+ */
+export interface ReactionOverviewResponse {
+  /** 실제로 남겨진 이모지별 반응 목록 */
+  items: ReactionItemResponse[];
+  /** 미리보기에 포함되지 않은 반응 종류가 있는지 여부 */
+  hasMore: boolean;
+}
+
+/**
+ * v2 피드 목록 기록 요약
+ */
+export interface FeedRecordSummaryResponse {
+  /** 기록 또는 항목 ID */
+  id: number;
+  /** 스팟 ID */
+  spotId: number;
+  /** 스팟 이름 */
+  spotName: string;
+  /** 작성자 요약 */
+  user: UserSummary;
+  /**
+     * 방문 날짜
+     * @nullable
+     */
+  visitedDate?: string | null;
+  /**
+     * 개화·단풍 상태
+     * @nullable
+     */
+  bloomStage?: FeedRecordSummaryResponseBloomStage;
+  /**
+     * 기록 메모
+     * @nullable
+     */
+  memo?: string | null;
+  contentLink?: ContentLink | null;
+  /** 기록된 식물 */
+  plants: PlantSummary[];
+  coverPhoto?: PhotoEntry | null;
+  /** 첨부 사진 전체 목록 (sortOrder 오름차순, 사진이 없으면 빈 배열) */
+  photos: PhotoEntry[];
+  /** 기록 상태 */
+  status: FeedRecordSummaryResponseStatus;
+  /**
+     * 게시 시각
+     * @nullable
+     */
+  publishedAt?: string | null;
+  /** 생성 시각 */
+  createdAt: string;
+  /** 수정 시각 */
+  updatedAt: string;
+  /** 리액션 요약 */
+  reactions: ReactionOverviewResponse;
+}
+
+/**
+ * 공통 페이지 응답 (0-based)
+ */
+export interface PageResponseFeedRecordSummaryResponse {
+  /** 현재 페이지의 항목 리스트 */
+  content: FeedRecordSummaryResponse[];
+  /** 0-based 현재 페이지 */
+  page: number;
+  /** 페이지 크기 */
+  size: number;
+  /** 전체 항목 수 */
+  totalElements: number;
+  /** 전체 페이지 수 */
+  totalPages: number;
+  /** 다음 페이지 존재 여부 */
+  hasNext: boolean;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponsePageResponseFeedRecordSummaryResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: PageResponseFeedRecordSummaryResponse | null;
+}
+
+/**
+ * 개화/단풍 상태
+ * @nullable
+ */
+export type FeedRecordResponseBloomStage = typeof FeedRecordResponseBloomStage[keyof typeof FeedRecordResponseBloomStage] | null;
+
+
+export const FeedRecordResponseBloomStage = {
+  EARLY: 'EARLY',
+  STARTING: 'STARTING',
+  PEAK: 'PEAK',
+  LATE: 'LATE',
+} as const;
+
+/**
+ * 기록 상태
+ */
+export type FeedRecordResponseStatus = typeof FeedRecordResponseStatus[keyof typeof FeedRecordResponseStatus];
+
+
+export const FeedRecordResponseStatus = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+  HIDDEN: 'HIDDEN',
+} as const;
+
+/**
+ * v2 피드 기록 상세 응답
+ */
+export interface FeedRecordResponse {
+  /** 기록 PK */
+  id: number;
+  /** 스팟 요약 */
+  spot: SpotSummary;
+  /** 작성자 요약 */
+  user: UserSummary;
+  /**
+     * 방문 일자
+     * @nullable
+     */
+  visitedDate?: string | null;
+  /**
+     * 개화/단풍 상태
+     * @nullable
+     */
+  bloomStage?: FeedRecordResponseBloomStage;
+  /**
+     * 메모
+     * @nullable
+     */
+  memo?: string | null;
+  contentLink?: ContentLink | null;
+  /** 기록된 식물 목록 */
+  plants: PlantSummary[];
+  /** 첨부 사진 목록 (sortOrder 오름차순) */
+  photos: PhotoEntry[];
+  /** 기록 상태 */
+  status: FeedRecordResponseStatus;
+  /**
+     * 게시 시각 (DRAFT 이면 null)
+     * @nullable
+     */
+  publishedAt?: string | null;
+  /** 최초 생성 시각 */
+  createdAt: string;
+  /** 최종 수정 시각 */
+  updatedAt: string;
+  /** 리액션 요약 */
+  reactions: ReactionOverviewResponse;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseFeedRecordResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: FeedRecordResponse | null;
+}
+
+/**
+ * 이모지 키 오름차순의 반응 집계 페이지
+ */
+export interface ReactionPageResponse {
+  /** 이모지별 반응 목록 */
+  items: ReactionItemResponse[];
+  /** 다음 페이지 존재 여부 */
+  hasMore: boolean;
+  /**
+     * 다음 요청의 afterKey. 마지막 페이지는 null
+     * @nullable
+     */
+  nextAfterKey?: string | null;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseReactionPageResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: ReactionPageResponse | null;
 }
 
 /**
@@ -2406,6 +3119,80 @@ export interface ApiResponseMyPageResponse {
   /** 사람이 읽는 메시지 */
   message: string;
   data?: MyPageResponse | null;
+}
+
+/**
+ * 로그인 경로
+ */
+export type DeviceSessionResponseClientType = typeof DeviceSessionResponseClientType[keyof typeof DeviceSessionResponseClientType];
+
+
+export const DeviceSessionResponseClientType = {
+  APP: 'APP',
+  WEB: 'WEB',
+} as const;
+
+/**
+ * 앱 플랫폼. 웹이거나 알 수 없으면 null
+ * @nullable
+ */
+export type DeviceSessionResponsePlatform = typeof DeviceSessionResponsePlatform[keyof typeof DeviceSessionResponsePlatform] | null;
+
+
+export const DeviceSessionResponsePlatform = {
+  ANDROID: 'ANDROID',
+  IOS: 'IOS',
+} as const;
+
+/**
+ * 로그인된 기기
+ */
+export interface DeviceSessionResponse {
+  /** 기기(세션) id. 해제 API 에 쓴다. */
+  sessionId: string;
+  /**
+     * 기기 표시 이름. 구버전 앱이면 null
+     * @nullable
+     */
+  deviceName?: string | null;
+  /** 로그인 경로 */
+  clientType: DeviceSessionResponseClientType;
+  /**
+     * 앱 플랫폼. 웹이거나 알 수 없으면 null
+     * @nullable
+     */
+  platform?: DeviceSessionResponsePlatform;
+  /** 기기 등록(로그인) 시각 */
+  registeredAt: string;
+  /** 마지막 사용(로그인·토큰 재발급) 시각 */
+  lastUsedAt: string;
+  /** 지금 요청을 보낸 기기인지 */
+  current: boolean;
+}
+
+/**
+ * 로그인된 기기 목록
+ */
+export interface DeviceSessionListResponse {
+  /** 로그인된 기기 수 */
+  count: number;
+  /** 최대 기기 수. 넘으면 같은 종류(앱·웹) 중 가장 오래 안 쓴 기기가 자동으로 로그아웃된다. */
+  maxCount: number;
+  /** 기기 목록. 등록일 최신순 */
+  devices: DeviceSessionResponse[];
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseDeviceSessionListResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: DeviceSessionListResponse | null;
 }
 
 /**
@@ -4907,6 +5694,96 @@ export interface ApiResponsePageResponseLocationUsageLogResponse {
 }
 
 /**
+ * 알림 받을 앱 플랫폼
+ */
+export type LaunchAlertSubscriptionResponsePlatform = typeof LaunchAlertSubscriptionResponsePlatform[keyof typeof LaunchAlertSubscriptionResponsePlatform];
+
+
+export const LaunchAlertSubscriptionResponsePlatform = {
+  IOS: 'IOS',
+} as const;
+
+/**
+ * 출시 알림 신청 1건
+ */
+export interface LaunchAlertSubscriptionResponse {
+  /** 신청 id */
+  id: number;
+  /** 알림 받을 앱 플랫폼 */
+  platform: LaunchAlertSubscriptionResponsePlatform;
+  /** 이메일 */
+  email: string;
+  /** 동의한 안내 문구 버전 */
+  consentVersion: string;
+  /** 동의 시각. 재신청하면 갱신된다 */
+  consentedAt: string;
+  /** 최초 신청 시각 */
+  createdAt: string;
+}
+
+/**
+ * 공통 페이지 응답 (0-based)
+ */
+export interface PageResponseLaunchAlertSubscriptionResponse {
+  /** 현재 페이지의 항목 리스트 */
+  content: LaunchAlertSubscriptionResponse[];
+  /** 0-based 현재 페이지 */
+  page: number;
+  /** 페이지 크기 */
+  size: number;
+  /** 전체 항목 수 */
+  totalElements: number;
+  /** 전체 페이지 수 */
+  totalPages: number;
+  /** 다음 페이지 존재 여부 */
+  hasNext: boolean;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponsePageResponseLaunchAlertSubscriptionResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: PageResponseLaunchAlertSubscriptionResponse | null;
+}
+
+/**
+ * 공통 페이지 응답 (0-based)
+ */
+export interface PageResponseLaunchAlertDispatchResponse {
+  /** 현재 페이지의 항목 리스트 */
+  content: LaunchAlertDispatchResponse[];
+  /** 0-based 현재 페이지 */
+  page: number;
+  /** 페이지 크기 */
+  size: number;
+  /** 전체 항목 수 */
+  totalElements: number;
+  /** 전체 페이지 수 */
+  totalPages: number;
+  /** 다음 페이지 존재 여부 */
+  hasNext: boolean;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponsePageResponseLaunchAlertDispatchResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: PageResponseLaunchAlertDispatchResponse | null;
+}
+
+/**
  * 실행 상태
  */
 export type SchedulerJobRunResponseStatus = typeof SchedulerJobRunResponseStatus[keyof typeof SchedulerJobRunResponseStatus];
@@ -5086,6 +5963,42 @@ export interface ApiResponseSchedulerJobRunDetailResponse {
 }
 
 /**
+ * 데이터 출처. PUBLIC_DATA(공공데이터)·MANUAL(직접 등록)
+ */
+export type FestivalAdminSummaryResponseSource = typeof FestivalAdminSummaryResponseSource[keyof typeof FestivalAdminSummaryResponseSource];
+
+
+export const FestivalAdminSummaryResponseSource = {
+  PUBLIC_DATA: 'PUBLIC_DATA',
+  MANUAL: 'MANUAL',
+} as const;
+
+/**
+ * 축제 종류. FESTIVAL(축제·행사)·TREE(트리 명소)
+ */
+export type FestivalAdminSummaryResponseKind = typeof FestivalAdminSummaryResponseKind[keyof typeof FestivalAdminSummaryResponseKind];
+
+
+export const FestivalAdminSummaryResponseKind = {
+  FESTIVAL: 'FESTIVAL',
+  TREE: 'TREE',
+} as const;
+
+/**
+ * 오늘 기준 단계. UPCOMING(시작 전)·ONGOING(진행 중)·ENDING_SOON(종료 임박)·ENDED(종료). 시작일이 없으면 null
+ * @nullable
+ */
+export type FestivalAdminSummaryResponsePhase = typeof FestivalAdminSummaryResponsePhase[keyof typeof FestivalAdminSummaryResponsePhase] | null;
+
+
+export const FestivalAdminSummaryResponsePhase = {
+  UPCOMING: 'UPCOMING',
+  ONGOING: 'ONGOING',
+  ENDING_SOON: 'ENDING_SOON',
+  ENDED: 'ENDED',
+} as const;
+
+/**
  * 에디토리얼 상태. 에디토리얼이 없으면 null
  * @nullable
  */
@@ -5103,6 +6016,10 @@ export const FestivalAdminSummaryResponseEditorialStatus = {
 export interface FestivalAdminSummaryResponse {
   /** 축제 id */
   id: number;
+  /** 데이터 출처. PUBLIC_DATA(공공데이터)·MANUAL(직접 등록) */
+  source: FestivalAdminSummaryResponseSource;
+  /** 축제 종류. FESTIVAL(축제·행사)·TREE(트리 명소) */
+  kind: FestivalAdminSummaryResponseKind;
   /** 축제명 */
   name: string;
   /** 원천 행사 장소명 */
@@ -5117,6 +6034,11 @@ export interface FestivalAdminSummaryResponse {
      * @nullable
      */
   endsOn?: string | null;
+  /**
+     * 오늘 기준 단계. UPCOMING(시작 전)·ONGOING(진행 중)·ENDING_SOON(종료 임박)·ENDED(종료). 시작일이 없으면 null
+     * @nullable
+     */
+  phase?: FestivalAdminSummaryResponsePhase;
   /** 에디토리얼 존재 여부 */
   hasEditorial: boolean;
   /**
@@ -5124,6 +6046,11 @@ export interface FestivalAdminSummaryResponse {
      * @nullable
      */
   editorialStatus?: FestivalAdminSummaryResponseEditorialStatus;
+  /**
+     * 에디토리얼 고정 시각. 고정하지 않았으면 null
+     * @nullable
+     */
+  pinnedAt?: string | null;
 }
 
 /**
@@ -5155,6 +6082,121 @@ export interface ApiResponsePageResponseFestivalAdminSummaryResponse {
   /** 사람이 읽는 메시지 */
   message: string;
   data?: PageResponseFestivalAdminSummaryResponse | null;
+}
+
+/**
+ * 데이터 출처. PUBLIC_DATA(공공데이터)·MANUAL(직접 등록)
+ */
+export type FestivalAdminDetailResponseSource = typeof FestivalAdminDetailResponseSource[keyof typeof FestivalAdminDetailResponseSource];
+
+
+export const FestivalAdminDetailResponseSource = {
+  PUBLIC_DATA: 'PUBLIC_DATA',
+  MANUAL: 'MANUAL',
+} as const;
+
+/**
+ * 축제 종류. FESTIVAL(축제·행사)·TREE(트리 명소)
+ */
+export type FestivalAdminDetailResponseKind = typeof FestivalAdminDetailResponseKind[keyof typeof FestivalAdminDetailResponseKind];
+
+
+export const FestivalAdminDetailResponseKind = {
+  FESTIVAL: 'FESTIVAL',
+  TREE: 'TREE',
+} as const;
+
+/**
+ * 오늘 기준 단계. UPCOMING(시작 전)·ONGOING(진행 중)·ENDING_SOON(종료 임박)·ENDED(종료). 시작일이 없으면 null
+ * @nullable
+ */
+export type FestivalAdminDetailResponsePhase = typeof FestivalAdminDetailResponsePhase[keyof typeof FestivalAdminDetailResponsePhase] | null;
+
+
+export const FestivalAdminDetailResponsePhase = {
+  UPCOMING: 'UPCOMING',
+  ONGOING: 'ONGOING',
+  ENDING_SOON: 'ENDING_SOON',
+  ENDED: 'ENDED',
+} as const;
+
+/**
+ * 관리자 축제 기본 정보. 직접 등록(MANUAL) 축제만 수정할 수 있다
+ */
+export interface FestivalAdminDetailResponse {
+  /** 축제 id */
+  id: number;
+  /** 데이터 출처. PUBLIC_DATA(공공데이터)·MANUAL(직접 등록) */
+  source: FestivalAdminDetailResponseSource;
+  /** 축제 종류. FESTIVAL(축제·행사)·TREE(트리 명소) */
+  kind: FestivalAdminDetailResponseKind;
+  /** 축제·트리 명소 이름 */
+  name: string;
+  /** 장소명 */
+  venue: string;
+  /**
+     * 시작일. 공공데이터 원천을 파싱할 수 없으면 null
+     * @nullable
+     */
+  startsOn?: string | null;
+  /**
+     * 종료일. 없거나 파싱할 수 없으면 null
+     * @nullable
+     */
+  endsOn?: string | null;
+  /**
+     * 도로명 주소. 없으면 null
+     * @nullable
+     */
+  roadAddress?: string | null;
+  /**
+     * 위도. 없으면 null
+     * @nullable
+     */
+  latitude?: number | null;
+  /**
+     * 경도. 없으면 null
+     * @nullable
+     */
+  longitude?: number | null;
+  /**
+     * 홈페이지 URL. 없으면 null
+     * @nullable
+     */
+  homepageUrl?: string | null;
+  /**
+     * 문의 전화번호. 없으면 null
+     * @nullable
+     */
+  phoneNumber?: string | null;
+  /**
+     * 주최. 없으면 null
+     * @nullable
+     */
+  hostOrganization?: string | null;
+  /**
+     * 주관. 없으면 null
+     * @nullable
+     */
+  organizingInstitution?: string | null;
+  /**
+     * 오늘 기준 단계. UPCOMING(시작 전)·ONGOING(진행 중)·ENDING_SOON(종료 임박)·ENDED(종료). 시작일이 없으면 null
+     * @nullable
+     */
+  phase?: FestivalAdminDetailResponsePhase;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseFestivalAdminDetailResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: FestivalAdminDetailResponse | null;
 }
 
 /**
@@ -5260,6 +6302,11 @@ export interface FestivalEditorialAdminResponse {
      * @nullable
      */
   publishedAt?: string | null;
+  /**
+     * 고정 시각. 고정하지 않았으면 null
+     * @nullable
+     */
+  pinnedAt?: string | null;
   /** 정렬된 주요 볼거리 */
   highlights: FestivalHighlightAdminResponse[];
 }
@@ -5309,6 +6356,11 @@ export interface CurationAdminSummaryResponse {
      * @nullable
      */
   publishedAt?: string | null;
+  /**
+     * 상단 고정 시각. 고정하지 않았으면 null
+     * @nullable
+     */
+  pinnedAt?: string | null;
   /** 챕터 수 */
   chapterCount: number;
   /** 추천 카드 수 */
@@ -5515,6 +6567,11 @@ export interface CurationAdminDetailResponse {
      * @nullable
      */
   publishedAt?: string | null;
+  /**
+     * 상단 고정 시각. 고정하지 않았으면 null
+     * @nullable
+     */
+  pinnedAt?: string | null;
   /** 저장된 정렬 순서대로 반환한 큐레이션 챕터 */
   chapters: CurationAdminChapterResponse[];
   /** 저장된 정렬 순서대로 반환한 당일치기 추천 카드 */
@@ -5582,8 +6639,15 @@ export const AdminAuditLogResponseAction = {
   PLANT_RESTORE: 'PLANT_RESTORE',
   CURATION_UPSERT: 'CURATION_UPSERT',
   CURATION_DELETE: 'CURATION_DELETE',
+  CURATION_PIN: 'CURATION_PIN',
+  CURATION_UNPIN: 'CURATION_UNPIN',
+  FESTIVAL_CREATE: 'FESTIVAL_CREATE',
+  FESTIVAL_UPDATE: 'FESTIVAL_UPDATE',
+  FESTIVAL_DELETE: 'FESTIVAL_DELETE',
   FESTIVAL_EDITORIAL_UPSERT: 'FESTIVAL_EDITORIAL_UPSERT',
   FESTIVAL_EDITORIAL_DELETE: 'FESTIVAL_EDITORIAL_DELETE',
+  FESTIVAL_EDITORIAL_PIN: 'FESTIVAL_EDITORIAL_PIN',
+  FESTIVAL_EDITORIAL_UNPIN: 'FESTIVAL_EDITORIAL_UNPIN',
   NOTICE_CREATE: 'NOTICE_CREATE',
   NOTICE_UPDATE: 'NOTICE_UPDATE',
   NOTICE_DISPATCH: 'NOTICE_DISPATCH',
@@ -5593,6 +6657,11 @@ export const AdminAuditLogResponseAction = {
   SCHEDULER_JOB_TRIGGER: 'SCHEDULER_JOB_TRIGGER',
   CONGESTION_LINK_CONFIRM: 'CONGESTION_LINK_CONFIRM',
   CONGESTION_LINK_REJECT: 'CONGESTION_LINK_REJECT',
+  LAUNCH_ALERT_DISPATCH: 'LAUNCH_ALERT_DISPATCH',
+  LAUNCH_ALERT_DISPATCH_CANCEL: 'LAUNCH_ALERT_DISPATCH_CANCEL',
+  LAUNCH_ALERT_TEST_SEND: 'LAUNCH_ALERT_TEST_SEND',
+  LAUNCH_ALERT_MAIL_TEMPLATE_UPDATE: 'LAUNCH_ALERT_MAIL_TEMPLATE_UPDATE',
+  LAUNCH_ALERT_DELETE: 'LAUNCH_ALERT_DELETE',
 } as const;
 
 /**
@@ -5610,6 +6679,7 @@ export const AdminAuditLogResponseTargetType = {
   NOTICE: 'NOTICE',
   SCHEDULER_JOB: 'SCHEDULER_JOB',
   CONGESTION_LINK: 'CONGESTION_LINK',
+  LAUNCH_ALERT: 'LAUNCH_ALERT',
 } as const;
 
 /**
@@ -5670,6 +6740,20 @@ export interface ApiResponsePageResponseAdminAuditLogResponse {
   message: string;
   data?: PageResponseAdminAuditLogResponse | null;
 }
+
+export type GetAdminLaunchAlertsMailTemplateParams = {
+/**
+ * 앱 플랫폼
+ */
+platform?: GetAdminLaunchAlertsMailTemplatePlatform;
+};
+
+export type GetAdminLaunchAlertsMailTemplatePlatform = typeof GetAdminLaunchAlertsMailTemplatePlatform[keyof typeof GetAdminLaunchAlertsMailTemplatePlatform];
+
+
+export const GetAdminLaunchAlertsMailTemplatePlatform = {
+  IOS: 'IOS',
+} as const;
 
 export type GetAdminCurationsParams = {
 /**
@@ -5747,6 +6831,30 @@ export const GetAdminNoticesStatus = {
   CANCELED: 'CANCELED',
 } as const;
 
+export type GetAdminLaunchAlertsDispatchesParams = {
+pageRequest: PageRequest;
+};
+
+export type GetAdminFestivalsParams = {
+/**
+ * 축제명 부분 검색어
+ */
+q?: string;
+/**
+ * 축제 종류 필터. 없으면 전체
+ */
+kind?: GetAdminFestivalsKind;
+pageRequest: PageRequest;
+};
+
+export type GetAdminFestivalsKind = typeof GetAdminFestivalsKind[keyof typeof GetAdminFestivalsKind];
+
+
+export const GetAdminFestivalsKind = {
+  FESTIVAL: 'FESTIVAL',
+  TREE: 'TREE',
+} as const;
+
 export type PostAdminCurationsImagesParams = {
 /**
  * 이미지 용도. HERO: 히어로(최대 1600×900), PHOTO: 챕터·추천 사진(최대 가로 860px)
@@ -5761,6 +6869,38 @@ export const PostAdminCurationsImagesUsage = {
   HERO: 'HERO',
   PHOTO: 'PHOTO',
 } as const;
+
+export type GetV2FeedParams = {
+/**
+ * 피드 필터
+ */
+filter?: GetV2FeedFilter;
+pageRequest: PageRequest;
+};
+
+export type GetV2FeedFilter = typeof GetV2FeedFilter[keyof typeof GetV2FeedFilter];
+
+
+export const GetV2FeedFilter = {
+  ALL: 'ALL',
+  INTEREST: 'INTEREST',
+  FOLLOWING: 'FOLLOWING',
+} as const;
+
+export type GetV2FeedByIdReactionsParams = {
+/**
+ * 이전 응답의 nextAfterKey
+ */
+afterKey?: string;
+/**
+ * 페이지 크기 (1~100)
+ */
+size?: number;
+/**
+ * 본인이 남긴 반응만 조회
+ */
+mineOnly?: boolean;
+};
 
 export type GetUsersByUserIdFollowingsParams = {
 pageRequest: PageRequest;
@@ -6345,6 +7485,43 @@ export const GetAdminLocationUsageLogsService = {
   SPOT_PREVIEW: 'SPOT_PREVIEW',
 } as const;
 
+export type GetAdminLaunchAlertsParams = {
+/**
+ * 앱 플랫폼
+ */
+platform?: GetAdminLaunchAlertsPlatform;
+/**
+ * 이메일 검색어 (부분일치)
+ */
+email?: string;
+pageRequest: PageRequest;
+};
+
+export type GetAdminLaunchAlertsPlatform = typeof GetAdminLaunchAlertsPlatform[keyof typeof GetAdminLaunchAlertsPlatform];
+
+
+export const GetAdminLaunchAlertsPlatform = {
+  IOS: 'IOS',
+} as const;
+
+export type GetAdminLaunchAlertsMailTemplatePreviewParams = {
+/**
+ * 앱 플랫폼
+ */
+platform?: GetAdminLaunchAlertsMailTemplatePreviewPlatform;
+/**
+ * 버튼에 걸 App Store 주소
+ */
+storeUrl?: string;
+};
+
+export type GetAdminLaunchAlertsMailTemplatePreviewPlatform = typeof GetAdminLaunchAlertsMailTemplatePreviewPlatform[keyof typeof GetAdminLaunchAlertsMailTemplatePreviewPlatform];
+
+
+export const GetAdminLaunchAlertsMailTemplatePreviewPlatform = {
+  IOS: 'IOS',
+} as const;
+
 export type GetAdminJobsRunsParams = {
 /**
  * 잡 이름
@@ -6370,14 +7547,6 @@ export const GetAdminJobsRunsStatus = {
   FAILED: 'FAILED',
   SKIPPED: 'SKIPPED',
 } as const;
-
-export type GetAdminFestivalsParams = {
-/**
- * 축제명 부분 검색어
- */
-q?: string;
-pageRequest: PageRequest;
-};
 
 export type GetAdminCongestionLinksParams = {
 /**
@@ -6425,5 +7594,6 @@ export const GetAdminAuditLogsTargetType = {
   NOTICE: 'NOTICE',
   SCHEDULER_JOB: 'SCHEDULER_JOB',
   CONGESTION_LINK: 'CONGESTION_LINK',
+  LAUNCH_ALERT: 'LAUNCH_ALERT',
 } as const;
 
