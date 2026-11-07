@@ -115,10 +115,10 @@ const invalidateBloomMap = (queryClient: ReturnType<typeof useQueryClient>) => {
   void queryClient.invalidateQueries({ queryKey: ['/api/spots/preview'] })
 }
 
-// 게시된 기록은 피드에도 노출되므로 '/api/feed' 프리픽스 캐시를 함께 무효화한다.
+// 게시된 기록은 피드에도 노출되므로 피드 캐시(v1 '/api/feed', v2 '/api/v2/feed' 프리픽스)를 함께 무효화한다.
 const invalidateFeed = (queryClient: ReturnType<typeof useQueryClient>) =>
   queryClient.invalidateQueries({
-    predicate: (q) => typeof q.queryKey[0] === 'string' && q.queryKey[0].startsWith('/api/feed'),
+    predicate: (q) => typeof q.queryKey[0] === 'string' && /^\/api\/(v2\/)?feed/.test(q.queryKey[0]),
   })
 
 const invalidateProfileSummaries = (queryClient: ReturnType<typeof useQueryClient>) => {

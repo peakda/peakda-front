@@ -21,7 +21,7 @@ import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { useRequireLogin } from '@/hooks/useRequireLogin'
 import { filterFromTab } from '@/lib/utils/feed'
 import { GetFeedFilter } from '@/api/facades/generated/peakdaApi.schemas'
-import type { PageResponseSpotRecordSummaryResponse } from '@/api/facades/generated/peakdaApi.schemas'
+import type { PageResponseFeedRecordSummaryResponse } from '@/api/facades/generated/peakdaApi.schemas'
 import { flattenPages } from '@/lib/utils/infinitePages'
 import { shouldLoadMore } from '@/lib/utils/myRecords'
 import { track } from '@/lib/analytics'
@@ -30,7 +30,7 @@ const FEED_CATEGORIES = ['전체', '관심 식물', '팔로잉']
 
 interface FeedClientProps {
   // 서버에서 받은 '전체' 탭 첫 페이지. 조회 실패(API 장애 등)면 null 이고 클라이언트가 다시 조회한다.
-  initialPage: PageResponseSpotRecordSummaryResponse | null
+  initialPage: PageResponseFeedRecordSummaryResponse | null
 }
 
 export function FeedClient({ initialPage }: FeedClientProps) {

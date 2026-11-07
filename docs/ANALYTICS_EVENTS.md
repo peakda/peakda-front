@@ -86,7 +86,7 @@ PM 공유용 전체 설계(퍼널·대시보드·예정 이벤트 포함): https
 | `feed_view` | Feed Viewed | 기록 상세 진입 | `record_id`, `spot_id` |
 | `feed_tab_change` | Feed Tab Changed | 피드 상단 탭 | `tab` |
 | `feed_photo_swipe` | Feed Photos Swiped | 기록 사진을 넘김. 기록(카드)당 처음 1회만 | `record_id`, `photo_count`, `surface`(feed_list/feed_detail) |
-| `reaction_add` / `reaction_remove` | Reaction Added / Reaction Removed | 리액션 성공 | `record_id`, `reaction_type` |
+| `reaction_add` / `reaction_remove` | Reaction Added / Reaction Removed | 리액션 성공 | `record_id`, `reaction_type`(이모지 키, 예: `u:2764-fe0f`. 2026-11 v2 전환 전 값은 `HEART`·`SMILE`) |
 | `follow` / `unfollow` | User Followed / User Unfollowed | 팔로우 성공 | `target_user_id` |
 | `report_submit` | Report Submitted | 신고 성공 | `target_type` |
 | `push_permission` | Push Permission Responded | 앱 알림 권한 응답 | `result` |

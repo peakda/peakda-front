@@ -1,4 +1,6 @@
 ﻿import type {
+  FeedRecordResponse,
+  FeedRecordSummaryResponse,
   PhotoEntry,
   PlantSummary,
   SpotRecordResponse,
@@ -46,7 +48,7 @@ type SummaryWithPhotos = SpotRecordSummaryResponse & { photos?: PhotoEntry[] }
 // 꽃 태그는 식물 이름으로 필터 드로어의 꽃 사진을 찾고, 못 찾으면 기본 이모지(🌸)를 쓴다.
 // photos 가 오면 전부, 아니면 대표 사진 한 장, 그것도 없으면 placeholder 를 쓴다.
 export function toFeedCardProps(
-  record: SummaryWithPhotos,
+  record: SummaryWithPhotos | FeedRecordSummaryResponse,
   options?: Pick<FeedCardProps, 'isOwner' | 'onEdit' | 'onDelete' | 'onReport' | 'href'>
 ): FeedCardProps {
   return {
@@ -68,7 +70,7 @@ export function toFeedCardProps(
   }
 }
 
-function toSummaryImages(record: SummaryWithPhotos): string[] {
+function toSummaryImages(record: SummaryWithPhotos | FeedRecordSummaryResponse): string[] {
   const urls = record.photos?.map((photo) => recordPhotoUrl(photo, 'medium')) ?? []
   if (urls.length > 0) return urls
   return record.coverPhoto ? [recordPhotoUrl(record.coverPhoto, 'medium')] : ['/images/explore.png']
@@ -77,7 +79,7 @@ function toSummaryImages(record: SummaryWithPhotos): string[] {
 // SpotRecordResponse(상세) → FeedCard props
 // 상세는 사진 전체(photos)를 포함하므로 캐러셀에 모두 노출한다.
 export function detailToFeedCardProps(
-  record: SpotRecordResponse,
+  record: SpotRecordResponse | FeedRecordResponse,
   options?: Pick<FeedCardProps, 'isOwner' | 'onEdit' | 'onDelete' | 'onReport'>
 ): FeedCardProps {
   return {
