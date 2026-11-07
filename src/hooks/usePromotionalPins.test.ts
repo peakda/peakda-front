@@ -23,7 +23,8 @@ const SHARK: PromotionalMapPinResponse = {
   iconKey: 'SHARK',
   linkUrl: LINK,
 }
-const map = {} as kakao.maps.Map
+let level: number
+const map = { getLevel: () => level } as kakao.maps.Map
 
 interface OverlayOptions {
   content: HTMLElement
@@ -32,6 +33,11 @@ interface OverlayOptions {
 
 let root: Root
 let visible: Set<Overlay>
+let zoomListeners: Set<() => void>
+const zoomTo = (next: number) => {
+  level = next
+  zoomListeners.forEach((listener) => listener())
+}
 
 class Overlay {
   constructor(public options: OverlayOptions) {}
@@ -55,6 +61,8 @@ const onlyContent = () => {
 beforeEach(() => {
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
   visible = new Set()
+  zoomListeners = new Set()
+  level = 3
   mocks.isNativeApp.mockReturnValue(false)
   mocks.browserOpen.mockClear()
   mocks.track.mockClear()
@@ -62,6 +70,12 @@ beforeEach(() => {
   vi.stubGlobal('kakao', {
     maps: {
       CustomOverlay: Overlay,
+      event: {
+        addListener: (_target: object, _type: string, handler: () => void) =>
+          zoomListeners.add(handler),
+        removeListener: (_target: object, _type: string, handler: () => void) =>
+          zoomListeners.delete(handler),
+      },
       LatLng: class {
         constructor(
           public lat: number,
@@ -85,6 +99,58 @@ describe('usePromotionalPins', () => {
     const content = onlyContent()
     expect(content.getAttribute('aria-label')).toBe('부산 북항')
     expect(content.querySelector('img')?.getAttribute('src')).toBe('/images/shark-pin.svg')
+  })
+
+  it('레벨 3 이하는 개별 핀 크기와 기본 이미지로 그린다', async () => {
+    await render([SHARK])
+
+    const content = onlyContent()
+    expect(content.classList.contains('scale-140')).toBe(false)
+    expect(content.querySelector('img')?.getAttribute('src')).toBe('/images/shark-pin.svg')
+  })
+
+  it('레벨 4 이상은 처음부터 크게, 고화질 이미지로 그린다', async () => {
+    level = 8
+    await render([SHARK])
+
+    const content = onlyContent()
+    expect(content.classList.contains('scale-140')).toBe(true)
+    expect(content.querySelector('img')?.getAttribute('src')).toBe('/images/shark-pin-large.svg')
+  })
+
+  it('줌으로 레벨 3과 4 사이를 넘으면 크기와 이미지를 바꾼다', async () => {
+    await render([SHARK])
+    const content = onlyContent()
+
+    zoomTo(4)
+    expect(content.classList.contains('scale-140')).toBe(true)
+    expect(content.querySelector('img')?.getAttribute('src')).toBe('/images/shark-pin-large.svg')
+
+    zoomTo(3)
+    expect(content.classList.contains('scale-140')).toBe(false)
+    expect(content.querySelector('img')?.getAttribute('src')).toBe('/images/shark-pin.svg')
+  })
+
+  it('핀을 내리면 줌 리스너도 해제한다', async () => {
+    await render([SHARK])
+    expect(zoomListeners.size).toBe(1)
+
+    await act(async () => root.render(h(Component, { pins: undefined })))
+    expect(zoomListeners.size).toBe(0)
+  })
+
+  it('투명 여백은 탭을 흘려보내고 보이는 원과 꼬리만 눌린다', async () => {
+    await render([SHARK])
+    const content = onlyContent()
+
+    expect(content.classList.contains('pointer-events-none')).toBe(true)
+    const hitAreas = content.querySelectorAll('span.pointer-events-auto')
+    expect(hitAreas).toHaveLength(2)
+
+    hitAreas[0].dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    expect(window.open).toHaveBeenCalledTimes(1)
+    hitAreas[1].dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    expect(window.open).toHaveBeenCalledTimes(2)
   })
 
   it('웹에서 탭하면 linkUrl 을 새 창으로 열고 집계한다', async () => {
