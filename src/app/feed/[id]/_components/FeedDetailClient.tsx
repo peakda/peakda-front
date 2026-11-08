@@ -21,7 +21,7 @@ import { detailToFeedCardProps } from '@/lib/utils/spotRecordToFeed'
 import { buildReportRequest } from '@/lib/utils/feed'
 import { track } from '@/lib/analytics'
 import type { CreateReportRequestReason } from '@/api/facades/generated/peakdaApi.schemas'
-import type { SpotRecordResponse } from '@/api/facades/generated/peakdaApi.schemas'
+import type { FeedRecordResponse } from '@/api/facades/generated/peakdaApi.schemas'
 
 // 서버(page.tsx)가 스팟 상세에서 골라 넘기는 값. 서버 요청엔 사용자 쿠키가 없어 찜 상태가 항상 비로그인 값이라,
 // 스팟 상세 쿼리 캐시에 넣으면 스팟 화면이 그 캐시를 그대로 써 찜이 틀려 보인다. 그래서 필요한 필드만 props 로 받는다.
@@ -31,7 +31,7 @@ export interface FeedSpotInfo {
 }
 
 interface FeedDetailClientProps {
-  initialRecord: SpotRecordResponse
+  initialRecord: FeedRecordResponse
   // 서버 조회가 실패하면 null 이고, 그때만 클라이언트가 스팟 상세를 받는다.
   spotInfo: FeedSpotInfo | null
 }

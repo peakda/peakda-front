@@ -12,6 +12,7 @@ import { WithdrawDrawerContent } from './WithdrawDrawerContent'
 import { SaveSpotDrawerContent } from './SaveSpotDrawerContent'
 import { DeleteConfirmDrawerContent } from './DeleteConfirmDrawerContent'
 import { ReactionDrawerContent } from './ReactionDrawerContent'
+import { ReactionAllDrawerContent } from './ReactionAllDrawerContent'
 import { PinList } from '@/components/ui/display/PinList'
 import { useFilterStore, type FilterValues } from '@/stores/useFilterStore'
 import { spotPreviewApi } from '@/api/facades/spot'
@@ -56,6 +57,7 @@ export function Drawer() {
     dateSelectData,
     deleteConfirmData,
     reactionData,
+    reactionAllData,
     closeDrawer,
     setSnapHeight,
     openPinDrawer,
@@ -68,6 +70,7 @@ export function Drawer() {
       dateSelectData: s.dateSelectData,
       deleteConfirmData: s.deleteConfirmData,
       reactionData: s.reactionData,
+      reactionAllData: s.reactionAllData,
       closeDrawer: s.closeDrawer,
       setSnapHeight: s.setSnapHeight,
       openPinDrawer: s.openPinDrawer,
@@ -190,14 +193,15 @@ export function Drawer() {
           ? snap
           : 400
 
-  // 로그아웃 / 회원탈퇴 / 찜 확인 / 촬영일자 선택 / 삭제 확인 / 반응 추가 시트: snap 없이 콘텐츠 높이에 맞춰 올라오는 바텀시트
+  // 로그아웃 / 회원탈퇴 / 찜 확인 / 촬영일자 선택 / 삭제 확인 / 반응 추가 / 전체 반응 시트: snap 없이 콘텐츠 높이에 맞춰 올라오는 바텀시트
   if (
     type === 'logout' ||
     type === 'withdraw' ||
     type === 'save-spot' ||
     type === 'date-select' ||
     type === 'delete-confirm' ||
-    type === 'reaction'
+    type === 'reaction' ||
+    type === 'reaction-all'
   ) {
     const title =
       type === 'logout'
@@ -210,7 +214,9 @@ export function Drawer() {
               ? '삭제 확인'
               : type === 'reaction'
                 ? '반응 추가'
-                : '찜 추가'
+                : type === 'reaction-all'
+                  ? '전체 반응'
+                  : '찜 추가'
     const description =
       type === 'logout'
         ? '현재 계정에서 로그아웃합니다.'
@@ -222,7 +228,9 @@ export function Drawer() {
               ? '선택한 항목을 삭제할지 확인합니다.'
               : type === 'reaction'
                 ? '기록에 남길 이모지 반응을 선택합니다.'
-                : '선택한 스팟을 찜 목록에 추가하고 개화 알림을 설정합니다.'
+                : type === 'reaction-all'
+                  ? '기록에 남겨진 모든 이모지 반응입니다.'
+                  : '선택한 스팟을 찜 목록에 추가하고 개화 알림을 설정합니다.'
     // 두 분기의 Root 가 같은 자리라 key 가 없으면 React 가 재사용해, 핀 목록 ↔ 찜 시트 전환 때
     // 드로어가 새로 뜨지 않고 내용만 바뀐 채 스냅 위치를 다시 잡느라 느리게 내려갔다 올라온다.
     return (
@@ -250,8 +258,16 @@ export function Drawer() {
               />
             ) : type === 'reaction' && reactionData ? (
               <ReactionDrawerContent
+                recordId={reactionData.recordId}
+                scope={reactionData.scope}
                 selected={reactionData.selected}
                 onSelect={reactionData.onSelect}
+                onClose={closeDrawer}
+              />
+            ) : type === 'reaction-all' && reactionAllData ? (
+              <ReactionAllDrawerContent
+                recordId={reactionAllData.recordId}
+                onSelect={reactionAllData.onSelect}
                 onClose={closeDrawer}
               />
             ) : saveSpotData ? (

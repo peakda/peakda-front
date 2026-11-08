@@ -25,7 +25,7 @@ it.each(['feed', 'explore'] as const)(
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     const key =
       surface === 'feed'
-        ? ['/api/feed', 'infinite', 'ALL']
+        ? ['/api/v2/feed', 'infinite', 'ALL']
         : ['/api/explore/spots', 'infinite', 'PEAK_NOW', null]
     const page = { content: [], page: 0, size: 20, totalElements: 40, totalPages: 2, hasNext: true }
     client.setQueryData(

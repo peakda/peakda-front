@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type { MultiImageProps } from '@/types/types'
-import type { FeedReactionSummaryResponseMyReactionsItem } from '@/api/facades/generated/peakdaApi.schemas'
+import type { ReactionAction, ReactionEmoji } from '@/lib/utils/feed'
 
 type DrawerType =
   | 'filter'
@@ -12,6 +12,7 @@ type DrawerType =
   | 'date-select'
   | 'delete-confirm'
   | 'reaction'
+  | 'reaction-all'
 
 export interface SaveSpotData {
   spotId: number
@@ -33,9 +34,18 @@ export interface DeleteConfirmData {
 }
 
 export interface ReactionData {
-  /** 내가 이미 남긴 리액션 — 시트에서 선택 상태로 표시한다 */
-  selected: FeedReactionSummaryResponseMyReactionsItem[]
-  onSelect: (type: FeedReactionSummaryResponseMyReactionsItem) => void
+  recordId: number
+  /** all: 전체 이모지 피커, legacy: ❤️·😀 만 (스팟 기록처럼 v1 응답을 쓰는 화면) */
+  scope: 'all' | 'legacy'
+  /** 내가 이미 남긴 리액션의 이모지 키 — 시트에서 선택 상태로 표시한다 */
+  selected: string[]
+  onSelect: (emoji: ReactionEmoji, action: ReactionAction) => void
+}
+
+/** 더보기로 여는 전체 반응 시트 */
+export interface ReactionAllData {
+  recordId: number
+  onSelect: ReactionData['onSelect']
 }
 
 interface DrawerState {
@@ -49,6 +59,7 @@ interface DrawerState {
   dateSelectData: DateSelectData | null
   deleteConfirmData: DeleteConfirmData | null
   reactionData: ReactionData | null
+  reactionAllData: ReactionAllData | null
   openFilterDrawer: () => void
   openFlowerFilterDrawer: () => void
   openPinDrawer: (data: MultiImageProps[]) => void
@@ -58,6 +69,7 @@ interface DrawerState {
   openDateSelectDrawer: (value: string, onSelect: (value: string) => void) => void
   openDeleteConfirmDrawer: (onConfirm: () => void) => void
   openReactionDrawer: (data: ReactionData) => void
+  openReactionAllDrawer: (data: ReactionAllData) => void
   closeDrawer: () => void
   // 핀 목록 데이터는 쿼리가 아니라 스냅샷이라, 찜·알림을 바꾸면 여기서 직접 맞춘다.
   updatePinFavorite: (spotId: number, isFavorite: boolean, notifyEnabled: boolean) => void
@@ -74,6 +86,7 @@ export const useDrawerStore = create<DrawerState>((set) => ({
   dateSelectData: null,
   deleteConfirmData: null,
   reactionData: null,
+  reactionAllData: null,
   openFilterDrawer: () => set({ isOpen: true, type: 'filter', snapHeight: 400 }),
   openFlowerFilterDrawer: () => set({ isOpen: true, type: 'flower-filter', snapHeight: 400 }),
   openPinDrawer: (data) => set({ isOpen: true, type: 'pin', pinListData: data, snapHeight: 400 }),
@@ -93,6 +106,8 @@ export const useDrawerStore = create<DrawerState>((set) => ({
     set({ isOpen: true, type: 'delete-confirm', deleteConfirmData: { onConfirm }, snapHeight: 0 }),
   openReactionDrawer: (data) =>
     set({ isOpen: true, type: 'reaction', reactionData: data, snapHeight: 0 }),
+  openReactionAllDrawer: (data) =>
+    set({ isOpen: true, type: 'reaction-all', reactionAllData: data, snapHeight: 0 }),
   closeDrawer: () =>
     set((s) =>
       s.type === 'save-spot' && s.returnPinList
