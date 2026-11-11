@@ -29,19 +29,14 @@ const STEPS = [
   },
 ]
 
-// 스크롤로 단계를 넘긴다. 데스크톱(xl)은 섹션을 길게 두고 내용을 고정하고, 모바일·태블릿은
-// 내용이 한 화면보다 길어 고정하지 않는다 — 대신 섹션이 화면을 꽉 채운 짧은 구간(단계 목록과
-// 휴대폰 카드가 함께 보이는 동안) 안에서 단계가 바뀐다.
-// 섹션의 view-timeline 'contain' 구간 진행 비율(0~1). 단계 카드의 진행 막대(globals.css)와 같은
-// 기준이라 01 막대가 다 차는 순간 02 로 넘어간다. 섹션이 화면보다 짧으면(큰 태블릿 세로) 아래끝이
-// 화면 아래에 닿을 때부터 위끝이 화면 위에 닿을 때까지가 그 구간이다.
-const getContainRange = (rect: DOMRect) => {
-  const overflow = rect.height - window.innerHeight
-  return { start: Math.max(0, -overflow), length: Math.abs(overflow) }
-}
+// 데스크톱(xl)에서만 섹션을 길게 두고 내용을 고정해 스크롤로 단계를 넘긴다.
+// 모바일·태블릿은 내용이 한 화면보다 길어 고정할 수 없어 단계를 눌러서만 바꾼다.
+const DESKTOP_QUERY = '(min-width: 1280px)'
+// 섹션이 화면을 꽉 채운 동안 스크롤한 비율(0~1). 단계 카드의 진행 막대(globals.css 의
+// view-timeline 'contain' 구간)와 같은 기준이라, 01 막대가 다 차는 순간 02 로 넘어간다.
 const getProgress = (rect: DOMRect) => {
-  const { start, length } = getContainRange(rect)
-  return length > 0 ? (start - rect.top) / length : 0
+  const scrollable = rect.height - window.innerHeight
+  return scrollable > 0 ? -rect.top / scrollable : 0
 }
 
 // Scene 03 찜·만개 알림. 단계에 맞춰 휴대폰 카드가 스크롤 방향으로 밀려나며 바뀐다.
@@ -51,10 +46,11 @@ export const SavedSteps = () => {
 
   // 스크롤 위치 → 단계. 절반을 넘으면 02 로 넘어간다.
   useEffect(() => {
+    const desktop = window.matchMedia(DESKTOP_QUERY)
     let frame = 0
     const update = () => {
       frame = 0
-      if (!trackRef.current) return
+      if (!desktop.matches || !trackRef.current) return
       setActive(getProgress(trackRef.current.getBoundingClientRect()) >= 0.5 ? 1 : 0)
     }
     const onScroll = () => {
@@ -70,16 +66,15 @@ export const SavedSteps = () => {
     }
   }, [])
 
-  // 누르면 그 단계가 보이는 스크롤 위치(각 구간의 가운데)로 이동한다. 진행 막대도 같이 맞춰진다.
+  // 데스크톱에서는 그 단계가 보이는 스크롤 위치(각 구간의 가운데)로 이동하고, 나머지는 바로 바꾼다.
   const select = (index: number) => {
     setActive(index)
     const track = trackRef.current
-    if (!track) return
+    if (!track || !window.matchMedia(DESKTOP_QUERY).matches) return
     const rect = track.getBoundingClientRect()
-    const { start, length } = getContainRange(rect)
-    const progress = index === 0 ? 0.25 : 0.75
+    const scrollable = rect.height - window.innerHeight
     // html 의 scroll-behavior(동작 줄이기 설정이 아니면 smooth)를 따른다
-    window.scrollTo({ top: window.scrollY + rect.top - (start - length * progress) })
+    window.scrollTo({ top: window.scrollY + rect.top + scrollable * (index === 0 ? 0.25 : 0.75) })
   }
 
   return (
@@ -123,7 +118,7 @@ export const SavedSteps = () => {
                     <span className="text-landing-muted text-[13px] leading-[1.55]">
                       {step.hint}
                     </span>
-                    {/* 스크롤 진행 막대 — 채우는 건 globals.css(.landing-step-bar) */}
+                    {/* 데스크톱 스크롤 진행 막대 — 채우는 건 globals.css(.landing-step-bar) */}
                     <span
                       aria-hidden
                       className="landing-step-track bg-landing-line mt-2 h-0.5 rounded-full"
