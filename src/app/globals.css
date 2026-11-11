@@ -436,7 +436,8 @@
   }
 }
 
-/* 랜딩 Scene 03(SavedSteps) — 데스크톱에서 고정된 섹션을 스크롤하는 만큼 단계 카드 아래 막대가 찬다.
+/* 랜딩 Scene 03(SavedSteps) — 섹션이 화면을 꽉 채운 구간(contain)을 스크롤하는 만큼 단계 카드 아래 막대가 찬다.
+   데스크톱은 고정된 섹션, 모바일·태블릿은 단계 목록과 휴대폰 카드가 함께 보이는 짧은 구간이다.
    01 은 앞 절반, 02 는 뒤 절반. view-timeline 을 모르는 브라우저는 막대를 숨긴다. */
 @keyframes landing-step-fill {
   from {
@@ -451,25 +452,23 @@
   display: none;
 }
 @supports (animation-timeline: view()) {
-  @media (min-width: 1280px) {
-    .landing-steps {
-      view-timeline-name: --landing-steps;
-    }
-    .landing-step-track,
-    .landing-step-bar {
-      display: block;
-    }
-    .landing-step-bar {
-      transform-origin: left;
-      animation: landing-step-fill linear both;
-      animation-timeline: --landing-steps;
-    }
-    .landing-step-bar[data-step='0'] {
-      animation-range: contain 0% contain 50%;
-    }
-    .landing-step-bar[data-step='1'] {
-      animation-range: contain 50% contain 100%;
-    }
+  .landing-steps {
+    view-timeline-name: --landing-steps;
+  }
+  .landing-step-track,
+  .landing-step-bar {
+    display: block;
+  }
+  .landing-step-bar {
+    transform-origin: left;
+    animation: landing-step-fill linear both;
+    animation-timeline: --landing-steps;
+  }
+  .landing-step-bar[data-step='0'] {
+    animation-range: contain 0% contain 50%;
+  }
+  .landing-step-bar[data-step='1'] {
+    animation-range: contain 50% contain 100%;
   }
 }
 
