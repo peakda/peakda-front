@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0DEBD5DAE7A5129C4023F535 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 441D0B73FDCD0FFCBE631976 /* PrivacyInfo.xcprivacy */; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
 		41D73DF50D8B45CA92636C9D /* NativeSecureStorePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26E1AB586E8437F5BB954015 /* NativeSecureStorePlugin.swift */; };
 		4D22ABE92AF431CB00220026 /* CapApp-SPM in Frameworks */ = {isa = PBXBuildFile; productRef = 4D22ABE82AF431CB00220026 /* CapApp-SPM */; };
@@ -20,6 +21,7 @@
 		68AB0184B43B611F47841AAC /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74750242097FF1A7019736F3 /* MainViewController.swift */; };
 		9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9582B6822FE993A50072D4E8 /* SceneDelegate.swift */; };
 		A93547E6DF96FA1C92D95067 /* NativeAppleSignInPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23061945D96227E04E351B65 /* NativeAppleSignInPlugin.swift */; };
+		ABA3755E4BC014AB7C697E87 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = B819F30F4AF39EB95BB96562 /* FirebaseMessaging */; };
 		B91CED1E79B9C01617E85703 /* NavigationErrorFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA9EBE61F7A62117B60252F6 /* NavigationErrorFilter.swift */; };
 /* End PBXBuildFile section */
 
@@ -27,6 +29,7 @@
 		23061945D96227E04E351B65 /* NativeAppleSignInPlugin.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeAppleSignInPlugin.swift; sourceTree = "<group>"; };
 		26E1AB586E8437F5BB954015 /* NativeSecureStorePlugin.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeSecureStorePlugin.swift; sourceTree = "<group>"; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
+		441D0B73FDCD0FFCBE631976 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
 		504EC3041FED79650016851F /* App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = App.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		504EC3071FED79650016851F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -49,6 +52,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4D22ABE92AF431CB00220026 /* CapApp-SPM in Frameworks */,
+				ABA3755E4BC014AB7C697E87 /* FirebaseMessaging in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -90,6 +94,7 @@
 				D91EC6C5F475532EFABCE37A /* App.entitlements */,
 				CA9EBE61F7A62117B60252F6 /* NavigationErrorFilter.swift */,
 				D06A5FEA806627909BAFAFF2 /* NativeGeolocationPlugin.swift */,
+				441D0B73FDCD0FFCBE631976 /* PrivacyInfo.xcprivacy */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -104,6 +109,7 @@
 				504EC3001FED79650016851F /* Sources */,
 				504EC3011FED79650016851F /* Frameworks */,
 				504EC3021FED79650016851F /* Resources */,
+				228BB6935A9C68AD6871B352 /* Copy GoogleService-Info.plist */,
 			);
 			buildRules = (
 			);
@@ -112,6 +118,7 @@
 			name = App;
 			packageProductDependencies = (
 				4D22ABE82AF431CB00220026 /* CapApp-SPM */,
+				B819F30F4AF39EB95BB96562 /* FirebaseMessaging */,
 			);
 			productName = App;
 			productReference = 504EC3041FED79650016851F /* App.app */;
@@ -144,6 +151,7 @@
 			mainGroup = 504EC2FB1FED79650016851F;
 			packageReferences = (
 				D4C12C0A2AAA248700AAC8A2 /* XCLocalSwiftPackageReference "CapApp-SPM" */,
+				31E54ACA6520A1DEE9ED9A96 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			productRefGroup = 504EC3051FED79650016851F /* Products */;
 			projectDirPath = "";
@@ -165,10 +173,33 @@
 				50379B232058CBB4000EE86E /* capacitor.config.json in Resources */,
 				504EC30D1FED79650016851F /* Main.storyboard in Resources */,
 				2FAD9763203C412B000D30F8 /* config.xml in Resources */,
+				0DEBD5DAE7A5129C4023F535 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		228BB6935A9C68AD6871B352 /* Copy GoogleService-Info.plist */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Copy GoogleService-Info.plist";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# GoogleService-Info.plist 는 git 에 올리지 않는다(ios/.gitignore — Android google-services.json 과 같은 규칙).\n# 빌드하는 PC 에 있으면 앱에 넣고, 없으면 푸시 없이 빌드한다(AppDelegate 가 Firebase 를 켜지 않는다).\nPLIST=\"${PROJECT_DIR}/App/GoogleService-Info.plist\"\nif [ -f \"$PLIST\" ]; then\n  cp \"$PLIST\" \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleService-Info.plist\"\nelse\n  echo \"warning: App/GoogleService-Info.plist 가 없어 이 빌드에서는 푸시 알림이 동작하지 않습니다.\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		504EC3001FED79650016851F /* Sources */ = {
@@ -394,11 +425,27 @@
 		};
 /* End XCLocalSwiftPackageReference section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		31E54ACA6520A1DEE9ED9A96 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 13.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		4D22ABE82AF431CB00220026 /* CapApp-SPM */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = D4C12C0A2AAA248700AAC8A2 /* XCLocalSwiftPackageReference "CapApp-SPM" */;
 			productName = "CapApp-SPM";
+		};
+		B819F30F4AF39EB95BB96562 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 31E54ACA6520A1DEE9ED9A96 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

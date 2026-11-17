@@ -6,6 +6,7 @@ import {
 } from '@capacitor/push-notifications'
 import { toast } from 'sonner'
 import { registerDeviceApi, unregisterDeviceApi } from '@/api/facades/device'
+import type { RegisterDeviceRequestPlatform } from '@/api/facades/generated/peakdaApi.schemas'
 import { track } from '@/lib/analytics'
 import { APP_SETTINGS_CHANGED_EVENT, APP_SETTINGS_KEY, loadAppSettings } from '@/lib/utils/appSettings'
 import { writeStorage } from '@/lib/utils/storage'
@@ -21,8 +22,14 @@ let registeredToken: string | null = null
 let listenerHandles: PluginListenerHandle[] = []
 let activeCallbacks: PushCallbacks = {}
 
-export function isNativeAndroid(): boolean {
-  return Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android'
+// 네이티브 앱(Android·iOS)에서만 푸시를 받는다. 웹은 앱 내 알림 목록으로 받는다.
+// iOS 는 AppDelegate 가 APNs 토큰을 FCM 토큰으로 바꿔 넘기므로 서버는 두 플랫폼 모두 FCM 으로 보낸다.
+export function isPushAvailable(): boolean {
+  return Capacitor.isNativePlatform()
+}
+
+function devicePlatform(): RegisterDeviceRequestPlatform {
+  return Capacitor.getPlatform() === 'ios' ? 'IOS' : 'ANDROID'
 }
 
 async function installListeners(callbacks: PushCallbacks): Promise<void> {
@@ -32,7 +39,7 @@ async function installListeners(callbacks: PushCallbacks): Promise<void> {
   listenerHandles = await Promise.all([
     PushNotifications.addListener('registration', async ({ value }) => {
       try {
-        await registerDeviceApi({ token: value, platform: 'ANDROID' })
+        await registerDeviceApi({ token: value, platform: devicePlatform() })
         registeredToken = value
       } catch (error) {
         console.error('푸시 토큰 등록 실패', error)
@@ -52,18 +59,21 @@ async function installListeners(callbacks: PushCallbacks): Promise<void> {
 
 async function register(callbacks: PushCallbacks): Promise<boolean> {
   await installListeners(callbacks)
-  await PushNotifications.createChannel({
-    id: CHANNEL_ID,
-    name: '피크다 알림',
-    description: '개화 소식과 서비스 활동 알림',
-    importance: 3,
-  })
+  // 알림 채널은 Android 에만 있다(iOS 플러그인은 미구현으로 실패한다).
+  if (Capacitor.getPlatform() === 'android') {
+    await PushNotifications.createChannel({
+      id: CHANNEL_ID,
+      name: '피크다 알림',
+      description: '개화 소식과 서비스 활동 알림',
+      importance: 3,
+    })
+  }
   await PushNotifications.register()
   return true
 }
 
 export async function startPushNotifications(callbacks: PushCallbacks = {}): Promise<boolean> {
-  if (!isNativeAndroid()) return false
+  if (!isPushAvailable()) return false
 
   const permission = await PushNotifications.checkPermissions()
   if (permission.receive !== 'granted') return false
@@ -74,7 +84,7 @@ export async function startPushNotifications(callbacks: PushCallbacks = {}): Pro
 export async function requestAndStartPushNotifications(
   callbacks: PushCallbacks = {}
 ): Promise<boolean> {
-  if (!isNativeAndroid()) return false
+  if (!isPushAvailable()) return false
 
   let permission = await PushNotifications.checkPermissions()
   if (permission.receive === 'prompt' || permission.receive === 'prompt-with-rationale') {
@@ -92,7 +102,7 @@ export async function requestAndStartPushNotifications(
 // 이벤트를 보내면 PushNotificationManager 가 알림 탭 콜백까지 붙여 등록을 이어받는다.
 // 웹은 푸시가 없어 아무것도 하지 않는다(앱 내 알림 목록으로 받는다).
 export async function enablePushForBloomAlert(): Promise<void> {
-  if (!isNativeAndroid() || loadAppSettings().pushEnabled) return
+  if (!isPushAvailable() || loadAppSettings().pushEnabled) return
 
   try {
     const enabled = await requestAndStartPushNotifications()
@@ -110,7 +120,7 @@ export async function enablePushForBloomAlert(): Promise<void> {
 }
 
 export async function stopPushNotifications(): Promise<void> {
-  if (!isNativeAndroid()) return
+  if (!isPushAvailable()) return
 
   if (registeredToken) {
     try {

@@ -1,26 +1,35 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { APP_SETTINGS_CHANGED_EVENT, APP_SETTINGS_KEY, loadAppSettings } from '@/lib/utils/appSettings'
-import { enablePushForBloomAlert } from './pushNotifications'
+import {
+  enablePushForBloomAlert,
+  requestAndStartPushNotifications,
+  stopPushNotifications,
+} from './pushNotifications'
 
 const native = vi.hoisted(() => ({
-  isAndroid: true,
+  platform: 'android' as 'android' | 'ios' | 'web',
   permission: 'prompt' as string,
   afterRequest: 'granted' as string,
+  listeners: new Map<string, (event: { value: string }) => unknown>(),
 }))
 
 vi.mock('@capacitor/core', () => ({
   Capacitor: {
-    isNativePlatform: () => native.isAndroid,
-    getPlatform: () => (native.isAndroid ? 'android' : 'web'),
+    isNativePlatform: () => native.platform !== 'web',
+    getPlatform: () => native.platform,
   },
 }))
 vi.mock('@capacitor/push-notifications', () => ({
   PushNotifications: {
     checkPermissions: vi.fn(() => Promise.resolve({ receive: native.permission })),
     requestPermissions: vi.fn(() => Promise.resolve({ receive: native.afterRequest })),
-    addListener: vi.fn(() => Promise.resolve({ remove: () => Promise.resolve() })),
+    addListener: vi.fn((event: string, listener: (event: { value: string }) => unknown) => {
+      native.listeners.set(event, listener)
+      return Promise.resolve({ remove: () => Promise.resolve() })
+    }),
     createChannel: vi.fn(() => Promise.resolve()),
     register: vi.fn(() => Promise.resolve()),
+    unregister: vi.fn(() => Promise.resolve()),
   },
 }))
 vi.mock('@/api/facades/device', () => ({ registerDeviceApi: vi.fn(), unregisterDeviceApi: vi.fn() }))
@@ -28,7 +37,40 @@ vi.mock('@/lib/analytics', () => ({ track: vi.fn() }))
 vi.mock('sonner', () => ({ toast: vi.fn() }))
 
 const { PushNotifications } = await import('@capacitor/push-notifications')
+const { registerDeviceApi } = await import('@/api/facades/device')
 const { toast } = await import('sonner')
+
+describe('requestAndStartPushNotifications', () => {
+  beforeEach(async () => {
+    await stopPushNotifications()
+    vi.clearAllMocks()
+    native.listeners.clear()
+    native.permission = 'granted'
+  })
+
+  it.each([
+    { platform: 'android' as const, expected: 'ANDROID', createsChannel: true },
+    // iOS 는 알림 채널이 없고, AppDelegate 가 넘긴 FCM 토큰을 IOS 로 등록한다
+    { platform: 'ios' as const, expected: 'IOS', createsChannel: false },
+  ])(
+    '$platform 은 토큰을 $expected 로 등록한다',
+    async ({ platform, expected, createsChannel }) => {
+      native.platform = platform
+
+      expect(await requestAndStartPushNotifications()).toBe(true)
+      await native.listeners.get('registration')?.({ value: 'fcm-token' })
+
+      expect(registerDeviceApi).toHaveBeenCalledWith({ token: 'fcm-token', platform: expected })
+      expect(PushNotifications.createChannel).toHaveBeenCalledTimes(createsChannel ? 1 : 0)
+    }
+  )
+
+  it('웹에서는 시작하지 않는다', async () => {
+    native.platform = 'web'
+    expect(await requestAndStartPushNotifications()).toBe(false)
+    expect(PushNotifications.register).not.toHaveBeenCalled()
+  })
+})
 
 describe('enablePushForBloomAlert', () => {
   let settingsEvents = 0
@@ -37,7 +79,7 @@ describe('enablePushForBloomAlert', () => {
   beforeEach(() => {
     localStorage.clear()
     vi.clearAllMocks()
-    native.isAndroid = true
+    native.platform = 'android'
     native.permission = 'prompt'
     native.afterRequest = 'granted'
     settingsEvents = 0
@@ -46,7 +88,7 @@ describe('enablePushForBloomAlert', () => {
   })
 
   it('웹에서는 권한을 묻지 않고 설정도 바꾸지 않는다', async () => {
-    native.isAndroid = false
+    native.platform = 'web'
     await enablePushForBloomAlert()
     expect(PushNotifications.requestPermissions).not.toHaveBeenCalled()
     expect(loadAppSettings().pushEnabled).toBe(false)

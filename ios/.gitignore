@@ -11,3 +11,6 @@ capacitor-cordova-ios-plugins
 # Generated Config files
 App/App/capacitor.config.json
 App/App/config.xml
+
+# Firebase iOS 설정 파일 — Android google-services.json 과 같이 빌드하는 PC 마다 따로 넣는다
+App/App/GoogleService-Info.plist
