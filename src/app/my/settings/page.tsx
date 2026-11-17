@@ -20,7 +20,7 @@ import {
 import type { LegalSlug } from '@/app/Terms/_data/legal-content'
 import { track } from '@/lib/analytics'
 import {
-  isNativeAndroid,
+  isPushAvailable,
   requestAndStartPushNotifications,
   stopPushNotifications,
 } from '@/lib/push/pushNotifications'
@@ -100,7 +100,7 @@ export default function SettingsPage() {
           />
         )}
       </div>
-      {isNativeAndroid() && (
+      {isPushAvailable() && (
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex flex-col">
             <span className="text-text-primary text-base">푸시 알림</span>

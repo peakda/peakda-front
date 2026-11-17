@@ -11,6 +11,7 @@ class MainViewController: CAPBridgeViewController {
     override open func capacitorDidLoad() {
         bridge?.registerPluginInstance(NativeSecureStorePlugin())
         bridge?.registerPluginInstance(NativeAppleSignInPlugin())
+        bridge?.registerPluginInstance(NativeGeolocationPlugin())
         installNavigationErrorFilter()
         enableViewportFitCover()
     }
