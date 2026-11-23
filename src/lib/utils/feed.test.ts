@@ -3,9 +3,7 @@ import {
   filterFromTab,
   buildReportRequest,
   applyReactionToggle,
-  isLegacyReactions,
   mergeReactionState,
-  toReactionOverview,
 } from './feed'
 
 const HEART = { key: 'u:2764-fe0f', emoji: '❤️' }
@@ -28,33 +26,6 @@ describe('utils/feed', () => {
     })
     it('알 수 없는 값 → ALL(기본값)', () => {
       expect(filterFromTab('기타')).toBe('ALL')
-    })
-  })
-
-  describe('toReactionOverview', () => {
-    it('v2 응답은 참조를 그대로 돌려준다', () => {
-      const reactions = overview({ ...PARTY, count: 1, reactedByMe: false })
-      expect(toReactionOverview(reactions)).toBe(reactions)
-      expect(isLegacyReactions(reactions)).toBe(false)
-    })
-    it('v1 응답의 HEART·SMILE 을 v2 키로 옮긴다', () => {
-      const reactions = {
-        counts: [
-          { reactionType: 'HEART' as const, count: 2 },
-          { reactionType: 'SMILE' as const, count: 1 },
-        ],
-        myReactions: ['SMILE' as const],
-      }
-      expect(isLegacyReactions(reactions)).toBe(true)
-      expect(toReactionOverview(reactions)).toEqual(
-        overview(
-          { ...HEART, count: 2, reactedByMe: false },
-          { key: 'u:1f600', emoji: '😀', count: 1, reactedByMe: true }
-        )
-      )
-    })
-    it('v1 응답에서 아무도 남기지 않은 반응은 칩을 만들지 않는다', () => {
-      expect(toReactionOverview({ counts: [], myReactions: [] })).toEqual(overview())
     })
   })
 

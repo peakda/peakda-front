@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { SmilePlus } from 'lucide-react'
 import { toast } from 'sonner'
 import { EmojiBtn } from '@/components/ui/button/EmojiBtn'
@@ -9,17 +9,12 @@ import { useDrawerStore } from '@/stores/useDrawerStore'
 import { useRequireLogin } from '@/hooks/useRequireLogin'
 import {
   applyReactionToggle,
-  isLegacyReactions,
   mergeReactionState,
-  toReactionOverview,
   type ReactionAction,
   type ReactionEmoji,
 } from '@/lib/utils/feed'
 import { cn } from '@/lib/utils/cn'
-import type {
-  ReactionOverviewResponse,
-  ReactionSummary,
-} from '@/api/facades/generated/peakdaApi.schemas'
+import type { ReactionOverviewResponse } from '@/api/facades/generated/peakdaApi.schemas'
 
 // 반응 추가/취소 안내 토스트 — 이모지를 제목, 안내 문구를 디스크립션으로 띄운다(시안 기준 어두운 배경).
 function showReactionToast(action: ReactionAction, emoji: string) {
@@ -35,20 +30,17 @@ function showReactionToast(action: ReactionAction, emoji: string) {
 
 interface ReactionBarProps {
   recordId: number
-  // 피드는 v2 형식, 스팟 기록은 아직 v1 형식(❤️·😀)으로 내려온다.
-  reactions: ReactionSummary | ReactionOverviewResponse
+  reactions: ReactionOverviewResponse
   className?: string
 }
 
 // 기록 하나의 리액션 줄. 맨 앞 추가 버튼(+이모지)으로 반응 추가 바텀시트를 열고,
 // 남겨진 리액션(내가 누른 것 포함)만 카운트 칩으로 잇는다.
 export function ReactionBar({ recordId, reactions, className }: ReactionBarProps) {
-  // 변환 결과가 렌더마다 새 객체가 되지 않도록 원본 참조로 묶는다.
-  const serverOverview = useMemo(() => toReactionOverview(reactions), [reactions])
   // 조회 응답의 리액션 요약을 그대로 보여주고, 이 화면에서 리액션을 누른 뒤에만
   // mutation 응답으로 덮어쓴다. (useState 초기값으로 두면 나중에 도착한 서버 값이 반영되지 않는다)
   const [reactionOverride, setReactionOverride] = useState<ReactionOverviewResponse | null>(null)
-  const overview = reactionOverride ?? serverOverview
+  const overview = reactionOverride ?? reactions
   const openReactionDrawer = useDrawerStore((s) => s.openReactionDrawer)
   const openReactionAllDrawer = useDrawerStore((s) => s.openReactionAllDrawer)
   const addReaction = useAddReaction()
@@ -89,7 +81,6 @@ export function ReactionBar({ recordId, reactions, className }: ReactionBarProps
             () =>
               openReactionDrawer({
                 recordId,
-                scope: isLegacyReactions(reactions) ? 'legacy' : 'all',
                 selected: overview.items.filter((item) => item.reactedByMe).map((item) => item.key),
                 onSelect: handleReaction,
               }),
