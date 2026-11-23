@@ -8,8 +8,10 @@ const mocks = vi.hoisted(() => ({
   browserOpen: vi.fn(() => Promise.resolve()),
   isNativeApp: vi.fn(() => false),
   track: vi.fn(),
+  router: { push: vi.fn() },
 }))
 
+vi.mock('next/navigation', () => ({ useRouter: () => mocks.router }))
 vi.mock('@capacitor/browser', () => ({ Browser: { open: mocks.browserOpen } }))
 vi.mock('@/lib/auth/nativeAuth', () => ({ isNativeApp: mocks.isNativeApp }))
 vi.mock('@/lib/analytics', () => ({ track: mocks.track }))
@@ -22,6 +24,14 @@ const SHARK: PromotionalMapPinResponse = {
   longitude: 129.04,
   iconKey: 'SHARK',
   linkUrl: LINK,
+}
+const TREE: PromotionalMapPinResponse = {
+  id: 'TREE_12',
+  name: '더현대 서울 크리스마스 트리',
+  latitude: 37.5259,
+  longitude: 126.9284,
+  iconKey: 'TREE',
+  linkUrl: '/festivals/12',
 }
 let level: number
 const map = { getLevel: () => level } as kakao.maps.Map
@@ -66,6 +76,7 @@ beforeEach(() => {
   mocks.isNativeApp.mockReturnValue(false)
   mocks.browserOpen.mockClear()
   mocks.track.mockClear()
+  mocks.router.push.mockClear()
   vi.stubGlobal('open', vi.fn())
   vi.stubGlobal('kakao', {
     maps: {
@@ -176,6 +187,28 @@ describe('usePromotionalPins', () => {
     onlyContent().dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }))
 
     expect(window.open).toHaveBeenCalledTimes(1)
+  })
+
+  it('TREE 핀은 트리 아이콘으로 그리고, 탭하면 앱 안에서 상세로 이동한다', async () => {
+    mocks.isNativeApp.mockReturnValue(true)
+    await render([TREE])
+    const content = onlyContent()
+    expect(content.querySelector('img')?.getAttribute('src')).toBe('/images/tree-pin.svg')
+
+    content.click()
+
+    expect(mocks.router.push).toHaveBeenCalledWith('/festivals/12')
+    expect(mocks.browserOpen).not.toHaveBeenCalled()
+    expect(window.open).not.toHaveBeenCalled()
+    expect(mocks.track).toHaveBeenCalledWith('map_promo_pin_click', { pin_id: 'TREE_12' })
+  })
+
+  it("'//' 로 시작하는 주소는 내부 경로로 보지 않고 새 창으로 연다", async () => {
+    await render([{ ...SHARK, linkUrl: '//example.com/' }])
+    onlyContent().click()
+
+    expect(mocks.router.push).not.toHaveBeenCalled()
+    expect(window.open).toHaveBeenCalledWith('//example.com/', '_blank', 'noopener,noreferrer')
   })
 
   it('모르는 iconKey 는 그리지 않는다', async () => {
