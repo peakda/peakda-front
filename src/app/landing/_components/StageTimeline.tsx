@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils/cn'
 
 // 위치는 트랙(304px) 기준 비율이라 모바일 274px 에서도 같은 배치가 된다.
 // segment 는 선택 단계 둘레의 진한 구간(62px)으로, 양 끝 단계에서는 트랙 밖으로 안 나가게 붙인다.
+// 핀 래퍼는 w-max 필수 — absolute 요소의 폭은 '트랙 폭 - left' 로 잡혀서 95% 위치('늦었다')에선 15px 로 줄고 꽃이 사라진다.
 const STAGES: {
   stage: Stage
   label: string
@@ -93,7 +94,7 @@ export const StageTimeline = () => {
 
       <div
         className={cn(
-          'absolute -top-[5px] z-10 -translate-x-1/2 motion-safe:transition-[left] motion-safe:duration-300 motion-safe:ease-[cubic-bezier(0.2,0.7,0.2,1)]',
+          'absolute -top-[5px] z-10 w-max -translate-x-1/2 motion-safe:transition-[left] motion-safe:duration-300 motion-safe:ease-[cubic-bezier(0.2,0.7,0.2,1)]',
           active.position
         )}
       >
