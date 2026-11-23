@@ -75,4 +75,6 @@ export const CATEGORY_ICON: Record<BloomSlotCategory, string> = {
 // 홍보 핀 iconKey → 아이콘. 서버가 새 값을 보내도 여기 없으면 그리지 않는다.
 export const PROMOTIONAL_PIN_ICON: Record<string, { small: string; large: string } | undefined> = {
   SHARK: { small: '/images/shark-pin.svg', large: '/images/shark-pin-large.svg' },
+  // 트리 명소. 큰 핀(1.4배)에서도 선명한 해상도로 넣어 두어 두 크기가 같은 파일을 쓴다.
+  TREE: { small: '/images/tree-pin.svg', large: '/images/tree-pin.svg' },
 }
