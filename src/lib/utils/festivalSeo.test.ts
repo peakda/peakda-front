@@ -5,6 +5,7 @@ import { toFestivalJsonLd, toFestivalSeoDescription } from './festivalSeo'
 const festival: FestivalDetailResponse = {
   festivalId: 4718,
   name: '하동 북천 코스모스·메밀꽃축제',
+  kind: 'FESTIVAL',
   venue: '경남 하동군 북천면 직전1길 7',
   roadAddress: null,
   latitude: 35.0,

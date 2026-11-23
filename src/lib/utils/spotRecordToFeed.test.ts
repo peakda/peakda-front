@@ -22,7 +22,7 @@ function summary(overrides: Partial<SpotRecordSummaryResponse> = {}): SpotRecord
     status: 'PUBLISHED',
     createdAt: '2026-09-01T00:00:00Z',
     updatedAt: '2026-09-01T00:00:00Z',
-    reactions: { counts: [], myReactions: [] },
+    reactions: { items: [], hasMore: false },
     ...overrides,
   }
 }

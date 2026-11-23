@@ -259,7 +259,6 @@ export function Drawer() {
             ) : type === 'reaction' && reactionData ? (
               <ReactionDrawerContent
                 recordId={reactionData.recordId}
-                scope={reactionData.scope}
                 selected={reactionData.selected}
                 onSelect={reactionData.onSelect}
                 onClose={closeDrawer}

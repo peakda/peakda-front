@@ -1090,42 +1090,27 @@ export const SpotRecordResponseStatus = {
 } as const;
 
 /**
- * 리액션 타입
+ * 이모지별 반응 집계
  */
-export type ReactionCountReactionType = typeof ReactionCountReactionType[keyof typeof ReactionCountReactionType];
-
-
-export const ReactionCountReactionType = {
-  HEART: 'HEART',
-  SMILE: 'SMILE',
-} as const;
-
-/**
- * 리액션 타입별 집계 1건
- */
-export interface ReactionCount {
-  /** 리액션 타입 */
-  reactionType: ReactionCountReactionType;
-  /** 개수 */
+export interface ReactionItemResponse {
+  /** 이모지 식별 키 */
+  key: string;
+  /** 표시할 이모지 */
+  emoji: string;
+  /** 반응 사용자 수 */
   count: number;
+  /** 현재 사용자가 이 반응을 남겼는지 여부 */
+  reactedByMe: boolean;
 }
 
-export type ReactionSummaryMyReactionsItem = typeof ReactionSummaryMyReactionsItem[keyof typeof ReactionSummaryMyReactionsItem];
-
-
-export const ReactionSummaryMyReactionsItem = {
-  HEART: 'HEART',
-  SMILE: 'SMILE',
-} as const;
-
 /**
- * 스팟 기록의 리액션 요약
+ * 반응 수 내림차순·키 오름차순의 최대 8종 미리보기
  */
-export interface ReactionSummary {
-  /** 리액션 타입별 집계 */
-  counts: ReactionCount[];
-  /** 현재 로그인 사용자가 남긴 리액션 타입들 (없으면 빈 배열) */
-  myReactions: ReactionSummaryMyReactionsItem[];
+export interface ReactionOverviewResponse {
+  /** 실제로 남겨진 이모지별 반응 목록 */
+  items: ReactionItemResponse[];
+  /** 미리보기에 포함되지 않은 반응 종류가 있는지 여부 */
+  hasMore: boolean;
 }
 
 /**
@@ -1169,8 +1154,8 @@ export interface SpotRecordResponse {
   createdAt: string;
   /** 최종 수정 시각 */
   updatedAt: string;
-  /** 리액션 요약 */
-  reactions: ReactionSummary;
+  /** 이모지 리액션 요약 (v2 피드와 동일, 최대 8종) */
+  reactions: ReactionOverviewResponse;
 }
 
 /**
@@ -1627,6 +1612,27 @@ export interface SubscribeLaunchAlertRequest {
   email: string;
   /** 개인정보 수집·이용 동의 여부. true 가 아니면 LAUNCH_ALERT_CONSENT_REQUIRED 로 거절한다 */
   privacyConsent: boolean;
+}
+
+/**
+ * 리액션 타입
+ */
+export type ReactionCountReactionType = typeof ReactionCountReactionType[keyof typeof ReactionCountReactionType];
+
+
+export const ReactionCountReactionType = {
+  HEART: 'HEART',
+  SMILE: 'SMILE',
+} as const;
+
+/**
+ * 리액션 타입별 집계 1건
+ */
+export interface ReactionCount {
+  /** 리액션 타입 */
+  reactionType: ReactionCountReactionType;
+  /** 개수 */
+  count: number;
 }
 
 export type FeedReactionSummaryResponseMyReactionsItem = typeof FeedReactionSummaryResponseMyReactionsItem[keyof typeof FeedReactionSummaryResponseMyReactionsItem];
@@ -2682,30 +2688,6 @@ export const FeedRecordSummaryResponseStatus = {
 } as const;
 
 /**
- * 이모지별 반응 집계
- */
-export interface ReactionItemResponse {
-  /** 이모지 식별 키 */
-  key: string;
-  /** 표시할 이모지 */
-  emoji: string;
-  /** 반응 사용자 수 */
-  count: number;
-  /** 현재 사용자가 이 반응을 남겼는지 여부 */
-  reactedByMe: boolean;
-}
-
-/**
- * 반응 수 내림차순·키 오름차순의 최대 8종 미리보기
- */
-export interface ReactionOverviewResponse {
-  /** 실제로 남겨진 이모지별 반응 목록 */
-  items: ReactionItemResponse[];
-  /** 미리보기에 포함되지 않은 반응 종류가 있는지 여부 */
-  hasMore: boolean;
-}
-
-/**
  * v2 피드 목록 기록 요약
  */
 export interface FeedRecordSummaryResponse {
@@ -3031,8 +3013,8 @@ export interface SpotRecordSummaryResponse {
   publishedAt?: string | null;
   createdAt: string;
   updatedAt: string;
-  /** 리액션 요약 */
-  reactions: ReactionSummary;
+  /** 이모지 리액션 요약 (v2 피드와 동일, 최대 8종) */
+  reactions: ReactionOverviewResponse;
 }
 
 /**
@@ -3446,6 +3428,17 @@ export interface WeatherForecast {
 }
 
 /**
+ * 축제 종류. FESTIVAL(축제·행사)·TREE(트리 명소)
+ */
+export type NearbyFestivalItemKind = typeof NearbyFestivalItemKind[keyof typeof NearbyFestivalItemKind];
+
+
+export const NearbyFestivalItemKind = {
+  FESTIVAL: 'FESTIVAL',
+  TREE: 'TREE',
+} as const;
+
+/**
  * 진행 상태
  */
 export type NearbyFestivalItemPhase = typeof NearbyFestivalItemPhase[keyof typeof NearbyFestivalItemPhase];
@@ -3466,6 +3459,8 @@ export interface NearbyFestivalItem {
   festivalId: number;
   /** 축제명 */
   name: string;
+  /** 축제 종류. FESTIVAL(축제·행사)·TREE(트리 명소) */
+  kind: NearbyFestivalItemKind;
   /** 진행 상태 */
   phase: NearbyFestivalItemPhase;
   /** 시작일 */
@@ -4492,7 +4487,18 @@ export interface ApiResponseHomeSuggestionResponse {
 }
 
 /**
- * 축제명으로 판정한 꽃 카테고리. 매칭되지 않으면 null
+ * 축제 종류. FESTIVAL(축제·행사)·TREE(트리 명소)
+ */
+export type FestivalDetailResponseKind = typeof FestivalDetailResponseKind[keyof typeof FestivalDetailResponseKind];
+
+
+export const FestivalDetailResponseKind = {
+  FESTIVAL: 'FESTIVAL',
+  TREE: 'TREE',
+} as const;
+
+/**
+ * 축제명으로 판정한 꽃 카테고리. 매칭되지 않거나 트리 명소(TREE)이면 null
  * @nullable
  */
 export type FestivalDetailResponseCategory = typeof FestivalDetailResponseCategory[keyof typeof FestivalDetailResponseCategory] | null;
@@ -4618,6 +4624,8 @@ export interface FestivalDetailResponse {
   festivalId: number;
   /** 축제명 */
   name: string;
+  /** 축제 종류. FESTIVAL(축제·행사)·TREE(트리 명소) */
+  kind: FestivalDetailResponseKind;
   /** 원천 행사 장소명 */
   venue: string;
   /**
@@ -4641,7 +4649,7 @@ export interface FestivalDetailResponse {
      */
   homepageUrl?: string | null;
   /**
-     * 축제명으로 판정한 꽃 카테고리. 매칭되지 않으면 null
+     * 축제명으로 판정한 꽃 카테고리. 매칭되지 않거나 트리 명소(TREE)이면 null
      * @nullable
      */
   category?: FestivalDetailResponseCategory;
@@ -4691,6 +4699,189 @@ export interface ApiResponseFestivalDetailResponse {
   /** 사람이 읽는 메시지 */
   message: string;
   data?: FestivalDetailResponse | null;
+}
+
+/**
+ * @nullable
+ */
+export type LegacyFeedRecordSummaryResponseBloomStage = typeof LegacyFeedRecordSummaryResponseBloomStage[keyof typeof LegacyFeedRecordSummaryResponseBloomStage] | null;
+
+
+export const LegacyFeedRecordSummaryResponseBloomStage = {
+  EARLY: 'EARLY',
+  STARTING: 'STARTING',
+  PEAK: 'PEAK',
+  LATE: 'LATE',
+} as const;
+
+export type LegacyFeedRecordSummaryResponseStatus = typeof LegacyFeedRecordSummaryResponseStatus[keyof typeof LegacyFeedRecordSummaryResponseStatus];
+
+
+export const LegacyFeedRecordSummaryResponseStatus = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+  HIDDEN: 'HIDDEN',
+} as const;
+
+export type ReactionSummaryMyReactionsItem = typeof ReactionSummaryMyReactionsItem[keyof typeof ReactionSummaryMyReactionsItem];
+
+
+export const ReactionSummaryMyReactionsItem = {
+  HEART: 'HEART',
+  SMILE: 'SMILE',
+} as const;
+
+/**
+ * 스팟 기록의 리액션 요약
+ */
+export interface ReactionSummary {
+  /** 리액션 타입별 집계 */
+  counts: ReactionCount[];
+  /** 현재 로그인 사용자가 남긴 리액션 타입들 (없으면 빈 배열) */
+  myReactions: ReactionSummaryMyReactionsItem[];
+}
+
+/**
+ * v1 피드 기록 목록용 요약 — 대표 사진과 전체 사진 목록을 포함
+ */
+export interface LegacyFeedRecordSummaryResponse {
+  id: number;
+  spotId: number;
+  spotName: string;
+  user: UserSummary;
+  /** @nullable */
+  visitedDate?: string | null;
+  /** @nullable */
+  bloomStage?: LegacyFeedRecordSummaryResponseBloomStage;
+  /** @nullable */
+  memo?: string | null;
+  contentLink?: ContentLink | null;
+  plants: PlantSummary[];
+  coverPhoto?: PhotoEntry | null;
+  /** 첨부 사진 전체 목록 (sortOrder 오름차순, 사진이 없으면 빈 배열) */
+  photos: PhotoEntry[];
+  status: LegacyFeedRecordSummaryResponseStatus;
+  /** @nullable */
+  publishedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  /** 리액션 요약 */
+  reactions: ReactionSummary;
+}
+
+/**
+ * 공통 페이지 응답 (0-based)
+ */
+export interface PageResponseLegacyFeedRecordSummaryResponse {
+  /** 현재 페이지의 항목 리스트 */
+  content: LegacyFeedRecordSummaryResponse[];
+  /** 0-based 현재 페이지 */
+  page: number;
+  /** 페이지 크기 */
+  size: number;
+  /** 전체 항목 수 */
+  totalElements: number;
+  /** 전체 페이지 수 */
+  totalPages: number;
+  /** 다음 페이지 존재 여부 */
+  hasNext: boolean;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponsePageResponseLegacyFeedRecordSummaryResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: PageResponseLegacyFeedRecordSummaryResponse | null;
+}
+
+/**
+ * 개화/단풍 상태
+ * @nullable
+ */
+export type LegacyFeedRecordResponseBloomStage = typeof LegacyFeedRecordResponseBloomStage[keyof typeof LegacyFeedRecordResponseBloomStage] | null;
+
+
+export const LegacyFeedRecordResponseBloomStage = {
+  EARLY: 'EARLY',
+  STARTING: 'STARTING',
+  PEAK: 'PEAK',
+  LATE: 'LATE',
+} as const;
+
+/**
+ * 기록 상태
+ */
+export type LegacyFeedRecordResponseStatus = typeof LegacyFeedRecordResponseStatus[keyof typeof LegacyFeedRecordResponseStatus];
+
+
+export const LegacyFeedRecordResponseStatus = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+  HIDDEN: 'HIDDEN',
+} as const;
+
+/**
+ * v1 피드 기록 상세 응답
+ */
+export interface LegacyFeedRecordResponse {
+  /** 기록 PK */
+  id: number;
+  /** 스팟 요약 */
+  spot: SpotSummary;
+  /** 작성자 요약 */
+  user: UserSummary;
+  /**
+     * 방문 일자
+     * @nullable
+     */
+  visitedDate?: string | null;
+  /**
+     * 개화/단풍 상태
+     * @nullable
+     */
+  bloomStage?: LegacyFeedRecordResponseBloomStage;
+  /**
+     * 메모
+     * @nullable
+     */
+  memo?: string | null;
+  contentLink?: ContentLink | null;
+  /** 기록된 식물 목록 */
+  plants: PlantSummary[];
+  /** 첨부 사진 목록 (sortOrder 오름차순) */
+  photos: PhotoEntry[];
+  /** 기록 상태 */
+  status: LegacyFeedRecordResponseStatus;
+  /**
+     * 게시 시각 (DRAFT 이면 null)
+     * @nullable
+     */
+  publishedAt?: string | null;
+  /** 최초 생성 시각 */
+  createdAt: string;
+  /** 최종 수정 시각 */
+  updatedAt: string;
+  /** 리액션 요약 */
+  reactions: ReactionSummary;
+}
+
+/**
+ * 공통 응답 envelope
+ */
+export interface ApiResponseLegacyFeedRecordResponse {
+  /** HTTP status code */
+  status: number;
+  /** 성공 시 'SUCCESS', 실패 시 ErrorCode enum name */
+  code: string;
+  /** 사람이 읽는 메시지 */
+  message: string;
+  data?: LegacyFeedRecordResponse | null;
 }
 
 /**

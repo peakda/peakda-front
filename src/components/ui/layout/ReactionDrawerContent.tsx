@@ -3,14 +3,14 @@
 import { useMemo, useState } from 'react'
 import Image from 'next/image'
 import { useMyReactionKeys, useReactionEmojiCatalog } from '@/api/facades/feed'
-import { EMOJI_GROUPS, REACTIONS } from '@/constants/reaction'
+import { EMOJI_GROUPS } from '@/constants/reaction'
 import { cn } from '@/lib/utils/cn'
 import { groupPickerEmojis, toTwemojiUrl } from '@/lib/utils/emoji'
 import type { ReactionEmoji } from '@/lib/utils/feed'
 import type { ReactionData } from '@/stores/useDrawerStore'
 
 interface EmojiGridProps {
-  emojis: (ReactionEmoji & { label?: string })[]
+  emojis: ReactionEmoji[]
   selected: ReadonlySet<string>
   onPick: (emoji: ReactionEmoji, isSelected: boolean) => void
   className?: string
@@ -28,11 +28,11 @@ function EmojiGrid({ emojis, selected, onPick, className }: EmojiGridProps) {
       data-vaul-no-drag
       onPointerDown={(e) => e.stopPropagation()}
     >
-      {emojis.map(({ key, emoji, label }) => (
+      {emojis.map(({ key, emoji }) => (
         <button
           key={key}
           type="button"
-          aria-label={label ?? emoji}
+          aria-label={emoji}
           aria-pressed={selected.has(key)}
           onClick={() => onPick({ key, emoji }, selected.has(key))}
           className={cn(
@@ -40,7 +40,7 @@ function EmojiGrid({ emojis, selected, onPick, className }: EmojiGridProps) {
             selected.has(key) && 'bg-green-50'
           )}
         >
-          <Image src={toTwemojiUrl(emoji)} alt={label ?? emoji} width={28} height={28} />
+          <Image src={toTwemojiUrl(emoji)} alt={emoji} width={28} height={28} />
         </button>
       ))}
     </div>
@@ -117,7 +117,6 @@ interface ReactionDrawerContentProps extends ReactionData {
 
 export function ReactionDrawerContent({
   recordId,
-  scope,
   selected,
   onSelect,
   onClose,
@@ -131,17 +130,7 @@ export function ReactionDrawerContent({
   return (
     <div className="flex flex-col gap-3 px-5 pt-2 pb-8">
       <h2 className="text-text-primary text-lg font-bold">반응 추가</h2>
-      {/* 스팟 기록 응답은 ❤️·😀 만 알려줘서, 다른 이모지를 남기면 새로고침 후 이 화면에서 사라진다. */}
-      {scope === 'legacy' ? (
-        <EmojiGrid
-          emojis={REACTIONS}
-          selected={new Set(selected)}
-          onPick={handlePick}
-          className="max-h-[45vh]"
-        />
-      ) : (
-        <CatalogPicker recordId={recordId} selected={selected} onPick={handlePick} />
-      )}
+      <CatalogPicker recordId={recordId} selected={selected} onPick={handlePick} />
     </div>
   )
 }
