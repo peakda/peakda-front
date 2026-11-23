@@ -26,8 +26,8 @@ import type {
 
 import type {
   ApiResponseFeedReactionSummaryResponse,
-  ApiResponsePageResponseSpotRecordSummaryResponse,
-  ApiResponseSpotRecordResponse,
+  ApiResponseLegacyFeedRecordResponse,
+  ApiResponsePageResponseLegacyFeedRecordSummaryResponse,
   DeleteFeedByIdReactionsParams,
   GetFeedParams,
   PostFeedByIdReactionsParams
@@ -239,7 +239,7 @@ export const useDeleteFeedByIdReactions = <TError = unknown,
       return useMutation(getDeleteFeedByIdReactionsMutationOptions(options), queryClient);
     }
     export type getFeedResponse200 = {
-  data: ApiResponsePageResponseSpotRecordSummaryResponse
+  data: ApiResponsePageResponseLegacyFeedRecordSummaryResponse
   status: 200
 }
 
@@ -367,7 +367,7 @@ export function useGetFeed<TData = Awaited<ReturnType<typeof getFeed>>, TError =
 
 
 export type getFeedByIdResponse200 = {
-  data: ApiResponseSpotRecordResponse
+  data: ApiResponseLegacyFeedRecordResponse
   status: 200
 }
 
