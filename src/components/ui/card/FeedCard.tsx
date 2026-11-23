@@ -29,7 +29,6 @@ import { cn } from '@/lib/utils/cn'
 import type {
   CreateReportRequestReason,
   ReactionOverviewResponse,
-  ReactionSummary,
 } from '@/api/facades/generated/peakdaApi.schemas'
 
 interface FlowerTag {
@@ -61,7 +60,7 @@ export interface FeedCardProps {
   content: string
   // 관련 콘텐츠 링크. null 이면 아무것도 그리지 않는다.
   contentLink?: ContentLink | null
-  reactions: ReactionSummary | ReactionOverviewResponse
+  reactions: ReactionOverviewResponse
   isOwner?: boolean
   onEdit?: () => void
   onDelete?: () => void
