@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Browser } from '@capacitor/browser'
 import type { PromotionalMapPinResponse } from '@/api/facades/generated/peakdaApi.schemas'
 import { PROMOTIONAL_PIN_ICON } from '@/constants/map'
@@ -22,8 +23,15 @@ const HIT_AREA_CLASSES = [
   'absolute top-[82.7%] left-[40.5%] h-[13.5%] w-[19%]',
 ]
 
-// 앱은 WebView 의 새 창 처리에 기대지 않고 Custom Tab(소셜 로그인과 같은 플러그인)으로 연다.
-function openPinLink(url: string) {
+// 앱 내부 경로('/festivals/1' 같은 트리 명소 상세)는 같은 화면 안에서 이동한다. '//host' 는 외부 주소라 제외한다.
+const isInternalPath = (url: string) => url.startsWith('/') && !url.startsWith('//')
+
+// 외부 링크는 앱에서 WebView 의 새 창 처리에 기대지 않고 Custom Tab(소셜 로그인과 같은 플러그인)으로 연다.
+function openPinLink(url: string, push: (href: string) => void) {
+  if (isInternalPath(url)) {
+    push(url)
+    return
+  }
   if (isNativeApp()) {
     Browser.open({ url }).catch((error: unknown) => console.error(error))
     return
@@ -36,6 +44,8 @@ export function usePromotionalPins(
   map: kakao.maps.Map | null,
   pins: PromotionalMapPinResponse[] | undefined
 ) {
+  const router = useRouter()
+
   useEffect(() => {
     if (!map || !pins) return
 
@@ -65,7 +75,7 @@ export function usePromotionalPins(
 
       const activate = () => {
         track('map_promo_pin_click', { pin_id: pin.id })
-        openPinLink(pin.linkUrl)
+        openPinLink(pin.linkUrl, router.push)
       }
       content.addEventListener('click', activate)
       content.addEventListener('keydown', (e) => {
@@ -103,5 +113,5 @@ export function usePromotionalPins(
       kakao.maps.event.removeListener(map, 'zoom_changed', applyPinSize)
       views.forEach(({ overlay }) => overlay.setMap(null))
     }
-  }, [map, pins])
+  }, [map, pins, router])
 }

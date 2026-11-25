@@ -92,6 +92,12 @@ prod 지도 '동네' 탭이 비어 있던 건 서버가 **최근 14일 방문 + 
 | `POST /api/spots/records/{id}/publish` | DRAFT 흐름 확정 대기 |
 | ~~`POST /api/devices` / `DELETE /api/devices/{token}`~~ | **연동 완료** — `src/lib/push/pushNotifications.ts`(앱 푸시 토큰 등록·해제, 2026-10-01 확인) |
 
+### 20번 트리 명소 지도 핀 — 프론트 선구현, 백엔드 대기 (2026-11-23)
+
+- 새 필드 대신 홍보 핀(`promotionalPins`, `iconKey: 'TREE'`)을 재사용하기로 했다. 트리 핀이 북항 상어 핀과 같은 틀(원·꼬리)이고, 묶이지 않고 필터·개수에서 빠지는 동작도 같아서다.
+- 프론트는 먼저 반영했다. `PROMOTIONAL_PIN_ICON.TREE`(`public/images/tree-pin.svg`)와, `linkUrl`이 `/`로 시작하면 `router.push`로 앱 안에서 이동하는 분기(`usePromotionalPins.ts`)다.
+- 서버가 `TREE`를 내려주기 전까지는 화면 변화가 없다. 배포 후 지도에서 트리 핀이 보이는지, 탭하면 축제 상세로 가는지 확인해야 한다.
+
 ### 로컬 전용으로 확정된 것
 
 - 위치 정보 활용 / EXIF 자동 추출 토글 → localStorage (`src/lib/utils/appSettings.ts`)
